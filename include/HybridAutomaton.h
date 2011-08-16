@@ -1,11 +1,11 @@
 #ifndef HYBRID_AUTOMATON_
 #define HYBRID_AUTOMATON_
 
-#include "utilities\Graph\DiGraph.h"
-#include "utilities\Graph\node.h"
-#include "utilities\Graph\edge.h"
-#include "elasticroadmap\include\Milestone.h"
-#include "elasticroadmap\include\MotionBehaviour.h"
+#include "DiGraph.h"
+#include "node.h"
+#include "edge.h"
+#include "Milestone.h"
+#include "MotionBehaviour.h"
 
 /**
 * HybridAutomaton class. 

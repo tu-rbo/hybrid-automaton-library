@@ -10,9 +10,9 @@
 #ifndef MILESTONE_
 #define MILESTONE_
 
-#include "utilities\graph\node.h"
+#include "node.h"
 #include <iostream>
-#include "thirdparty\tinyxml\tinyxml.h"
+#include "tinyxml.h"
 
 class Milestone : public Node 
 {

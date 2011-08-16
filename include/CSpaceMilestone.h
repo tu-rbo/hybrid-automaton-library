@@ -2,8 +2,8 @@
 #ifndef C_SPACE_MILESTONE_
 #define C_SPACE_MILESTONE_
 
-#include "elasticroadmap\include\Milestone.h"
-#include "elasticroadmap\include\MotionBehaviour.h"
+#include "Milestone.h"
+#include "MotionBehaviour.h"
 
 #include <vector>
 

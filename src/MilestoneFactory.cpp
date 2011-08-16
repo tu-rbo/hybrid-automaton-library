@@ -1,5 +1,5 @@
-#include "elasticroadmap\include\MilestoneFactory.h"
-#include "elasticroadmap\include\CSpaceMilestone.h"
+#include "MilestoneFactory.h"
+#include "CSpaceMilestone.h"
 #include <iostream>
 #include <string>
 

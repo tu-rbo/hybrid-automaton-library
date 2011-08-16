@@ -41,7 +41,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="&quot;$(RLAB_INC_PATH)&quot;;&quot;$(SolutionDir)\..\..\..\&quot;"
+				AdditionalIncludeDirectories="&quot;$(RLAB_INC_PATH)&quot;;&quot;$(RSWIN_ROOT)\hybrid_automaton\include&quot;;&quot;$(RSWIN_ROOT)\hybrid_automaton\thirdparty\tinyxml&quot;;&quot;$(RSWIN_ROOT)\graph\include&quot;"
 				PreprocessorDefinitions="WIN32;_DEBUG;_LIB"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -193,7 +193,7 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\include\MilestonFactory.h"
+				RelativePath="..\..\include\MilestoneFactory.h"
 				>
 			</File>
 			<File

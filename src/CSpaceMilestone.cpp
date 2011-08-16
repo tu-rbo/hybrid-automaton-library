@@ -1,10 +1,10 @@
-#include "elasticroadmap\include\CSpaceMilestone.h"
+#include "CSpaceMilestone.h"
 
 #include <iostream>
 #include <string>
 
-#include "thirdparty\tinyxml\tinyxml.h"
-#include "elasticroadmap\include\MilestoneFactory.h"
+#include "tinyxml.h"
+#include "MilestoneFactory.h"
 
 using namespace std;
 

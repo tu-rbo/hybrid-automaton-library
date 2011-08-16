@@ -8,9 +8,9 @@
 #ifndef MILESTONE_FACTORY_H_
 #define MILESTONE_FACTORY_H_
 
-#include "thirdparty\tinyxml\tinyxml.h"
+#include "tinyxml.h"
 #include "rxControlSDK\rxControlSDK.h"
-#include "elasticroadmap\include\Milestone.h"
+#include "Milestone.h"
 
 class MilestoneFactory
 {

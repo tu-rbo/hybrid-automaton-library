@@ -1,12 +1,12 @@
 #ifndef MOTION_BEHAVIOUR
 #define MOTION_BEHAVIOUR
 
-#include "utilities\graph\Edge.h"
-#include "elasticroadmap\include\Milestone.h"
+#include "Edge.h"
+#include "Milestone.h"
 #include "rControlalgorithm\rControlalgorithm.h"
 #include "rxControlSDK\rxControlSDK.h"
 
-#include "thirdparty\tinyxml\tinyxml.h"
+#include "tinyxml.h"
 
 class MotionBehaviour: public Edge<Milestone> 
 {

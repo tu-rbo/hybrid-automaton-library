@@ -1,5 +1,5 @@
-#include "elasticroadmap\include\HybridAutomaton.h"
-#include "elasticroadmap\include\MilestoneFactory.h"
+#include "HybridAutomaton.h"
+#include "MilestoneFactory.h"
 
 HybridAutomaton::HybridAutomaton() :
 start_node_id_(NULL)
