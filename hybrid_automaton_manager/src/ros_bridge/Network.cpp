@@ -1,4 +1,4 @@
-#include "ros_bridge\Network.h"
+#include "Network.h"
 
 Network::Network(const char * serverIP, int serverPort, const char * clientIP, int clientPort,NetworkUpdatable *listener){
 	_listener=listener;

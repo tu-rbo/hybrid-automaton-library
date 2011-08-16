@@ -6,7 +6,7 @@
 #include "HybridAutomatonManager.h"
 #include "HybridAutomatonManagerCmd.h"
 
-#include "ros_bridge/msgs/String.h"
+#include "String_msgs.h"
 
 std::vector<double> convert(const dVector& in)
 {

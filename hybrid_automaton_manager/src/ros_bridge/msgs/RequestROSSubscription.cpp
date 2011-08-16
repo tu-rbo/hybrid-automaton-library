@@ -1,4 +1,4 @@
-#include "ros_bridge\msgs\RequestROSSubscription.h"
+#include "RequestROSSubscription.h"
 
 
 namespace rlab {

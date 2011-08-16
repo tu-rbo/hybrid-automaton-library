@@ -1,4 +1,4 @@
-#include "ros_bridge\RTBlackBoard.h"
+#include "RTBlackBoard.h"
 
 //#include <iostream>
 //#include <cstdlib>
@@ -8,10 +8,10 @@
 //#include <math.h>
 #include <errno.h>
 
-#include "ros_bridge\msgs\Float64.h"
-#include "ros_bridge\msgs\Float64MultiArray.h"
-#include "ros_bridge\msgs\String.h"
-#include "ros_bridge\msgs\RequestROSSubscription.h"
+#include "Float64.h"
+#include "Float64MultiArray.h"
+#include "String_msgs.h"
+#include "RequestROSSubscription.h"
 
 /*
 * for the singleton stuff

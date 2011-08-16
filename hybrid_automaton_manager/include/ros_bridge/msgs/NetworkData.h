@@ -15,7 +15,7 @@
 #include <iostream>
 #include <sstream>
 
-#include "ros_bridge\msgs\DataObject.h"
+#include "DataObject.h"
 
 template < typename T >
 T stream_cast(const std::string & r_s){

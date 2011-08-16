@@ -1,4 +1,4 @@
-#include "ros_bridge\msgs\Float64MultiArray.h"
+#include "Float64MultiArray.h"
 
 namespace rlab {
 

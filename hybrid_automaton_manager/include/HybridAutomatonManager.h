@@ -10,12 +10,12 @@
 #include "rControlAlgorithm/rControlAlgorithm.h"
 #include "rxControlSDK/rxControlSDK.h"
 
-#include "ros_bridge\RTBlackBoard.h"
+#include "RTBlackBoard.h"
 
-#include "..\..\elasticroadmap\include\CSpaceMilestone.h"
-#include "..\..\elasticroadmap\include\MotionBehaviour.h"
-#include "..\..\elasticroadmap\include\Milestone.h"
-#include "..\..\elasticroadmap\include\HybridAutomaton.h"
+#include "CSpaceMilestone.h"
+#include "MotionBehaviour.h"
+#include "Milestone.h"
+#include "HybridAutomaton.h"
 
 class REXPORT HybridAutomatonManager : public rControlAlgorithm
 {

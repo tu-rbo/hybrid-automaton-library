@@ -10,7 +10,7 @@
 #ifndef __REQUESTROSSUBSCRIPTION__
 #define __REQUESTROSSUBSCRIPTION__
 
-#include "ros_bridge\msgs\NetworkData.h"
+#include "NetworkData.h"
 #include <ostream>
 #include <iostream>
 #include <sstream>

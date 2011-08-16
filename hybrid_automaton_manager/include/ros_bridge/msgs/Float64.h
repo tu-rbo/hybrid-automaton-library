@@ -10,7 +10,7 @@
 #ifndef __FLOAT64__
 #define __FLOAT64__
 
-#include "ros_bridge\msgs\NetworkData.h"
+#include "NetworkData.h"
 #include <ostream>
 #include <iostream>
 #include <sstream>

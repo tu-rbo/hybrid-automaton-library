@@ -5,7 +5,7 @@
  *      Author: clemens
  */
 
-#include "ros_bridge\msgs\DataObject.h"
+#include "DataObject.h"
 
 namespace rlab {
 

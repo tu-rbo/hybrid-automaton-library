@@ -1,4 +1,4 @@
-#include "ros_bridge\msgs/NetworkData.h"
+#include "NetworkData.h"
 
 namespace rlab {
 
