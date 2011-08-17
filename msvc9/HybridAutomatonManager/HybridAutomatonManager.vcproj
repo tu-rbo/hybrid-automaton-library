@@ -180,61 +180,61 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
-				RelativePath="..\..\src\HybridAutomatonManager.cpp"
+				RelativePath="..\..\src\hybrid_automaton_manager\HybridAutomatonManager.cpp"
 				>
 			</File>
 			<Filter
 				Name="ros_bridge"
 				>
 				<File
-					RelativePath="..\..\src\ros_bridge\Network.cpp"
+					RelativePath="..\..\src\hybrid_automaton_manager\ros_bridge\Network.cpp"
 					>
 				</File>
 				<File
-					RelativePath="..\..\src\ros_bridge\NetworkUpdatable.cpp"
+					RelativePath="..\..\src\hybrid_automaton_manager\ros_bridge\NetworkUpdatable.cpp"
 					>
 				</File>
 				<File
-					RelativePath="..\..\src\ros_bridge\RTBlackBoard.cpp"
+					RelativePath="..\..\src\hybrid_automaton_manager\ros_bridge\RTBlackBoard.cpp"
 					>
 				</File>
 				<File
-					RelativePath="..\..\src\ros_bridge\TCPclient.cpp"
+					RelativePath="..\..\src\hybrid_automaton_manager\ros_bridge\TCPclient.cpp"
 					>
 				</File>
 				<File
-					RelativePath="..\..\src\ros_bridge\TCPcomm.cpp"
+					RelativePath="..\..\src\hybrid_automaton_manager\ros_bridge\TCPcomm.cpp"
 					>
 				</File>
 				<File
-					RelativePath="..\..\src\ros_bridge\TCPserver.cpp"
+					RelativePath="..\..\src\hybrid_automaton_manager\ros_bridge\TCPserver.cpp"
 					>
 				</File>
 				<Filter
 					Name="msgs"
 					>
 					<File
-						RelativePath="..\..\src\ros_bridge\msgs\DataObject.cpp"
+						RelativePath="..\..\src\hybrid_automaton_manager\ros_bridge\msgs\DataObject.cpp"
 						>
 					</File>
 					<File
-						RelativePath="..\..\src\ros_bridge\msgs\Float64.cpp"
+						RelativePath="..\..\src\hybrid_automaton_manager\ros_bridge\msgs\Float64.cpp"
 						>
 					</File>
 					<File
-						RelativePath="..\..\src\ros_bridge\msgs\Float64MultiArray.cpp"
+						RelativePath="..\..\src\hybrid_automaton_manager\ros_bridge\msgs\Float64MultiArray.cpp"
 						>
 					</File>
 					<File
-						RelativePath="..\..\src\ros_bridge\msgs\NetworkData.cpp"
+						RelativePath="..\..\src\hybrid_automaton_manager\ros_bridge\msgs\NetworkData.cpp"
 						>
 					</File>
 					<File
-						RelativePath="..\..\src\ros_bridge\msgs\RequestROSSubscription.cpp"
+						RelativePath="..\..\src\hybrid_automaton_manager\ros_bridge\msgs\RequestROSSubscription.cpp"
 						>
 					</File>
 					<File
-						RelativePath="..\..\src\ros_bridge\msgs\String_msgs.cpp"
+						RelativePath="..\..\src\hybrid_automaton_manager\ros_bridge\msgs\String_msgs.cpp"
 						>
 					</File>
 				</Filter>
@@ -246,65 +246,65 @@
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
 			<File
-				RelativePath="..\..\include\HybridAutomatonManager.h"
+				RelativePath="..\..\include\hybrid_automaton_manager\HybridAutomatonManager.h"
 				>
 			</File>
 			<File
-				RelativePath="..\..\include\HybridAutomatonManagerCmd.h"
+				RelativePath="..\..\include\hybrid_automaton_manager\HybridAutomatonManagerCmd.h"
 				>
 			</File>
 			<Filter
 				Name="ros_bridge"
 				>
 				<File
-					RelativePath="..\..\include\ros_bridge\Network.h"
+					RelativePath="..\..\include\hybrid_automaton_manager\ros_bridge\Network.h"
 					>
 				</File>
 				<File
-					RelativePath="..\..\include\ros_bridge\NetworkUpdatable.h"
+					RelativePath="..\..\include\hybrid_automaton_manager\ros_bridge\NetworkUpdatable.h"
 					>
 				</File>
 				<File
-					RelativePath="..\..\include\ros_bridge\RTBlackBoard.h"
+					RelativePath="..\..\include\hybrid_automaton_manager\ros_bridge\RTBlackBoard.h"
 					>
 				</File>
 				<File
-					RelativePath="..\..\include\ros_bridge\TCPclient.h"
+					RelativePath="..\..\include\hybrid_automaton_manager\ros_bridge\TCPclient.h"
 					>
 				</File>
 				<File
-					RelativePath="..\..\include\ros_bridge\TCPcomm.h"
+					RelativePath="..\..\include\hybrid_automaton_manager\ros_bridge\TCPcomm.h"
 					>
 				</File>
 				<File
-					RelativePath="..\..\include\ros_bridge\TCPserver.h"
+					RelativePath="..\..\include\hybrid_automaton_manager\ros_bridge\TCPserver.h"
 					>
 				</File>
 				<Filter
 					Name="msgs"
 					>
 					<File
-						RelativePath="..\..\include\ros_bridge\msgs\DataObject.h"
+						RelativePath="..\..\include\hybrid_automaton_manager\ros_bridge\msgs\DataObject.h"
 						>
 					</File>
 					<File
-						RelativePath="..\..\include\ros_bridge\msgs\Float64.h"
+						RelativePath="..\..\include\hybrid_automaton_manager\ros_bridge\msgs\Float64.h"
 						>
 					</File>
 					<File
-						RelativePath="..\..\include\ros_bridge\msgs\Float64MultiArray.h"
+						RelativePath="..\..\include\hybrid_automaton_manager\ros_bridge\msgs\Float64MultiArray.h"
 						>
 					</File>
 					<File
-						RelativePath="..\..\include\ros_bridge\msgs\NetworkData.h"
+						RelativePath="..\..\include\hybrid_automaton_manager\ros_bridge\msgs\NetworkData.h"
 						>
 					</File>
 					<File
-						RelativePath="..\..\include\ros_bridge\msgs\RequestROSSubscription.h"
+						RelativePath="..\..\include\hybrid_automaton_manager\ros_bridge\msgs\RequestROSSubscription.h"
 						>
 					</File>
 					<File
-						RelativePath="..\..\include\ros_bridge\msgs\String_msgs.h"
+						RelativePath="..\..\include\hybrid_automaton_manager\ros_bridge\msgs\String_msgs.h"
 						>
 					</File>
 				</Filter>

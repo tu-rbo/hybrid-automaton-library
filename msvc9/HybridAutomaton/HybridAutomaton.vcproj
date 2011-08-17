@@ -2,7 +2,7 @@
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="9.00"
-	Name="libhybrid_automaton"
+	Name="HybridAutomaton"
 	ProjectGUID="{207FD383-F8DB-4E03-A885-D7A17AEBCA15}"
 	RootNamespace="libhybrid_automaton"
 	Keyword="Win32Proj"
@@ -159,23 +159,23 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
-				RelativePath="..\..\src\CSpaceMilestone.cpp"
+				RelativePath="..\..\src\hybrid_automaton\CSpaceMilestone.cpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\HybridAutomaton.cpp"
+				RelativePath="..\..\src\hybrid_automaton\HybridAutomaton.cpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\Milestone.cpp"
+				RelativePath="..\..\src\hybrid_automaton\Milestone.cpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\MilestoneFactory.cpp"
+				RelativePath="..\..\src\hybrid_automaton\MilestoneFactory.cpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\MotionBehaviour.cpp"
+				RelativePath="..\..\src\hybrid_automaton\MotionBehaviour.cpp"
 				>
 			</File>
 		</Filter>
@@ -185,23 +185,23 @@
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
 			<File
-				RelativePath="..\..\include\CSpaceMilestone.h"
+				RelativePath="..\..\include\hybrid_automaton\CSpaceMilestone.h"
 				>
 			</File>
 			<File
-				RelativePath="..\..\include\HybridAutomaton.h"
+				RelativePath="..\..\include\hybrid_automaton\HybridAutomaton.h"
 				>
 			</File>
 			<File
-				RelativePath="..\..\include\Milestone.h"
+				RelativePath="..\..\include\hybrid_automaton\Milestone.h"
 				>
 			</File>
 			<File
-				RelativePath="..\..\include\MilestoneFactory.h"
+				RelativePath="..\..\include\hybrid_automaton\MilestoneFactory.h"
 				>
 			</File>
 			<File
-				RelativePath="..\..\include\MotionBehaviour.h"
+				RelativePath="..\..\include\hybrid_automaton\MotionBehaviour.h"
 				>
 			</File>
 		</Filter>
