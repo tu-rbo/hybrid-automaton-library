@@ -18,7 +18,7 @@
 	<Configurations>
 		<Configuration
 			Name="Debug|Win32"
-			OutputDirectory="$(RSWIN_ROOT)\hybrid_automaton\hybrid_automaton_manager\bin"
+			OutputDirectory="$(ProjectDir)..\..\bin"
 			IntermediateDirectory="$(ConfigurationName)"
 			ConfigurationType="2"
 			CharacterSet="1"
@@ -41,7 +41,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="&quot;$(RLAB_INC_PATH)&quot;;&quot;$(RSWIN_ROOT)\graph\include&quot;;&quot;$(RSWIN_ROOT)\hybrid_automaton\include&quot;;&quot;$(RSWIN_ROOT)\hybrid_automaton\thirdparty\tinyxml\include&quot;;&quot;$(RSWIN_ROOT)\hybrid_automaton\hybrid_automaton_manager\include&quot;;&quot;$(RSWIN_ROOT)\hybrid_automaton\hybrid_automaton_manager\include\ros_bridge&quot;;&quot;$(RSWIN_ROOT)\hybrid_automaton\hybrid_automaton_manager\include\ros_bridge\msgs&quot;"
+				AdditionalIncludeDirectories="&quot;$(RLAB_INC_PATH)&quot;;&quot;$(ProjectDir)..\..\..\graph\include&quot;;&quot;$(ProjectDir)..\..\include\hybrid_automaton&quot;;&quot;$(ProjectDir)..\..\thirdparty\tinyxml\include&quot;;&quot;$(ProjectDir)..\..\include\hybrid_automaton_manager&quot;;&quot;$(ProjectDir)..\..\include\hybrid_automaton_manager\ros_bridge&quot;"
 				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_USRDLL;HYBRIDAUTOMATONMANAGER_EXPORTS;R_EXPORTS"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -63,7 +63,7 @@
 				Name="VCLinkerTool"
 				AdditionalDependencies="rMath_9d.lib rxControlSDK_9d.lib libhybrid_automatond.lib libgraphd.lib tinyxmld.lib"
 				LinkIncremental="2"
-				AdditionalLibraryDirectories="&quot;$(RLAB_LIB_PATH)&quot;;&quot;$(RSWIN_ROOT)\hybrid_automaton\bin&quot;;&quot;$(RSWIN_ROOT)\hybrid_automaton\thirdparty\tinyxml\bin&quot;;&quot;$(RSWIN_ROOT)\graph\bin&quot;"
+				AdditionalLibraryDirectories="&quot;$(RLAB_LIB_PATH)&quot;;&quot;$(ProjectDir)..\..\lib&quot;;&quot;$(ProjectDir)..\..\thirdparty\tinyxml\bin&quot;;&quot;$(ProjectDir)..\..\..\graph\bin&quot;"
 				GenerateDebugInformation="true"
 				SubSystem="1"
 				TargetMachine="1"
@@ -93,7 +93,7 @@
 		</Configuration>
 		<Configuration
 			Name="Release|Win32"
-			OutputDirectory="$(RSWIN_ROOT)\hybrid_automaton\hybrid_automaton_manager\bin"
+			OutputDirectory="$(ProjectDir)..\..\bin"
 			IntermediateDirectory="$(ConfigurationName)"
 			ConfigurationType="2"
 			CharacterSet="1"
@@ -119,7 +119,7 @@
 				Optimization="2"
 				EnableIntrinsicFunctions="true"
 				WholeProgramOptimization="false"
-				AdditionalIncludeDirectories="&quot;$(RLAB_INC_PATH)&quot;;&quot;$(RSWIN_ROOT)\graph\include&quot;;&quot;$(RSWIN_ROOT)\hybrid_automaton\include&quot;;&quot;$(RSWIN_ROOT)\hybrid_automaton\thirdparty\tinyxml\include&quot;;&quot;$(RSWIN_ROOT)\hybrid_automaton\hybrid_automaton_manager\include&quot;;&quot;$(RSWIN_ROOT)\hybrid_automaton\hybrid_automaton_manager\include\ros_bridge&quot;;&quot;$(RSWIN_ROOT)\hybrid_automaton\hybrid_automaton_manager\include\ros_bridge\msgs&quot;"
+				AdditionalIncludeDirectories="&quot;$(RLAB_INC_PATH)&quot;;&quot;$(ProjectDir)..\..\..\graph\include&quot;;&quot;$(ProjectDir)..\..\include\hybrid_automaton&quot;;&quot;$(ProjectDir)..\..\thirdparty\tinyxml\include&quot;;&quot;$(ProjectDir)..\..\include\hybrid_automaton_manager&quot;;&quot;$(ProjectDir)..\..\include\hybrid_automaton_manager\ros_bridge&quot;"
 				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_USRDLL;HYBRIDAUTOMATONMANAGER_EXPORTS;R_EXPORTS"
 				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="true"
@@ -140,7 +140,7 @@
 				Name="VCLinkerTool"
 				AdditionalDependencies="rMath_9.lib rxControlSDK_9.lib libhybrid_automaton.lib libgraph.lib tinyxml.lib"
 				LinkIncremental="1"
-				AdditionalLibraryDirectories="&quot;$(RLAB_LIB_PATH)&quot;;&quot;$(RSWIN_ROOT)\hybrid_automaton\bin&quot;;&quot;$(RSWIN_ROOT)\hybrid_automaton\thirdparty\tinyxml\bin&quot;;&quot;$(RSWIN_ROOT)\graph\bin&quot;"
+				AdditionalLibraryDirectories="&quot;$(RLAB_LIB_PATH)&quot;;&quot;$(ProjectDir)..\..\lib&quot;;&quot;$(ProjectDir)..\..\thirdparty\tinyxml\bin&quot;;&quot;$(ProjectDir)..\..\..\graph\bin&quot;"
 				GenerateDebugInformation="true"
 				SubSystem="1"
 				OptimizeReferences="2"
