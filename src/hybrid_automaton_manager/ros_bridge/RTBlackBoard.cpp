@@ -8,10 +8,10 @@
 //#include <math.h>
 #include <errno.h>
 
-#include "Float64.h"
-#include "Float64MultiArray.h"
-#include "String_msgs.h"
-#include "RequestROSSubscription.h"
+#include "msgs\Float64.h"
+#include "msgs\Float64MultiArray.h"
+#include "msgs\String.h"
+#include "msgs\RequestROSSubscription.h"
 
 /*
 * for the singleton stuff

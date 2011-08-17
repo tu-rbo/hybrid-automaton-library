@@ -18,7 +18,7 @@
 	<Configurations>
 		<Configuration
 			Name="Debug|Win32"
-			OutputDirectory="$(ProjectDir)..\..\lib"
+			OutputDirectory="$(ProjectDir)..\..\bin"
 			IntermediateDirectory="$(ConfigurationName)"
 			ConfigurationType="4"
 			CharacterSet="1"
@@ -41,7 +41,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="&quot;$(RLAB_INC_PATH)&quot;;&quot;$(RSWIN_ROOT)\hybrid_automaton\include&quot;;&quot;$(RSWIN_ROOT)\hybrid_automaton\thirdparty\tinyxml\include&quot;;&quot;$(RSWIN_ROOT)\graph\include&quot;"
+				AdditionalIncludeDirectories="&quot;$(RLAB_INC_PATH)&quot;;&quot;$(ProjectDir)..\..\include\hybrid_automaton&quot;;&quot;$(ProjectDir)..\..\thirdparty\tinyxml\include&quot;;&quot;$(ProjectDir)..\..\...\graph\include&quot;"
 				PreprocessorDefinitions="WIN32;_DEBUG;_LIB"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -64,7 +64,7 @@
 				LinkLibraryDependencies="false"
 				AdditionalDependencies="libgraphd.lib"
 				OutputFile="$(OutDir)\$(ProjectName)d.lib"
-				AdditionalLibraryDirectories="&quot;$(RSWIN_ROOT)\graph\bin"
+				AdditionalLibraryDirectories="&quot;$(ProjectDir)..\..\..\graph\bin&quot;"
 			/>
 			<Tool
 				Name="VCALinkTool"
@@ -84,7 +84,7 @@
 		</Configuration>
 		<Configuration
 			Name="Release|Win32"
-			OutputDirectory="$(ProjectDir)..\..\lib"
+			OutputDirectory="$(ProjectDir)..\..\bin"
 			IntermediateDirectory="$(ConfigurationName)"
 			ConfigurationType="4"
 			CharacterSet="1"
@@ -110,7 +110,7 @@
 				Optimization="2"
 				EnableIntrinsicFunctions="true"
 				WholeProgramOptimization="false"
-				AdditionalIncludeDirectories="&quot;$(RLAB_INC_PATH)&quot;;&quot;$(RSWIN_ROOT)\hybrid_automaton\include&quot;;&quot;$(RSWIN_ROOT)\hybrid_automaton\thirdparty\tinyxml\include&quot;;&quot;$(RSWIN_ROOT)\graph\include&quot;"
+				AdditionalIncludeDirectories="&quot;$(RLAB_INC_PATH)&quot;;&quot;$(ProjectDir)..\..\include\hybrid_automaton&quot;;&quot;$(ProjectDir)..\..\thirdparty\tinyxml\include&quot;;&quot;$(ProjectDir)..\..\...\graph\include&quot;"
 				PreprocessorDefinitions="WIN32;NDEBUG;_LIB"
 				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="true"
@@ -131,7 +131,7 @@
 				Name="VCLibrarianTool"
 				LinkLibraryDependencies="false"
 				AdditionalDependencies="libgraph.lib"
-				AdditionalLibraryDirectories="&quot;$(RSWIN_ROOT)\graph\bin"
+				AdditionalLibraryDirectories="&quot;$(ProjectDir)..\..\..\graph\bin&quot;"
 			/>
 			<Tool
 				Name="VCALinkTool"

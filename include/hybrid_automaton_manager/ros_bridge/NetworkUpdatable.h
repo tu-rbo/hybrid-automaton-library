@@ -12,7 +12,7 @@
 #ifndef __NETWORKUPDATABLE__
 #define __NETWORKUPDATABLE__
 
-#include "NetworkData.h"
+#include "msgs\NetworkData.h"
 
 class NetworkUpdatable {
 public:

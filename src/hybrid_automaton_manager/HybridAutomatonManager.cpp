@@ -6,7 +6,7 @@
 #include "HybridAutomatonManager.h"
 #include "HybridAutomatonManagerCmd.h"
 
-#include "String_msgs.h"
+#include "msgs\String.h"
 
 std::vector<double> convert(const dVector& in)
 {

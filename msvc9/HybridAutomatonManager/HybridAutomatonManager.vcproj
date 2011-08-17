@@ -61,9 +61,9 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="rMath_9d.lib rxControlSDK_9d.lib libhybrid_automatond.lib libgraphd.lib tinyxmld.lib"
+				AdditionalDependencies="rMath_9d.lib rxControlSDK_9d.lib HybridAutomatond.lib libgraphd.lib tinyxmld.lib"
 				LinkIncremental="2"
-				AdditionalLibraryDirectories="&quot;$(RLAB_LIB_PATH)&quot;;&quot;$(ProjectDir)..\..\lib&quot;;&quot;$(ProjectDir)..\..\thirdparty\tinyxml\bin&quot;;&quot;$(ProjectDir)..\..\..\graph\bin&quot;"
+				AdditionalLibraryDirectories="&quot;$(RLAB_LIB_PATH)&quot;;&quot;$(ProjectDir)..\..\bin&quot;;&quot;$(ProjectDir)..\..\thirdparty\tinyxml\bin&quot;;&quot;$(ProjectDir)..\..\..\graph\bin&quot;"
 				GenerateDebugInformation="true"
 				SubSystem="1"
 				TargetMachine="1"
@@ -138,9 +138,9 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="rMath_9.lib rxControlSDK_9.lib libhybrid_automaton.lib libgraph.lib tinyxml.lib"
+				AdditionalDependencies="rMath_9.lib rxControlSDK_9.lib HybridAutomaton.lib libgraph.lib tinyxml.lib"
 				LinkIncremental="1"
-				AdditionalLibraryDirectories="&quot;$(RLAB_LIB_PATH)&quot;;&quot;$(ProjectDir)..\..\lib&quot;;&quot;$(ProjectDir)..\..\thirdparty\tinyxml\bin&quot;;&quot;$(ProjectDir)..\..\..\graph\bin&quot;"
+				AdditionalLibraryDirectories="&quot;$(RLAB_LIB_PATH)&quot;;&quot;$(ProjectDir)..\..\bin&quot;;&quot;$(ProjectDir)..\..\thirdparty\tinyxml\bin&quot;;&quot;$(ProjectDir)..\..\..\graph\bin&quot;"
 				GenerateDebugInformation="true"
 				SubSystem="1"
 				OptimizeReferences="2"
@@ -234,7 +234,7 @@
 						>
 					</File>
 					<File
-						RelativePath="..\..\src\hybrid_automaton_manager\ros_bridge\msgs\String_msgs.cpp"
+						RelativePath="..\..\src\hybrid_automaton_manager\ros_bridge\msgs\String.cpp"
 						>
 					</File>
 				</Filter>
@@ -304,7 +304,7 @@
 						>
 					</File>
 					<File
-						RelativePath="..\..\include\hybrid_automaton_manager\ros_bridge\msgs\String_msgs.h"
+						RelativePath="..\..\include\hybrid_automaton_manager\ros_bridge\msgs\String.h"
 						>
 					</File>
 				</Filter>

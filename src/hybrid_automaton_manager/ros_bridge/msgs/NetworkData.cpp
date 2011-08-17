@@ -1,4 +1,4 @@
-#include "NetworkData.h"
+#include "msgs\NetworkData.h"
 
 namespace rlab {
 

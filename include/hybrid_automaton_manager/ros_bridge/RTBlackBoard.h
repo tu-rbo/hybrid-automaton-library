@@ -19,7 +19,7 @@
 //#include <process.h>
 
 #include "Network.h"
-#include "NetworkData.h"
+#include "msgs\NetworkData.h"
 #include "NetworkUpdatable.h"
 
 

@@ -16,7 +16,7 @@
 #include "TCPserver.h"
 #include "TCPclient.h"
 
-#include "NetworkData.h"
+#include "msgs\NetworkData.h"
 
 #include "NetworkUpdatable.h"
 
