@@ -47,12 +47,7 @@ object_id_(object_id)
 		this->motion_behaviour_ = NULL;
 	}
 
-	Point tmp(0.0, 0.0, 0.0);
-	if(configuration.size()>1)
-	{
-		tmp.x = configuration[0];
-		tmp.y = configuration[1];
-	}
+	Point tmp(configuration[0],configuration[1],0.0);
 	tmp.x += RADIUS;
 	handle_points_.push_back(tmp);
 	tmp.x -= 2 * RADIUS;
