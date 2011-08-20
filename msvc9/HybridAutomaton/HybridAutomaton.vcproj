@@ -41,7 +41,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="&quot;$(RLAB_INC_PATH)&quot;;&quot;$(ProjectDir)..\..\include\hybrid_automaton&quot;;&quot;$(ProjectDir)..\..\thirdparty\tinyxml\include&quot;;&quot;$(ProjectDir)..\..\...\graph\include&quot;"
+				AdditionalIncludeDirectories="&quot;$(RLAB_INC_PATH)&quot;;&quot;$(ProjectDir)..\..\include\hybrid_automaton&quot;;&quot;$(ProjectDir)..\..\thirdparty\tinyxml\include&quot;;&quot;$(ProjectDir)..\..\..\graph\include&quot;"
 				PreprocessorDefinitions="WIN32;_DEBUG;_LIB"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -110,7 +110,7 @@
 				Optimization="2"
 				EnableIntrinsicFunctions="true"
 				WholeProgramOptimization="false"
-				AdditionalIncludeDirectories="&quot;$(RLAB_INC_PATH)&quot;;&quot;$(ProjectDir)..\..\include\hybrid_automaton&quot;;&quot;$(ProjectDir)..\..\thirdparty\tinyxml\include&quot;;&quot;$(ProjectDir)..\..\...\graph\include&quot;"
+				AdditionalIncludeDirectories="&quot;$(RLAB_INC_PATH)&quot;;&quot;$(ProjectDir)..\..\include\hybrid_automaton&quot;;&quot;$(ProjectDir)..\..\thirdparty\tinyxml\include&quot;;&quot;$(ProjectDir)..\..\..\graph\include&quot;"
 				PreprocessorDefinitions="WIN32;NDEBUG;_LIB"
 				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="true"
