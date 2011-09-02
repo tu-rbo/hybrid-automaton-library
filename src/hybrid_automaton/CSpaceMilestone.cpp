@@ -79,7 +79,7 @@ motion_behaviour_(NULL),
 object_id_(-1)
 {
 	XMLDeserializer xml_deserializer_(milestone_xml);
-	this->status_ = (Status)xml_deserializer_.deserializeInteger("Status");
+	this->setStatus((Status)xml_deserializer_.deserializeInteger("Status"));
 	this->object_id_ = xml_deserializer_.deserializeInteger("ObjectId");
 	this->dofs_ = xml_deserializer_.deserializeInteger("DOFs");
 
