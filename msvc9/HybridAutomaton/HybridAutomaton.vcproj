@@ -178,6 +178,10 @@
 				RelativePath="..\..\src\hybrid_automaton\MotionBehaviour.cpp"
 				>
 			</File>
+			<File
+				RelativePath="..\..\src\hybrid_automaton\XMLDeserializer.cpp"
+				>
+			</File>
 		</Filter>
 		<Filter
 			Name="Header Files"
@@ -202,6 +206,10 @@
 			</File>
 			<File
 				RelativePath="..\..\include\hybrid_automaton\MotionBehaviour.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\include\hybrid_automaton\XMLDeserializer.h"
 				>
 			</File>
 		</Filter>

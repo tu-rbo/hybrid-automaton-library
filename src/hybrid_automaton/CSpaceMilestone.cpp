@@ -4,6 +4,7 @@
 #include <string>
 
 #include "tinyxml.h"
+#include "XMLDeserializer.h"
 #include "MilestoneFactory.h"
 
 using namespace std;
@@ -77,22 +78,10 @@ dofs_(-1),
 motion_behaviour_(NULL),
 object_id_(-1)
 {
-	int status = -1;
-	if(!milestone_xml->Attribute("Status", &status))
-	{
-		throw std::string("ERROR: [CSpaceMilestone::CSpaceMilestone(TiXmlElement* milestone_xml, rxSystem* robot)] Attribute \"Status\" not found in XML element milestone_xml.");
-	}
-	this->setStatus((Status)status);
-
-	if(!milestone_xml->Attribute( "ObjectId", &this->object_id_))
-	{
-		throw std::string("ERROR: [CSpaceMilestone::CSpaceMilestone(TiXmlElement* milestone_xml, rxSystem* robot)] Attribute \"ObjectId\" not found in XML element milestone_xml.");
-	}
-
-	if(!milestone_xml->Attribute( "DOFs", &this->dofs_))
-	{
-		throw std::string("ERROR: [CSpaceMilestone::CSpaceMilestone(TiXmlElement* milestone_xml, rxSystem* robot)] Attribute \"DOFs\" not found in XML element milestone_xml.");
-	}
+	XMLDeserializer xml_deserializer_(milestone_xml);
+	this->status_ = (Status)xml_deserializer_.deserializeInteger("Status");
+	this->object_id_ = xml_deserializer_.deserializeInteger("ObjectId");
+	this->dofs_ = xml_deserializer_.deserializeInteger("DOFs");
 
 	TiXmlElement* configuration_element = milestone_xml->FirstChildElement("Configuration");
 	if(configuration_element == NULL)
@@ -102,12 +91,8 @@ object_id_(-1)
 
 	for(TiXmlElement* joint_element = configuration_element->FirstChildElement("Joint"); joint_element; joint_element = joint_element->NextSiblingElement())
 	{
-		double joint_value = -1.f;
-		if(!joint_element->Attribute("value", &joint_value))
-		{
-			throw std::string("ERROR: [CSpaceMilestone::CSpaceMilestone(TiXmlElement* milestone_xml, rxSystem* robot)] Attribute \"value\" not found in XML element joint_element.");
-		}
-		(this->configuration_).push_back(joint_value);
+		XMLDeserializer xml_deserializer_joint(joint_element);
+		(this->configuration_).push_back(xml_deserializer_joint.deserializeDouble("value"));
 	}
 
 	TiXmlElement* radius_convergence_element = milestone_xml->FirstChildElement("RadiusRoC");
@@ -118,12 +103,8 @@ object_id_(-1)
 
 	for(TiXmlElement* radius_element = radius_convergence_element->FirstChildElement("Radius"); radius_element; radius_element = radius_element->NextSiblingElement())
 	{
-		double radius_value = -1.0;		
-		if(!radius_element->Attribute("value", &radius_value))
-		{
-			throw std::string("ERROR: [CSpaceMilestone::CSpaceMilestone(TiXmlElement* milestone_xml, rxSystem* robot)] Attribute \"value\" not found in XML element radius_element.");
-		}
-		(this->region_convergence_radius_).push_back(radius_value);		
+		XMLDeserializer xml_deserializer_radius(radius_element);
+		(this->region_convergence_radius_).push_back(xml_deserializer_radius.deserializeDouble("value"));		
 	}
 
 	TiXmlElement* handle_point_set_element = milestone_xml->FirstChildElement("HandlePoints");
@@ -134,19 +115,11 @@ object_id_(-1)
 
 	for(TiXmlElement* handle_point_element = handle_point_set_element->FirstChildElement("HandlePoint"); handle_point_element; handle_point_element = handle_point_element->NextSiblingElement())
 	{
-		Point handle_point_value(-1.f,-1.f,-1.f);		
-		if(!handle_point_element->Attribute("x", &handle_point_value.x))
-		{
-			throw std::string("ERROR: [CSpaceMilestone::CSpaceMilestone(TiXmlElement* milestone_xml, rxSystem* robot)] Attribute \"x\" not found in XML element handle_point_element.");
-		}
-		if(!handle_point_element->Attribute("y", &handle_point_value.y))
-		{
-			throw std::string("ERROR: [CSpaceMilestone::CSpaceMilestone(TiXmlElement* milestone_xml, rxSystem* robot)] Attribute \"y\" not found in XML element handle_point_element.");
-		}
-		if(!handle_point_element->Attribute("z", &handle_point_value.z))
-		{
-			throw std::string("ERROR: [CSpaceMilestone::CSpaceMilestone(TiXmlElement* milestone_xml, rxSystem* robot)] Attribute \"z\" not found in XML element handle_point_element.");
-		}
+		XMLDeserializer xml_deserializer_handle_point(handle_point_element);
+		Point handle_point_value(-1.f,-1.f,-1.f);
+		handle_point_value.x = xml_deserializer_handle_point.deserializeDouble("x");
+		handle_point_value.x = xml_deserializer_handle_point.deserializeDouble("y");
+		handle_point_value.x = xml_deserializer_handle_point.deserializeDouble("z");
 		(this->handle_points_).push_back(handle_point_value);
 	}
 
@@ -198,7 +171,7 @@ void CSpaceMilestone::setMotionBehaviour(MotionBehaviour * motion_behaviour)
 {
 	if(motion_behaviour)
 	{
-	this->motion_behaviour_ = motion_behaviour->clone();
+		this->motion_behaviour_ = motion_behaviour->clone();
 		this->motion_behaviour_->setChild(this);
 		this->motion_behaviour_->setParent(this);
 	}
