@@ -370,7 +370,6 @@ void MotionBehaviour::RLabInfoString2ElementXML_(string_type string_data, TiXmlE
 		via_point_xml->SetAttribute("r", wstring2string_(temp_st.substr(temp_st.find(L"=") + 1, temp_st.find(L"\n"))).c_str());
 		break;
 	default:
-		throw std::string("ERROR: [MotionBehaviour::RLabInfoString2ElementXML_(string_type string_data, TiXmlElement* out_xml_element)] Unexpected Controller group.");
 		break;
 		}
 	}
@@ -424,7 +423,6 @@ void MotionBehaviour::RLabInfoString2ElementXML_(string_type string_data, TiXmlE
 		out_xml_element->SetAttribute("betaDisplacement", colon2space_(wstring2string_(temp_st.substr(temp_st.find(L"=") + 1, temp_st.find(L"\n")))).c_str() );
 		break;
 	default:
-		throw std::string("ERROR: [MotionBehaviour::RLabInfoString2ElementXML_(string_type string_data, TiXmlElement* out_xml_element)] Unexpected Controller group.");
 		break;
 	}
 }
