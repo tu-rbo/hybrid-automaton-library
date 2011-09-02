@@ -76,12 +76,18 @@ void HybridAutomatonManager::update(const rTime& t)
 
 	rControlAlgorithm::update(t);
 
-	_blackboard->setFloat64MultiArray("angle", _q_BB);
+	/*if(_robot->jdof == 3)
+	{
+		_blackboard->setFloat64MultiArray("angle", _q_BB);
+	}
+	else
+	{*/
+		_blackboard->setFloat64MultiArray("angle", _q_BB);
 
-	_blackboard->setFloat64MultiArray("velocity", _qdot_BB);
+		_blackboard->setFloat64MultiArray("velocity", _qdot_BB);
 
-	_blackboard->setFloat64MultiArray("torque" , _torque_BB);
-
+		_blackboard->setFloat64MultiArray("torque" , _torque_BB);
+	//}
 	_blackboard->step();
 
 }
@@ -147,34 +153,48 @@ void HybridAutomatonManager::_readDevices()
 	//read = readDeviceValue(_robotDevice, qdot, _dof * sizeof(double), 1);
 	//RASSERT(read > 0);
 	int read;
-	double data[2*7];
-	read = readDeviceValue(_robotDevice, data, 2*sizeof(double)*7);
-
-	if (read > 0)
+	if(_dof == 3)
 	{
-		double rad[7];
-		double vrad[7];
-
-		memcpy(rad, data, sizeof(double)*7);
-		double* velOffset = data+7;
-		memcpy(vrad, velOffset, sizeof(double)*7);
-		_q = dVector(7, rad);
-		_qdot = dVector(7, vrad);
+		float data[3];
+		read = readDeviceValue(_robotDevice, data, sizeof(float)*3, 0);
+		RASSERT(read > 0);
+		for( int i = 0;i < 3; i++)
+		{
+			_q[i] = data[i];
+		}
 	}
-	_q[6] = 0.0;
-	_qdot[6] = 0.0;
-	_qdot.zero();
-	//for(int i = 0 ; i < _dof; ++i)
-	//{
-	//	_q[i] = q[i];
-	//	_qdot[i] = qdot[i];
-	//}
+	else
+	{
+		double data[2*7];
+		read = readDeviceValue(_robotDevice, data, 2*sizeof(double)*7);
 
-	//delete q;
-	//delete qdot;
+		if (read > 0)
+		{
+			double rad[7];
+			double vrad[7];
 
+			memcpy(rad, data, sizeof(double)*7);
+			double* velOffset = data+7;
+			memcpy(vrad, velOffset, sizeof(double)*7);
+			_q = dVector(7, rad);
+			_qdot = dVector(7, vrad);
+		}
+		_q[6] = 0.0;
+		_qdot[6] = 0.0;
+		_qdot.zero();
+		//for(int i = 0 ; i < _dof; ++i)
+		//{
+		//	_q[i] = q[i];
+		//	_qdot[i] = qdot[i];
+		//}
+
+		//delete q;
+		//delete qdot;
+
+	
+		_qdot_BB = convert(_qdot);
+	}
 	_q_BB = convert(_q);
-	_qdot_BB = convert(_qdot);
 }
 
 
