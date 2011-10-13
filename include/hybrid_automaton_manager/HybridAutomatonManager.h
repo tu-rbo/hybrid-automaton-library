@@ -43,6 +43,8 @@ private:
 
 	void updateHybridAutomaton();
 
+	void updateBlackboard();
+
 private:
 
 	HybridAutomaton						_plan;
@@ -56,6 +58,8 @@ private:
 	RTBlackBoard*						_blackboard;
 
 	MotionBehaviour*					_activeMotionBehavior;
+
+	MotionBehaviour*					_defaultMotionBehavior;
 
 	string_type							_path;
 	

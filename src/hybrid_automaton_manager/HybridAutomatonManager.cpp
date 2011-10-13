@@ -21,6 +21,7 @@ HybridAutomatonManager::HybridAutomatonManager(rDC rdc)
 , _robot(NULL)
 , _blackboard(NULL)
 , _activeMotionBehavior(NULL)
+, _defaultMotionBehavior(NULL)
 , _dof()
 , _HS()
 , _newHAArrived(false)
@@ -30,6 +31,8 @@ HybridAutomatonManager::HybridAutomatonManager(rDC rdc)
 HybridAutomatonManager::~HybridAutomatonManager()
 {
 	delete _activeMotionBehavior;
+
+	delete _defaultMotionBehavior;
 
 	for( ::std::vector< MotionBehaviour* >::const_iterator it = _navigationFunction.begin(); it != _navigationFunction.end(); ++it)
 		delete *it;
@@ -43,7 +46,6 @@ HybridAutomatonManager::~HybridAutomatonManager()
 void HybridAutomatonManager::init(int mode)
 {
 
-	//load the parameters of the filter - this can be eliminated once the robot API is there
 	_robot =  LOAD_SYSTEM(_path, _aml, _T0, _q0);
 	assert(_robot);
 
@@ -68,7 +70,11 @@ void HybridAutomatonManager::init(int mode)
 	RASSERT(_robotDevice != INVALID_RHANDLE);
 
 	_blackboard = RTBlackBoard::getInstance();
+
+	_defaultMotionBehavior = new MotionBehaviour(new Milestone(), new Milestone(),_robot);
+	_activeMotionBehavior = _defaultMotionBehavior;
 }
+
 
 void HybridAutomatonManager::update(const rTime& t)
 {
@@ -76,20 +82,19 @@ void HybridAutomatonManager::update(const rTime& t)
 
 	rControlAlgorithm::update(t);
 
-	/*if(_robot->jdof == 3)
-	{
-		_blackboard->setFloat64MultiArray("angle", _q_BB);
-	}
-	else
-	{*/
-		_blackboard->setFloat64MultiArray("angle", _q_BB);
+	this->updateBlackboard();
 
-		_blackboard->setFloat64MultiArray("velocity", _qdot_BB);
+}
 
-		_blackboard->setFloat64MultiArray("torque" , _torque_BB);
-	//}
-	_blackboard->step();
+void HybridAutomatonManager::updateBlackboard()
+{
+	_blackboard->setFloat64MultiArray("angle", _q_BB);
 
+	_blackboard->setFloat64MultiArray("velocity", _qdot_BB);
+
+	_blackboard->setFloat64MultiArray("torque" , _torque_BB);
+
+	_blackboard->step();	
 }
 
 void HybridAutomatonManager::updateHybridAutomaton()
@@ -144,81 +149,40 @@ void HybridAutomatonManager::setPeriod(const rTime& dT)
 
 void HybridAutomatonManager::_readDevices()
 {
-	//float* q = new float[_dof] ;
-	//float* qdot = new float[_dof] ;
+	double* q = new double[_dof];
+	double* qdot = new double[_dof];
 
-	//int read = readDeviceValue(_robotDevice, q, _dof * sizeof(double), 0);
-	//RASSERT(read > 0);
+	int read = readDeviceValue(_robotDevice, q, _dof * sizeof(double), 0);
+	RASSERT(read > 0);
 
-	//read = readDeviceValue(_robotDevice, qdot, _dof * sizeof(double), 1);
-	//RASSERT(read > 0);
-	int read;
-	if(_dof == 3)
-	{
-		float data[3];
-		read = readDeviceValue(_robotDevice, data, sizeof(float)*3, 0);
-		RASSERT(read > 0);
-		for( int i = 0;i < 3; i++)
-		{
-			_q[i] = data[i];
-		}
-	}
-	else
-	{
-		double data[2*7];
-		read = readDeviceValue(_robotDevice, data, 2*sizeof(double)*7);
+	read = readDeviceValue(_robotDevice, qdot, _dof * sizeof(double), 1);
+	RASSERT(read > 0);
 
-		if (read > 0)
-		{
-			double rad[7];
-			double vrad[7];
+	_q = dVector(*q);
+	_qdot = dVector(*qdot);
 
-			memcpy(rad, data, sizeof(double)*7);
-			double* velOffset = data+7;
-			memcpy(vrad, velOffset, sizeof(double)*7);
-			_q = dVector(7, rad);
-			_qdot = dVector(7, vrad);
-		}
-		_q[6] = 0.0;
-		_qdot[6] = 0.0;
-		_qdot.zero();
-		//for(int i = 0 ; i < _dof; ++i)
-		//{
-		//	_q[i] = q[i];
-		//	_qdot[i] = qdot[i];
-		//}
-
-		//delete q;
-		//delete qdot;
-
-	
-		_qdot_BB = convert(_qdot);
-	}
+	_qdot_BB = convert(_qdot);
 	_q_BB = convert(_q);
+
+	delete q;
+	delete qdot;
 }
 
 
 void HybridAutomatonManager::_writeDevices()
 {
-	float* torque = new float[_dof];
+	double* torque = new double[_dof];
 
-	for(int i = 0 ; i < _dof; ++i)
+	for(int i = 0; i < _dof; ++i)
 		torque[i] = _torque[i];
 
-	//int written = writeDeviceValue(_robotDevice, torque, _dof * sizeof(float));
-	//RASSERT(written > 0);
-
-	double jointTq[7];	
-	
-	for (int i=0; i<7; i++)
-		jointTq[i] = _torque[i];
-
-	_torque[6] = 0.0;
-	writeDeviceValue(_robotDevice, jointTq, sizeof(double)*7);
+	int written = writeDeviceValue(_robotDevice, torque, _dof * sizeof(double));
+	RASSERT(written > 0);
 
 	_torque_BB = convert(_torque);
 
 	delete torque;
+
 }
 
 
@@ -233,16 +197,18 @@ void HybridAutomatonManager::_reflect()
 void HybridAutomatonManager::_compute(const double& t)
 {
 
-
-	//TODO change this if statement!!! 
-	if((!_activeMotionBehavior || _activeMotionBehavior->hasConverged()) && _navigationFunction.size() > 0)
+	if( _newHAArrived || _activeMotionBehavior->hasConverged())
 	{
 		_activeMotionBehavior = _navigationFunction.front();
 		_navigationFunction.erase(_navigationFunction.begin());
+
+		if(!_activeMotionBehavior)
+			_activeMotionBehavior = _defaultMotionBehavior;
+
 		_activeMotionBehavior->activate();
 	}
-	if(_activeMotionBehavior)
-		_torque = _activeMotionBehavior->update(t);
+	
+	_torque = _activeMotionBehavior->update(t);
 	
 }
 
