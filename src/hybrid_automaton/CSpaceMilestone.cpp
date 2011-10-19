@@ -118,11 +118,11 @@ object_id_(-1)
 		XMLDeserializer xml_deserializer_handle_point(handle_point_element);
 		Point handle_point_value(-1.f,-1.f,-1.f);
 		handle_point_value.x = xml_deserializer_handle_point.deserializeDouble("x");
-		std::cout << handle_point_value.x << std::endl;
+		//std::cout << handle_point_value.x << std::endl;
 		handle_point_value.y = xml_deserializer_handle_point.deserializeDouble("y");
-		std::cout << handle_point_value.y << std::endl;
+		//std::cout << handle_point_value.y << std::endl;
 		handle_point_value.z = xml_deserializer_handle_point.deserializeDouble("z");
-		std::cout << handle_point_value.z << std::endl;
+		//std::cout << handle_point_value.z << std::endl;
 		(this->handle_points_).push_back(handle_point_value);
 	}
 

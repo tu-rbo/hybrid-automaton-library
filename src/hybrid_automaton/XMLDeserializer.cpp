@@ -78,11 +78,16 @@ ViaPointBase * XMLDeserializer::deserializeViaPoint(ControllerType type_of_contr
 		std::stringstream via_point_ss = std::stringstream(this->deserializeString("dVector"));
 		double via_point_value = -1.0;
 		dVector via_point_dVector;
-		for(int i=0; i<controller_dimension; i++)
-		{
-			via_point_ss >> via_point_value;
-			via_point_dVector.expand(1,via_point_value);
+		std::string value_str;
+		while(getline(via_point_ss, value_str, ',')){
+			via_point_dVector.expand(1,atof(value_str.c_str()));
 		}
+		// NOTE: This older version works when the values are separated with white spaces instead of commas
+		//for(int i=0; i<controller_dimension; i++)
+		//{
+		//	via_point_ss >> via_point_value;
+		//	via_point_dVector.expand(1,via_point_value);
+		//}
 		return_value = new ViaPointdVector(via_point_time, via_point_type, via_point_reuse_bool, via_point_dVector);
 		break;
 		}

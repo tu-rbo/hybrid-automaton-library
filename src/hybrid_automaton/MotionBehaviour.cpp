@@ -91,8 +91,9 @@ MotionBehaviour::~MotionBehaviour()
 	// Do not delete any object that was not directly created in the constructor!!
 	if(control_set_)
 	{
-		delete control_set_;
-		control_set_ = NULL;
+		//TODO: Do not delete it! It was already deleted somehow -> Where?
+		//delete control_set_;
+		//control_set_ = NULL;
 	}
 }
 
@@ -221,6 +222,7 @@ bool MotionBehaviour::hasConverged()
 
 	for(int i = 0; i < error.size(); ++i)
 	{
+		//HACK (George) : This is because I couldn't get the error between the current position and the desired position at the END of the trajectory
 		if (::std::abs(error[i]) > 0.01 || time_ < 2.0)
 		{
 			return false;

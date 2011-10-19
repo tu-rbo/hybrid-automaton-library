@@ -32,7 +32,7 @@ HybridAutomatonManager::~HybridAutomatonManager()
 {
 	delete _activeMotionBehavior;
 
-	delete _defaultMotionBehavior;
+	//delete _defaultMotionBehavior;
 
 	for( ::std::vector< MotionBehaviour* >::const_iterator it = _navigationFunction.begin(); it != _navigationFunction.end(); ++it)
 		delete *it;
@@ -103,10 +103,13 @@ void HybridAutomatonManager::updateHybridAutomaton()
 	{
 		rlab::String* s = dynamic_cast<rlab::String*>(_blackboard->getData("update_hybrid_automaton"));
 		_HS = s->get();
-
+		//::std::cout << _HS << ::std::endl;
 		try
 		{
+			std::cout << "Before deserialize" << std::endl;
 			_plan.fromStringXML(_HS,_robot);
+			std::cout << "After deserialize" << std::endl;
+			//::std::cout << _plan.toStringXML() << ::std::endl;
 		}
 		catch(::std::string e)
 		{
@@ -121,6 +124,8 @@ void HybridAutomatonManager::updateHybridAutomaton()
 		for( int i = 1; i < _plan.getNodeNumber(); ++i)
 		{
 			_navigationFunction.push_back(_plan.outgoingEdges(*tmpMilestone)[0]);
+			//::std::cout << _plan.outgoingEdges(*tmpMilestone)[0]->toStringXML() << ::std::endl;
+			//::std::cout << _navigationFunction[0]->toStringXML() << ::std::endl;
 			tmpMilestone = _navigationFunction.back()->getChild();
 		}
 
@@ -158,8 +163,11 @@ void HybridAutomatonManager::_readDevices()
 	read = readDeviceValue(_robotDevice, qdot, _dof * sizeof(double), 1);
 	RASSERT(read > 0);
 
-	_q = dVector(*q);
-	_qdot = dVector(*qdot);
+	for(int i = 0; i < _dof; ++i)
+	{
+		_q[i] = q[i];
+		_qdot[i] = qdot[i];
+	}
 
 	_qdot_BB = convert(_qdot);
 	_q_BB = convert(_q);
@@ -199,12 +207,15 @@ void HybridAutomatonManager::_compute(const double& t)
 
 	if( _newHAArrived || _activeMotionBehavior->hasConverged())
 	{
-		_activeMotionBehavior = _navigationFunction.front();
-		_navigationFunction.erase(_navigationFunction.begin());
-
-		if(!_activeMotionBehavior)
+		if(_navigationFunction.size() < 1)
 			_activeMotionBehavior = _defaultMotionBehavior;
+		else
+		{
+			_activeMotionBehavior = _navigationFunction.front();
+			_navigationFunction.erase(_navigationFunction.begin());
+		}
 
+		_newHAArrived = false;
 		_activeMotionBehavior->activate();
 	}
 	
