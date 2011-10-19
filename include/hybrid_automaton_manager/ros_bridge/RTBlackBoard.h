@@ -102,6 +102,8 @@ public:
 	*/
 	void setFloat64MultiArray(const std::string& topic, const std::vector<double>& val);
 
+	void setJointState(const std::string& topic, const std::vector<double>& position, const std::vector<double>& velocity, const std::vector<double>& effort);
+
 	/*!
 	* \brief increment tick counter and starts the ros communication on every 10 call.
 	*/
@@ -114,6 +116,7 @@ private:
 
 	void setFloat64(const std::string& topic, double val, DataMap& map);
 	void setFloat64MultiArray(const std::string& topic, const std::vector<double>& val, DataMap& map);
+	void setJointState(const std::string& topic, const std::vector<double>& position, const std::vector<double>& velocity, const std::vector<double>& effort, DataMap& map);
 
 	//template <typename T1, typename T2>
 	//void set(const std::string& topic, T& value, DataMap& map) {

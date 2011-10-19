@@ -11,6 +11,7 @@
 #include "msgs\Float64.h"
 #include "msgs\Float64MultiArray.h"
 #include "msgs\String.h"
+#include "msgs\JointState.h"
 #include "msgs\RequestROSSubscription.h"
 
 /*
@@ -66,6 +67,7 @@ RTBlackBoard::RTBlackBoard() :
 	net.subscribeObject(new rlab::Float64MultiArray());
 	net.subscribeObject(new rlab::Float64());
 	net.subscribeObject(new rlab::String());
+	net.subscribeObject(new rlab::JointState());
 
 	// initialize mutex to copy input buffer
 	copyInputBufferMutex = CreateMutex(0, FALSE, 0);
@@ -87,6 +89,7 @@ net(rlab_host.c_str(), rlab_port, ros_host.c_str(), ros_port, this)
 	net.subscribeObject(new rlab::Float64MultiArray());
 	net.subscribeObject(new rlab::Float64());
 	net.subscribeObject(new rlab::String());
+	net.subscribeObject(new rlab::JointState());
 
 	// initialize mutex to copy input buffer
 	copyInputBufferMutex = CreateMutex(0, FALSE, 0);
@@ -208,6 +211,30 @@ void RTBlackBoard::setFloat64MultiArray(const std::string& topic, const std::vec
 		
 		if(data)
 			data->set(val);
+		else
+			throw "topic has different type than expected";
+	}
+}
+
+void RTBlackBoard::setJointState(const std::string& topic, const std::vector<double>& position, const std::vector<double>& velocity, const std::vector<double>& effort) {
+	setJointState(topic, position, velocity, effort, outputMap);
+}
+
+void RTBlackBoard::setJointState(const std::string& topic, const std::vector<double>& position, const std::vector<double>& velocity, const std::vector<double>& effort, DataMap &map) {
+	DataMap::iterator iter = map.find(topic);
+	if(iter == map.end()) {
+		// if not in map create a new object with data from val
+		map[topic] = new rlab::JointState(topic, position, velocity, effort);
+	}
+	else {
+		// cast to message type
+		rlab::JointState* data = static_cast<rlab::JointState*>(iter->second);
+		
+		if(data) {
+			data->setPosition(position);
+			data->setVelocity(velocity);
+			data->setEffort(effort);
+		}
 		else
 			throw "topic has different type than expected";
 	}

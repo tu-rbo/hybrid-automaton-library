@@ -1,11 +1,6 @@
 #ifndef __FLOAT64MULTIARRAY__
 #define __FLOAT64MULTIARRAY__
 
-//#include <MPL_def.h>
-//#include <iostream>
-//#include <sstream>
-//#include <string>
-//#include <ostream>
 #include <vector>
 
 #include "NetworkData.h"

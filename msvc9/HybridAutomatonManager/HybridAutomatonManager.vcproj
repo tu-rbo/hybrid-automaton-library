@@ -226,6 +226,10 @@
 						>
 					</File>
 					<File
+						RelativePath="..\..\src\hybrid_automaton_manager\ros_bridge\msgs\JointState.cpp"
+						>
+					</File>
+					<File
 						RelativePath="..\..\src\hybrid_automaton_manager\ros_bridge\msgs\NetworkData.cpp"
 						>
 					</File>
@@ -293,6 +297,10 @@
 					</File>
 					<File
 						RelativePath="..\..\include\hybrid_automaton_manager\ros_bridge\msgs\Float64MultiArray.h"
+						>
+					</File>
+					<File
+						RelativePath="..\..\include\hybrid_automaton_manager\ros_bridge\msgs\JointState.h"
 						>
 					</File>
 					<File
