@@ -69,7 +69,7 @@ void HybridAutomatonManager::init(int mode)
 	_robotDevice = findDevice(_T("ROBOT"));
 	RASSERT(_robotDevice != INVALID_RHANDLE);
 
-	_blackboard = RTBlackBoard::getInstance();
+	_blackboard = RTBlackBoard::getInstance("130.149.238.179", 1888, "130.149.238.184", 1999);
 
 	_defaultMotionBehavior = new MotionBehaviour(new Milestone(), new Milestone(),_robot);
 	_activeMotionBehavior = _defaultMotionBehavior;
@@ -88,11 +88,7 @@ void HybridAutomatonManager::update(const rTime& t)
 
 void HybridAutomatonManager::updateBlackboard()
 {
-	_blackboard->setFloat64MultiArray("angle", _q_BB);
-
-	_blackboard->setFloat64MultiArray("velocity", _qdot_BB);
-
-	_blackboard->setFloat64MultiArray("torque" , _torque_BB);
+	_blackboard->setJointState("joint_state", _q_BB, _qdot_BB, _torque_BB);
 
 	_blackboard->step();	
 }
