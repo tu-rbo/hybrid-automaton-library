@@ -69,7 +69,7 @@ void HybridAutomatonManager::init(int mode)
 	_robotDevice = findDevice(_T("ROBOT"));
 	RASSERT(_robotDevice != INVALID_RHANDLE);
 
-	_blackboard = RTBlackBoard::getInstance("130.149.238.179", 1888, "130.149.238.184", 1999);
+	_blackboard = RTBlackBoard::getInstance();
 
 	_defaultMotionBehavior = new MotionBehaviour(new Milestone(), new Milestone(),_robot);
 	_activeMotionBehavior = _defaultMotionBehavior;
@@ -88,7 +88,11 @@ void HybridAutomatonManager::update(const rTime& t)
 
 void HybridAutomatonManager::updateBlackboard()
 {
-	_blackboard->setJointState("joint_state", _q_BB, _qdot_BB, _torque_BB);
+	_blackboard->setFloat64MultiArray("angle", _q_BB);
+
+	_blackboard->setFloat64MultiArray("velocity", _qdot_BB);
+
+	_blackboard->setFloat64MultiArray("torque" , _torque_BB);
 
 	_blackboard->step();	
 }
@@ -102,9 +106,7 @@ void HybridAutomatonManager::updateHybridAutomaton()
 		//::std::cout << _HS << ::std::endl;
 		try
 		{
-			std::cout << "Before deserialize" << std::endl;
 			_plan.fromStringXML(_HS,_robot);
-			std::cout << "After deserialize" << std::endl;
 			//::std::cout << _plan.toStringXML() << ::std::endl;
 		}
 		catch(::std::string e)
@@ -112,20 +114,20 @@ void HybridAutomatonManager::updateHybridAutomaton()
 			::std::cout << e << ::std::endl;
 		}
 
-		_navigationFunction.clear();
+		//_navigationFunction.clear();
 		_activeMotionBehavior = NULL;
 
-		Milestone* tmpMilestone = _plan.getStartNode();
+		//Milestone* tmpMilestone = _plan.getStartNode();
 	
-		for( int i = 1; i < _plan.getNodeNumber(); ++i)
-		{
-			_navigationFunction.push_back(_plan.outgoingEdges(*tmpMilestone)[0]);
-			//::std::cout << _plan.outgoingEdges(*tmpMilestone)[0]->toStringXML() << ::std::endl;
-			//::std::cout << _navigationFunction[0]->toStringXML() << ::std::endl;
-			tmpMilestone = _navigationFunction.back()->getChild();
-		}
+		//for( int i = 1; i < _plan.getNodeNumber(); ++i)
+		//{
+		//	_navigationFunction.push_back(_plan.outgoingEdges(*tmpMilestone)[0]);
+		//	//::std::cout << _plan.outgoingEdges(*tmpMilestone)[0]->toStringXML() << ::std::endl;
+		//	//::std::cout << _navigationFunction[0]->toStringXML() << ::std::endl;
+		//	tmpMilestone = _navigationFunction.back()->getChild();
+		//}
 
-		delete tmpMilestone;
+		//delete tmpMilestone;
 
 		_newHAArrived = true;
 	}
@@ -201,22 +203,49 @@ void HybridAutomatonManager::_reflect()
 void HybridAutomatonManager::_compute(const double& t)
 {
 
-	if( _newHAArrived || _activeMotionBehavior->hasConverged())
+	if( _newHAArrived )
 	{
-		if(_navigationFunction.size() < 1)
-			_activeMotionBehavior = _defaultMotionBehavior;
-		else
-		{
-			_activeMotionBehavior = _navigationFunction.front();
-			_navigationFunction.erase(_navigationFunction.begin());
-		}
-
+		Milestone* tmpMilestone = _plan.getStartNode();
+		_activeMotionBehavior = _plan.outgoingEdges(*tmpMilestone)[0];
 		_newHAArrived = false;
 		_activeMotionBehavior->activate();
 	}
+	else if(_activeMotionBehavior->hasConverged() ){
+		if(_plan.getEdgeNumber() > 0){
+			std::cout << "Switching controller" << std::endl;
+			_activeMotionBehavior = _plan.outgoingEdges(*(_activeMotionBehavior->getChild()))[0];
+			::std::cout << _activeMotionBehavior->toStringXML() << ::std::endl;
+		}else{
+			std::cout << ".";
+			_activeMotionBehavior = _defaultMotionBehavior;
+		}
+		_activeMotionBehavior->activate();
+	}
+
+	///////////////////////////////////////////////////////////////////////////////////////////////
+	//NOTE (Roberto): The old version creates a vector of MBs, the _navigationFunction, when a new plan is received
+	//We then iterate over this vector.
+	//It is much more flexible if we extract the next MB to execute directly from the HS
+	//NOTE2: We take simply the first outgoing MB from the reached MS, but we could decide between several outgoing edges if they exist
+	/*if( _newHAArrived 	|| _activeMotionBehavior->hasConverged())
+	{
+		if(_navigationFunction.size() < 1)
+		{
+			std::cout << "Using default controller" << std::endl;
+			_activeMotionBehavior = _defaultMotionBehavior;
+		}
+		else
+		{
+			std::cout << "Switching controlller" << std::endl;
+			_activeMotionBehavior = _navigationFunction.front();
+			_navigationFunction.erase(_navigationFunction.begin());
+			::std::cout << _activeMotionBehavior->toStringXML() << ::std::endl;
+		}		
+		_newHAArrived = false;
+		_activeMotionBehavior->activate();
+	}*/
 	
-	_torque = _activeMotionBehavior->update(t);
-	
+	_torque = _activeMotionBehavior->update(t);	
 }
 
 
