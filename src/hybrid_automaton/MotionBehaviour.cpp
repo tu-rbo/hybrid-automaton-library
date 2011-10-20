@@ -13,6 +13,7 @@ Edge<Milestone>(NULL, NULL, -1)
 , robot_(NULL)
 , time_(-1)
 , dT_(-1)
+, time_to_converge_(-1)
 {
 }
 
@@ -21,6 +22,7 @@ Edge<Milestone>(dad, son, weight)
 , robot_(robot)
 , time_(0)
 , dT_(dt)
+, time_to_converge_(-1)
 {
 	if(robot_)
 	{
@@ -36,11 +38,14 @@ Edge<Milestone>(dad, son, weight)
 
 MotionBehaviour::MotionBehaviour(TiXmlElement* motion_behaviour_xml, const Milestone * dad, const Milestone * son, rxSystem* robot):
 Edge(dad, son),
-robot_(robot)
+robot_(robot),
+time_to_converge_(0)
 {
 	XMLDeserializer xml_deserializer_(motion_behaviour_xml);
 	this->weight = xml_deserializer_.deserializeDouble("Weight");
-	this->time_ = xml_deserializer_.deserializeDouble("Time");
+	//NOTE (Roberto): We ignore this value. The executing time of a new MotionBehaviour should be always 0.
+	//this->time_ = xml_deserializer_.deserializeDouble("Time");
+	this->time_ = 0;
 	this->dT_ = xml_deserializer_.deserializeDouble("dT");
 
 	std::string control_set_type = xml_deserializer_.deserializeString("ControlSetType");
@@ -72,8 +77,10 @@ MotionBehaviour::MotionBehaviour(const MotionBehaviour & motion_behaviour_copy) 
 Edge(motion_behaviour_copy),
 robot_(motion_behaviour_copy.robot_),
 time_(motion_behaviour_copy.time_),
-dT_(motion_behaviour_copy.dT_)
+dT_(motion_behaviour_copy.dT_),
+time_to_converge_(motion_behaviour_copy.time_to_converge_)
 {
+	// NOTE (Roberto): Should we avoid copying the value of time_? We are creating a new MB, maybe time_ should be 0
 	if(motion_behaviour_copy.control_set_)
 	{
 		this->control_set_ = new rxControlSet((*motion_behaviour_copy.control_set_));
@@ -131,25 +138,37 @@ void MotionBehaviour::addController_(TiXmlElement * rxController_xml)
 		invL2sqr_vector.expand(1,invL2sqr_value);
 	}
 
-	int motion_behaviour_num_via_points = xml_deserializer_.deserializeInteger("num_of_viaPoints");
-
+	double ctrl_total_time = 0.0;
 	std::vector<ViaPointBase*> via_points_ptr;
-	for(TiXmlElement* via_point_xml = rxController_xml->FirstChildElement("ViaPoint"); via_point_xml; via_point_xml = via_point_xml->NextSiblingElement())
-	{
-		XMLDeserializer xml_via_point_deserializer_(via_point_xml);
-		ViaPointBase* via_point_ptr = xml_via_point_deserializer_.deserializeViaPoint(type_of_controller, controller_dimension);
-		via_points_ptr.push_back(via_point_ptr);
+	int ctrl_num_via_points = xml_deserializer_.deserializeInteger("num_of_viaPoints");
+	if(ctrl_num_via_points){
+		std::cout << "WARNING [MotionBehaviour::addController_(TiXmlElement * rxController_xml)]: The xml string of the controller contains a via point, but they are not allowed. The via point will be ignored." << std::endl;	
 	}
+	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	//for(TiXmlElement* via_point_xml = rxController_xml->FirstChildElement("ViaPoint"); via_point_xml; via_point_xml = via_point_xml->NextSiblingElement())
+	//{
+	//	XMLDeserializer xml_via_point_deserializer_(via_point_xml);
+	//	ViaPointBase* via_point_ptr = xml_via_point_deserializer_.deserializeViaPoint(type_of_controller, controller_dimension);
+	//	ctrl_total_time += via_point_ptr->time_;
+	//	via_points_ptr.push_back(via_point_ptr);
+	//}
 
 	// Create the Controller
 	rxController* controller = NULL;
+	// HACK (Roberto): The total time to complete the motion between both nodes must be bigger than the sum of the 
+	// partial timings between via points. BUT, HOW MUCH BIGGER?
+	ctrl_total_time += 3;	//5 seconds to complete the motion!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+	if(time_to_converge_ < ctrl_total_time)
+		time_to_converge_ = ctrl_total_time;
 	switch(type_of_controller.first)
 	{
 	case JOINT_SPACE_GROUP:
 		controller = this->createJointController_(type_of_controller.second, controller_duration, via_points_ptr);
+		dynamic_cast<rxJointController*>(controller)->addPoint(child->getConfiguration(), time_to_converge_);
 		break;
 	case DISPLACEMENT_GROUP:
 		controller = this->createDisplacementController_(type_of_controller.second, controller_duration, via_points_ptr, rxController_xml);
+		dynamic_cast<rxDisplacementController*>(controller)->addPoint(child->getConfiguration(), time_to_converge_);
 		break;
 	case ORIENTATION_GROUP:
 		controller = this->createOrientationController_(type_of_controller.second, controller_duration, via_points_ptr, rxController_xml);
@@ -220,15 +239,23 @@ bool MotionBehaviour::hasConverged()
 {
 	dVector error(this->control_set_->e()) ;
 
-	for(int i = 0; i < error.size(); ++i)
+	//NOTE (Roberto) : How could we check if it has converged? There is no way to check automatically all the controllers through the control set.
+	//We wait until the time to converge is exceeded and then we check if the error is small.
+	if(time_ > time_to_converge_)
 	{
-		//HACK (George) : This is because I couldn't get the error between the current position and the desired position at the END of the trajectory
-		if (::std::abs(error[i]) > 0.01 || time_ < 2.0)
+		for(int i = 0; i < error.size(); ++i)
 		{
-			return false;
+			//HACK (George) : This is because I couldn't get the error between the current position and the desired position at the END of the trajectory
+			if (::std::abs(error[i]) > 0.01 )
+			{
+				std::cout << "Error in " << i << " is to large = " << ::std::abs(error[i]) << std::endl;
+				return false;
+			}
 		}
+		std::cout << "CONVERGED!!!" << std::endl<< std::endl<< std::endl;
+		return true;
 	}
-	return true;
+	return false;
 }
 
 dVector MotionBehaviour::update(double t)

@@ -53,6 +53,11 @@ bool Milestone::operator !=(const Milestone & n) const
 	return !(this->status_ == n.getStatus());
 }
 
+dVector Milestone::getConfiguration() const
+{
+	return dVector();
+}
+
 //bool Milestone::operator== (const Node& n) const {
 //	return false;
 //}

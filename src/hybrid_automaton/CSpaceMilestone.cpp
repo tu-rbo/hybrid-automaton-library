@@ -184,9 +184,20 @@ void CSpaceMilestone::setMotionBehaviour(MotionBehaviour * motion_behaviour)
 	}
 }
 
-std::vector<double> CSpaceMilestone::getConfiguration() const
+std::vector<double> CSpaceMilestone::getConfigurationSTDVector() const
 {
 	return this->configuration_;	
+}
+
+dVector CSpaceMilestone::getConfiguration() const
+{
+	dVector ret_value(dofs_);
+	ret_value.all(0);
+	for(int i = 0; i<dofs_; i++)
+	{
+		ret_value[i] = configuration_[i];
+	}
+	return ret_value;
 }
 
 int CSpaceMilestone::getObjectId() const
@@ -291,7 +302,7 @@ CSpaceMilestone* CSpaceMilestone::clone() const
 
 bool CSpaceMilestone::operator ==(const CSpaceMilestone & n) const
 {
-	return (this->configuration_ == n.getConfiguration() 
+	return (this->configuration_ == n.getConfigurationSTDVector() 
 		&& this->dofs_==n.getDofs() && this->handle_points_ == n.handle_points_ 
 		&& this->object_id_ == n.getObjectId());
 }
@@ -300,7 +311,7 @@ bool CSpaceMilestone::operator ==(const Milestone & n) const
 {
 	const CSpaceMilestone* n_cspace = dynamic_cast<const CSpaceMilestone*>(&n);
 	if(n_cspace)
-		return (this->configuration_ == n_cspace->getConfiguration() 
+		return (this->configuration_ == n_cspace->getConfigurationSTDVector() 
 		&& this->dofs_==n_cspace->getDofs() && this->handle_points_ == n_cspace->handle_points_ 
 		&& this->object_id_ == n_cspace->getObjectId());
 	else

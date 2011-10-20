@@ -37,61 +37,53 @@ typedef enum{
 
 typedef std::pair<ControllerGroup, ControllerSubgroup> ControllerType;
 
-struct ViaPointBase {};
-
-struct ViaPointdVector : ViaPointBase{
-	double					time_;
+struct ViaPointBase {
+double					time_;
 	int						type_;
 	bool					reuse_;
+};
+
+struct ViaPointdVector : ViaPointBase{
 	dVector					point_;
 
-	ViaPointdVector(double time, int type, bool reuse, dVector point) :
-	time_(time),
-		type_(type),
-		reuse_(reuse)
+	ViaPointdVector(double time, int type, bool reuse, dVector point)
 	{
+				time_ = time;
+		type_ = type;
+		reuse_ = reuse;
 		point_ = point;
 	};
 };
 
 struct ViaPointVector3D : ViaPointBase{
-	double					time_;
-	int						type_;
-	bool					reuse_;
 	Vector3D				point_;
-	ViaPointVector3D(double time, int type, bool reuse, Vector3D point) :
-	time_(time),
-		type_(type),
-		reuse_(reuse)
+	ViaPointVector3D(double time, int type, bool reuse, Vector3D point) 
 	{
+		time_ = time;
+		type_ = type;
+		reuse_ = reuse;
 		point_ = point;
 	};
 };
 
 struct ViaPointRotation : ViaPointBase{
-	double					time_;
-	int						type_;
-	bool					reuse_;
 	Rotation				point_;
-	ViaPointRotation(double time, int type, bool reuse, Rotation point) :
-	time_(time),
-		type_(type),
-		reuse_(reuse)
+	ViaPointRotation(double time, int type, bool reuse, Rotation point)
 	{
+				time_ = time;
+		type_ = type;
+		reuse_ = reuse;
 		point_ = point;
 	};
 };
 
 struct ViaPointHTransform : ViaPointBase{
-	double					time_;
-	int						type_;
-	bool					reuse_;
 	HTransform				point_;
-	ViaPointHTransform(double time, int type, bool reuse, HTransform point) :
-	time_(time),
-		type_(type),
-		reuse_(reuse)
+	ViaPointHTransform(double time, int type, bool reuse, HTransform point)
 	{
+		time_ = time;
+		type_ = type;
+		reuse_ = reuse;
 		point_ = point;
 	};
 };
@@ -268,9 +260,11 @@ private:
 
 	rxControlSet*									control_set_;		// Stores the set of rxController's defining this MotionBehaviour
 	rxSystem*										robot_;	
-	double											time_;				// Counts the time that the MotionBehaviour is active (for convergence check including time)
+	double											time_;				// Execution time. Counts the time that the MotionBehaviour is active 
+																		// (for convergence check including time)
 	double											dT_;				// Control interval
 	static std::map<std::string, ControllerType>	controller_map_;	// Translation between class name (string) of the controllers and their type
+	double											time_to_converge_;	// Maximum time that the MotionBehaviour can be executing
 };
 
 #endif

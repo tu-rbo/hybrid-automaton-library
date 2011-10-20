@@ -82,7 +82,7 @@ ViaPointBase * XMLDeserializer::deserializeViaPoint(ControllerType type_of_contr
 		while(getline(via_point_ss, value_str, ',')){
 			via_point_dVector.expand(1,atof(value_str.c_str()));
 		}
-		// NOTE: This older version works when the values are separated with white spaces instead of commas
+		// NOTE (Roberto): This older version works when the values are separated with white spaces instead of commas
 		//for(int i=0; i<controller_dimension; i++)
 		//{
 		//	via_point_ss >> via_point_value;

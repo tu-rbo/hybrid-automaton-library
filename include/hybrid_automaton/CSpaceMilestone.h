@@ -52,7 +52,7 @@ public:
 
 	void setMotionBehaviour(MotionBehaviour * motion_behaviour);
 
-	std::vector<double> getConfiguration() const;
+	std::vector<double> getConfigurationSTDVector() const;
 
 	int getObjectId() const;
 
@@ -77,6 +77,8 @@ public:
 	virtual bool operator !=(const Milestone & n) const ;
 
 	virtual CSpaceMilestone& operator=(const CSpaceMilestone & cmilestone_assignment);
+
+	virtual dVector getConfiguration() const;
 
 protected:
 

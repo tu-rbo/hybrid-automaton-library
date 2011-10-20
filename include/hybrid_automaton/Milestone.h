@@ -13,6 +13,7 @@
 #include "node.h"
 #include <iostream>
 #include "tinyxml.h"
+#include "rxControlSDK\rxControlSDK.h"
 
 class Milestone : public Node 
 {
@@ -42,6 +43,8 @@ public:
 	virtual bool operator ==(const Milestone & n) const;
 
 	virtual bool operator !=(const Milestone & n) const;
+
+	virtual dVector getConfiguration() const;
 
 private:
 
