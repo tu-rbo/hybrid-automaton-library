@@ -8,6 +8,16 @@
 
 #include "msgs\String.h"
 
+#include <process.h>
+
+unsigned __stdcall deparsePlan(void *udata)
+{
+	DeparsingStructure* dep_struct = static_cast<DeparsingStructure*>(udata);
+	(dep_struct->_ha)->fromStringXML(dep_struct->_string, dep_struct->_robot);
+	(*(dep_struct->_finished)) = true;
+	return 0;
+}
+
 std::vector<double> convert(const dVector& in)
 {
 	std::vector<double> out(in.size());
@@ -25,6 +35,8 @@ HybridAutomatonManager::HybridAutomatonManager(rDC rdc)
 , _dof()
 , _HS()
 , _newHAArrived(false)
+, _servo_on(false)
+, _plan(NULL)
 {
 }
 
@@ -69,7 +81,7 @@ void HybridAutomatonManager::init(int mode)
 	_robotDevice = findDevice(_T("ROBOT"));
 	RASSERT(_robotDevice != INVALID_RHANDLE);
 
-	_blackboard = RTBlackBoard::getInstance("130.149.238.179", 1888, "130.149.238.184", 1999);
+	_blackboard = RTBlackBoard::getInstance("130.149.238.180", 1888, "130.149.238.185", 1999);
 
 	_defaultMotionBehavior = new MotionBehaviour(new Milestone(), new Milestone(),_robot);
 	_activeMotionBehavior = _defaultMotionBehavior;
@@ -97,13 +109,22 @@ void HybridAutomatonManager::updateHybridAutomaton()
 {
 	if (_blackboard->isUpdated("update_hybrid_automaton"))
 	{
+
 		rlab::String* s = dynamic_cast<rlab::String*>(_blackboard->getData("update_hybrid_automaton"));
 		_HS = s->get();
+
 		//::std::cout << _HS << ::std::endl;
 		try
 		{
-			_plan.fromStringXML(_HS,_robot);
-			//::std::cout << _plan.toStringXML() << ::std::endl;
+			
+			_dep_struct._robot = _robot;
+			_dep_struct._string = _HS;
+			_dep_struct._finished = &_newHAArrived;
+			HybridAutomaton* ha_new = new HybridAutomaton();
+			_dep_struct._ha = ha_new;
+			_beginthreadex(NULL, 0, deparsePlan, (void*)&_dep_struct, 0, NULL);
+			//_plan->fromStringXML(_HS,_robot);
+			//::std::cout << _plan->toStringXML() << ::std::endl;
 		}
 		catch(::std::string e)
 		{
@@ -111,21 +132,21 @@ void HybridAutomatonManager::updateHybridAutomaton()
 		}
 
 		//_navigationFunction.clear();
-		_activeMotionBehavior = NULL;
+		//_activeMotionBehavior = NULL;
 
-		//Milestone* tmpMilestone = _plan.getStartNode();
+		//Milestone* tmpMilestone = _plan->getStartNode();
 	
-		//for( int i = 1; i < _plan.getNodeNumber(); ++i)
+		//for( int i = 1; i < _plan->getNodeNumber(); ++i)
 		//{
-		//	_navigationFunction.push_back(_plan.outgoingEdges(*tmpMilestone)[0]);
-		//	//::std::cout << _plan.outgoingEdges(*tmpMilestone)[0]->toStringXML() << ::std::endl;
+		//	_navigationFunction.push_back(_plan->outgoingEdges(*tmpMilestone)[0]);
+		//	//::std::cout << _plan->outgoingEdges(*tmpMilestone)[0]->toStringXML() << ::std::endl;
 		//	//::std::cout << _navigationFunction[0]->toStringXML() << ::std::endl;
 		//	tmpMilestone = _navigationFunction.back()->getChild();
 		//}
 
 		//delete tmpMilestone;
 
-		_newHAArrived = true;
+		//_newHAArrived = true;
 	}
 }
 
@@ -173,10 +194,17 @@ void HybridAutomatonManager::_readDevices()
 
 void HybridAutomatonManager::_writeDevices()
 {
+
 	double* torque = new double[_dof];
 
 	for(int i = 0; i < _dof; ++i)
-		torque[i] = _torque[i];
+	{
+		if(_servo_on){
+			torque[i] = _torque[i];
+		}else{
+			torque[i] =0;
+		}
+	}
 
 	int written = writeDeviceValue(_robotDevice, torque, _dof * sizeof(double));
 	RASSERT(written > 0);
@@ -201,21 +229,28 @@ void HybridAutomatonManager::_compute(const double& t)
 
 	if( _newHAArrived )
 	{
-		Milestone* tmpMilestone = _plan.getStartNode();
-		_activeMotionBehavior = _plan.outgoingEdges(*tmpMilestone)[0];
+		delete _plan;
+		_plan = _dep_struct._ha;
+		std::cout << "First controller" << std::endl;
+		Milestone* tmpMilestone = _plan->getStartNode();
+		_activeMotionBehavior = _plan->outgoingEdges(*tmpMilestone)[0];
+		//::std::cout << _activeMotionBehavior->toStringXML() << ::std::endl;
 		_newHAArrived = false;
 		_activeMotionBehavior->activate();
 	}
 	else if(_activeMotionBehavior->hasConverged() ){
-		if(_plan.getEdgeNumber() > 0){
+		MotionBehaviour* next_controller;
+		if(_plan){
 			std::cout << "Switching controller" << std::endl;
-			_activeMotionBehavior = _plan.outgoingEdges(*(_activeMotionBehavior->getChild()))[0];
-			::std::cout << _activeMotionBehavior->toStringXML() << ::std::endl;
+			 next_controller= _plan->outgoingEdges(*(_activeMotionBehavior->getChild()))[0];
+			//::std::cout << next_controller->toStringXML() << ::std::endl;
 		}else{
-			std::cout << ".";
-			_activeMotionBehavior = _defaultMotionBehavior;
+			//std::cout << ".";
+			next_controller = _defaultMotionBehavior;
 		}
-		_activeMotionBehavior->activate();
+		_activeMotionBehavior->deactivate();
+		next_controller->activate();		
+		_activeMotionBehavior = next_controller;
 	}
 
 	///////////////////////////////////////////////////////////////////////////////////////////////
@@ -269,6 +304,13 @@ int HybridAutomatonManager::command(const short& cmd, const int& arg)
 
 		}
 		break;
+
+	case SERVO_ON:
+		{
+			_servo_on = true;
+		}
+		break;
+
 	default:
 		break;
 	}

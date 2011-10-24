@@ -48,7 +48,7 @@ struct ViaPointdVector : ViaPointBase{
 
 	ViaPointdVector(double time, int type, bool reuse, dVector point)
 	{
-				time_ = time;
+		time_ = time;
 		type_ = type;
 		reuse_ = reuse;
 		point_ = point;

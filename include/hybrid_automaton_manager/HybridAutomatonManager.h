@@ -17,6 +17,14 @@
 #include "Milestone.h"
 #include "HybridAutomaton.h"
 
+
+typedef struct DeparsingStructure{
+	std::string _string;
+	rxSystem* _robot;
+	volatile bool * _finished;
+	HybridAutomaton * _ha;
+};
+
 class REXPORT HybridAutomatonManager : public rControlAlgorithm
 {
 public:
@@ -47,7 +55,7 @@ private:
 
 private:
 
-	HybridAutomaton						_plan;
+	HybridAutomaton	*					_plan;
 
 	std::string							_HS;
 
@@ -87,7 +95,11 @@ private:
 
 	::std::vector< MotionBehaviour* >   _navigationFunction;
 
-	bool								_newHAArrived;
+	volatile bool						_newHAArrived;
+
+	bool								_servo_on;
+
+	DeparsingStructure					_dep_struct;
 
 };
 #endif
