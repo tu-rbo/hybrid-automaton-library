@@ -84,8 +84,6 @@ time_to_converge_(motion_behaviour_copy.time_to_converge_)
 	if(motion_behaviour_copy.control_set_)
 	{
 		this->control_set_ = new rxControlSet((*motion_behaviour_copy.control_set_));
-		this->control_set_->setGravity(0,0,-GRAV_ACC);
-		//this->control_set_->setInverseDynamicsAlgorithm(new rxAMBSGravCompensation(motion_behaviour_copy.robot_));
 	}
 	else
 	{
@@ -141,9 +139,9 @@ void MotionBehaviour::addController_(TiXmlElement * rxController_xml)
 	double ctrl_total_time = 0.0;
 	std::vector<ViaPointBase*> via_points_ptr;
 	int ctrl_num_via_points = xml_deserializer_.deserializeInteger("num_of_viaPoints");
-	if(ctrl_num_via_points){
-		std::cout << "WARNING [MotionBehaviour::addController_(TiXmlElement * rxController_xml)]: The xml string of the controller contains a via point, but they are not allowed. The via point will be ignored." << std::endl;	
-	}
+	//if(ctrl_num_via_points){
+	//	std::cout << "WARNING [MotionBehaviour::addController_(TiXmlElement * rxController_xml)]: The xml string of the controller contains a via point, but they are not allowed. The via point will be ignored." << std::endl;	
+	//}
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	//for(TiXmlElement* via_point_xml = rxController_xml->FirstChildElement("ViaPoint"); via_point_xml; via_point_xml = via_point_xml->NextSiblingElement())
 	//{
@@ -157,14 +155,14 @@ void MotionBehaviour::addController_(TiXmlElement * rxController_xml)
 	rxController* controller = NULL;
 	// HACK (Roberto): The total time to complete the motion between both nodes must be bigger than the sum of the 
 	// partial timings between via points. BUT, HOW MUCH BIGGER?
-	ctrl_total_time += 3;	//5 seconds to complete the motion!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-	if(time_to_converge_ < ctrl_total_time)
-		time_to_converge_ = ctrl_total_time;
+	//ctrl_total_time += 1;	//1 seconds to complete the motion!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+	//if(time_to_converge_ < ctrl_total_time)
+	time_to_converge_ = 10;
 	switch(type_of_controller.first)
 	{
 	case JOINT_SPACE_GROUP:
 		controller = this->createJointController_(type_of_controller.second, controller_duration, via_points_ptr);
-		dynamic_cast<rxJointController*>(controller)->addPoint(child->getConfiguration(), time_to_converge_);
+		dynamic_cast<rxJointController*>(controller)->addPoint(child->getConfiguration(), 10, true);
 		break;
 	case DISPLACEMENT_GROUP:
 		controller = this->createDisplacementController_(type_of_controller.second, controller_duration, via_points_ptr, rxController_xml);
@@ -218,10 +216,16 @@ void MotionBehaviour::activate()
 		{
 			if(*controllers_it)
 			{
+				//ControllerType type_of_controller = controller_map_[(*controllers_it)->type()];
 				if(!((*controllers_it)->activated()))
 				{
+					//(*controllers_it)->_reset();
 					(*controllers_it)->activate();
 				}
+				/*else{
+					(*controllers_it)->deactivate();
+					(*controllers_it)->activate();
+				}*/
 			}
 		}
 	}
@@ -248,11 +252,11 @@ bool MotionBehaviour::hasConverged()
 			//HACK (George) : This is because I couldn't get the error between the current position and the desired position at the END of the trajectory
 			if (::std::abs(error[i]) > 0.01 )
 			{
-				std::cout << "Error in " << i << " is to large = " << ::std::abs(error[i]) << std::endl;
+				//std::cout << "Error in " << i << " is to large = " << ::std::abs(error[i]) << std::endl;
 				return false;
 			}
 		}
-		std::cout << "CONVERGED!!!" << std::endl<< std::endl<< std::endl;
+		//std::cout << "CONVERGED!!!" << std::endl<< std::endl<< std::endl;
 		return true;
 	}
 	return false;
