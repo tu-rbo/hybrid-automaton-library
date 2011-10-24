@@ -1,6 +1,11 @@
 #include "HybridAutomaton.h"
 #include "MilestoneFactory.h"
 
+#include <Windows.h>
+
+#include <ctime>
+#include <iostream>
+
 HybridAutomaton::HybridAutomaton() :
 start_node_id_(NULL)
 {
@@ -157,6 +162,19 @@ void HybridAutomaton::fromStringXML(std::string xmlString, rxSystem* robot)
 			if(edge_number_xml<0)
 				throw std::string("ERROR [HybridAutomaton::fromStringXML]: To many edges");
 	}
+	//SYSTEMTIME systemTime3;
+	//	GetSystemTime(&systemTime3);
+	//	FILETIME fileTime3;
+	//	SystemTimeToFileTime(&systemTime3, &fileTime3);
+	//	ULARGE_INTEGER uli3;
+	//	uli3.LowPart = fileTime3.dwLowDateTime;
+	//	uli3.HighPart = fileTime3.dwHighDateTime;
+	//	ULONGLONG systemTimeIn_ms3(uli3.QuadPart/10000);
+
+		//std::cout << "Time consumed milestones: " << systemTimeIn_ms2 - systemTimeIn_ms1 << std::endl;
+		//std::cout << "Time consumed edges: " << systemTimeIn_ms3 - systemTimeIn_ms2 << std::endl;
+		//std::cout << "Time consumed total: " << systemTimeIn_ms3 - systemTimeIn_ms1 << std::endl;
+
 }
 
 ostream& operator<<(ostream & out, const HybridAutomaton & hybrid_system){

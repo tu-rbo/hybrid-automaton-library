@@ -12,5 +12,6 @@
 #define EXECUTE_PLAN	(RCMD_USER + 2)
 #define PAUSE			(RCMD_USER + 3)
 #define RESUME			(RCMD_USER + 4)
+#define SERVO_ON		(RCMD_USER + 5)
 
 #endif
