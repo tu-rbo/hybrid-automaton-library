@@ -73,7 +73,7 @@ ViaPointBase * XMLDeserializer::deserializeViaPoint(ControllerType type_of_contr
 	bool via_point_reuse_bool = this->deserializeBoolean("reuse");
 	switch( type_of_controller.first )
 	{
-	case JOINT_SPACE_GROUP:	
+	case JOINT_SPACE_CONTROLLER:	
 		{
 		std::stringstream via_point_ss = std::stringstream(this->deserializeString("dVector"));
 		double via_point_value = -1.0;
@@ -91,7 +91,7 @@ ViaPointBase * XMLDeserializer::deserializeViaPoint(ControllerType type_of_contr
 		return_value = new ViaPointdVector(via_point_time, via_point_type, via_point_reuse_bool, via_point_dVector);
 		break;
 		}
-	case DISPLACEMENT_GROUP:
+	case DISPLACEMENT_CONTROLLER:	
 		{
 		std::stringstream via_point_ss = std::stringstream(this->deserializeString("Vector3D"));
 		double via_point_value = -1.0;
@@ -104,7 +104,7 @@ ViaPointBase * XMLDeserializer::deserializeViaPoint(ControllerType type_of_contr
 		return_value = new ViaPointVector3D(via_point_time, via_point_type, via_point_reuse_bool, via_point_Vector3D);
 		break;
 		}
-	case ORIENTATION_GROUP:
+	case ORIENTATION_CONTROLLER:	
 		{
 		std::stringstream via_point_ss = std::stringstream(this->deserializeString("R"));
 		double via_point_value = -1.0;
@@ -118,7 +118,7 @@ ViaPointBase * XMLDeserializer::deserializeViaPoint(ControllerType type_of_contr
 		return_value = new ViaPointRotation(via_point_time, via_point_type, via_point_reuse_bool, via_point_Rotation);
 		break;
 		}
-	case H_TRANSFORM_GROUP:
+	case H_TRANSFORM_CONTROLLER:	
 		{
 		std::stringstream via_point_ss = std::stringstream(this->deserializeString("R"));
 		double via_point_value = -1.0;

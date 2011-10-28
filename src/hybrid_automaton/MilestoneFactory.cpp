@@ -1,5 +1,6 @@
 #include "MilestoneFactory.h"
 #include "CSpaceMilestone.h"
+#include "OpSpaceMilestone.h"
 #include <iostream>
 #include <string>
 
@@ -18,8 +19,10 @@ Milestone* MilestoneFactory::createMilestone(TiXmlElement* milestone_xml, rxSyst
 
 	if(milestone_type == "CSpaceMilestone"){
 		return_milestone = new CSpaceMilestone(milestone_xml, robot);
+	}else if(milestone_type == "OpSpaceMilestone"){
+		return_milestone = new OpSpaceMilestone(milestone_xml, robot);
 	}else{
-		throw std::string("Wrong time of milestone");
+		throw std::string("Wrong type of milestone");
 	}
 	return return_milestone;
 }

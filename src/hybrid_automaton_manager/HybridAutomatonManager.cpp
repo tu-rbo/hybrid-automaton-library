@@ -1,14 +1,16 @@
 /* RoboticsLab, Copyright 2008-2010 SimLab Co., Ltd. All rights reserved.
- *
- * This library is commercial and cannot be redistributed, and/or modified
- * WITHOUT ANY ALLOWANCE OR PERMISSION OF SimLab Co., LTD.
- */
+*
+* This library is commercial and cannot be redistributed, and/or modified
+* WITHOUT ANY ALLOWANCE OR PERMISSION OF SimLab Co., LTD.
+*/
 #include "HybridAutomatonManager.h"
 #include "HybridAutomatonManagerCmd.h"
 
 #include "msgs\String.h"
 
 #include <process.h>
+
+#define NOT_IN_RT
 
 unsigned __stdcall deparsePlan(void *udata)
 {
@@ -75,7 +77,7 @@ void HybridAutomatonManager::init(int mode)
 	_q.zero();
 	_torque.zero();
 	_qdot.zero();
-	
+
 	//Find the robot device. This devicce is used to read position and write torques
 	//to the robot
 	_robotDevice = findDevice(_T("ROBOT"));
@@ -116,7 +118,7 @@ void HybridAutomatonManager::updateHybridAutomaton()
 		//::std::cout << _HS << ::std::endl;
 		try
 		{
-			
+
 			_dep_struct._robot = _robot;
 			_dep_struct._string = _HS;
 			_dep_struct._finished = &_newHAArrived;
@@ -128,6 +130,7 @@ void HybridAutomatonManager::updateHybridAutomaton()
 		}
 		catch(::std::string e)
 		{
+			std::cout << "Error caught: " << std::endl;
 			::std::cout << e << ::std::endl;
 		}
 
@@ -135,7 +138,7 @@ void HybridAutomatonManager::updateHybridAutomaton()
 		//_activeMotionBehavior = NULL;
 
 		//Milestone* tmpMilestone = _plan->getStartNode();
-	
+
 		//for( int i = 1; i < _plan->getNodeNumber(); ++i)
 		//{
 		//	_navigationFunction.push_back(_plan->outgoingEdges(*tmpMilestone)[0]);
@@ -157,7 +160,7 @@ void HybridAutomatonManager::setNominalSystem(const TCHAR* path, const TCHAR* am
 	this->_aml = aml;
 
 	this->_T0 = T0;
-	
+
 	this->_q0 = q0;
 }
 
@@ -234,7 +237,9 @@ void HybridAutomatonManager::_compute(const double& t)
 		std::cout << "First controller" << std::endl;
 		Milestone* tmpMilestone = _plan->getStartNode();
 		_activeMotionBehavior = _plan->outgoingEdges(*tmpMilestone)[0];
-		//::std::cout << _activeMotionBehavior->toStringXML() << ::std::endl;
+#ifdef NOT_IN_RT
+		::std::cout << _activeMotionBehavior->toStringXML() << ::std::endl;
+#endif
 		_newHAArrived = false;
 		_activeMotionBehavior->activate();
 	}
@@ -242,10 +247,15 @@ void HybridAutomatonManager::_compute(const double& t)
 		MotionBehaviour* next_controller;
 		if(_plan){
 			std::cout << "Switching controller" << std::endl;
-			 next_controller= _plan->outgoingEdges(*(_activeMotionBehavior->getChild()))[0];
-			//::std::cout << next_controller->toStringXML() << ::std::endl;
+			next_controller= _plan->outgoingEdges(*(_activeMotionBehavior->getChild()))[0];
+#ifdef NOT_IN_RT
+			::std::cout << next_controller->toStringXML() << ::std::endl;
+#endif
 		}else{
-			//std::cout << ".";
+#ifdef NOT_IN_RT
+			std::cout << ".";
+#endif
+
 			next_controller = _defaultMotionBehavior;
 		}
 		_activeMotionBehavior->deactivate();
@@ -260,22 +270,22 @@ void HybridAutomatonManager::_compute(const double& t)
 	//NOTE2: We take simply the first outgoing MB from the reached MS, but we could decide between several outgoing edges if they exist
 	/*if( _newHAArrived 	|| _activeMotionBehavior->hasConverged())
 	{
-		if(_navigationFunction.size() < 1)
-		{
-			std::cout << "Using default controller" << std::endl;
-			_activeMotionBehavior = _defaultMotionBehavior;
-		}
-		else
-		{
-			std::cout << "Switching controlller" << std::endl;
-			_activeMotionBehavior = _navigationFunction.front();
-			_navigationFunction.erase(_navigationFunction.begin());
-			::std::cout << _activeMotionBehavior->toStringXML() << ::std::endl;
-		}		
-		_newHAArrived = false;
-		_activeMotionBehavior->activate();
+	if(_navigationFunction.size() < 1)
+	{
+	std::cout << "Using default controller" << std::endl;
+	_activeMotionBehavior = _defaultMotionBehavior;
+	}
+	else
+	{
+	std::cout << "Switching controlller" << std::endl;
+	_activeMotionBehavior = _navigationFunction.front();
+	_navigationFunction.erase(_navigationFunction.begin());
+	::std::cout << _activeMotionBehavior->toStringXML() << ::std::endl;
+	}		
+	_newHAArrived = false;
+	_activeMotionBehavior->activate();
 	}*/
-	
+
 	_torque = _activeMotionBehavior->update(t);	
 }
 
