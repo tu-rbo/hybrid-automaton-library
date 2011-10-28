@@ -4,6 +4,8 @@
 
 #include "XMLDeserializer.h"
 
+#define NOT_IN_RT
+
 using namespace std;
 std::map<std::string, ControllerType> MotionBehaviour::controller_map_ = MotionBehaviour::createControllerMapping_();
 
@@ -29,6 +31,7 @@ Edge<Milestone>(dad, son, weight)
 		control_set_ = new rxControlSet(robot_, dT_);
 		control_set_->setGravity(0,0,-GRAV_ACC);
 		control_set_->setInverseDynamicsAlgorithm(new rxAMBSGravCompensation(this->robot_));
+		control_set_->nullMotionController()->setGain(0.02,0.0,0.01);
 	}
 	else
 	{
@@ -56,6 +59,7 @@ time_to_converge_(0)
 			control_set_ = new rxControlSet(robot, dT_);
 			control_set_->setGravity(0,0,-GRAV_ACC);
 			control_set_->setInverseDynamicsAlgorithm(new rxAMBSGravCompensation(this->robot_));
+			control_set_->nullMotionController()->setGain(0.02,0.0,0.01);
 		}
 		else
 		{
@@ -157,25 +161,54 @@ void MotionBehaviour::addController_(TiXmlElement * rxController_xml)
 	// partial timings between via points. BUT, HOW MUCH BIGGER?
 	//ctrl_total_time += 1;	//1 seconds to complete the motion!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 	//if(time_to_converge_ < ctrl_total_time)
-	time_to_converge_ = 10;
+#ifdef NOT_IN_RT
+	time_to_converge_ = 4;
+#else
+	time_to_converge_ = 15;
+#endif
+
 	switch(type_of_controller.first)
 	{
-	case JOINT_SPACE_GROUP:
-		controller = this->createJointController_(type_of_controller.second, controller_duration, via_points_ptr);
-		dynamic_cast<rxJointController*>(controller)->addPoint(child->getConfiguration(), 10, true);
+	case JOINT_SPACE_CONTROLLER:
+		controller = this->createJointController_(type_of_controller.second, controller_duration, via_points_ptr, rxController_xml);
+		dynamic_cast<rxJointController*>(controller)->addPoint(child->getConfiguration(), time_to_converge_, true);
 		break;
-	case DISPLACEMENT_GROUP:
+	case DISPLACEMENT_CONTROLLER:
+		{
 		controller = this->createDisplacementController_(type_of_controller.second, controller_duration, via_points_ptr, rxController_xml);
-		dynamic_cast<rxDisplacementController*>(controller)->addPoint(child->getConfiguration(), time_to_converge_);
+		dVector goal = child->getConfiguration();
+		Vector3D goal_3D(goal[0],goal[1],goal[2]);
+		dynamic_cast<rxDisplacementController*>(controller)->addPoint(goal_3D, time_to_converge_, true);
 		break;
-	case ORIENTATION_GROUP:
+		}
+	case ORIENTATION_CONTROLLER:
+		{
 		controller = this->createOrientationController_(type_of_controller.second, controller_duration, via_points_ptr, rxController_xml);
+		dVector goal = child->getConfiguration();
+		Rotation goal_rot(goal[3], goal[4], goal[5]);		//NOTE: Suposses that the orientation is defined with 
+															// goal[3] = roll
+															// goal[4] = pitch
+															// goal[5] = yaw
+		dynamic_cast<rxOrientationController*>(controller)->addPoint(goal_rot, time_to_converge_, true);
 		break;
-	case H_TRANSFORM_GROUP:
+		}
+	case H_TRANSFORM_CONTROLLER:
+		{
 		controller = this->createHTransformController_(type_of_controller.second, controller_duration, via_points_ptr, rxController_xml);
+		dVector goal = child->getConfiguration();
+		Vector3D goal_3D(goal[0],goal[1],goal[2]);
+		Rotation goal_rot(goal[3], goal[4], goal[5]);		//NOTE: Suposses that the orientation is defined with 
+															// goal[3] = roll
+															// goal[4] = pitch
+															// goal[5] = yaw
+		dynamic_cast<rxHTransformController*>(controller)->addPoint(HTransform(goal_rot, goal_3D), time_to_converge_, true);
 		break;
-	case QUASICOORD_GROUP:
+		}
+	case QUASICOORD_CONTROLLER:
 		controller = this->createQuasiCoordController_(type_of_controller.second, controller_duration);
+		break;
+	case NULL_MOTION_CONTROLLER:
+		controller = this->createNullMotionController_(type_of_controller.second, controller_duration);
 		break;
 	default:
 		throw std::string("ERROR: [MotionBehaviour::addController_(TiXmlElement * rxController_xml)] Unexpected Controller group.");
@@ -223,8 +256,8 @@ void MotionBehaviour::activate()
 					(*controllers_it)->activate();
 				}
 				/*else{
-					(*controllers_it)->deactivate();
-					(*controllers_it)->activate();
+				(*controllers_it)->deactivate();
+				(*controllers_it)->activate();
 				}*/
 			}
 		}
@@ -252,7 +285,9 @@ bool MotionBehaviour::hasConverged()
 			//HACK (George) : This is because I couldn't get the error between the current position and the desired position at the END of the trajectory
 			if (::std::abs(error[i]) > 0.01 )
 			{
-				//std::cout << "Error in " << i << " is to large = " << ::std::abs(error[i]) << std::endl;
+#ifdef NOT_IN_RT
+				std::cout << "Error in " << i << " is to large = " << ::std::abs(error[i]) << std::endl;
+#endif
 				return false;
 			}
 		}
@@ -310,7 +345,9 @@ void MotionBehaviour::toElementXML(TiXmlElement* motion_behaviour_xml) const
 
 void MotionBehaviour::RLabInfoString2ElementXML_(string_type string_data, TiXmlElement* out_xml_element) const
 {
-
+#ifdef NOT_IN_RT
+	std::wcout << string_data.c_str() << std::endl;
+#endif
 	std::wstringstream data_ss(string_data);
 	string_type temp_st;
 	std::getline(data_ss, temp_st);	
@@ -384,19 +421,19 @@ void MotionBehaviour::RLabInfoString2ElementXML_(string_type string_data, TiXmlE
 		via_point_xml->SetAttribute("reuse", wstring2string_(temp_st.substr(temp_st.find(L"=") + 1, temp_st.find(L"\n"))).c_str());
 
 		switch( type_of_controller.first ){
-	case JOINT_SPACE_GROUP:
+	case JOINT_SPACE_CONTROLLER:
 		std::getline(data_ss, temp_st);	
 		via_point_xml->SetAttribute("dVector", wstring2string_(temp_st.substr(temp_st.find(L"=") + 1, temp_st.find(L"\n"))).c_str());
 		break;
-	case DISPLACEMENT_GROUP:
+	case DISPLACEMENT_CONTROLLER:
 		std::getline(data_ss, temp_st);	
 		via_point_xml->SetAttribute("Vector3D", wstring2string_(temp_st.substr(temp_st.find(L"=") + 1, temp_st.find(L"\n"))).c_str());
 		break;
-	case ORIENTATION_GROUP:
+	case ORIENTATION_CONTROLLER:
 		std::getline(data_ss, temp_st);	
 		via_point_xml->SetAttribute("R", wstring2string_(temp_st.substr(temp_st.find(L"=") + 1, temp_st.find(L"\n"))).c_str());
 		break;
-	case H_TRANSFORM_GROUP:
+	case H_TRANSFORM_CONTROLLER:
 		std::getline(data_ss, temp_st);	
 		via_point_xml->SetAttribute("R", wstring2string_(temp_st.substr(temp_st.find(L"=") + 1, temp_st.find(L"\n"))).c_str());
 		std::getline(data_ss, temp_st);	
@@ -409,7 +446,7 @@ void MotionBehaviour::RLabInfoString2ElementXML_(string_type string_data, TiXmlE
 
 	switch(type_of_controller.first)
 	{
-	case DISPLACEMENT_GROUP:
+	case DISPLACEMENT_CONTROLLER:
 		std::getline(data_ss, temp_st);	
 		out_xml_element->SetAttribute("alpha", colon2space_( wstring2string_( temp_st.substr( temp_st.find(L"=") + 1, temp_st.find(L"\n") ) ) ).c_str() );
 
@@ -422,7 +459,7 @@ void MotionBehaviour::RLabInfoString2ElementXML_(string_type string_data, TiXmlE
 		std::getline(data_ss, temp_st);	
 		out_xml_element->SetAttribute("betaDisplacement",colon2space_( wstring2string_(temp_st.substr(temp_st.find(L"=") + 1, temp_st.find(L"\n")))).c_str() );
 		break;
-	case ORIENTATION_GROUP:
+	case ORIENTATION_CONTROLLER:
 		std::getline(data_ss, temp_st);	
 		out_xml_element->SetAttribute("alpha", colon2space_(wstring2string_(temp_st.substr(temp_st.find(L"=") + 1, temp_st.find(L"\n")))).c_str() );
 
@@ -435,7 +472,7 @@ void MotionBehaviour::RLabInfoString2ElementXML_(string_type string_data, TiXmlE
 		std::getline(data_ss, temp_st);	
 		out_xml_element->SetAttribute("betaRotation", colon2space_(wstring2string_(temp_st.substr(temp_st.find(L"=") + 1, temp_st.find(L"\n")))).c_str() );
 		break;
-	case H_TRANSFORM_GROUP:
+	case H_TRANSFORM_CONTROLLER:
 		std::getline(data_ss, temp_st);	
 		out_xml_element->SetAttribute("alpha", colon2space_(wstring2string_(temp_st.substr(temp_st.find(L"=") + 1, temp_st.find(L"\n")))).c_str() );
 
@@ -457,6 +494,24 @@ void MotionBehaviour::RLabInfoString2ElementXML_(string_type string_data, TiXmlE
 		break;
 	default:
 		break;
+	}
+
+	if(type_of_controller.second & WITH_COMPLIANCE)
+	{
+		std::string stiffness_b;
+		std::string stiffness_k;
+		for(int i = 0; i<dimension_int; i++)
+		{
+			stiffness_b += std::string("15");
+			stiffness_k += std::string("100");
+			if(i!=dimension_int -1)
+			{
+				stiffness_b += std::string(" ");
+				stiffness_k += std::string(" ");
+			}
+		}
+		out_xml_element->SetAttribute("stiffness_b", stiffness_b.c_str() );
+		out_xml_element->SetAttribute("stiffness_k", stiffness_k.c_str() );
 	}
 }
 
@@ -493,55 +548,56 @@ MotionBehaviour& MotionBehaviour::operator=(const MotionBehaviour & motion_behav
 std::map<std::string, ControllerType> MotionBehaviour::createControllerMapping_()
 {
 	std::map<std::string, ControllerType> mapping;
-	mapping[std::string("rxJointController")]							= ControllerType(JOINT_SPACE_GROUP, STANDARD_CONTROLLER);
-	mapping[std::string("rxJointComplianceController")]					= ControllerType(JOINT_SPACE_GROUP, COMPLIANCE_CONTROLLER);
-	mapping[std::string("rxJointImpedanceController")]					= ControllerType(JOINT_SPACE_GROUP, IMPEDANCE_CONTROLLER);
-	mapping[std::string("rxInterpolatedJointController")]				= ControllerType(JOINT_SPACE_GROUP, INTERPOLATED_CONTROLLER);
-	mapping[std::string("rxInterpolatedJointComplianceController")]		= ControllerType(JOINT_SPACE_GROUP, INTERPOLATED_COMPLIANCE_CONTROLLER);
-	mapping[std::string("rxInterpolatedJointImpedanceController")]		= ControllerType(JOINT_SPACE_GROUP, INTERPOLATED_IMPEDANCE_CONTROLLER);
+	mapping[std::string("rxJointController")]							= ControllerType(JOINT_SPACE_CONTROLLER, 0);
+	mapping[std::string("rxJointComplianceController")]					= ControllerType(JOINT_SPACE_CONTROLLER, WITH_COMPLIANCE);
+	mapping[std::string("rxJointImpedanceController")]					= ControllerType(JOINT_SPACE_CONTROLLER, WITH_IMPEDANCE);
+	mapping[std::string("rxInterpolatedJointController")]				= ControllerType(JOINT_SPACE_CONTROLLER, WITH_INTERPOLATION);
+	mapping[std::string("rxInterpolatedJointComplianceController")]		= ControllerType(JOINT_SPACE_CONTROLLER, WITH_INTERPOLATION + WITH_COMPLIANCE);
+	mapping[std::string("rxInterpolatedJointImpedanceController")]		= ControllerType(JOINT_SPACE_CONTROLLER, WITH_INTERPOLATION + WITH_IMPEDANCE);
 
-	mapping[std::string("rxFunctionController")]						= ControllerType(FUNCTION_GROUP, STANDARD_CONTROLLER);
-	mapping[std::string("rxFunctionComplianceController")]				= ControllerType(FUNCTION_GROUP, COMPLIANCE_CONTROLLER);
-	mapping[std::string("rxFunctionImpedanceController")]				= ControllerType(FUNCTION_GROUP, IMPEDANCE_CONTROLLER);
-	mapping[std::string("rxInterpolatedFunctionController")]			= ControllerType(FUNCTION_GROUP, INTERPOLATED_CONTROLLER);
-	mapping[std::string("rxInterpolatedFunctionComplianceController")]	= ControllerType(FUNCTION_GROUP, INTERPOLATED_COMPLIANCE_CONTROLLER);
-	mapping[std::string("rxInterpolatedFunctionImpedanceController")]	= ControllerType(FUNCTION_GROUP, INTERPOLATED_IMPEDANCE_CONTROLLER);
+	mapping[std::string("rxFunctionController")]						= ControllerType(FUNCTION_CONTROLLER, 0);
+	mapping[std::string("rxFunctionComplianceController")]				= ControllerType(FUNCTION_CONTROLLER, WITH_COMPLIANCE);
+	mapping[std::string("rxFunctionImpedanceController")]				= ControllerType(FUNCTION_CONTROLLER, WITH_IMPEDANCE);
+	mapping[std::string("rxInterpolatedFunctionController")]			= ControllerType(FUNCTION_CONTROLLER, WITH_INTERPOLATION);
+	mapping[std::string("rxInterpolatedFunctionComplianceController")]	= ControllerType(FUNCTION_CONTROLLER, WITH_INTERPOLATION + WITH_COMPLIANCE);
+	mapping[std::string("rxInterpolatedFunctionImpedanceController")]	= ControllerType(FUNCTION_CONTROLLER, WITH_INTERPOLATION + WITH_IMPEDANCE);
 
-	mapping[std::string("rxDisplacementFunctionController")]			= ControllerType(DISPLACEMENT_GROUP, FUNCTION_CONTROLLER);
-	mapping[std::string("rxDisplacementFunctionComplianceController")]	= ControllerType(DISPLACEMENT_GROUP, FUNCTION_COMPLIANCE_CONTROLLER);
-	mapping[std::string("rxDisplacementFunctionImpedanceController")]	= ControllerType(DISPLACEMENT_GROUP, FUNCTION_IMPEDANCE_CONTROLLER);
-	mapping[std::string("rxDisplacementController")]					= ControllerType(DISPLACEMENT_GROUP, STANDARD_CONTROLLER);
-	mapping[std::string("rxDisplacementComplianceController")]			= ControllerType(DISPLACEMENT_GROUP, COMPLIANCE_CONTROLLER);
-	mapping[std::string("rxDisplacementImpedanceController")]			= ControllerType(DISPLACEMENT_GROUP, IMPEDANCE_CONTROLLER);
-	mapping[std::string("rxInterpolatedDisplacementController")]		= ControllerType(DISPLACEMENT_GROUP, INTERPOLATED_CONTROLLER);
-	mapping[std::string("rxInterpolatedDisplacementComplianceController")] = ControllerType(DISPLACEMENT_GROUP, INTERPOLATED_COMPLIANCE_CONTROLLER);
-	mapping[std::string("rxInterpolatedDisplacementImpedanceController")] = ControllerType(DISPLACEMENT_GROUP, INTERPOLATED_IMPEDANCE_CONTROLLER);
+	mapping[std::string("rxDisplacementFunctionController")]			= ControllerType(DISPLACEMENT_CONTROLLER, WITH_FUNCTION);
+	mapping[std::string("rxDisplacementFunctionComplianceController")]	= ControllerType(DISPLACEMENT_CONTROLLER, WITH_FUNCTION + WITH_COMPLIANCE);
+	mapping[std::string("rxDisplacementFunctionImpedanceController")]	= ControllerType(DISPLACEMENT_CONTROLLER, WITH_FUNCTION + WITH_IMPEDANCE);
+	mapping[std::string("rxDisplacementController")]					= ControllerType(DISPLACEMENT_CONTROLLER, 0);
+	mapping[std::string("rxDisplacementComplianceController")]			= ControllerType(DISPLACEMENT_CONTROLLER, WITH_COMPLIANCE);
+	mapping[std::string("rxDisplacementImpedanceController")]			= ControllerType(DISPLACEMENT_CONTROLLER, WITH_IMPEDANCE);
+	mapping[std::string("rxInterpolatedDisplacementController")]		= ControllerType(DISPLACEMENT_CONTROLLER, WITH_INTERPOLATION);
+	mapping[std::string("rxInterpolatedDisplacementComplianceController")] = ControllerType(DISPLACEMENT_CONTROLLER, WITH_INTERPOLATION + WITH_COMPLIANCE);
+	mapping[std::string("rxInterpolatedDisplacementImpedanceController")] = ControllerType(DISPLACEMENT_CONTROLLER, WITH_INTERPOLATION + WITH_IMPEDANCE);
 
-	mapping[std::string("rxOrientationFunctionController")]				= ControllerType(ORIENTATION_GROUP, FUNCTION_CONTROLLER);
-	mapping[std::string("rxOrientationFunctionComplianceController")]	= ControllerType(ORIENTATION_GROUP, FUNCTION_COMPLIANCE_CONTROLLER);
-	mapping[std::string("rxOrientationFunctionImpedanceController")]	= ControllerType(ORIENTATION_GROUP, FUNCTION_IMPEDANCE_CONTROLLER);
-	mapping[std::string("rxOrientationController")]						= ControllerType(ORIENTATION_GROUP, STANDARD_CONTROLLER);
-	mapping[std::string("rxOrientationComplianceController")]			= ControllerType(ORIENTATION_GROUP, COMPLIANCE_CONTROLLER);
-	mapping[std::string("rxOrientationImpedanceController")]			= ControllerType(ORIENTATION_GROUP, IMPEDANCE_CONTROLLER);
-	mapping[std::string("rxInterpolatedOrientationController")]			= ControllerType(ORIENTATION_GROUP, INTERPOLATED_CONTROLLER);
-	mapping[std::string("rxInterpolatedOrientationComplianceController")] = ControllerType(ORIENTATION_GROUP, INTERPOLATED_COMPLIANCE_CONTROLLER);
-	mapping[std::string("rxInterpolatedOrientationImpedanceController")] = ControllerType(ORIENTATION_GROUP, INTERPOLATED_IMPEDANCE_CONTROLLER);
+	mapping[std::string("rxOrientationFunctionController")]				= ControllerType(ORIENTATION_CONTROLLER, WITH_FUNCTION);
+	mapping[std::string("rxOrientationFunctionComplianceController")]	= ControllerType(ORIENTATION_CONTROLLER, WITH_FUNCTION + WITH_COMPLIANCE);
+	mapping[std::string("rxOrientationFunctionImpedanceController")]	= ControllerType(ORIENTATION_CONTROLLER, WITH_FUNCTION + WITH_IMPEDANCE);
+	mapping[std::string("rxOrientationController")]						= ControllerType(ORIENTATION_CONTROLLER, 0);
+	mapping[std::string("rxOrientationComplianceController")]			= ControllerType(ORIENTATION_CONTROLLER, WITH_COMPLIANCE);
+	mapping[std::string("rxOrientationImpedanceController")]			= ControllerType(ORIENTATION_CONTROLLER, WITH_IMPEDANCE);
+	mapping[std::string("rxInterpolatedOrientationController")]			= ControllerType(ORIENTATION_CONTROLLER, WITH_INTERPOLATION);
+	mapping[std::string("rxInterpolatedOrientationComplianceController")] = ControllerType(ORIENTATION_CONTROLLER, WITH_INTERPOLATION + WITH_COMPLIANCE);
+	mapping[std::string("rxInterpolatedOrientationImpedanceController")] = ControllerType(ORIENTATION_CONTROLLER, WITH_INTERPOLATION + WITH_IMPEDANCE);
 
-	mapping[std::string("rxHTransformFunctionController")]				= ControllerType(H_TRANSFORM_GROUP, FUNCTION_CONTROLLER);
-	mapping[std::string("rxHTransformFunctionComplianceController")]	= ControllerType(H_TRANSFORM_GROUP, FUNCTION_COMPLIANCE_CONTROLLER);
-	mapping[std::string("rxHTransformFunctionImpedanceController")]		= ControllerType(H_TRANSFORM_GROUP, FUNCTION_IMPEDANCE_CONTROLLER);
-	mapping[std::string("rxHTransformController")]						= ControllerType(H_TRANSFORM_GROUP, STANDARD_CONTROLLER);
-	mapping[std::string("rxHTransformComplianceController")]			= ControllerType(H_TRANSFORM_GROUP, COMPLIANCE_CONTROLLER);
-	mapping[std::string("rxHTransformImpedanceController")]				= ControllerType(H_TRANSFORM_GROUP, IMPEDANCE_CONTROLLER);
-	mapping[std::string("rxInterpolatedHTransformController")]			= ControllerType(H_TRANSFORM_GROUP, INTERPOLATED_CONTROLLER);
-	mapping[std::string("rxInterpolatedHTransformComplianceController")] = ControllerType(H_TRANSFORM_GROUP, INTERPOLATED_COMPLIANCE_CONTROLLER);
-	mapping[std::string("rxInterpolatedHTransformImpedanceController")] = ControllerType(H_TRANSFORM_GROUP, INTERPOLATED_IMPEDANCE_CONTROLLER);
+	mapping[std::string("rxHTransformFunctionController")]				= ControllerType(H_TRANSFORM_CONTROLLER, WITH_FUNCTION);
+	mapping[std::string("rxHTransformFunctionComplianceController")]	= ControllerType(H_TRANSFORM_CONTROLLER, WITH_FUNCTION + WITH_COMPLIANCE);
+	mapping[std::string("rxHTransformFunctionImpedanceController")]		= ControllerType(H_TRANSFORM_CONTROLLER, WITH_FUNCTION + WITH_IMPEDANCE);
+	mapping[std::string("rxHTransformController")]						= ControllerType(H_TRANSFORM_CONTROLLER, 0);
+	mapping[std::string("rxHTransformComplianceController")]			= ControllerType(H_TRANSFORM_CONTROLLER, WITH_COMPLIANCE);
+	mapping[std::string("rxHTransformImpedanceController")]				= ControllerType(H_TRANSFORM_CONTROLLER, WITH_IMPEDANCE);
+	mapping[std::string("rxInterpolatedHTransformController")]			= ControllerType(H_TRANSFORM_CONTROLLER, WITH_INTERPOLATION);
+	mapping[std::string("rxInterpolatedHTransformComplianceController")] = ControllerType(H_TRANSFORM_CONTROLLER, WITH_INTERPOLATION + WITH_COMPLIANCE);
+	mapping[std::string("rxInterpolatedHTransformImpedanceController")] = ControllerType(H_TRANSFORM_CONTROLLER, WITH_INTERPOLATION + WITH_IMPEDANCE);
 
-	mapping[std::string("rxQuasiCoordController")]						= ControllerType(QUASICOORD_GROUP, STANDARD_CONTROLLER);
-	mapping[std::string("rxQuasiCoordComplianceController")]			= ControllerType(QUASICOORD_GROUP, COMPLIANCE_CONTROLLER);
-	mapping[std::string("rxNullMotionController")]						= ControllerType(QUASICOORD_GROUP, NULL_MOTION_CONTROLLER);
-	mapping[std::string("rxNullMotionComplianceController")]			= ControllerType(QUASICOORD_GROUP, NULL_MOTION_COMPLIANCE_CONTROLLER);
-	mapping[std::string("rxGradientNullMotionController")]				= ControllerType(QUASICOORD_GROUP, GRADIENT_NULL_MOTION_CONTROLLER);
+	mapping[std::string("rxQuasiCoordController")]						= ControllerType(QUASICOORD_CONTROLLER, 0);
+	mapping[std::string("rxQuasiCoordComplianceController")]			= ControllerType(QUASICOORD_CONTROLLER, WITH_COMPLIANCE);
+
+	mapping[std::string("rxNullMotionController")]						= ControllerType(NULL_MOTION_CONTROLLER, 0);
+	mapping[std::string("rxNullMotionComplianceController")]			= ControllerType(NULL_MOTION_CONTROLLER, WITH_COMPLIANCE);
+	mapping[std::string("rxGradientNullMotionController")]				= ControllerType(NULL_MOTION_CONTROLLER, WITH_GRADIENT);
 
 	return mapping;
 }
@@ -570,27 +626,31 @@ std::string MotionBehaviour::colon2space_(std::string text) const
 	return text;
 }
 
-rxController* MotionBehaviour::createJointController_(ControllerSubgroup joint_subgroup, double controller_duration, std::vector<ViaPointBase*> via_points_ptr) const
+rxController* MotionBehaviour::createJointController_(int joint_subgroup, double controller_duration, std::vector<ViaPointBase*> via_points_ptr, TiXmlElement* rxController_xml) const
 {
 	rxController* controller = NULL;
 	switch(joint_subgroup)
 	{
-	case STANDARD_CONTROLLER:
+	case 0:
 		controller = new rxJointController(this->robot_,controller_duration);
 		break;
-	case COMPLIANCE_CONTROLLER:
-		controller = new rxJointComplianceController(this->robot_,controller_duration);				
+	case WITH_COMPLIANCE:
+		{
+		controller = new rxJointComplianceController(this->robot_,controller_duration);	
 		break;
-	case IMPEDANCE_CONTROLLER:
+		}
+	case WITH_IMPEDANCE:
 		controller = new rxJointImpedanceController(this->robot_,controller_duration);
 		break;
-	case INTERPOLATED_CONTROLLER:
+	case WITH_INTERPOLATION:
 		controller = new rxInterpolatedJointController(this->robot_,controller_duration);
 		break;
-	case INTERPOLATED_COMPLIANCE_CONTROLLER:
+	case WITH_INTERPOLATION + WITH_COMPLIANCE:
+		{
 		controller = new rxInterpolatedJointComplianceController(this->robot_,controller_duration);
 		break;
-	case INTERPOLATED_IMPEDANCE_CONTROLLER:
+		}
+	case WITH_INTERPOLATION + WITH_IMPEDANCE:
 		controller = new rxInterpolatedJointImpedanceController(this->robot_,controller_duration);
 		break;
 	default:
@@ -602,10 +662,31 @@ rxController* MotionBehaviour::createJointController_(ControllerSubgroup joint_s
 		ViaPointdVector* vpdv_ptr = (ViaPointdVector*)((*vp_it));
 		dynamic_cast<rxJointController*>(controller)->addPoint(vpdv_ptr->point_, vpdv_ptr->time_, vpdv_ptr->reuse_, (eInterpolatorType)(vpdv_ptr->type_));
 	}
+
+	if(joint_subgroup & WITH_COMPLIANCE)
+	{
+		XMLDeserializer xml_deserializer_(rxController_xml);
+		std::stringstream stiffness_b_ss = std::stringstream(xml_deserializer_.deserializeString("stiffness_b"));
+		std::stringstream stiffness_k_ss = std::stringstream(xml_deserializer_.deserializeString("stiffness_k"));
+		double stiffness_b_value = -1.0;
+		double stiffness_k_value = -1.0;
+		dVector stiffness_b_displacement;
+		dVector stiffness_k_displacement;
+		while ((stiffness_b_ss >> stiffness_b_value))
+		{
+			stiffness_b_displacement.expand(1,stiffness_b_value);
+		}
+		while ((stiffness_k_ss >> stiffness_k_value))
+		{
+			stiffness_k_displacement.expand(1,stiffness_k_value);
+		}
+		dynamic_cast<rxJointComplianceController*>(controller)->setStiffness(stiffness_b_displacement, stiffness_k_displacement);
+	}
+
 	return controller;
 }
 
-rxController* MotionBehaviour::createDisplacementController_(ControllerSubgroup displacement_subgroup, double controller_duration, std::vector<ViaPointBase*> via_points_ptr, TiXmlElement* rxController_xml) const
+rxController* MotionBehaviour::createDisplacementController_(int displacement_subgroup, double controller_duration, std::vector<ViaPointBase*> via_points_ptr, TiXmlElement* rxController_xml) const
 {
 	rxBody*   alpha = NULL;
 	rxBody*   beta = NULL;
@@ -618,7 +699,6 @@ rxController* MotionBehaviour::createDisplacementController_(ControllerSubgroup 
 	dVector alpha_displacement;
 	while ((alpha_ss >> alpha_value))
 	{
-
 		alpha_displacement.expand(1,alpha_value);
 	}
 
@@ -634,22 +714,26 @@ rxController* MotionBehaviour::createDisplacementController_(ControllerSubgroup 
 
 	switch(displacement_subgroup)
 	{
-	case STANDARD_CONTROLLER:
+	case 0:
 		controller = new rxDisplacementController(this->robot_, beta, Displacement(beta_displacement), alpha, Displacement(alpha_displacement), controller_duration);
 		break;
-	case COMPLIANCE_CONTROLLER:
+	case WITH_COMPLIANCE:
+		{
 		controller = new rxDisplacementComplianceController(this->robot_, beta, Displacement(beta_displacement), alpha, Displacement(alpha_displacement), controller_duration );
 		break;
-	case IMPEDANCE_CONTROLLER:
+		}
+	case WITH_IMPEDANCE:
 		controller = new rxDisplacementImpedanceController(this->robot_, beta, Displacement(beta_displacement), alpha, Displacement(alpha_displacement), controller_duration );
 		break;
-	case INTERPOLATED_CONTROLLER:
+	case WITH_INTERPOLATION:
 		controller = new rxInterpolatedDisplacementController(this->robot_, beta, Displacement(beta_displacement), alpha, Displacement(alpha_displacement), controller_duration );
 		break;
-	case INTERPOLATED_COMPLIANCE_CONTROLLER:
+	case WITH_INTERPOLATION + WITH_COMPLIANCE:
+		{
 		controller = new rxInterpolatedDisplacementComplianceController(this->robot_, beta, Displacement(beta_displacement), alpha, Displacement(alpha_displacement), controller_duration );
 		break;
-	case INTERPOLATED_IMPEDANCE_CONTROLLER:
+		}
+	case WITH_INTERPOLATION + WITH_IMPEDANCE:
 		controller = new rxInterpolatedDisplacementImpedanceController(this->robot_, beta, Displacement(beta_displacement), alpha, Displacement(alpha_displacement), controller_duration );
 		break;
 	default:
@@ -661,10 +745,30 @@ rxController* MotionBehaviour::createDisplacementController_(ControllerSubgroup 
 		ViaPointVector3D* vpdv_ptr = (ViaPointVector3D*)((*vp_it));
 		dynamic_cast<rxDisplacementController*>(controller)->addPoint(vpdv_ptr->point_, vpdv_ptr->time_, vpdv_ptr->reuse_, (eInterpolatorType)(vpdv_ptr->type_));
 	}
+
+	if(displacement_subgroup & WITH_COMPLIANCE)
+	{
+		XMLDeserializer xml_deserializer_(rxController_xml);
+		std::stringstream stiffness_b_ss = std::stringstream(xml_deserializer_.deserializeString("stiffness_b"));
+		std::stringstream stiffness_k_ss = std::stringstream(xml_deserializer_.deserializeString("stiffness_k"));
+		double stiffness_b_value = -1.0;
+		double stiffness_k_value = -1.0;
+		dVector stiffness_b_displacement;
+		dVector stiffness_k_displacement;
+		while ((stiffness_b_ss >> stiffness_b_value))
+		{
+			stiffness_b_displacement.expand(1,stiffness_b_value);
+		}
+		while ((stiffness_k_ss >> stiffness_k_value))
+		{
+			stiffness_k_displacement.expand(1,stiffness_k_value);
+		}
+		dynamic_cast<rxDisplacementComplianceController*>(controller)->setStiffness(stiffness_b_displacement, stiffness_k_displacement);
+	}
 	return controller;
 }
 
-rxController* MotionBehaviour::createOrientationController_(ControllerSubgroup orientation_subgroup, double controller_duration, std::vector<ViaPointBase*> via_points_ptr, TiXmlElement* rxController_xml) const
+rxController* MotionBehaviour::createOrientationController_(int orientation_subgroup, double controller_duration, std::vector<ViaPointBase*> via_points_ptr, TiXmlElement* rxController_xml) const
 {
 	rxBody*   alpha = NULL;
 	rxBody*   beta = NULL;
@@ -691,22 +795,26 @@ rxController* MotionBehaviour::createOrientationController_(ControllerSubgroup o
 
 	switch(orientation_subgroup)
 	{
-	case STANDARD_CONTROLLER:
+	case 0:
 		controller = new rxOrientationController(this->robot_, beta, Rotation(beta_rotation), alpha, Rotation(alpha_rotation), controller_duration );
 		break;
-	case COMPLIANCE_CONTROLLER:
+	case WITH_COMPLIANCE:
+		{
 		controller = new rxOrientationComplianceController(this->robot_, beta, Rotation(beta_rotation), alpha, Rotation(alpha_rotation), controller_duration );
 		break;
-	case IMPEDANCE_CONTROLLER:
+		}
+	case WITH_IMPEDANCE:
 		controller = new rxOrientationImpedanceController(this->robot_, beta, Rotation(beta_rotation), alpha, Rotation(alpha_rotation), controller_duration );
 		break;
-	case INTERPOLATED_CONTROLLER:
+	case WITH_INTERPOLATION:
 		controller = new rxInterpolatedOrientationController(this->robot_, beta, Rotation(beta_rotation), alpha, Rotation(alpha_rotation), controller_duration );
 		break;
-	case INTERPOLATED_COMPLIANCE_CONTROLLER:
+	case WITH_INTERPOLATION + WITH_COMPLIANCE:
+		{
 		controller = new rxInterpolatedOrientationComplianceController(this->robot_, beta, Rotation(beta_rotation), alpha, Rotation(alpha_rotation), controller_duration );
 		break;
-	case INTERPOLATED_IMPEDANCE_CONTROLLER:
+		}
+	case WITH_INTERPOLATION + WITH_IMPEDANCE:
 		controller = new rxInterpolatedOrientationImpedanceController(this->robot_, beta, Rotation(beta_rotation), alpha, Rotation(alpha_rotation), controller_duration );
 		break;
 	default:
@@ -718,10 +826,29 @@ rxController* MotionBehaviour::createOrientationController_(ControllerSubgroup o
 		ViaPointRotation* vpdv_ptr = (ViaPointRotation*)((*vp_it));
 		dynamic_cast<rxOrientationController*>(controller)->addPoint(vpdv_ptr->point_, vpdv_ptr->time_, vpdv_ptr->reuse_, (eInterpolatorType)(vpdv_ptr->type_));
 	}
+	if(orientation_subgroup & WITH_COMPLIANCE)
+	{
+		XMLDeserializer xml_deserializer_(rxController_xml);
+		std::stringstream stiffness_b_ss = std::stringstream(xml_deserializer_.deserializeString("stiffness_b"));
+		std::stringstream stiffness_k_ss = std::stringstream(xml_deserializer_.deserializeString("stiffness_k"));
+		double stiffness_b_value = -1.0;
+		double stiffness_k_value = -1.0;
+		dVector stiffness_b_displacement;
+		dVector stiffness_k_displacement;
+		while ((stiffness_b_ss >> stiffness_b_value))
+		{
+			stiffness_b_displacement.expand(1,stiffness_b_value);
+		}
+		while ((stiffness_k_ss >> stiffness_k_value))
+		{
+			stiffness_k_displacement.expand(1,stiffness_k_value);
+		}
+		dynamic_cast<rxOrientationComplianceController*>(controller)->setStiffness(stiffness_b_displacement, stiffness_k_displacement);
+	}
 	return controller;
 }
 
-rxController* MotionBehaviour::createHTransformController_(ControllerSubgroup htransform_subgroup, double controller_duration, std::vector<ViaPointBase*> via_points_ptr, TiXmlElement* rxController_xml) const
+rxController* MotionBehaviour::createHTransformController_(int htransform_subgroup, double controller_duration, std::vector<ViaPointBase*> via_points_ptr, TiXmlElement* rxController_xml) const
 {
 	rxBody*   alpha = NULL;
 	rxBody*   beta = NULL;
@@ -761,22 +888,22 @@ rxController* MotionBehaviour::createHTransformController_(ControllerSubgroup ht
 
 	switch(htransform_subgroup)
 	{
-	case STANDARD_CONTROLLER:
+	case 0:
 		controller = new rxHTransformController(this->robot_, beta, HTransform(beta_rotation, beta_displacement), alpha, HTransform(alpha_rotation, alpha_displacement), controller_duration );
 		break;
-	case COMPLIANCE_CONTROLLER:
+	case WITH_COMPLIANCE:
 		controller = new rxHTransformComplianceController(this->robot_, beta, HTransform(beta_rotation, beta_displacement), alpha, HTransform(alpha_rotation, alpha_displacement), controller_duration );
 		break;
-	case IMPEDANCE_CONTROLLER:
+	case WITH_IMPEDANCE:
 		controller = new rxHTransformImpedanceController(this->robot_, beta, HTransform(beta_rotation, beta_displacement), alpha, HTransform(alpha_rotation, alpha_displacement), controller_duration );
 		break;
-	case INTERPOLATED_CONTROLLER:
+	case WITH_INTERPOLATION:
 		controller = new rxInterpolatedHTransformController(this->robot_, beta, HTransform(beta_rotation, beta_displacement), alpha, HTransform(alpha_rotation, alpha_displacement), controller_duration );
 		break;
-	case INTERPOLATED_COMPLIANCE_CONTROLLER:
+	case WITH_INTERPOLATION + WITH_COMPLIANCE:
 		controller = new rxInterpolatedHTransformComplianceController(this->robot_, beta, HTransform(beta_rotation, beta_displacement), alpha, HTransform(alpha_rotation, alpha_displacement), controller_duration );
 		break;
-	case INTERPOLATED_IMPEDANCE_CONTROLLER:
+	case WITH_INTERPOLATION + WITH_IMPEDANCE:
 		controller = new rxInterpolatedHTransformImpedanceController(this->robot_, beta, HTransform(beta_rotation, beta_displacement), alpha, HTransform(alpha_rotation, alpha_displacement), controller_duration );
 		break;
 	default:
@@ -788,22 +915,63 @@ rxController* MotionBehaviour::createHTransformController_(ControllerSubgroup ht
 		ViaPointHTransform* vpdv_ptr = (ViaPointHTransform*)((*vp_it));
 		dynamic_cast<rxHTransformController*>(controller)->addPoint(vpdv_ptr->point_, vpdv_ptr->time_, vpdv_ptr->reuse_, (eInterpolatorType)(vpdv_ptr->type_));
 	}
+
+	if(htransform_subgroup & WITH_COMPLIANCE)
+	{
+		XMLDeserializer xml_deserializer_(rxController_xml);
+		std::stringstream stiffness_b_ss = std::stringstream(xml_deserializer_.deserializeString("stiffness_b"));
+		std::stringstream stiffness_k_ss = std::stringstream(xml_deserializer_.deserializeString("stiffness_k"));
+		double stiffness_b_value = -1.0;
+		double stiffness_k_value = -1.0;
+		dVector stiffness_b_displacement;
+		dVector stiffness_k_displacement;
+		while ((stiffness_b_ss >> stiffness_b_value))
+		{
+			stiffness_b_displacement.expand(1,stiffness_b_value);
+		}
+		while ((stiffness_k_ss >> stiffness_k_value))
+		{
+			stiffness_k_displacement.expand(1,stiffness_k_value);
+		}
+		dynamic_cast<rxHTransformComplianceController*>(controller)->setStiffness(stiffness_b_displacement, stiffness_k_displacement);
+	}
 	return controller;
 }
 
-rxController* MotionBehaviour::createQuasiCoordController_(ControllerSubgroup quasi_coord_subgroup, double controller_duration) const
+rxController* MotionBehaviour::createQuasiCoordController_(int quasi_coord_subgroup, double controller_duration) const
 {
 	rxController* controller = NULL;
 	switch(quasi_coord_subgroup)
 	{
-	case NULL_MOTION_CONTROLLER:
-		controller = new rxNullMotionController(this->robot_,controller_duration);
+	case 0:
+	//	controller = new rxQuasiCoordController(this->robot_, , controller_duration);
 		break;
-	case NULL_MOTION_COMPLIANCE_CONTROLLER:
-		controller = new rxNullMotionComplianceController(this->robot_,controller_duration);
+	case WITH_COMPLIANCE:
+	//	controller = new rxQuasiCoordComplianceController(this->robot_, ,controller_duration);
 		break;
 	default:
 		throw std::string("ERROR: [MotionBehaviour::createQuasiCoordController_(ControllerSubgroup quasi_coord_subgroup, double controller_duration)] Unexpected Controller subgroup.");
+		break;
+	}
+	return controller;
+}
+
+rxController* MotionBehaviour::createNullMotionController_(int null_motion_subgroup, double controller_duration) const
+{
+	rxController* controller = NULL;
+	switch(null_motion_subgroup)
+	{
+	case 0:
+		controller = new rxNullMotionController(this->robot_, controller_duration);
+		break;
+	case WITH_COMPLIANCE:
+		controller = new rxNullMotionComplianceController(this->robot_,  controller_duration);
+		break;
+	case	WITH_GRADIENT:
+	//	controller = new rxGradientNullMotionController(this->robot_, controller_duration);
+		break;
+	default:
+		throw std::string("ERROR: [MotionBehaviour::createNullMotionController_(ControllerSubgroup null_motion_subgroup, double controller_duration)] Unexpected Controller subgroup.");
 		break;
 	}
 	return controller;
