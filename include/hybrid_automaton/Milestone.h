@@ -15,6 +15,33 @@
 #include "tinyxml.h"
 #include "rxControlSDK\rxControlSDK.h"
 
+
+typedef struct Point
+{
+	double x;
+	double y;
+	double z;
+
+	Point(double X, double Y, double Z)
+	{
+		x = X;
+		y = Y;
+		z = Z;
+	}
+
+	bool operator ==(const Point & p) const 
+	{
+		return (this->x==p.x && this->y==p.y && this->z==p.z );
+	}
+
+	bool operator ==(const Point & p) 
+	{
+		return (this->x==p.x && this->y==p.y && this->z==p.z );
+	}
+
+
+}point;
+
 class Milestone : public Node 
 {
 
