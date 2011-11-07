@@ -5,7 +5,6 @@
 
 #include "tinyxml.h"
 #include "XMLDeserializer.h"
-#include "MilestoneFactory.h"
 
 using namespace std;
 
