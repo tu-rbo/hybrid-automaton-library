@@ -1,5 +1,8 @@
 #include "HybridAutomaton.h"
-#include "MilestoneFactory.h"
+//#include "MilestoneFactory.h"
+
+#include "CSpaceMilestone.h"
+#include "OpSpaceMilestone.h"
 
 #include <Windows.h>
 
@@ -49,20 +52,17 @@ std::string HybridAutomaton::toStringXML() const{
 	name_counter++;
 
 	hyb->SetAttribute("Name", name_complete.c_str());
-	hyb->SetAttribute("NumberNodes", nodeNumber);
-	hyb->SetAttribute("NumberEdges", edgeNumber);
 
 	if(start_node_id_ < 0)
 		throw std::string("ERROR [std::string HybridAutomaton::toStringXML()] Start node is non-valid.");
 
-	hyb->SetAttribute("StartNode", this->getInternalNodeId(start_node_id_));
+	hyb->SetAttribute("InitialMilestone", start_node_id_->getName().c_str());
 
 	// Add the data of the nodes-milestones
 	for(unsigned int i = 0; i<nodeNumber ; i++){
 		if(nodeList.at(i)!=NULL){
-			TiXmlElement * node = new TiXmlElement("Node");
-			hyb->LinkEndChild(node);
-			(nodeList.at(i))->toElementXML(node);
+			TiXmlElement * mst_element = (nodeList.at(i))->toElementXML();
+			hyb->LinkEndChild(mst_element);			
 		}
 	}
 
@@ -70,13 +70,12 @@ std::string HybridAutomaton::toStringXML() const{
 	for(unsigned int i = 0; i<nodeNumber ; i++){
 		for(unsigned int j = 0; j<nodeNumber ; j++){
 			if( adjacencyMatrix.at(i).at(j) != NULL){
-				TiXmlElement * edge = new TiXmlElement("Edge");
-				hyb->LinkEndChild(edge);
+				TiXmlElement * mb_element = (adjacencyMatrix.at(i).at(j))->toElementXML();
+				hyb->LinkEndChild(mb_element);
 				// Parent and Child indexes cannot be retrieved by the Edge itself, because they are define at the 
 				// HybridAutomaton level. They must be added at this level.
-				edge->SetAttribute("Parent", this->getInternalNodeId((adjacencyMatrix.at(i).at(j))->getParent()));
-				edge->SetAttribute("Child", this->getInternalNodeId((adjacencyMatrix.at(i).at(j))->getChild()));
-				(adjacencyMatrix.at(i).at(j))->toElementXML(edge);
+				mb_element->SetAttribute("Parent", (adjacencyMatrix.at(i).at(j))->getParent()->getName().c_str());
+				mb_element->SetAttribute("Child", (adjacencyMatrix.at(i).at(j))->getChild()->getName().c_str());
 			}
 		}
 	}
@@ -92,75 +91,100 @@ std::string HybridAutomaton::toStringXML() const{
 	return ret_val;
 }
 
-void HybridAutomaton::fromStringXML(std::string xmlString, rxSystem* robot)
+void HybridAutomaton::fromStringXML(std::string xml_string, rxSystem* robot, double dT)
 {
 	// Delete the current values of the HybridAutomaton
 	this->clear();
 
 	// Create the DOM-model
 	TiXmlDocument document;
-	document.Parse(xmlString.c_str());
+	document.Parse(xml_string.c_str());
 	TiXmlHandle docHandle(&document);
 
 	// Find the first (there should be the only one) HybridAutomaton element in the base document
-	TiXmlElement* hsElement =
+	TiXmlElement* hs_element =
 		docHandle.FirstChild("HybridAutomaton").Element();
 
 	// Check if the HybridAutomaton element was found
-	if (hsElement == NULL) {
+	if (hs_element == NULL) {
 		throw std::string("ERROR [HybridAutomaton::fromStringXML]: Child Element \"HybridAutomaton\" not found in XML element docHandle.");
 		return;
 	}
 
-	int node_number_xml=-1, edge_number_xml=-1, start_node_xml = -1;
-	if(!hsElement->Attribute("NumberNodes", &node_number_xml)){
-		std::cout << "WARNING [HybridAutomaton::fromStringXML]: Attribute \"NumberNodes\" not found in XML element hsElement." << std::endl;
-	}
-
-	if(!hsElement->Attribute("NumberEdges", &edge_number_xml)){
-		std::cout << "WARNING [HybridAutomaton::fromStringXML]: Attribute \"NumberEdges\" not found in XML element hsElement." << std::endl;
-	}
-
-	if(!hsElement->Attribute("StartNode", &start_node_xml)){
-		std::cout << "WARNING [HybridAutomaton::fromStringXML]: Attribute \"StartNode\" not found in XML element hsElement." << std::endl;
+	std::string start_node = std::string(hs_element->Attribute("InitialMilestone"));
+	if(start_node == std::string("")){
+		std::cout << "WARNING [HybridAutomaton::fromStringXML]: Attribute \"InitialMilestone\" not found in XML element hsElement." << std::endl;
 	}
 
 	// Print out a message with the general properties of the new HybridAutomaton.
-	std::cout << "Creating hybrid system '" << hsElement->Attribute("Name") << "'. Number of nodes: "<<node_number_xml << ". Number of edges: " << edge_number_xml
-		<< ". Starting Node ID:" << start_node_xml << std::endl;
+	std::cout << "Creating hybrid system '" << hs_element->Attribute("Name") << "'. Initial Milestone:" << start_node << std::endl;
 
-	MilestoneFactory * milestone_factory = new MilestoneFactory();
 	// Read the data of the nodes-milestones and create them
-	for (TiXmlElement* nodeElement = hsElement->FirstChildElement("Node"); nodeElement
-		!= 0; nodeElement = nodeElement->NextSiblingElement("Node")) {
-			Milestone* mst = milestone_factory->createMilestone(nodeElement, robot);
-			this->addNode(mst);
-			node_number_xml--;
-			if(node_number_xml<0)
-				throw std::string("ERROR [HybridAutomaton::fromStringXML]: To many nodes");
+	for (TiXmlElement* mst_element = hs_element->FirstChildElement("Milestone"); mst_element
+		!= 0; mst_element = mst_element->NextSiblingElement("Milestone")) 
+	{
+		Milestone* mst;
+		std::string mst_type = std::string(mst_element->Attribute("type"));
+		if(mst_type == "CSpace"){
+			mst = new CSpaceMilestone(mst_element, robot, dT);
+		}else if(mst_type == "OpSpace"){
+			mst = new OpSpaceMilestone(mst_element, robot, dT);
+		}else{
+			throw std::string("ERROR [HybridAutomaton::fromStringXML]: Wrong type of milestone.");
+		}
+		this->addNode(mst);
 	}
-	delete milestone_factory;
 	// Set the start node-milestone
-	this->start_node_id_ = this->nodeList[start_node_xml];
+	for(int i=0; i<this->nodeList.size(); i++)
+	{
+		if(this->nodeList[i]->getName() == start_node)
+		{
+			this->start_node_id_ = this->nodeList[i];
+			break;
+		}
+		throw std::string("ERROR [HybridAutomaton::fromStringXML]: The name of the initial node does not match with the name of any milestone.");
+	}
 
 	// Read the data of the edges-motionbehaviours and create them
-	for (TiXmlElement* edgeElement = hsElement->FirstChildElement("Edge"); edgeElement
-		!= 0; edgeElement = edgeElement->NextSiblingElement("Edge")) {
-			int parent_node, child_node;
-			if(!edgeElement->Attribute("Parent", &parent_node))
+	for (TiXmlElement* mb_element = hs_element->FirstChildElement("MotionBehaviour"); mb_element
+		!= 0; mb_element = mb_element->NextSiblingElement("MotionBehaviour")) {
+			std::string ms_parent = std::string(mb_element->Attribute("Parent"));
+			std::string ms_child = std::string(mb_element->Attribute("Child"));
+			Milestone* ms_parent_ptr = NULL;
+			Milestone* ms_child_ptr = NULL;
+			if(ms_parent == std::string(""))
 			{
 				throw std::string("ERROR [HybridAutomaton::fromStringXML]: Attribute \"Parent\" not found in XML element edgeElement.");
 			}
-			if(!edgeElement->Attribute("Child", &child_node))
+
+			for(int i=0; i<this->nodeList.size(); i++)
+			{
+				if(this->nodeList[i]->getName() == ms_parent)
+				{
+					ms_parent_ptr = this->nodeList[i];
+					break;
+				}
+			}
+			if(ms_parent_ptr == NULL)
+				throw std::string("ERROR [HybridAutomaton::fromStringXML]: The name of the parent node does not match with the name of any milestone.");
+			
+			if(ms_child == std::string(""))
 			{
 				throw std::string("ERROR [HybridAutomaton::fromStringXML]: Attribute \"Child\" not found in XML element edgeElement.");
 			}
-			MotionBehaviour* motion_behaviour = new MotionBehaviour(edgeElement, nodeList.at(parent_node), nodeList.at(child_node), robot);
-			//MotionBehaviour* mb = createMotionBehaviour(edgeElement, nodeList.at(parent_node), nodeList.at(child_node), robot );
-			this->addEdge(motion_behaviour);
-			edge_number_xml--;
-			if(edge_number_xml<0)
-				throw std::string("ERROR [HybridAutomaton::fromStringXML]: To many edges");
+			for(int i=0; i<this->nodeList.size(); i++)
+			{
+				if(this->nodeList[i]->getName() == ms_child)
+				{
+					ms_child_ptr = this->nodeList[i];
+					break;
+				}
+			}
+			if(ms_child_ptr == NULL)
+				throw std::string("ERROR [HybridAutomaton::fromStringXML]: The name of the child node does not match with the name of any milestone.");
+
+			MotionBehaviour* mb = new MotionBehaviour(mb_element, ms_parent_ptr, ms_child_ptr, robot, dT);
+			this->addEdge(mb);
 	}
 	//SYSTEMTIME systemTime3;
 	//	GetSystemTime(&systemTime3);
@@ -170,11 +194,9 @@ void HybridAutomaton::fromStringXML(std::string xmlString, rxSystem* robot)
 	//	uli3.LowPart = fileTime3.dwLowDateTime;
 	//	uli3.HighPart = fileTime3.dwHighDateTime;
 	//	ULONGLONG systemTimeIn_ms3(uli3.QuadPart/10000);
-
-		//std::cout << "Time consumed milestones: " << systemTimeIn_ms2 - systemTimeIn_ms1 << std::endl;
-		//std::cout << "Time consumed edges: " << systemTimeIn_ms3 - systemTimeIn_ms2 << std::endl;
-		//std::cout << "Time consumed total: " << systemTimeIn_ms3 - systemTimeIn_ms1 << std::endl;
-
+	//std::cout << "Time consumed milestones: " << systemTimeIn_ms2 - systemTimeIn_ms1 << std::endl;
+	//std::cout << "Time consumed edges: " << systemTimeIn_ms3 - systemTimeIn_ms2 << std::endl;
+	//std::cout << "Time consumed total: " << systemTimeIn_ms3 - systemTimeIn_ms1 << std::endl;
 }
 
 ostream& operator<<(ostream & out, const HybridAutomaton & hybrid_system){

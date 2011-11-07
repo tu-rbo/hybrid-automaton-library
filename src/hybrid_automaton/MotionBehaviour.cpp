@@ -39,20 +39,21 @@ Edge<Milestone>(dad, son, weight)
 	}
 }
 
-MotionBehaviour::MotionBehaviour(TiXmlElement* motion_behaviour_xml, const Milestone * dad, const Milestone * son, rxSystem* robot):
+MotionBehaviour::MotionBehaviour(TiXmlElement* motion_behaviour_xml, const Milestone * dad, const Milestone * son, rxSystem* robot, double dt):
 Edge(dad, son),
 robot_(robot),
-time_to_converge_(0)
+time_to_converge_(0),
+dT_(dt)
 {
 	XMLDeserializer xml_deserializer_(motion_behaviour_xml);
-	this->weight = xml_deserializer_.deserializeDouble("Weight");
-	//NOTE (Roberto): We ignore this value. The executing time of a new MotionBehaviour should be always 0.
-	//this->time_ = xml_deserializer_.deserializeDouble("Time");
-	this->time_ = 0;
-	this->dT_ = xml_deserializer_.deserializeDouble("dT");
+	TiXmlElement* control_set_element = motion_behaviour_xml->FirstChildElement("ControlSet");
+	if(control_set_element == NULL)
+	{
+		throw std::string("ERROR: [MotionBehaviour::MotionBehaviour(TiXmlElement* motion_xml, const Milestone * dad, const Milestone * son, rxSystem* robot)] ControlSet element was not found.");
+	}
 
-	std::string control_set_type = xml_deserializer_.deserializeString("ControlSetType");
-	if(control_set_type==std::string("class rxControlSet *"))
+	std::string control_set_type = std::string(control_set_element->Attribute("type"));
+	if(control_set_type==std::string("rxControlSet"))
 	{
 		if(robot_)
 		{
@@ -71,7 +72,7 @@ time_to_converge_(0)
 		throw std::string("ERROR: [MotionBehaviour::MotionBehaviour(TiXmlElement* motion_xml, const Milestone * dad, const Milestone * son, rxSystem* robot)] Unknown type of rxControlSet.");
 	}	
 
-	for(TiXmlElement* rxController_xml = motion_behaviour_xml->FirstChildElement("rxController"); rxController_xml; rxController_xml = rxController_xml->NextSiblingElement())
+	for(TiXmlElement* rxController_xml = control_set_element->FirstChildElement("Controller"); rxController_xml; rxController_xml = rxController_xml->NextSiblingElement())
 	{	
 		this->addController_(rxController_xml);
 	}
@@ -109,12 +110,8 @@ MotionBehaviour::~MotionBehaviour()
 void MotionBehaviour::addController_(TiXmlElement * rxController_xml)
 {
 	XMLDeserializer xml_deserializer_(rxController_xml);
-	std::string controller_class_name = xml_deserializer_.deserializeString("className");
+	std::string controller_class_name = xml_deserializer_.deserializeString("type");
 	ControllerType type_of_controller = controller_map_[controller_class_name];
-	std::string controller_name = xml_deserializer_.deserializeString("name");
-	int controller_dimension = xml_deserializer_.deserializeInteger("dim");
-	double controller_duration = xml_deserializer_.deserializeDouble("dt");
-	bool controller_activated_bool = xml_deserializer_.deserializeBoolean("activated");
 	bool controller_ik_bool = xml_deserializer_.deserializeBoolean("ik");
 	std::stringstream kp_vector_ss = std::stringstream(xml_deserializer_.deserializeString("kp"));
 	std::stringstream kv_vector_ss = std::stringstream(xml_deserializer_.deserializeString("kv"));
@@ -124,36 +121,18 @@ void MotionBehaviour::addController_(TiXmlElement * rxController_xml)
 	dVector kv_vector;
 	dVector invL2sqr_vector;
 	kp_vector.all(-1.0);
-	for(int i =0; i<controller_dimension; i++)
-	{
-		double kp_value = -1.0;
-		double kv_value = -1.0;
-		double invL2sqr_value = -1.0;
-
-		kp_vector_ss >> kp_value;
-		kp_vector.expand(1,kp_value);
-
-		kv_vector_ss >> kv_value;
-		kv_vector.expand(1,kv_value);
-
-		invL2sqr_vector_ss >> invL2sqr_value;
+	double kp_value = -1.0;
+	double kv_value = -1.0;
+	double invL2sqr_value = -1.0;
+	while(kp_vector_ss >> kp_value && kv_vector_ss >> kv_value && invL2sqr_vector_ss >> invL2sqr_value)
+	{	
+		kp_vector.expand(1,kp_value);		
+		kv_vector.expand(1,kv_value);		
 		invL2sqr_vector.expand(1,invL2sqr_value);
 	}
 
 	double ctrl_total_time = 0.0;
 	std::vector<ViaPointBase*> via_points_ptr;
-	int ctrl_num_via_points = xml_deserializer_.deserializeInteger("num_of_viaPoints");
-	//if(ctrl_num_via_points){
-	//	std::cout << "WARNING [MotionBehaviour::addController_(TiXmlElement * rxController_xml)]: The xml string of the controller contains a via point, but they are not allowed. The via point will be ignored." << std::endl;	
-	//}
-	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	//for(TiXmlElement* via_point_xml = rxController_xml->FirstChildElement("ViaPoint"); via_point_xml; via_point_xml = via_point_xml->NextSiblingElement())
-	//{
-	//	XMLDeserializer xml_via_point_deserializer_(via_point_xml);
-	//	ViaPointBase* via_point_ptr = xml_via_point_deserializer_.deserializeViaPoint(type_of_controller, controller_dimension);
-	//	ctrl_total_time += via_point_ptr->time_;
-	//	via_points_ptr.push_back(via_point_ptr);
-	//}
 
 	// Create the Controller
 	rxController* controller = NULL;
@@ -162,7 +141,7 @@ void MotionBehaviour::addController_(TiXmlElement * rxController_xml)
 	//ctrl_total_time += 1;	//1 seconds to complete the motion!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 	//if(time_to_converge_ < ctrl_total_time)
 #ifdef NOT_IN_RT
-	time_to_converge_ = 4;
+	time_to_converge_ = 10;
 #else
 	time_to_converge_ = 15;
 #endif
@@ -170,45 +149,47 @@ void MotionBehaviour::addController_(TiXmlElement * rxController_xml)
 	switch(type_of_controller.first)
 	{
 	case JOINT_SPACE_CONTROLLER:
-		controller = this->createJointController_(type_of_controller.second, controller_duration, via_points_ptr, rxController_xml);
+		controller = this->createJointController_(type_of_controller.second, this->dT_, via_points_ptr, rxController_xml);
+		//child->getConfiguration().print(_T("topot"));
 		dynamic_cast<rxJointController*>(controller)->addPoint(child->getConfiguration(), time_to_converge_, true);
+
 		break;
 	case DISPLACEMENT_CONTROLLER:
 		{
-		controller = this->createDisplacementController_(type_of_controller.second, controller_duration, via_points_ptr, rxController_xml);
-		dVector goal = child->getConfiguration();
-		Vector3D goal_3D(goal[0],goal[1],goal[2]);
-		dynamic_cast<rxDisplacementController*>(controller)->addPoint(goal_3D, time_to_converge_, true);
-		break;
+			controller = this->createDisplacementController_(type_of_controller.second, this->dT_, via_points_ptr, rxController_xml);
+			dVector goal = child->getConfiguration();
+			Vector3D goal_3D(goal[0],goal[1],goal[2]);
+			dynamic_cast<rxDisplacementController*>(controller)->addPoint(goal_3D, time_to_converge_, true);
+			break;
 		}
 	case ORIENTATION_CONTROLLER:
 		{
-		controller = this->createOrientationController_(type_of_controller.second, controller_duration, via_points_ptr, rxController_xml);
-		dVector goal = child->getConfiguration();
-		Rotation goal_rot(goal[3], goal[4], goal[5]);		//NOTE: Suposses that the orientation is defined with 
-															// goal[3] = roll
-															// goal[4] = pitch
-															// goal[5] = yaw
-		dynamic_cast<rxOrientationController*>(controller)->addPoint(goal_rot, time_to_converge_, true);
-		break;
+			controller = this->createOrientationController_(type_of_controller.second, this->dT_, via_points_ptr, rxController_xml);
+			dVector goal = child->getConfiguration();
+			Rotation goal_rot(goal[3], goal[4], goal[5]);		//NOTE: Suposses that the orientation is defined with 
+			// goal[3] = roll
+			// goal[4] = pitch
+			// goal[5] = yaw
+			dynamic_cast<rxOrientationController*>(controller)->addPoint(goal_rot, time_to_converge_, true);
+			break;
 		}
 	case H_TRANSFORM_CONTROLLER:
 		{
-		controller = this->createHTransformController_(type_of_controller.second, controller_duration, via_points_ptr, rxController_xml);
-		dVector goal = child->getConfiguration();
-		Vector3D goal_3D(goal[0],goal[1],goal[2]);
-		Rotation goal_rot(goal[3], goal[4], goal[5]);		//NOTE: Suposses that the orientation is defined with 
-															// goal[3] = roll
-															// goal[4] = pitch
-															// goal[5] = yaw
-		dynamic_cast<rxHTransformController*>(controller)->addPoint(HTransform(goal_rot, goal_3D), time_to_converge_, true);
-		break;
+			controller = this->createHTransformController_(type_of_controller.second, this->dT_, via_points_ptr, rxController_xml);
+			dVector goal = child->getConfiguration();
+			Vector3D goal_3D(goal[0],goal[1],goal[2]);
+			Rotation goal_rot(goal[3], goal[4], goal[5]);		//NOTE: Suposses that the orientation is defined with 
+			// goal[3] = roll
+			// goal[4] = pitch
+			// goal[5] = yaw
+			dynamic_cast<rxHTransformController*>(controller)->addPoint(HTransform(goal_rot, goal_3D), time_to_converge_, true);
+			break;
 		}
 	case QUASICOORD_CONTROLLER:
-		controller = this->createQuasiCoordController_(type_of_controller.second, controller_duration);
+		controller = this->createQuasiCoordController_(type_of_controller.second, this->dT_);
 		break;
 	case NULL_MOTION_CONTROLLER:
-		controller = this->createNullMotionController_(type_of_controller.second, controller_duration);
+		controller = this->createNullMotionController_(type_of_controller.second, this->dT_);
 		break;
 	default:
 		throw std::string("ERROR: [MotionBehaviour::addController_(TiXmlElement * rxController_xml)] Unexpected Controller group.");
@@ -217,10 +198,6 @@ void MotionBehaviour::addController_(TiXmlElement * rxController_xml)
 	this->addController(controller);	// The controller is deactivated when added
 	controller->setIKMode(controller_ik_bool);
 	controller->setGain(kv_vector, kp_vector, invL2sqr_vector);	
-	if(controller_activated_bool)
-	{
-		controller->activate();
-	}
 }
 
 void MotionBehaviour::addController(rxController* ctrl) 
@@ -255,10 +232,10 @@ void MotionBehaviour::activate()
 					//(*controllers_it)->_reset();
 					(*controllers_it)->activate();
 				}
-				/*else{
-				(*controllers_it)->deactivate();
-				(*controllers_it)->activate();
-				}*/
+				else{
+					(*controllers_it)->deactivate();
+					(*controllers_it)->activate();
+				}
 			}
 		}
 	}
@@ -308,9 +285,8 @@ dVector MotionBehaviour::update(double t)
 std::string MotionBehaviour::toStringXML() const
 {
 	TiXmlDocument document_xml;
-	TiXmlElement * motion_behaviour_element = new TiXmlElement("MotionBehaviour");
-	this->toElementXML(motion_behaviour_element);
-	document_xml.LinkEndChild(motion_behaviour_element);
+	TiXmlElement * mb_element = this->toElementXML();	
+	document_xml.LinkEndChild(mb_element);
 
 	// Declare a printer
 	TiXmlPrinter printer_xml;
@@ -320,15 +296,19 @@ std::string MotionBehaviour::toStringXML() const
 	std::string return_value = printer_xml.CStr();
 
 	//TODO: Memory leaks????????????????
+	//delete mb_element;
 	return return_value;
 }
 
-void MotionBehaviour::toElementXML(TiXmlElement* motion_behaviour_xml) const
+TiXmlElement* MotionBehaviour::toElementXML() const
 {
-	motion_behaviour_xml->SetDoubleAttribute("Weight", weight);
-	motion_behaviour_xml->SetDoubleAttribute("Time", time_);
-	motion_behaviour_xml->SetDoubleAttribute("dT", dT_);
-	motion_behaviour_xml->SetAttribute("ControlSetType", typeid(control_set_).name());
+	TiXmlElement * mb_element = new TiXmlElement("MotionBehaviour");
+	TiXmlElement * control_set_element = new TiXmlElement("ControlSet");
+	mb_element->LinkEndChild(control_set_element);
+	std::string control_set_name = std::string(typeid(control_set_).name());
+	std::string control_set_name2 = control_set_name.substr(6);		//Ignore the 'class ' part
+	control_set_name2.resize(control_set_name2.size()-2);	//Ignore the ' *' part
+	control_set_element->SetAttribute("type", control_set_name2.c_str());
 
 	std::list<rxController*> controllers = control_set_->getControllers();
 	string_type controllers_to_string;
@@ -336,43 +316,35 @@ void MotionBehaviour::toElementXML(TiXmlElement* motion_behaviour_xml) const
 		controllers_it != controllers.end() ; controllers_it ++){
 			string_type controller_to_string;
 			(*controllers_it)->toString(controller_to_string);
-			TiXmlElement * rxController_xml;
-			rxController_xml = new TiXmlElement("rxController");
-			motion_behaviour_xml->LinkEndChild(rxController_xml);
+			TiXmlElement * rxController_xml = new TiXmlElement("Controller");
+			control_set_element->LinkEndChild(rxController_xml);
 			this->RLabInfoString2ElementXML_(controller_to_string, rxController_xml);
 	}
+	return mb_element;
 }
 
 void MotionBehaviour::RLabInfoString2ElementXML_(string_type string_data, TiXmlElement* out_xml_element) const
 {
 #ifdef NOT_IN_RT
-	std::wcout << string_data.c_str() << std::endl;
+	//std::wcout << string_data.c_str() << std::endl;
 #endif
 	std::wstringstream data_ss(string_data);
 	string_type temp_st;
 	std::getline(data_ss, temp_st);	
-	out_xml_element->SetAttribute("className", wstring2string_(temp_st.substr(temp_st.find(L"=") + 1, temp_st.find(L"\n"))).c_str());
+	out_xml_element->SetAttribute("type", wstring2string_(temp_st.substr(temp_st.find(L"=") + 1, temp_st.find(L"\n"))).c_str());
 
 	ControllerType type_of_controller = controller_map_[wstring2string_(temp_st.substr(temp_st.find(L"=") + 1, temp_st.find(L"\n")))];
 
-	std::getline(data_ss, temp_st);	
-	out_xml_element->SetAttribute("name", wstring2string_(temp_st.substr(temp_st.find(L"=") + 1, temp_st.find(L"\n"))).c_str());
-
+	std::getline(data_ss, temp_st);		// Discard field "name"
 	std::getline(data_ss, temp_st);		// Discard field "system"
 	std::getline(data_ss, temp_st);		// Discard field "type"
-	std::getline(data_ss, temp_st);	
-	out_xml_element->SetAttribute("dim", wstring2string_(temp_st.substr(temp_st.find(L"=") + 1, temp_st.find(L"\n"))).c_str());
+	std::getline(data_ss, temp_st);		// Field "dim"
 	int dimension_int = -1;
 	std::wstringstream dimension_ss(temp_st.substr(temp_st.find(L"=") + 1, temp_st.find(L"\n")));
 	dimension_ss >> dimension_int;
-
-	std::getline(data_ss, temp_st);	
-	out_xml_element->SetAttribute("dt", wstring2string_(temp_st.substr(temp_st.find(L"=") + 1, temp_st.find(L"\n"))).c_str());
-
-	std::getline(data_ss, temp_st);	
-	out_xml_element->SetAttribute("activated", wstring2string_(temp_st.substr(temp_st.find(L"=") + 1, temp_st.find(L"\n"))).c_str());
-
-	std::getline(data_ss, temp_st);	
+	std::getline(data_ss, temp_st);		// Discard field "dt"
+	std::getline(data_ss, temp_st);		// Discard field "activated"
+	std::getline(data_ss, temp_st);		// Field "ik"
 	out_xml_element->SetAttribute("ik", wstring2string_(temp_st.substr(temp_st.find(L"=") + 1, temp_st.find(L"\n"))).c_str());
 
 	string_type kp_st;
@@ -399,45 +371,32 @@ void MotionBehaviour::RLabInfoString2ElementXML_(string_type string_data, TiXmlE
 	out_xml_element->SetAttribute("kv",wstring2string_(kv_st).c_str());
 	out_xml_element->SetAttribute("invL2sqr",wstring2string_(invL2sqr_st).c_str());
 
-	std::getline(data_ss, temp_st);	
-	out_xml_element->SetAttribute("num_of_viaPoints", wstring2string_(temp_st.substr(temp_st.find(L"=") + 1, temp_st.find(L"\n"))).c_str());
+	std::getline(data_ss, temp_st);			// Field "number of via points"
 	int num_via_points_int = -1;
 	std::wstringstream num_via_points_ss(temp_st.substr(temp_st.find(L"=") + 1, temp_st.find(L"\n")));
 	num_via_points_ss >> num_via_points_int;
 
 	for(int i=0; i< num_via_points_int; i++)
 	{
-		TiXmlElement * via_point_xml;
-		via_point_xml = new TiXmlElement("ViaPoint");
-		out_xml_element->LinkEndChild(via_point_xml);
-
-		std::getline(data_ss, temp_st);	
-		via_point_xml->SetAttribute("time", wstring2string_(temp_st.substr(temp_st.find(L"=") + 1, temp_st.find(L"\n"))).c_str());
-
-		std::getline(data_ss, temp_st);	
-		via_point_xml->SetAttribute("type", wstring2string_(temp_st.substr(temp_st.find(L"=") + 1, temp_st.find(L"\n"))).c_str());
-
-		std::getline(data_ss, temp_st);
-		via_point_xml->SetAttribute("reuse", wstring2string_(temp_st.substr(temp_st.find(L"=") + 1, temp_st.find(L"\n"))).c_str());
-
+		std::getline(data_ss, temp_st);		// Discard field "time" of via points
+		std::getline(data_ss, temp_st);		// Discard field "type" of via points
+		std::getline(data_ss, temp_st);		// Discard field "reuse" of via points 
 		switch( type_of_controller.first ){
 	case JOINT_SPACE_CONTROLLER:
-		std::getline(data_ss, temp_st);	
-		via_point_xml->SetAttribute("dVector", wstring2string_(temp_st.substr(temp_st.find(L"=") + 1, temp_st.find(L"\n"))).c_str());
+		std::getline(data_ss, temp_st);		// Discard field "dVector" of via points 
 		break;
 	case DISPLACEMENT_CONTROLLER:
-		std::getline(data_ss, temp_st);	
-		via_point_xml->SetAttribute("Vector3D", wstring2string_(temp_st.substr(temp_st.find(L"=") + 1, temp_st.find(L"\n"))).c_str());
+		std::getline(data_ss, temp_st);		// Discard field "Vector3D" of via points 
 		break;
 	case ORIENTATION_CONTROLLER:
 		std::getline(data_ss, temp_st);	
-		via_point_xml->SetAttribute("R", wstring2string_(temp_st.substr(temp_st.find(L"=") + 1, temp_st.find(L"\n"))).c_str());
+		//via_point_xml->SetAttribute("R", wstring2string_(temp_st.substr(temp_st.find(L"=") + 1, temp_st.find(L"\n"))).c_str());
 		break;
 	case H_TRANSFORM_CONTROLLER:
 		std::getline(data_ss, temp_st);	
-		via_point_xml->SetAttribute("R", wstring2string_(temp_st.substr(temp_st.find(L"=") + 1, temp_st.find(L"\n"))).c_str());
+		//via_point_xml->SetAttribute("R", wstring2string_(temp_st.substr(temp_st.find(L"=") + 1, temp_st.find(L"\n"))).c_str());
 		std::getline(data_ss, temp_st);	
-		via_point_xml->SetAttribute("r", wstring2string_(temp_st.substr(temp_st.find(L"=") + 1, temp_st.find(L"\n"))).c_str());
+		//via_point_xml->SetAttribute("r", wstring2string_(temp_st.substr(temp_st.find(L"=") + 1, temp_st.find(L"\n"))).c_str());
 		break;
 	default:
 		break;
@@ -629,6 +588,7 @@ std::string MotionBehaviour::colon2space_(std::string text) const
 rxController* MotionBehaviour::createJointController_(int joint_subgroup, double controller_duration, std::vector<ViaPointBase*> via_points_ptr, TiXmlElement* rxController_xml) const
 {
 	rxController* controller = NULL;
+	//std::cout << this->robot_->jdof() << std::endl;
 	switch(joint_subgroup)
 	{
 	case 0:
@@ -636,8 +596,8 @@ rxController* MotionBehaviour::createJointController_(int joint_subgroup, double
 		break;
 	case WITH_COMPLIANCE:
 		{
-		controller = new rxJointComplianceController(this->robot_,controller_duration);	
-		break;
+			controller = new rxJointComplianceController(this->robot_,controller_duration);	
+			break;
 		}
 	case WITH_IMPEDANCE:
 		controller = new rxJointImpedanceController(this->robot_,controller_duration);
@@ -647,8 +607,8 @@ rxController* MotionBehaviour::createJointController_(int joint_subgroup, double
 		break;
 	case WITH_INTERPOLATION + WITH_COMPLIANCE:
 		{
-		controller = new rxInterpolatedJointComplianceController(this->robot_,controller_duration);
-		break;
+			controller = new rxInterpolatedJointComplianceController(this->robot_,controller_duration);
+			break;
 		}
 	case WITH_INTERPOLATION + WITH_IMPEDANCE:
 		controller = new rxInterpolatedJointImpedanceController(this->robot_,controller_duration);
@@ -719,8 +679,8 @@ rxController* MotionBehaviour::createDisplacementController_(int displacement_su
 		break;
 	case WITH_COMPLIANCE:
 		{
-		controller = new rxDisplacementComplianceController(this->robot_, beta, Displacement(beta_displacement), alpha, Displacement(alpha_displacement), controller_duration );
-		break;
+			controller = new rxDisplacementComplianceController(this->robot_, beta, Displacement(beta_displacement), alpha, Displacement(alpha_displacement), controller_duration );
+			break;
 		}
 	case WITH_IMPEDANCE:
 		controller = new rxDisplacementImpedanceController(this->robot_, beta, Displacement(beta_displacement), alpha, Displacement(alpha_displacement), controller_duration );
@@ -730,8 +690,8 @@ rxController* MotionBehaviour::createDisplacementController_(int displacement_su
 		break;
 	case WITH_INTERPOLATION + WITH_COMPLIANCE:
 		{
-		controller = new rxInterpolatedDisplacementComplianceController(this->robot_, beta, Displacement(beta_displacement), alpha, Displacement(alpha_displacement), controller_duration );
-		break;
+			controller = new rxInterpolatedDisplacementComplianceController(this->robot_, beta, Displacement(beta_displacement), alpha, Displacement(alpha_displacement), controller_duration );
+			break;
 		}
 	case WITH_INTERPOLATION + WITH_IMPEDANCE:
 		controller = new rxInterpolatedDisplacementImpedanceController(this->robot_, beta, Displacement(beta_displacement), alpha, Displacement(alpha_displacement), controller_duration );
@@ -800,8 +760,8 @@ rxController* MotionBehaviour::createOrientationController_(int orientation_subg
 		break;
 	case WITH_COMPLIANCE:
 		{
-		controller = new rxOrientationComplianceController(this->robot_, beta, Rotation(beta_rotation), alpha, Rotation(alpha_rotation), controller_duration );
-		break;
+			controller = new rxOrientationComplianceController(this->robot_, beta, Rotation(beta_rotation), alpha, Rotation(alpha_rotation), controller_duration );
+			break;
 		}
 	case WITH_IMPEDANCE:
 		controller = new rxOrientationImpedanceController(this->robot_, beta, Rotation(beta_rotation), alpha, Rotation(alpha_rotation), controller_duration );
@@ -811,8 +771,8 @@ rxController* MotionBehaviour::createOrientationController_(int orientation_subg
 		break;
 	case WITH_INTERPOLATION + WITH_COMPLIANCE:
 		{
-		controller = new rxInterpolatedOrientationComplianceController(this->robot_, beta, Rotation(beta_rotation), alpha, Rotation(alpha_rotation), controller_duration );
-		break;
+			controller = new rxInterpolatedOrientationComplianceController(this->robot_, beta, Rotation(beta_rotation), alpha, Rotation(alpha_rotation), controller_duration );
+			break;
 		}
 	case WITH_INTERPOLATION + WITH_IMPEDANCE:
 		controller = new rxInterpolatedOrientationImpedanceController(this->robot_, beta, Rotation(beta_rotation), alpha, Rotation(alpha_rotation), controller_duration );
@@ -944,10 +904,10 @@ rxController* MotionBehaviour::createQuasiCoordController_(int quasi_coord_subgr
 	switch(quasi_coord_subgroup)
 	{
 	case 0:
-	//	controller = new rxQuasiCoordController(this->robot_, , controller_duration);
+		//	controller = new rxQuasiCoordController(this->robot_, , controller_duration);
 		break;
 	case WITH_COMPLIANCE:
-	//	controller = new rxQuasiCoordComplianceController(this->robot_, ,controller_duration);
+		//	controller = new rxQuasiCoordComplianceController(this->robot_, ,controller_duration);
 		break;
 	default:
 		throw std::string("ERROR: [MotionBehaviour::createQuasiCoordController_(ControllerSubgroup quasi_coord_subgroup, double controller_duration)] Unexpected Controller subgroup.");
@@ -968,11 +928,55 @@ rxController* MotionBehaviour::createNullMotionController_(int null_motion_subgr
 		controller = new rxNullMotionComplianceController(this->robot_,  controller_duration);
 		break;
 	case	WITH_GRADIENT:
-	//	controller = new rxGradientNullMotionController(this->robot_, controller_duration);
+		//	controller = new rxGradientNullMotionController(this->robot_, controller_duration);
 		break;
 	default:
 		throw std::string("ERROR: [MotionBehaviour::createNullMotionController_(ControllerSubgroup null_motion_subgroup, double controller_duration)] Unexpected Controller subgroup.");
 		break;
 	}
 	return controller;
+}
+
+void MotionBehaviour::printViaPoints()
+{
+	std::list<rxController*> controllers = control_set_->getControllers();
+	string_type controllers_to_string;
+	for(std::list< rxController* >::const_iterator controllers_it = controllers.begin();
+		controllers_it != controllers.end() ; controllers_it ++){
+			string_type controller_to_string;
+			(*controllers_it)->toString(controller_to_string);
+
+			std::wcout << controller_to_string << std::endl;
+
+	//		int num_via_points_int = -1;
+	//		std::wstringstream num_via_points_ss(temp_st.substr(temp_st.find(L"=") + 1, temp_st.find(L"\n")));
+	//		num_via_points_ss >> num_via_points_int;
+	//		for(int i=0; i< num_via_points_int; i++)
+	//		{
+	//			std::getline(data_ss, temp_st);		// Discard field "time" of via points
+	//			std::getline(data_ss, temp_st);		// Discard field "type" of via points
+	//			std::getline(data_ss, temp_st);		// Discard field "reuse" of via points 
+	//			switch( type_of_controller.first ){
+	//case JOINT_SPACE_CONTROLLER:
+	//	std::getline(data_ss, temp_st);		// Discard field "dVector" of via points 
+	//	break;
+	//case DISPLACEMENT_CONTROLLER:
+	//	std::getline(data_ss, temp_st);		// Discard field "Vector3D" of via points 
+	//	break;
+	//case ORIENTATION_CONTROLLER:
+	//	std::getline(data_ss, temp_st);	
+	//	//via_point_xml->SetAttribute("R", wstring2string_(temp_st.substr(temp_st.find(L"=") + 1, temp_st.find(L"\n"))).c_str());
+	//	break;
+	//case H_TRANSFORM_CONTROLLER:
+	//	std::getline(data_ss, temp_st);	
+	//	//via_point_xml->SetAttribute("R", wstring2string_(temp_st.substr(temp_st.find(L"=") + 1, temp_st.find(L"\n"))).c_str());
+	//	std::getline(data_ss, temp_st);	
+	//	//via_point_xml->SetAttribute("r", wstring2string_(temp_st.substr(temp_st.find(L"=") + 1, temp_st.find(L"\n"))).c_str());
+	//	break;
+	//default:
+	//	break;
+	//			}
+	//		}
+
+	}
 }

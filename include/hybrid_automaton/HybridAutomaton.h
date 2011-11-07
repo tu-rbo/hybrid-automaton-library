@@ -47,9 +47,10 @@ public:
 	* REPLACE the current values of the HybridAutomaton with the values contained in a string with XML format.
 	* @param xmlString String with XML format containing the new values for the HybridAutomaton.
 	* @param robot Pointer to the rxSystem, used to create the rxControllers.
+	* @param dT Interval to be used by all the controllers in this HybridSystem
 	* Note: It uses tinyXML library to read the string with XML format.
 	*/
-	virtual void fromStringXML(std::string xmlString, rxSystem* robot);
+	virtual void fromStringXML(std::string xml_string, rxSystem* robot, double dT);
 
 private:
 	Milestone* start_node_id_;	// Pointer to the first Milestone (if exists). 

@@ -151,3 +151,15 @@ ViaPointBase * XMLDeserializer::deserializeViaPoint(ControllerType type_of_contr
 	}
 	return return_value;
 }
+
+std::vector<double> XMLDeserializer::deserializeVectorDouble(const char * field_name)
+{
+	std::stringstream vector_ss = std::stringstream(xml_element->Attribute(field_name));
+	double vector_value = -1.0;
+	std::vector<double> ret_vector;
+	while ((vector_ss >> vector_value))
+	{
+		ret_vector.push_back(vector_value);
+	}
+	return ret_vector;
+}

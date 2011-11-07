@@ -23,6 +23,7 @@ typedef struct DeparsingStructure{
 	rxSystem* _robot;
 	volatile bool * _finished;
 	HybridAutomaton * _ha;
+	double _dT;
 };
 
 class REXPORT HybridAutomatonManager : public rControlAlgorithm

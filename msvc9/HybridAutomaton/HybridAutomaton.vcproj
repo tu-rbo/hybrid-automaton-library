@@ -171,11 +171,11 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\hybrid_automaton\MilestoneFactory.cpp"
+				RelativePath="..\..\src\hybrid_automaton\MotionBehaviour.cpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\hybrid_automaton\MotionBehaviour.cpp"
+				RelativePath="..\..\src\hybrid_automaton\OpSpaceMilestone.cpp"
 				>
 			</File>
 			<File
@@ -201,11 +201,11 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\include\hybrid_automaton\MilestoneFactory.h"
+				RelativePath="..\..\include\hybrid_automaton\MotionBehaviour.h"
 				>
 			</File>
 			<File
-				RelativePath="..\..\include\hybrid_automaton\MotionBehaviour.h"
+				RelativePath="..\..\include\hybrid_automaton\OpSpaceMilestone.h"
 				>
 			</File>
 			<File

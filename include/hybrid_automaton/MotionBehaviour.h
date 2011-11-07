@@ -108,8 +108,9 @@ public:
 	* @param dad Pointer to the parent milestone (MotionBehaviour-Edge stores directly the pointer, no internal copy!).
 	* @param son Pointer to the child milestone (MotionBehaviour-Edge stores directly the pointer, no internal copy!).
 	* @param robot Pointer to the RLab system object.
+	* @param dt Control interval of the controllers in this MB.
 	*/
-	MotionBehaviour(TiXmlElement* motion_behaviour_xml , const Milestone *dad, const Milestone *son , rxSystem* robot );
+	MotionBehaviour(TiXmlElement* motion_behaviour_xml , const Milestone *dad, const Milestone *son , rxSystem* robot, double dt );
 
 	/**
 	* Copy constructor - Create a new MotionBehaviour that is a copy of the MotionBehaviour given as parameter
@@ -155,9 +156,8 @@ public:
 
 	/**
 	* Write in a TinyXML element all the information necessary to construct a copy of this MotionBehaviour
-	* @param motion_behaviour_xml TinyXML element that will contain the information of this MotionBehaviour
 	*/
-	virtual void toElementXML(TiXmlElement* motion_behaviour_xml) const;
+	virtual TiXmlElement* toElementXML() const;
 
 	/**
 	* Create a copy of this MotionBehaviour and return a pointer to it
@@ -170,6 +170,8 @@ public:
 	* @param motion_behaviour_assignment MotionBehaviour object that will be copied
 	*/
 	virtual MotionBehaviour& operator=(const MotionBehaviour & motion_behaviour_assignment);
+
+	virtual void printViaPoints();
 
 private:
 	/**

@@ -22,6 +22,8 @@ public:
 
 	ViaPointBase * deserializeViaPoint(ControllerType type_of_controller, int controller_dimension);
 
+	std::vector<double> deserializeVectorDouble(const char * field_name);
+
 private:
 	TiXmlElement * xml_element;
 };
