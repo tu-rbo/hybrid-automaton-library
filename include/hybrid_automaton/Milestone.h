@@ -53,6 +53,10 @@ public:
 
 	Milestone();
 
+	Milestone(std::string milestone_name);
+
+	Milestone(const char* milestone_name);
+
 	virtual ~Milestone();
 
 	Milestone::Status getStatus() const;
@@ -63,7 +67,7 @@ public:
 
 	virtual std::string toStringXML() const;
 
-	virtual void toElementXML(TiXmlElement* root) const;
+	virtual TiXmlElement* toElementXML() const;
 
 	virtual Milestone* clone() const;
 
@@ -73,9 +77,12 @@ public:
 
 	virtual dVector getConfiguration() const;
 
-private:
+	virtual std::string getName() const;
 
-	Status status_;
+protected:
+
+	Status			status_;
+	std::string		name_;
 
 };
 

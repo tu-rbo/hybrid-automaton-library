@@ -23,9 +23,9 @@ public:
 
 	OpSpaceMilestone();  
 
-	OpSpaceMilestone(std::vector<double>& posi_ori_value, PosiOriSelector posi_ori_selection, MotionBehaviour * motion_behaviour, std::vector<double>& region_convergence_radius,int object_id);
+	OpSpaceMilestone(std::vector<double>& posi_ori_value, PosiOriSelector posi_ori_selection, MotionBehaviour * motion_behaviour, std::vector<double>& region_convergence_radius);
 
-	OpSpaceMilestone(TiXmlElement* milestone_xml, rxSystem* robot);
+	OpSpaceMilestone(TiXmlElement* milestone_xml, rxSystem* robot, double dt);
 
 	OpSpaceMilestone(const OpSpaceMilestone & op_milestone_cpy);
 
@@ -41,27 +41,27 @@ public:
 
 	virtual dVector getConfiguration() const;
 
-	int getObjectId() const;
+	//int getObjectId() const;
 
-	int getDofs() const;
+	//int getDofs() const;
 
 	void update();
 
 	virtual std::string toStringXML() const;
 
-	virtual void toElementXML(TiXmlElement* cspace_milestone_xml) const ;
+	virtual TiXmlElement* toElementXML() const ;
 
 	virtual OpSpaceMilestone* clone() const;
 
 	void addHandlePoint( const Point & point_to_add );
 
-	virtual bool operator ==(const OpSpaceMilestone & n) const ;
+	//virtual bool operator ==(const OpSpaceMilestone & n) const ;
 
-	virtual bool operator ==(const Milestone & n) const ;
+	//virtual bool operator ==(const Milestone & n) const ;
 
-	virtual bool operator !=(const OpSpaceMilestone & n) const ;
+	//virtual bool operator !=(const OpSpaceMilestone & n) const ;
 
-	virtual bool operator !=(const Milestone & n) const ;
+	//virtual bool operator !=(const Milestone & n) const ;
 
 	virtual OpSpaceMilestone& operator=(const OpSpaceMilestone & op_milestone_assignment);
 
@@ -76,7 +76,7 @@ protected:
 	std::vector<double>		region_convergence_radius_;			// Position = 3 first values
 																// Orientation = 3 second values
 																// Total size = 6
-	int						object_id_;
+	//int						object_id_;
 	std::vector<Point>		handle_points_;
 	PosiOriSelector			posi_ori_selection_;				// Position/Orientation/Both values defined in this Milestone
 

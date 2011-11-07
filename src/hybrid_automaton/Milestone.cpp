@@ -7,6 +7,21 @@ Milestone::Milestone() :
 Node(),
 status_(INVALID)
 {
+	this->name_ = std::string("default");
+}
+
+Milestone::Milestone(std::string milestone_name) : 
+Node(),
+status_(INVALID)
+{
+	this->name_ = milestone_name;
+}
+
+Milestone::Milestone(const char* milestone_name) : 
+Node(),
+status_(INVALID)
+{
+	this->name_ = std::string(milestone_name);
 }
 
 Milestone::~Milestone()
@@ -32,7 +47,7 @@ std::string Milestone::toStringXML() const
 	throw std::string("WARNING: [Milestone::toStringXML()] Empty method. Derived class' method should have been called instead.");
 }
 
-void Milestone::toElementXML(TiXmlElement* root) const 
+TiXmlElement* Milestone::toElementXML() const 
 {
 	throw std::string("WARNING: [Milestone::toElementXML(TiXmlElement* root)] Empty method. Derived class' method should have been called instead.");
 }
@@ -45,17 +60,22 @@ Milestone* Milestone::clone() const
 
 bool Milestone::operator ==(const Milestone & n) const 
 {
-	return this->status_ == n.getStatus();
+	return (this->name_ == n.getName());
 }
 
 bool Milestone::operator !=(const Milestone & n) const 
 {
-	return !(this->status_ == n.getStatus());
+	return !(this->name_ == n.getName());
 }
 
 dVector Milestone::getConfiguration() const
 {
 	return dVector();
+}
+
+std::string Milestone::getName() const
+{
+	return this->name_;
 }
 
 //bool Milestone::operator== (const Node& n) const {

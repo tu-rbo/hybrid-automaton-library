@@ -14,11 +14,11 @@ public:
 
 	CSpaceMilestone();  
 
-	CSpaceMilestone(int dofs);  
+	CSpaceMilestone(std::string csm_name);  
 
-	CSpaceMilestone(int dofs, std::vector<double>& configuration, MotionBehaviour * motion_behaviour, std::vector<double>& region_convergence_radius,int object_id);
+	CSpaceMilestone(std::string csm_name, std::vector<double>& configuration, MotionBehaviour * motion_behaviour, std::vector<double>& region_convergence_radius);
 
-	CSpaceMilestone(TiXmlElement* milestone_xml, rxSystem* robot);
+	CSpaceMilestone(TiXmlElement* milestone_xml, rxSystem* robot, double dt);
 
 	CSpaceMilestone(const CSpaceMilestone & cmilestone_cpy);
 
@@ -28,27 +28,23 @@ public:
 
 	std::vector<double> getConfigurationSTDVector() const;
 
-	int getObjectId() const;
-
-	int getDofs() const;
-
 	void update();
 
 	virtual std::string toStringXML() const;
 
-	virtual void toElementXML(TiXmlElement* cspace_milestone_xml) const ;
+	virtual TiXmlElement* toElementXML() const ;
 
 	virtual CSpaceMilestone* clone() const;
 
 	void addHandlePoint( const Point & point_to_add );
 
-	virtual bool operator ==(const CSpaceMilestone & n) const ;
+	//virtual bool operator ==(const CSpaceMilestone & n) const ;
 
-	virtual bool operator ==(const Milestone & n) const ;
+	//virtual bool operator ==(const Milestone & n) const ;
 
-	virtual bool operator !=(const CSpaceMilestone & n) const ;
+	//virtual bool operator !=(const CSpaceMilestone & n) const ;
 
-	virtual bool operator !=(const Milestone & n) const ;
+	//virtual bool operator !=(const Milestone & n) const ;
 
 	virtual CSpaceMilestone& operator=(const CSpaceMilestone & cmilestone_assignment);
 
@@ -56,11 +52,11 @@ public:
 
 protected:
 
-	int						dofs_;
+	//int						dofs_;
 	std::vector<double>		configuration_;
 	MotionBehaviour*		motion_behaviour_;
 	std::vector<double>		region_convergence_radius_;
-	int						object_id_;
+	//int						object_id_;
 	std::vector<Point>		handle_points_;
 
 };
