@@ -4,7 +4,7 @@
 
 #include "XMLDeserializer.h"
 
-#define NOT_IN_RT
+//#define NOT_IN_RT
 
 using namespace std;
 std::map<std::string, ControllerType> MotionBehaviour::controller_map_ = MotionBehaviour::createControllerMapping_();

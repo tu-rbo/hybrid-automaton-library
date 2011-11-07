@@ -10,7 +10,7 @@
 
 #include <process.h>
 
-#define NOT_IN_RT
+//#define NOT_IN_RT
 
 unsigned __stdcall deparsePlan(void *udata)
 {
@@ -87,7 +87,7 @@ void HybridAutomatonManager::init(int mode)
 	RASSERT(_robotDevice != INVALID_RHANDLE);
 
 
-	_blackboard = RTBlackBoard::getInstance("130.149.238.180", 1888, "130.149.238.185", 1999);
+	_blackboard = RTBlackBoard::getInstance("130.149.238.180", 1888, "130.149.238.184", 1999);
 
 	_defaultMotionBehavior = new MotionBehaviour(new Milestone(), new Milestone(),_robot);
 	_activeMotionBehavior = _defaultMotionBehavior;
@@ -154,13 +154,13 @@ void HybridAutomatonManager::setPeriod(const rTime& dT)
 
 void HybridAutomatonManager::_readDevices()
 {
-	float* q = new float[_dof];
-	float* qdot = new float[_dof];
+	double* q = new double[_dof];
+	double* qdot = new double[_dof];
 
-	int read = readDeviceValue(_robotDevice, q, _dof * sizeof(float), 0);
+	int read = readDeviceValue(_robotDevice, q, _dof * sizeof(double), 0);
 	RASSERT(read > 0);
 
-	read = readDeviceValue(_robotDevice, qdot, _dof * sizeof(float), 1);
+	read = readDeviceValue(_robotDevice, qdot, _dof * sizeof(double), 1);
 	RASSERT(read > 0);
 
 	for(int i = 0; i < _dof; ++i)
@@ -179,17 +179,17 @@ void HybridAutomatonManager::_readDevices()
 
 void HybridAutomatonManager::_writeDevices()
 {
-	float* torque = new float[_dof];
+	double* torque = new double[_dof];
 	for(int i = 0; i < _dof; ++i)
 	{
 		if(_servo_on){
-			torque[i] = static_cast<float>(_torque[i]);
+			torque[i] = static_cast<double>(_torque[i]);
 			//std::cerr << torque[i] << std::endl;
 		}else{
 			torque[i] =0;
 		}
 	}
-	int written = writeDeviceValue(_robotDevice, torque, _dof * sizeof(float));
+	int written = writeDeviceValue(_robotDevice, torque, _dof * sizeof(double));
 	RASSERT(written > 0);
 	_torque_BB = convert(_torque);
 	delete[] torque;
@@ -206,13 +206,13 @@ void HybridAutomatonManager::_reflect()
 
 void HybridAutomatonManager::_compute(const double& t)
 {
-
 	if( _newHAArrived )
 	{
 		delete _plan;
 		_plan = _dep_struct._ha;
 		std::cout << "First controller" << std::endl;
 		Milestone* tmpMilestone = _plan->getStartNode();
+		_activeMotionBehavior->deactivate();
 		_activeMotionBehavior = _plan->outgoingEdges(*tmpMilestone)[0];
 #ifdef NOT_IN_RT
 		std::cout << _activeMotionBehavior->toStringXML() << ::std::endl;
@@ -225,23 +225,16 @@ void HybridAutomatonManager::_compute(const double& t)
 	}
 	else if(_activeMotionBehavior->hasConverged() ){/*
 		this->_q.print(_T("configuration"));*/
-		MotionBehaviour* next_controller;
-		if(_plan){
+		if (_plan && !_plan->outgoingEdges(*(_activeMotionBehavior->getChild())).empty()) {
 			std::cout << "Switching controller" << std::endl;
-			next_controller= _plan->outgoingEdges(*(_activeMotionBehavior->getChild()))[0];
-			#ifdef NOT_IN_RT
-		std::cout << next_controller->toStringXML() << ::std::endl;
-		next_controller->printViaPoints();
-#endif
-		}else{
+			_activeMotionBehavior->deactivate();
+			_activeMotionBehavior = _plan->outgoingEdges(*(_activeMotionBehavior->getChild()))[0];
 #ifdef NOT_IN_RT
-			//std::cout << ".";
+			std::cout << _activeMotionBehavior->toStringXML() << ::std::endl;
+			_activeMotionBehavior->printViaPoints();
 #endif
-			next_controller = _defaultMotionBehavior;
+			_activeMotionBehavior->activate();
 		}
-		_activeMotionBehavior->deactivate();
-		next_controller->activate();		
-		_activeMotionBehavior = next_controller;
 	}
 	
 	_torque = _activeMotionBehavior->update(t);	

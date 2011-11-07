@@ -117,7 +117,7 @@ void HybridAutomaton::fromStringXML(std::string xml_string, rxSystem* robot, dou
 	}
 
 	// Print out a message with the general properties of the new HybridAutomaton.
-	std::cout << "Creating hybrid system '" << hs_element->Attribute("Name") << "'. Initial Milestone:" << start_node << std::endl;
+	std::cout << "Creating hybrid system '" << hs_element->Attribute("Name") << "'. Initial Milestone: " << start_node << std::endl;
 
 	// Read the data of the nodes-milestones and create them
 	for (TiXmlElement* mst_element = hs_element->FirstChildElement("Milestone"); mst_element
