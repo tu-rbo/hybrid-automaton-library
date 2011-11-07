@@ -52,9 +52,9 @@ SOCKET_HANDLE TCPcomm::OpenTCPConnection(const char *ServerName, short nPort){
 	  #endif
 
 	  #ifdef WIN32
-		Sleep(10);
+		Sleep(1);
 	  #else
-		usleep(10000);
+		usleep(1000);
 	  #endif
 	}
 	return socket;
