@@ -145,6 +145,11 @@ public:
 	bool hasConverged();
 
 	/**
+	* Get the current error from the control set
+	*/
+	dVector getError() const;
+
+	/**
 	* Activate the controllers stored in the rxControlSet through the vector of rxController's (NOT WORKING!!!!)
 	*/
 	dVector update(double t);

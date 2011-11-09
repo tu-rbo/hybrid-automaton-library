@@ -303,6 +303,30 @@ void HybridAutomatonManager::collect(vector<double>& data, int channel)
 		for(int i = 0; i < _dof; ++i)
 			data.push_back(_qdot[i]);
 	}
+	else if (channel == 4)
+	{
+		dVector e = _activeMotionBehavior->getError();
+		if (e.size() > 0) {
+			for(int i = 0; i < _dof; ++i)
+				data.push_back(e[i]);
+		}
+		else {
+			for(int i = 0; i < _dof; ++i)
+				data.push_back(666.6);
+		}
+	}
+	else if (channel == 5)
+	{
+		dVector e = _activeMotionBehavior->getError();
+		if (e.size() > 0) {
+			for(int i = 0; i < _dof; ++i)
+				data.push_back(_q[i]-e[i]);
+		}
+		else {
+			for(int i = 0; i < _dof; ++i)
+				data.push_back(666.6);
+		}
+	}
 }
 
 void HybridAutomatonManager::onSetInterestFrame(const TCHAR* name, const HTransform& T)

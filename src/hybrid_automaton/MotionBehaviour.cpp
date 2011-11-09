@@ -143,15 +143,15 @@ void MotionBehaviour::addController_(TiXmlElement * rxController_xml)
 #ifdef NOT_IN_RT
 	time_to_converge_ = 10;
 #else
-	time_to_converge_ = 15;
+	time_to_converge_ = 10;
 #endif
 
 	switch(type_of_controller.first)
 	{
 	case JOINT_SPACE_CONTROLLER:
 		controller = this->createJointController_(type_of_controller.second, this->dT_, via_points_ptr, rxController_xml);
-		//child->getConfiguration().print(_T("topot"));
-		dynamic_cast<rxJointController*>(controller)->addPoint(child->getConfiguration(), time_to_converge_, true);
+
+		dynamic_cast<rxJointController*>(controller)->addPoint(child->getConfiguration(), time_to_converge_, false);
 
 		break;
 	case DISPLACEMENT_CONTROLLER:
@@ -272,6 +272,11 @@ bool MotionBehaviour::hasConverged()
 		return true;
 	}
 	return false;
+}
+
+dVector MotionBehaviour::getError() const
+{
+	return control_set_->e();
 }
 
 dVector MotionBehaviour::update(double t)
