@@ -11,25 +11,17 @@
 #include <map>
 #include <math.h>
 
-typedef enum{
-	JOINT_SPACE_CONTROLLER				= 1,
-	FUNCTION_CONTROLLER					= 2*JOINT_SPACE_CONTROLLER,
-	DISPLACEMENT_CONTROLLER				= 2*FUNCTION_CONTROLLER,
-	ORIENTATION_CONTROLLER				= 2*DISPLACEMENT_CONTROLLER,
-	H_TRANSFORM_CONTROLLER				= 2*ORIENTATION_CONTROLLER,
-	QUASICOORD_CONTROLLER				= 2*H_TRANSFORM_CONTROLLER,
-	NULL_MOTION_CONTROLLER				= 2*QUASICOORD_CONTROLLER
-} ControllerGroup;
+typedef enum {
+	NONE				= 0,
+	WITH_FUNCTION		= 1,
+	WITH_COMPLIANCE		= 2,
+	WITH_IMPEDANCE		= 4,
+	WITH_INTERPOLATION	= 8,
+	WITH_GRADIENT		= 16
+} ControllerSubtype;
 
-typedef enum{
-	WITH_FUNCTION						= 1,
-	WITH_COMPLIANCE						= 2*WITH_FUNCTION,
-	WITH_IMPEDANCE						= 2*WITH_COMPLIANCE,
-	WITH_INTERPOLATION					= 2*WITH_IMPEDANCE,
-	WITH_GRADIENT						= 2*WITH_INTERPOLATION
-} ControllerSubgroup;
-
-typedef std::pair<ControllerGroup, int> ControllerType;
+// impossible to replace int by ControllerSubtype because then no combinations of subtypes are allowed!
+typedef std::pair<rxController::eControlType, int> ControllerType;
 
 struct ViaPointBase {
 	double					time_;
@@ -86,12 +78,13 @@ struct ViaPointHTransform : ViaPointBase{
 class MotionBehaviour: public Edge<Milestone> 
 {
 
-public:
+private:
 	/**
 	* Constructor
 	*/
 	MotionBehaviour();
 
+public:
 	/**
 	* Constructor
 	* @param dad Pointer to the parent milestone (MotionBehaviour-Edge stores directly the pointer, no internal copy!).
@@ -176,7 +169,7 @@ public:
 	*/
 	virtual MotionBehaviour& operator=(const MotionBehaviour & motion_behaviour_assignment);
 
-	virtual void printViaPoints();
+	virtual void print();
 
 private:
 	/**
@@ -222,7 +215,7 @@ private:
 	* @param controller_duration Time interval of the controller to be created.
 	* @param via_points_ptr Via points of the controller to be created.
 	*/
-	rxController* createJointController_(int joint_subgroup, double controller_duration, std::vector<ViaPointBase*> via_points_ptr, TiXmlElement* rxController_xml) const;
+	rxController* createJointController_(int joint_subtype, double controller_duration, std::vector<ViaPointBase*> via_points_ptr, TiXmlElement* rxController_xml) const;
 
 	/**
 	* Recreate a Displacement controller
@@ -231,7 +224,7 @@ private:
 	* @param via_points_ptr Via points of the controller to be created.
 	* @param rxController_xml TinyXML Element with some other required information (alpha, alpha displacement, beta, beta displacement).
 	*/
-	rxController* createDisplacementController_(int displacement_subgroup, double controller_duration, std::vector<ViaPointBase*> via_points_ptr, TiXmlElement* rxController_xml) const;
+	rxController* createDisplacementController_(int displacement_subtype, double controller_duration, std::vector<ViaPointBase*> via_points_ptr, TiXmlElement* rxController_xml) const;
 
 	/**
 	* Recreate an Orientation controller
@@ -240,7 +233,7 @@ private:
 	* @param via_points_ptr Via points of the controller to be created.
 	* @param rxController_xml TinyXML Element with some other required information (alpha, alpha orientation, beta, beta orientation).
 	*/
-	rxController* createOrientationController_(int orientation_subgroup, double controller_duration, std::vector<ViaPointBase*> via_points_ptr, TiXmlElement* rxController_xml) const;
+	rxController* createOrientationController_(int orientation_subtype, double controller_duration, std::vector<ViaPointBase*> via_points_ptr, TiXmlElement* rxController_xml) const;
 
 	/**
 	* Recreate a HTransform controller
@@ -249,21 +242,21 @@ private:
 	* @param via_points_ptr Via points of the controller to be created.
 	* @param rxController_xml TinyXML Element with some other required information (alpha, alpha htransform, beta, beta htransform).
 	*/
-	rxController* createHTransformController_(int htransform_subgroup, double controller_duration, std::vector<ViaPointBase*> via_points_ptr, TiXmlElement* rxController_xml) const;
+	rxController* createHTransformController_(int htransform_subtype, double controller_duration, std::vector<ViaPointBase*> via_points_ptr, TiXmlElement* rxController_xml) const;
 
 	/**
 	* Recreate a QuasiCoord controller
 	* @param quasi_coord_subgroup Subgroup of the controller to be created within the Joint Controller group.
 	* @param controller_duration Time interval of the controller to be created.
 	*/
-	rxController* createQuasiCoordController_(int quasi_coord_subgroup, double controller_duration) const;
+	rxController* createQuasiCoordController_(int quasi_coord_subtype, double controller_duration) const;
 
 	/**
 	* Recreate a NullMotion controller
 	* @param null_motion_coord_subgroup Subgroup of the controller to be created within the Null Motion Controller group.
 	* @param controller_duration Time interval of the controller to be created.
 	*/
-	rxController* createNullMotionController_(int null_motion_subgroup, double controller_duration) const;
+	rxController* createNullMotionController_(int null_motion_subtype, double controller_duration) const;
 
 
 	rxControlSet*									control_set_;		// Stores the set of rxController's defining this MotionBehaviour

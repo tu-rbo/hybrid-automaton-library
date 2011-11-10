@@ -214,26 +214,29 @@ void HybridAutomatonManager::_compute(const double& t)
 		Milestone* tmpMilestone = _plan->getStartNode();
 		_activeMotionBehavior->deactivate();
 		_activeMotionBehavior = _plan->outgoingEdges(*tmpMilestone)[0];
+		_newHAArrived = false;
+
+		_activeMotionBehavior->activate();
 #ifdef NOT_IN_RT
 		std::cout << _activeMotionBehavior->toStringXML() << ::std::endl;
-		_activeMotionBehavior->printViaPoints();
+		_activeMotionBehavior->print();
 		std::cout << "Number of edges: " << _plan->getEdgeNumber() << std::endl;
 		_plan->__printMatrix();
 #endif
-		_newHAArrived = false;
-		_activeMotionBehavior->activate();
 	}
 	else if(_activeMotionBehavior->hasConverged() ){/*
 		this->_q.print(_T("configuration"));*/
 		if (_plan && !_plan->outgoingEdges(*(_activeMotionBehavior->getChild())).empty()) {
 			std::cout << "Switching controller" << std::endl;
 			_activeMotionBehavior->deactivate();
+			
 			_activeMotionBehavior = _plan->outgoingEdges(*(_activeMotionBehavior->getChild()))[0];
+			_activeMotionBehavior->activate();
+
 #ifdef NOT_IN_RT
 			std::cout << _activeMotionBehavior->toStringXML() << ::std::endl;
-			_activeMotionBehavior->printViaPoints();
+			_activeMotionBehavior->print();
 #endif
-			_activeMotionBehavior->activate();
 		}
 	}
 	
