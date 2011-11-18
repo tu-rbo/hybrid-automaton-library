@@ -47,6 +47,8 @@ private:
 	* how often step() is called (not used)
 	*/
 	unsigned long ticks;
+	unsigned int ros_publish_every_n_ticks;
+	
 	/*
 	* is true when we have created an instance of the Blackboard
 	*/
@@ -63,7 +65,6 @@ private:
 	RTBlackBoard(const std::string& rlab_host, int rlab_port, const std::string& ros_host, int ros_port);
 	~RTBlackBoard();
 
-	bool ros_thread_finished;
 public:
 	/*!
 	* \brief Get the pointer to the only instance of the bb.

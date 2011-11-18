@@ -77,9 +77,7 @@ RTBlackBoard::RTBlackBoard() :
 
 	// set ticks to zero
 	this->ticks = 0;
-	//publish_it = pub.begin();
-	ros_thread_finished = true;
-	//pthread_create(&thread_handle_ros, NULL, &BlackBoard::ros_thread, NULL);
+	this->ros_publish_every_n_ticks = 10;
 }
 
 RTBlackBoard::RTBlackBoard(const std::string& rlab_host, int rlab_port, const std::string& ros_host, int ros_port) :
@@ -99,9 +97,7 @@ net(rlab_host.c_str(), rlab_port, ros_host.c_str(), ros_port, this)
 
 	// set ticks to zero
 	this->ticks = 0;
-	//publish_it = pub.begin();
-	ros_thread_finished = true;
-	//pthread_create(&thread_handle_ros, NULL, &BlackBoard::ros_thread, NULL);
+	this->ros_publish_every_n_ticks = 10;
 }
 
 /*
@@ -331,9 +327,11 @@ void RTBlackBoard::subscribeToROSMessage(const std::string& topic) {
 void RTBlackBoard::step() {
 	ticks++;
 
-	// publish all the data of the outputMap
-	for( DataMap::iterator it = this->outputMap.begin(); it != this->outputMap.end(); ++it ) {
-		net << *(it->second);
+	if (ticks % ros_publish_every_n_ticks == 0) {
+		// publish all the data of the outputMap
+		for( DataMap::iterator it = this->outputMap.begin(); it != this->outputMap.end(); ++it ) {
+			net << *(it->second);
+		}
 	}
 
 	// set all updated flags to false in the input map
@@ -342,19 +340,12 @@ void RTBlackBoard::step() {
 	}
 
 	// copy all the data from the inputBuffer to the inputMap
-	DWORD rc = WaitForSingleObject(copyInputBufferMutex, INFINITE);
+	DWORD rc = WaitForSingleObject(copyInputBufferMutex, 0);
 	if( rc == WAIT_FAILED ) {
 		std::cerr << "Cannot lock copyInputBufferMutex (RTBlackBoard::step)" << std::endl;
+		return;
 	}
 	for( DataMap::iterator it = this->inputBuffer.begin(); it != this->inputBuffer.end(); ++it ) {
-		//DataMap::iterator pos = inputMap.find(it->first);
-		//if( inputMap.find(it->first) != inputMap.end() ) {
-		//	// is already in inputMap
-		//	pos->second->update(it->second);
-		//}
-		//else {
-		//	// is not part of inputMap
-		//}
 		update(it->second, inputMap);
 	}
 	// clear input buffer
@@ -365,31 +356,6 @@ void RTBlackBoard::step() {
 	inputBuffer.clear();
 	if( !ReleaseMutex(copyInputBufferMutex) ) {
 		std::cerr << "Cannot release copyInputBufferMutex (RTBlackBoard::step)" << std::endl;
-	}
-
-	if(!ros_thread_finished) {
-		// do not lock the rt thread
-		//if(pthread_mutex_trylock(&ros_bb_mutex) != EBUSY)
-		//{
-		//	// store the state
-		//	ros_thread_finished = true;
-		//	pthread_mutex_unlock(&ros_bb_mutex);
-		//}
-	}
-	if(ros_thread_finished) {
-		// copy the data from the subscribe call backs to the real time side
-		//publishToRos();
-		//    if(ticks%10==0) {
-		//copyRosSubscriber();
-		/*if (publish_it == pub.end())
-		{
-			publish_it = pub.begin();
-		}*/
-		// do publish of all published values
-		// send a signal to the ros thread to start the network communication
-		ros_thread_finished = false;
-		//pthread_cond_signal(&ros_go);
-		//    }
 	}
 }
 
