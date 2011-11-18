@@ -142,6 +142,12 @@ public:
 	*/
 	dVector getError() const;
 
+	dVector getDesired() const;
+	dVector getDesiredDot() const;
+	dVector getErrorDot() const;
+	dVector getCurrentDotReference() const;
+	dVector getCurrentDotDotReference() const;
+
 	/**
 	* Activate the controllers stored in the rxControlSet through the vector of rxController's (NOT WORKING!!!!)
 	*/

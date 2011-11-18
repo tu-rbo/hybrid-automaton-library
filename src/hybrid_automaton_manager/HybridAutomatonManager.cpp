@@ -101,7 +101,6 @@ void HybridAutomatonManager::update(const rTime& t)
 	rControlAlgorithm::update(t);
 
 	this->updateBlackboard();
-
 }
 
 void HybridAutomatonManager::updateBlackboard()
@@ -206,6 +205,8 @@ void HybridAutomatonManager::_reflect()
 
 void HybridAutomatonManager::_compute(const double& t)
 {
+	_torque = _activeMotionBehavior->update(t);	
+
 	if( _newHAArrived )
 	{
 		delete _plan;
@@ -240,7 +241,6 @@ void HybridAutomatonManager::_compute(const double& t)
 		}
 	}
 	
-	_torque = _activeMotionBehavior->update(t);	
 	//_torque.print(_T("_torquenew"));
 }
 
@@ -285,8 +285,19 @@ int HybridAutomatonManager::command(const short& cmd, const int& arg)
 }
 
 
-void HybridAutomatonManager::datanames (vector<string_type>& names, int channel)
+void HybridAutomatonManager::datanames(vector<string_type>& names, int channel)
 {
+	switch (channel) {
+		case 1: names.push_back(_T("Torque"));
+		case 2: names.push_back(_T("Q"));
+		case 3: names.push_back(_T("Velocity"));
+		case 4: names.push_back(_T("Error"));
+		case 5: names.push_back(_T("Desired Q"));
+		case 6: names.push_back(_T("Error Velocity"));
+		case 7: names.push_back(_T("Reference Velocity"));
+		case 8: names.push_back(_T("Reference Acceleration"));
+		case 9: names.push_back(_T("Desired Velocity"));
+	}
 }
 
 void HybridAutomatonManager::collect(vector<double>& data, int channel)
@@ -315,19 +326,67 @@ void HybridAutomatonManager::collect(vector<double>& data, int channel)
 		}
 		else {
 			for(int i = 0; i < _dof; ++i)
-				data.push_back(666.6);
+				data.push_back(666);
 		}
 	}
 	else if (channel == 5)
 	{
-		dVector e = _activeMotionBehavior->getError();
-		if (e.size() > 0) {
+		dVector d = _activeMotionBehavior->getDesired();
+		if (d.size() > 0) {
 			for(int i = 0; i < _dof; ++i)
-				data.push_back(_q[i]-e[i]);
+				data.push_back(d[i]);
 		}
 		else {
 			for(int i = 0; i < _dof; ++i)
-				data.push_back(666.6);
+				data.push_back(666);
+		}
+	}
+	else if (channel == 6)
+	{
+		dVector d = _activeMotionBehavior->getErrorDot();
+		if (d.size() > 0) {
+			for(int i = 0; i < _dof; ++i)
+				data.push_back(d[i]);
+		}
+		else {
+			for(int i = 0; i < _dof; ++i)
+				data.push_back(666);
+		}
+	}
+	else if (channel == 7)
+	{
+		dVector d = _activeMotionBehavior->getCurrentDotReference();
+		if (d.size() > 0) {
+			for(int i = 0; i < _dof; ++i)
+				data.push_back(d[i]);
+		}
+		else {
+			for(int i = 0; i < _dof; ++i)
+				data.push_back(666);
+		}
+	}
+	else if (channel == 8)
+	{
+		dVector d = _activeMotionBehavior->getCurrentDotDotReference();
+		if (d.size() > 0) {
+			for(int i = 0; i < _dof; ++i)
+				data.push_back(d[i]);
+		}
+		else {
+			for(int i = 0; i < _dof; ++i)
+				data.push_back(666);
+		}
+	}
+	else if (channel == 9)
+	{
+		dVector d = _activeMotionBehavior->getDesiredDot();
+		if (d.size() > 0) {
+			for(int i = 0; i < _dof; ++i)
+				data.push_back(d[i]);
+		}
+		else {
+			for(int i = 0; i < _dof; ++i)
+				data.push_back(666);
 		}
 	}
 }

@@ -205,6 +205,8 @@ void MotionBehaviour::activate()
 					(*it)->deactivate();
 				}
 
+				(*it)->activate();
+
 				// add the goal of the child milestone
 				switch((*it)->type()) {
 					case rxController::eControlType_Joint:
@@ -221,7 +223,7 @@ void MotionBehaviour::activate()
 								time_to_converge_ = max( fabs((6 * desired_q[i] - 6 * current_q[i]) / (current_qd[i] + desired_qd[i] + 4 * max_velocity)), time_to_converge_ );
 							}
 							std::cout << "time of trajectory: " << time_to_converge_ << std::endl;
-							dynamic_cast<rxJointController*>(*it)->addPoint(desired_q, time_to_converge_, false);
+							dynamic_cast<rxJointController*>(*it)->addPoint(desired_q, time_to_converge_, false, eInterpolatorType_Quintic);
 							break;
 						}
 					case rxController::eControlType_Displacement:
@@ -256,8 +258,6 @@ void MotionBehaviour::activate()
 							break;
 						}
 				}
-
-				(*it)->activate();
 			}
 		}
 	}
@@ -273,12 +273,12 @@ void MotionBehaviour::deactivate()
 
 bool MotionBehaviour::hasConverged() 
 {
-	dVector error(this->control_set_->e()) ;
-
 	//NOTE (Roberto) : How could we check if it has converged? There is no way to check automatically all the controllers through the control set.
 	//We wait until the time to converge is exceeded and then we check if the error is small.
 	if(time_ > time_to_converge_)
 	{
+		dVector error = this->control_set_->e();
+
 		for(int i = 0; i < error.size(); ++i)
 		{
 			//HACK (George) : This is because I couldn't get the error between the current position and the desired position at the END of the trajectory
@@ -290,7 +290,7 @@ bool MotionBehaviour::hasConverged()
 				return false;
 			}
 		}
-		//std::cout << "CONVERGED!!!" << std::endl<< std::endl<< std::endl;
+		//std::cout << "CONVERGED!!!" << std::endl;
 		return true;
 	}
 	return false;
@@ -299,6 +299,96 @@ bool MotionBehaviour::hasConverged()
 dVector MotionBehaviour::getError() const
 {
 	return control_set_->e();
+}
+
+dVector MotionBehaviour::getDesired() const
+{
+	dVector desired;
+	std::list<rxController*> controllers = control_set_->getControllers();
+	for(std::list<rxController*>::const_iterator it = controllers.begin(); it != controllers.end(); ++it)
+	{
+		if (*it)
+		{
+			if ((*it)->type() == rxController::eControlType_Joint)
+			{
+				dVector qd = dynamic_cast<rxJointController*>(*it)->qd();
+				desired.expand(qd.size(), qd);
+			}
+		}
+	}
+	return desired;
+}
+
+dVector MotionBehaviour::getDesiredDot() const
+{
+	dVector desired_dot;
+	std::list<rxController*> controllers = control_set_->getControllers();
+	for(std::list<rxController*>::const_iterator it = controllers.begin(); it != controllers.end(); ++it)
+	{
+		if (*it)
+		{
+			if ((*it)->type() == rxController::eControlType_Joint)
+			{
+				dVector qdotd = dynamic_cast<rxJointController*>(*it)->qdotd();
+				desired_dot.expand(qdotd.size(), qdotd);
+			}
+		}
+	}
+	return desired_dot;
+}
+
+dVector MotionBehaviour::getErrorDot() const
+{
+	dVector error_dot;
+	std::list<rxController*> controllers = control_set_->getControllers();
+	for(std::list<rxController*>::const_iterator it = controllers.begin(); it != controllers.end(); ++it)
+	{
+		if (*it)
+		{
+			if ((*it)->type() == rxController::eControlType_Joint)
+			{
+				dVector edot = dynamic_cast<rxJointController*>(*it)->edot();
+				error_dot.expand(edot.size(), edot);
+			}
+		}
+	}
+	return error_dot;
+}
+
+dVector MotionBehaviour::getCurrentDotReference() const
+{
+	dVector current_dot_ref;
+	std::list<rxController*> controllers = control_set_->getControllers();
+	for(std::list<rxController*>::const_iterator it = controllers.begin(); it != controllers.end(); ++it)
+	{
+		if (*it)
+		{
+			if ((*it)->type() == rxController::eControlType_Joint)
+			{
+				dVector qdot_ref = dynamic_cast<rxJointController*>(*it)->qdot_ref();
+				current_dot_ref.expand(qdot_ref.size(), qdot_ref);
+			}
+		}
+	}
+	return current_dot_ref;
+}
+
+dVector MotionBehaviour::getCurrentDotDotReference() const
+{
+	dVector current_dotdot_ref;
+	std::list<rxController*> controllers = control_set_->getControllers();
+	for(std::list<rxController*>::const_iterator it = controllers.begin(); it != controllers.end(); ++it)
+	{
+		if (*it)
+		{
+			if ((*it)->type() == rxController::eControlType_Joint)
+			{
+				dVector qddot_ref = dynamic_cast<rxJointController*>(*it)->qddot_ref();
+				current_dotdot_ref.expand(qddot_ref.size(), qddot_ref);
+			}
+		}
+	}
+	return current_dotdot_ref;
 }
 
 dVector MotionBehaviour::update(double t)
@@ -620,26 +710,22 @@ rxController* MotionBehaviour::createJointController_(int joint_subtype, double 
 	switch(joint_subtype)
 	{
 	case NONE:
-		controller = new rxJointController(this->robot_,controller_duration);
+		controller = new rxJointController(this->robot_, controller_duration);
 		break;
 	case WITH_COMPLIANCE:
-		{
-			controller = new rxJointComplianceController(this->robot_,controller_duration);	
-			break;
-		}
+		controller = new rxJointComplianceController(this->robot_, controller_duration);	
+		break;
 	case WITH_IMPEDANCE:
-		controller = new rxJointImpedanceController(this->robot_,controller_duration);
+		controller = new rxJointImpedanceController(this->robot_, controller_duration);
 		break;
 	case WITH_INTERPOLATION:
-		controller = new rxInterpolatedJointController(this->robot_,controller_duration);
+		controller = new rxInterpolatedJointController(this->robot_, controller_duration);
 		break;
 	case WITH_INTERPOLATION | WITH_COMPLIANCE:
-		{
-			controller = new rxInterpolatedJointComplianceController(this->robot_,controller_duration);
-			break;
-		}
+		controller = new rxInterpolatedJointComplianceController(this->robot_, controller_duration);
+		break;
 	case WITH_INTERPOLATION | WITH_IMPEDANCE:
-		controller = new rxInterpolatedJointImpedanceController(this->robot_,controller_duration);
+		controller = new rxInterpolatedJointImpedanceController(this->robot_, controller_duration);
 		break;
 	default:
 		throw std::string("ERROR: [MotionBehaviour::createJointController_(ControllerSubgroup joint_subtype, double controller_duration, std::vector<ViaPointBase*> via_points_ptr)] Unexpected Controller subgroup.");
