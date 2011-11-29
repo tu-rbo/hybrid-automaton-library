@@ -211,7 +211,7 @@ void MotionBehaviour::activate()
 				switch((*it)->type()) {
 					case rxController::eControlType_Joint:
 						{
-							double max_velocity = 0.5;// in rad/s
+							double max_velocity = 0.3;// in rad/s
 							time_to_converge_ = 1.0;
 							dVector current_q = robot_->q();//parent->getConfiguration();
 							dVector desired_q = child->getConfiguration();

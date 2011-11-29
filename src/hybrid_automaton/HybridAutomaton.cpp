@@ -28,8 +28,8 @@ void HybridAutomaton::setStartNode(Milestone* nodeID)
 	start_node_id_ = nodeID; 
 }
 
-std::string HybridAutomaton::toStringXML() const{
-
+std::string HybridAutomaton::toStringXML() const
+{
 	// If the HybridAutomaton is empty, return the corresponding string
 	if(nodeNumber==0 && edgeNumber==0)
 		return std::string("Empty HybridAutomaton");

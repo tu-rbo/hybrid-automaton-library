@@ -61,7 +61,7 @@ RTBlackBoard* RTBlackBoard::getInstance(const std::string& rlab_host, int rlab_p
 * constructor
 */
 RTBlackBoard::RTBlackBoard() :
-	net("130.149.238.180",1888,"130.149.238.185",1999,this)
+	net("130.149.238.179", 1888, "130.149.238.184", 1999, this)
 {
 	// TODO: Order matters => because of string comparision(!)
 	net.subscribeObject(new rlab::Float64MultiArray());

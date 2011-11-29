@@ -14,9 +14,16 @@
 
 unsigned __stdcall deparsePlan(void *udata)
 {
-	DeparsingStructure* dep_struct = static_cast<DeparsingStructure*>(udata);
-	(dep_struct->_ha)->fromStringXML(dep_struct->_string, dep_struct->_robot, dep_struct->_dT);
-	(*(dep_struct->_finished)) = true;
+	DeserializingThreadArguments* thread_args = static_cast<DeserializingThreadArguments*>(udata);
+	HybridAutomaton* ha = new HybridAutomaton();
+	ha->fromStringXML(thread_args->_string, thread_args->_robot, thread_args->_dT);
+
+	WaitForSingleObject(*(thread_args->_deserialize_mutex), INFINITE);
+	thread_args->_deserialized_hybrid_automatons->push_back(ha);
+	ReleaseMutex(*(thread_args->_deserialize_mutex));
+	
+	delete thread_args;
+
 	return 0;
 }
 
@@ -34,12 +41,14 @@ HybridAutomatonManager::HybridAutomatonManager(rDC rdc)
 , _blackboard(NULL)
 , _activeMotionBehavior(NULL)
 , _defaultMotionBehavior(NULL)
-, _dof()
-, _HS()
-, _newHAArrived(false)
+, _dof(0)
 , _servo_on(false)
-, _plan(NULL)
+, _hybrid_automaton(NULL)
 {
+	_deserialize_mutex = CreateMutex(0, FALSE, 0);
+	if( !_deserialize_mutex ) {
+		throw(std::string("[HybridAutomatonManager::HybridAutomatonManager(rDC rdc)] Mutex was not created (_deserialize_mutex)!"));
+	}
 }
 
 HybridAutomatonManager::~HybridAutomatonManager()
@@ -48,18 +57,11 @@ HybridAutomatonManager::~HybridAutomatonManager()
 
 	//delete _defaultMotionBehavior;
 
-	for( ::std::vector< MotionBehaviour* >::const_iterator it = _navigationFunction.begin(); it != _navigationFunction.end(); ++it)
-		delete *it;
-	_navigationFunction.clear();
-
 	FREE_SYSTEMS();
 }
 
-
-
 void HybridAutomatonManager::init(int mode)
 {
-
 	//std::wcout << _path << std::endl;
 	//std::wcout << _aml << std::endl;
 
@@ -86,8 +88,7 @@ void HybridAutomatonManager::init(int mode)
 	_robotDevice = findDevice(_T("ROBOT"));
 	RASSERT(_robotDevice != INVALID_RHANDLE);
 
-
-	_blackboard = RTBlackBoard::getInstance("130.149.238.180", 1888, "130.149.238.184", 1999);
+	_blackboard = RTBlackBoard::getInstance("130.149.238.179", 1888, "130.149.238.184", 1999);
 
 	_defaultMotionBehavior = new MotionBehaviour(new Milestone(), new Milestone(),_robot);
 	_activeMotionBehavior = _defaultMotionBehavior;
@@ -114,17 +115,20 @@ void HybridAutomatonManager::updateHybridAutomaton()
 {
 	if (_blackboard->isUpdated("update_hybrid_automaton"))
 	{
-		rlab::String* s = dynamic_cast<rlab::String*>(_blackboard->getData("update_hybrid_automaton"));
-		_HS = s->get();
+		rlab::String* ha_xml = dynamic_cast<rlab::String*>(_blackboard->getData("update_hybrid_automaton"));
 		try
 		{
-			_dep_struct._robot = this->_robot;
-			_dep_struct._string = this->_HS;
-			_dep_struct._finished = &(this->_newHAArrived);
-			HybridAutomaton* ha_new = new HybridAutomaton();
-			_dep_struct._ha = ha_new;
-			_dep_struct._dT = this->_dT;
-			_beginthreadex(NULL, 0, deparsePlan, (void*)&_dep_struct, 0, NULL);
+			DeserializingThreadArguments* thread_args = new DeserializingThreadArguments();
+			thread_args->_robot = this->_robot;
+			thread_args->_string = ha_xml->get();
+			thread_args->_dT = this->_dT;
+			thread_args->_deserialize_mutex = &(this->_deserialize_mutex);
+			thread_args->_deserialized_hybrid_automatons = &(this->_deserialized_hybrid_automatons);
+
+			if (_beginthreadex(NULL, 0, deparsePlan, (void*)thread_args, 0, NULL) == 0)
+			{
+				std::cerr << "[HybridAutomatonManager::updateHybridAutomaton()] Error creating thread to deserialize xml string!" << std::endl;
+			}
 		}
 		catch(::std::string e)
 		{
@@ -137,11 +141,8 @@ void HybridAutomatonManager::updateHybridAutomaton()
 void HybridAutomatonManager::setNominalSystem(const TCHAR* path, const TCHAR* aml, const HTransform& T0, const dVector& q0)
 {
 	this->_path = path;
-
 	this->_aml = aml;
-
 	this->_T0 = T0;
-
 	this->_q0 = q0;
 }
 
@@ -207,31 +208,35 @@ void HybridAutomatonManager::_compute(const double& t)
 {
 	_torque = _activeMotionBehavior->update(t);	
 
-	if( _newHAArrived )
+	if( !_deserialized_hybrid_automatons.empty() )
 	{
-		delete _plan;
-		_plan = _dep_struct._ha;
-		std::cout << "First controller" << std::endl;
-		Milestone* tmpMilestone = _plan->getStartNode();
-		_activeMotionBehavior->deactivate();
-		_activeMotionBehavior = _plan->outgoingEdges(*tmpMilestone)[0];
-		_newHAArrived = false;
-
-		_activeMotionBehavior->activate();
+		if (WaitForSingleObject(_deserialize_mutex, 0) != WAIT_FAILED && !_deserialized_hybrid_automatons.empty())
+		{
+			delete _hybrid_automaton;
+			_hybrid_automaton = _deserialized_hybrid_automatons.front();
+			_deserialized_hybrid_automatons.pop_front();
+			
+			std::cout << "New Hybrid Automaton" << std::endl;
+			Milestone* tmpMilestone = _hybrid_automaton->getStartNode();
+			_activeMotionBehavior->deactivate();
+			_activeMotionBehavior = _hybrid_automaton->outgoingEdges(*tmpMilestone)[0];
+			_activeMotionBehavior->activate();
 #ifdef NOT_IN_RT
-		std::cout << _activeMotionBehavior->toStringXML() << ::std::endl;
-		_activeMotionBehavior->print();
-		std::cout << "Number of edges: " << _plan->getEdgeNumber() << std::endl;
-		_plan->__printMatrix();
+			std::cout << _activeMotionBehavior->toStringXML() << ::std::endl;
+			_activeMotionBehavior->print();
+			std::cout << "Number of edges: " << _hybrid_automaton->getEdgeNumber() << std::endl;
+			_hybrid_automaton->__printMatrix();
 #endif
+			ReleaseMutex(_deserialize_mutex);
+		}
 	}
 	else if(_activeMotionBehavior->hasConverged() ){/*
 		this->_q.print(_T("configuration"));*/
-		if (_plan && !_plan->outgoingEdges(*(_activeMotionBehavior->getChild())).empty()) {
+		if (_hybrid_automaton && !_hybrid_automaton->outgoingEdges(*(_activeMotionBehavior->getChild())).empty()) {
 			std::cout << "Switching controller" << std::endl;
 			_activeMotionBehavior->deactivate();
 			
-			_activeMotionBehavior = _plan->outgoingEdges(*(_activeMotionBehavior->getChild()))[0];
+			_activeMotionBehavior = _hybrid_automaton->outgoingEdges(*(_activeMotionBehavior->getChild()))[0];
 			_activeMotionBehavior->activate();
 
 #ifdef NOT_IN_RT

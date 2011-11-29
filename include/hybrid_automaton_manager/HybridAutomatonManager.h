@@ -18,12 +18,12 @@
 #include "HybridAutomaton.h"
 
 
-typedef struct DeparsingStructure{
+typedef struct DeserializingThreadArguments {
 	std::string _string;
 	rxSystem* _robot;
-	volatile bool * _finished;
-	HybridAutomaton * _ha;
 	double _dT;
+	std::deque<HybridAutomaton*>* _deserialized_hybrid_automatons;
+	HANDLE* _deserialize_mutex;
 };
 
 class REXPORT HybridAutomatonManager : public rControlAlgorithm
@@ -41,8 +41,6 @@ public:
 	virtual void collect(vector<double>& data, int channel = -1);
 	virtual void onSetInterestFrame(const TCHAR* name, const HTransform& T);
 
-	
-
 private:
 	virtual void _estimate();
 	virtual void _readDevices();
@@ -51,56 +49,36 @@ private:
 	virtual void _compute(const rTime& t);
 
 	void updateHybridAutomaton();
-
 	void updateBlackboard();
 
-private:
+	HybridAutomaton*	_hybrid_automaton;
 
-	HybridAutomaton	*					_plan;
+	rxSystem*			_robot;
+	rHANDLE				_robotDevice;
 
-	std::string							_HS;
+	MotionBehaviour*	_activeMotionBehavior;
+	MotionBehaviour*	_defaultMotionBehavior;
 
-	rxSystem*							_robot;
+	string_type			_path;
+	string_type			_aml;
 
-	rHANDLE								_robotDevice;
+	HTransform			_T0;
 
-	RTBlackBoard*						_blackboard;
+	dVector				_q0;
+	double				_dT;
+	dVector				_q;
+	dVector				_qdot;
+	dVector				_torque;
 
-	MotionBehaviour*					_activeMotionBehavior;
+	RTBlackBoard*		_blackboard;
+	std::vector<double>	_q_BB;
+	std::vector<double>	_qdot_BB;
+	std::vector<double>	_torque_BB;
 
-	MotionBehaviour*					_defaultMotionBehavior;
+	int					_dof;
+	bool				_servo_on;
 
-	string_type							_path;
-	
-	string_type							_aml;
-
-	HTransform							_T0;
-
-	dVector								_q0;
-
-	double								_dT;
-
-	dVector								_q;
-
-	dVector								_qdot;
-
-	dVector								_torque;
-
-	std::vector<double>					_q_BB;
-
-	std::vector<double>					_qdot_BB;
-
-	std::vector<double>					_torque_BB;
-
-	int									_dof;
-
-	::std::vector< MotionBehaviour* >   _navigationFunction;
-
-	volatile bool						_newHAArrived;
-
-	bool								_servo_on;
-
-	DeparsingStructure					_dep_struct;
-
+	std::deque<HybridAutomaton*> _deserialized_hybrid_automatons;
+	HANDLE				_deserialize_mutex;
 };
 #endif
