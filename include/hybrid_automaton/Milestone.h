@@ -42,13 +42,18 @@ typedef struct Point
 
 }point;
 
+/*enum MilestoneType
+{
+	MILESTONE, CSPACE, OPSPACE, CURRENT_POS, GOAL
+};*/
+
 class Milestone : public Node 
 {
 
 public:
 
 	enum Status {
-		VALID, INVALID, TASK_CONSISTENT, STATUS_NUM
+		VALID, INVALID, TASK_CONSISTENT, STATUS_NUM, CURRENT_POS, GOAL
 	};
 
 	Milestone();
@@ -79,10 +84,16 @@ public:
 
 	virtual std::string getName() const;
 
+	//MilestoneType getType() const;
+
+	//void setType(MilestoneType typ);
+
 protected:
 
 	Status			status_;
 	std::string		name_;
+	//MilestoneType type_;
+
 
 };
 

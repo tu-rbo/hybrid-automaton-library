@@ -78,6 +78,17 @@ std::string Milestone::getName() const
 	return this->name_;
 }
 
+/*
+MilestoneType Milestone::getType() const
+{
+	return this->type_;
+}
+
+void Milestone::setType(MilestoneType type)
+{
+	this->type_ = type;
+}
+*/
 //bool Milestone::operator== (const Node& n) const {
 //	return false;
 //}
