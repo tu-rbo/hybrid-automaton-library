@@ -15,15 +15,15 @@ JointState::JointState(const std::string& topic, const std::vector<double>& posi
 	this->typeid_name = "JointState";
 	this->topic = topic;
 	this->position = position;
-	this->position = velocity;
-	this->position = effort;
+	this->velocity = velocity;
+	this->effort = effort;
 }
 
 JointState::JointState(const std::vector<double>& position, const std::vector<double>& velocity, const std::vector<double>& effort) {
 	this->typeid_name = "JointState";
 	this->position = position;
-	this->position = velocity;
-	this->position = effort;
+	this->velocity = velocity;
+	this->effort = effort;
 }
 
 //std::string JointState::getType(){

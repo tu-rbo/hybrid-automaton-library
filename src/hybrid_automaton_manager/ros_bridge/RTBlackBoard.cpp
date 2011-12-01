@@ -13,6 +13,7 @@
 #include "msgs\String.h"
 #include "msgs\JointState.h"
 #include "msgs\RequestROSSubscription.h"
+#include "msgs\Transform.h"
 
 /*
 * for the singleton stuff
@@ -68,6 +69,7 @@ RTBlackBoard::RTBlackBoard() :
 	net.subscribeObject(new rlab::Float64());
 	net.subscribeObject(new rlab::String());
 	net.subscribeObject(new rlab::JointState());
+	net.subscribeObject(new rlab::Transform());
 
 	// initialize mutex to copy input buffer
 	copyInputBufferMutex = CreateMutex(0, FALSE, 0);
@@ -88,6 +90,7 @@ net(rlab_host.c_str(), rlab_port, ros_host.c_str(), ros_port, this)
 	net.subscribeObject(new rlab::Float64());
 	net.subscribeObject(new rlab::String());
 	net.subscribeObject(new rlab::JointState());
+	net.subscribeObject(new rlab::Transform());
 
 	// initialize mutex to copy input buffer
 	copyInputBufferMutex = CreateMutex(0, FALSE, 0);
@@ -230,6 +233,44 @@ void RTBlackBoard::setJointState(const std::string& topic, const std::vector<dou
 			data->setPosition(position);
 			data->setVelocity(velocity);
 			data->setEffort(effort);
+		}
+		else
+			throw "topic has different type than expected";
+	}
+}
+
+void RTBlackBoard::setTransform(const std::string& topic, rMath::HTransform& transform, const std::string& parent) {
+	setTransform(topic, transform, parent, outputMap);
+}
+
+void RTBlackBoard::setTransform(const std::string& topic, rMath::HTransform& transform, const std::string& parent, DataMap &map) {
+	std::vector<double> position(3);
+	std::vector<double> orientation(4);
+	
+	rMath::dVector quat(4);
+	transform.R.GetQuaternion(quat);
+	orientation[0] = quat(1);
+	orientation[1] = quat(2);
+	orientation[2] = quat(3);
+	orientation[3] = quat(0);
+
+	position[0] = transform.r[0];
+	position[1] = transform.r[1];
+	position[2] = transform.r[2];
+
+	DataMap::iterator iter = map.find(topic);
+	if(iter == map.end()) {
+		// if not in map create a new object with data from val
+		map[topic] = new rlab::Transform(topic, position, orientation, parent);
+	}
+	else {
+		// cast to message type
+		rlab::Transform* data = static_cast<rlab::Transform*>(iter->second);
+		
+		if(data) {
+			data->setPosition(position);
+			data->setOrientation(orientation);
+			data->setParent(parent);
 		}
 		else
 			throw "topic has different type than expected";

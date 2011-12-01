@@ -241,6 +241,10 @@
 						RelativePath="..\..\src\hybrid_automaton_manager\ros_bridge\msgs\String.cpp"
 						>
 					</File>
+					<File
+						RelativePath="..\..\src\hybrid_automaton_manager\ros_bridge\msgs\Transform.cpp"
+						>
+					</File>
 				</Filter>
 			</Filter>
 		</Filter>
@@ -313,6 +317,10 @@
 					</File>
 					<File
 						RelativePath="..\..\include\hybrid_automaton_manager\ros_bridge\msgs\String.h"
+						>
+					</File>
+					<File
+						RelativePath="..\..\include\hybrid_automaton_manager\ros_bridge\msgs\Transform.h"
 						>
 					</File>
 				</Filter>
