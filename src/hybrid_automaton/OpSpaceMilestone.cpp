@@ -95,6 +95,7 @@ motion_behaviour_(NULL)
 {
 	XMLDeserializer xml_deserializer_(milestone_xml);
 	this->setStatus((Status)xml_deserializer_.deserializeInteger("status"));
+	this->name_ = xml_deserializer_.deserializeString("name");
 	//this->object_id_ = xml_deserializer_.deserializeInteger("ObjectId");
 	this->posi_ori_selection_ = (PosiOriSelector)xml_deserializer_.deserializeInteger("PosiOriSelector");
 

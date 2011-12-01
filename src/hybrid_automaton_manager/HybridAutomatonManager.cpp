@@ -12,11 +12,23 @@
 
 //#define NOT_IN_RT
 
-unsigned __stdcall deparsePlan(void *udata)
+unsigned __stdcall deserializeHybridAutomaton(void *udata)
 {
 	DeserializingThreadArguments* thread_args = static_cast<DeserializingThreadArguments*>(udata);
 	HybridAutomaton* ha = new HybridAutomaton();
-	ha->fromStringXML(thread_args->_string, thread_args->_robot, thread_args->_dT);
+
+	try {
+		ha->fromStringXML(thread_args->_string, thread_args->_robot, thread_args->_dT);
+	}
+	catch(std::string e)
+	{
+		std::cerr << "ERROR while deserializing hybrid automaton!" << std::endl;
+		std::cerr << e << std::endl;
+
+		delete ha;
+		delete thread_args;
+		return 0;
+	}
 
 	WaitForSingleObject(*(thread_args->_deserialize_mutex), INFINITE);
 	thread_args->_deserialized_hybrid_automatons->push_back(ha);
@@ -107,8 +119,10 @@ void HybridAutomatonManager::update(const rTime& t)
 void HybridAutomatonManager::updateBlackboard()
 {
 	_blackboard->setJointState("joint_state", _q_BB, _qdot_BB, _torque_BB);
-
-	_blackboard->step();	
+	rxBody* ee = _robot->findBody(_T("Body7"));
+	HTransform h = ee->T();
+	_blackboard->setTransform("ee", h, "base");
+	_blackboard->step();
 }
 
 void HybridAutomatonManager::updateHybridAutomaton()
@@ -125,7 +139,7 @@ void HybridAutomatonManager::updateHybridAutomaton()
 			thread_args->_deserialize_mutex = &(this->_deserialize_mutex);
 			thread_args->_deserialized_hybrid_automatons = &(this->_deserialized_hybrid_automatons);
 
-			if (_beginthreadex(NULL, 0, deparsePlan, (void*)thread_args, 0, NULL) == 0)
+			if (_beginthreadex(NULL, 0, deserializeHybridAutomaton, (void*)thread_args, 0, NULL) == 0)
 			{
 				std::cerr << "[HybridAutomatonManager::updateHybridAutomaton()] Error creating thread to deserialize xml string!" << std::endl;
 			}

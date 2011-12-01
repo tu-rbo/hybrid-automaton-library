@@ -124,13 +124,18 @@ void HybridAutomaton::fromStringXML(std::string xml_string, rxSystem* robot, dou
 		!= 0; mst_element = mst_element->NextSiblingElement("Milestone")) 
 	{
 		Milestone* mst;
-		std::string mst_type = std::string(mst_element->Attribute("type"));
-		if(mst_type == "CSpace"){
+		std::string mst_type(mst_element->Attribute("type"));
+		if(mst_type == "CSpace")
+		{
 			mst = new CSpaceMilestone(mst_element, robot, dT);
-		}else if(mst_type == "OpSpace"){
+		}
+		else if(mst_type == "OpSpace")
+		{
 			mst = new OpSpaceMilestone(mst_element, robot, dT);
-		}else{
-			throw std::string("ERROR [HybridAutomaton::fromStringXML]: Wrong type of milestone.");
+		}
+		else
+		{
+			throw ("ERROR [HybridAutomaton::fromStringXML]: Unknown type of milestone: " + mst_type);
 		}
 		this->addNode(mst);
 	}
@@ -142,14 +147,14 @@ void HybridAutomaton::fromStringXML(std::string xml_string, rxSystem* robot, dou
 			this->start_node_id_ = this->nodeList[i];
 			break;
 		}
-		throw std::string("ERROR [HybridAutomaton::fromStringXML]: The name of the initial node does not match with the name of any milestone.");
+		throw ("ERROR [HybridAutomaton::fromStringXML]: The name of the initial node '" + start_node + "' does not match with the name of any milestone.");
 	}
 
 	// Read the data of the edges-motionbehaviours and create them
 	for (TiXmlElement* mb_element = hs_element->FirstChildElement("MotionBehaviour"); mb_element
 		!= 0; mb_element = mb_element->NextSiblingElement("MotionBehaviour")) {
-			std::string ms_parent = std::string(mb_element->Attribute("Parent"));
-			std::string ms_child = std::string(mb_element->Attribute("Child"));
+			std::string ms_parent(mb_element->Attribute("Parent"));
+			std::string ms_child(mb_element->Attribute("Child"));
 			Milestone* ms_parent_ptr = NULL;
 			Milestone* ms_child_ptr = NULL;
 			if(ms_parent == std::string(""))
@@ -181,7 +186,9 @@ void HybridAutomaton::fromStringXML(std::string xml_string, rxSystem* robot, dou
 				}
 			}
 			if(ms_child_ptr == NULL)
-				throw std::string("ERROR [HybridAutomaton::fromStringXML]: The name of the child node does not match with the name of any milestone.");
+			{
+				throw ("ERROR [HybridAutomaton::fromStringXML]: The name of the child node '" + ms_child + "' does not match the name of any milestone.");
+			}
 
 			MotionBehaviour* mb = new MotionBehaviour(mb_element, ms_parent_ptr, ms_child_ptr, robot, dT);
 			this->addEdge(mb);

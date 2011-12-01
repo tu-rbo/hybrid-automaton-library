@@ -170,6 +170,12 @@ void MotionBehaviour::addController_(TiXmlElement * rxController_xml)
 		throw std::string("ERROR: [MotionBehaviour::addController_(TiXmlElement * rxController_xml)] Unexpected Controller group.");
 		break;
 	}
+	
+	// we need unique names for all controllers in a single control set, otherwise RLAB will complain
+	std::wstringstream wss;
+	wss << "controller_" << control_set_->getControllers().size();
+	controller->setName(wss.str());
+	
 	this->addController(controller);	// The controller is deactivated when added
 	controller->setIKMode(controller_ik_bool);
 	controller->setGain(kv_vector, kp_vector, invL2sqr_vector);	
@@ -183,7 +189,7 @@ void MotionBehaviour::addController(rxController* ctrl)
 			throw std::string("ERROR: [MotionBehaviour::addController(rxController* ctrl)] Time intervals of MotionBehaviour and all its controllers must be the same.");
 		}
 		ctrl->deactivate();
-		control_set_->addController(ctrl);
+		control_set_->addController(ctrl, ctrl->name());
 	}
 	else
 	{
@@ -212,7 +218,7 @@ void MotionBehaviour::activate()
 					case rxController::eControlType_Joint:
 						{
 							double max_velocity = 0.3;// in rad/s
-							time_to_converge_ = 1.0;
+							time_to_converge_ = 0.5;
 							dVector current_q = robot_->q();//parent->getConfiguration();
 							dVector desired_q = child->getConfiguration();
 							dVector current_qd = current_q;
@@ -223,7 +229,7 @@ void MotionBehaviour::activate()
 								time_to_converge_ = max( fabs((6 * desired_q[i] - 6 * current_q[i]) / (current_qd[i] + desired_qd[i] + 4 * max_velocity)), time_to_converge_ );
 							}
 							std::cout << "time of trajectory: " << time_to_converge_ << std::endl;
-							dynamic_cast<rxJointController*>(*it)->addPoint(desired_q, time_to_converge_, false, eInterpolatorType_Quintic);
+							dynamic_cast<rxJointController*>(*it)->addPoint(desired_q, time_to_converge_, false, eInterpolatorType_Cubic);
 							break;
 						}
 					case rxController::eControlType_Displacement:
@@ -238,7 +244,8 @@ void MotionBehaviour::activate()
 						{
 							time_to_converge_ = 10.0;
 							dVector goal = child->getConfiguration();
-							Rotation goal_rot(goal[3], goal[4], goal[5]);		//NOTE: Suposses that the orientation is defined with 
+							Rotation goal_rot(goal[3], goal[4], goal[5]);		
+							//NOTE: Suposses that the orientation is defined with 
 							// goal[3] = roll
 							// goal[4] = pitch
 							// goal[5] = yaw
@@ -903,8 +910,8 @@ rxController* MotionBehaviour::createOrientationController_(int orientation_subt
 	if(orientation_subtype & WITH_COMPLIANCE)
 	{
 		XMLDeserializer xml_deserializer_(rxController_xml);
-		std::stringstream stiffness_b_ss = std::stringstream(xml_deserializer_.deserializeString("stiffness_b"));
-		std::stringstream stiffness_k_ss = std::stringstream(xml_deserializer_.deserializeString("stiffness_k"));
+		std::stringstream stiffness_b_ss(xml_deserializer_.deserializeString("stiffness_b"));
+		std::stringstream stiffness_k_ss(xml_deserializer_.deserializeString("stiffness_k"));
 		double stiffness_b_value = -1.0;
 		double stiffness_k_value = -1.0;
 		dVector stiffness_b_displacement;
