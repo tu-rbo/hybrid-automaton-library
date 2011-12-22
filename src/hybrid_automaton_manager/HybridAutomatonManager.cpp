@@ -100,7 +100,7 @@ void HybridAutomatonManager::init(int mode)
 	_robotDevice = findDevice(_T("ROBOT"));
 	RASSERT(_robotDevice != INVALID_RHANDLE);
 
-	_blackboard = RTBlackBoard::getInstance("130.149.238.179", 1888, "130.149.238.184", 1999);
+	_blackboard = RTBlackBoard::getInstance("130.149.238.180", 1888, "130.149.238.184", 1999);
 
 	_defaultMotionBehavior = new MotionBehaviour(new Milestone(), new Milestone(),_robot);
 	_activeMotionBehavior = _defaultMotionBehavior;

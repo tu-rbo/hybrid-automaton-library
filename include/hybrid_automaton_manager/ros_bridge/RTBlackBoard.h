@@ -31,14 +31,15 @@
 class RTBlackBoard : public NetworkUpdatable {
 
 private:
-	Network net;
+	bool usesNetwork;
+	std::auto_ptr<Network> net;
 
 	/**
 	* The map contains all topic value pairs.
 	*
 	*/
 	typedef std::map< std::string, rlab::NetworkData* > DataMap;
-	DataMap inputBuffer;
+	DataMap networkInputBuffer;
 	DataMap inputMap;
 	DataMap outputMap;
 
@@ -91,18 +92,15 @@ public:
 	int size();
 
 	void subscribeToROSMessage(const std::string& topic);
-
-	/*!
-	* \brief set a double value in the BlackBoard
-	*/
-	void setFloat64(const std::string &topic, double val);
-
+	
 	/*!
 	* \brief set a value in the BlackBoard.
 	* @param  topic   the topic to set
-	* @param  val    the value
+	* @param  value   the value
 	*/
-	void setFloat64MultiArray(const std::string& topic, const std::vector<double>& val);
+	void setFloat64(const std::string& topic, double value);
+	void setString(const std::string& topic, const std::string& value);
+	void setFloat64MultiArray(const std::string& topic, const std::vector<double>& value);
 	void setJointState(const std::string& topic, const std::vector<double>& position, const std::vector<double>& velocity, const std::vector<double>& effort);
 	void setTransform(const std::string& topic, rMath::HTransform& transform, const std::string& parent);
 
@@ -116,28 +114,11 @@ public:
 private:
 	void update(rlab::NetworkData *s, DataMap& map);
 
-	void setFloat64(const std::string& topic, double val, DataMap& map);
-	void setFloat64MultiArray(const std::string& topic, const std::vector<double>& val, DataMap& map);
+	void setFloat64(const std::string& topic, double value, DataMap& map);
+	void setString(const std::string& topic, const std::string& value, DataMap& map);
+	void setFloat64MultiArray(const std::string& topic, const std::vector<double>& value, DataMap& map);
 	void setJointState(const std::string& topic, const std::vector<double>& position, const std::vector<double>& velocity, const std::vector<double>& effort, DataMap& map);
 	void setTransform(const std::string& topic, rMath::HTransform& transform, const std::string& parent, DataMap& map);
-
-	//template <typename T1, typename T2>
-	//void set(const std::string& topic, T& value, DataMap& map) {
-	//	DataMap::iterator iter = map.find(topic);
-	//	if(iter == map.end()) {
-	//		// the topic is empty so we need to create a new object and copy the data
-	//		map[topic] = new rlab::Float64(topic, val);
-	//	}
-	//	else {
-	//	// copy the new data
-	//	rlab::Float64* data = static_cast<rlab::Float64*>(iter->second);
-
-	//	if(data)
-	//		data->set(val);
-	//	else
-	//		throw "topic has different type than expected";
-	//}
-
 };
 
 #endif /* BLACKBOARD_H_ */
