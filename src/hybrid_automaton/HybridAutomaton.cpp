@@ -91,7 +91,7 @@ std::string HybridAutomaton::toStringXML() const
 	return ret_val;
 }
 
-void HybridAutomaton::fromStringXML(std::string xml_string, rxSystem* robot, double dT)
+void HybridAutomaton::fromStringXML(const std::string& xml_string, rxSystem* robot, double dT)
 {
 	// Delete the current values of the HybridAutomaton
 	this->clear();
