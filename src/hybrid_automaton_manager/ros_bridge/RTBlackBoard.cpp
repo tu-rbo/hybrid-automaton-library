@@ -86,6 +86,19 @@ RTBlackBoard::RTBlackBoard(const std::string& rlab_host, int rlab_port, const st
 	if( !copyInputBufferMutex ) {
 		throw(std::string("Mutex was not created (copyInputBufferMutex)"));
 	}
+
+	isAboutToBeDestructedEvent = CreateEvent(NULL, true, false, NULL);
+	if (isAboutToBeDestructedEvent == NULL)
+	{
+		std::cerr << "[RTBlackBoard::RTBlackBoard()] Error creating isDestructed event!" << std::endl;
+	}
+
+	// create write thread
+	writeToNetworkThreadHandle = reinterpret_cast<HANDLE>(_beginthreadex(NULL, 0, writeToNetwork, (void*)this, 0, NULL));
+	if (writeToNetworkThreadHandle == NULL)
+	{
+		std::cerr << "[RTBlackBoard::RTBlackBoard()] Error creating thread to send data over network!" << std::endl;
+	}
 }
 
 /*
@@ -103,6 +116,15 @@ RTBlackBoard::~RTBlackBoard()
 
 	// clear the instance flag
 	instanceFlag = false;
+
+	// signal destruction event
+	//if (SetEvent(isAboutToBeDestructedEvent) == 0) {
+	//	std::cerr << "[RTBlackBoard::~RTBlackBoard()] Error signaling isDestructed event!" << std::endl;
+	//}
+	SignalObjectAndWait(isAboutToBeDestructedEvent, writeToNetworkThreadHandle, INFINITE, false);
+
+	//WaitForSingleObject(writeToNetworkThreadHandle, INFINITE);
+	CloseHandle(writeToNetworkThreadHandle);
 	//pthread_join(thread_handle_ros, NULL);
 }
 
@@ -356,21 +378,25 @@ void RTBlackBoard::subscribeToROSMessage(const std::string& topic) {
 //  }
 //}
 
+
 void RTBlackBoard::step() {
 	ticks++;
 
 	if (usesNetwork) {
+		/* OLD SCHOOL -- now a separate thread does this
 		if (ticks % ros_publish_every_n_ticks == 0) {
 			// publish all the data of the outputMap
 			for( DataMap::iterator it = this->outputMap.begin(); it != this->outputMap.end(); ++it ) {
 				(*net) << *(it->second);
 			}
 		}
+		*/
 
 		// set all updated flags to false in the input map
 		for( DataMap::iterator it = this->inputMap.begin(); it != this->inputMap.end(); ++it ) {
 			it->second->setIsUpdated(false);
 		}
+
 
 		// copy all the data from the networkInputBuffer to the inputMap
 		DWORD rc = WaitForSingleObject(copyInputBufferMutex, 0);

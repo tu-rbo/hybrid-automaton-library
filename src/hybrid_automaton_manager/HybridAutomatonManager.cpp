@@ -67,6 +67,8 @@ HybridAutomatonManager::~HybridAutomatonManager()
 {
 	delete _activeMotionBehavior;
 
+	delete _blackboard;
+
 	//delete _defaultMotionBehavior;
 
 	FREE_SYSTEMS();

@@ -34,6 +34,9 @@ private:
 	bool usesNetwork;
 	std::auto_ptr<Network> net;
 
+	HANDLE writeToNetworkThreadHandle;
+	HANDLE isAboutToBeDestructedEvent;
+
 	/**
 	* The map contains all topic value pairs.
 	*
@@ -50,7 +53,7 @@ private:
 	*/
 	unsigned long ticks;
 	unsigned int ros_publish_every_n_ticks;
-	
+
 	/*
 	* is true when we have created an instance of the Blackboard
 	*/
@@ -65,7 +68,6 @@ private:
 	*/
 	RTBlackBoard();
 	RTBlackBoard(const std::string& rlab_host, int rlab_port, const std::string& ros_host, int ros_port);
-	~RTBlackBoard();
 
 public:
 	/*!
@@ -75,6 +77,7 @@ public:
 	static RTBlackBoard* getInstance();
 	static RTBlackBoard* getInstance(const std::string& rlab_host, int rlab_port, const std::string& ros_host, int ros_port);
 
+	~RTBlackBoard();
 	/*!
 	* \brief returns the ros::Message at topic topc in val.
 	* no check if it is actually Tmsg in the bb
@@ -92,7 +95,7 @@ public:
 	int size();
 
 	void subscribeToROSMessage(const std::string& topic);
-	
+
 	/*!
 	* \brief set a value in the BlackBoard.
 	* @param  topic   the topic to set
@@ -119,6 +122,36 @@ private:
 	void setFloat64MultiArray(const std::string& topic, const std::vector<double>& value, DataMap& map);
 	void setJointState(const std::string& topic, const std::vector<double>& position, const std::vector<double>& velocity, const std::vector<double>& effort, DataMap& map);
 	void setTransform(const std::string& topic, rMath::HTransform& transform, const std::string& parent, DataMap& map);
+
+
+	friend unsigned __stdcall writeToNetwork(void *obj)
+	{
+		RTBlackBoard* black_board = static_cast<RTBlackBoard*>(obj);
+
+		while (black_board->outputMap.empty()) {
+			Sleep(200);
+		}
+
+		DataMap::iterator it = black_board->outputMap.begin();
+		
+		// write it infinitely to the network
+		while (WaitForSingleObject(black_board->isAboutToBeDestructedEvent, 0) != WAIT_OBJECT_0) {
+			// copy the stuff from the output buffer
+			// TODO: let's see
+			(*(black_board->net)) << *(it->second);
+
+			Sleep(20);
+
+			if ((++it) == black_board->outputMap.end()) {
+				it = black_board->outputMap.begin();
+			}
+		}
+
+		//std::cerr << "Main Thread is about to be destructed!" << std::endl;
+
+		_endthreadex(0);
+		return 0;
+	}
 };
 
 #endif /* BLACKBOARD_H_ */
