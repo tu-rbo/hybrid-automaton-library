@@ -97,8 +97,11 @@ void HybridAutomaton::fromStringXML(const std::string& xml_string, rxSystem* rob
 	this->clear();
 
 	// Create the DOM-model
-	TiXmlDocument document;
-	document.Parse(xml_string.c_str());
+ 	TiXmlDocument document;
+	if(document.Parse(xml_string.c_str()) == NULL)
+	{
+		std::cout << document.ErrorDesc() << std::endl;
+	}
 	TiXmlHandle docHandle(&document);
 
 	// Find the first (there should be the only one) HybridAutomaton element in the base document
