@@ -15,7 +15,8 @@ Edge<Milestone>(NULL, NULL, -1)
 , robot_(NULL)
 , time_(-1)
 , dT_(-1)
-, time_to_converge_(-1)
+, max_velocity_(-1)
+, min_time_(-1)
 {
 }
 
@@ -24,7 +25,8 @@ Edge<Milestone>(dad, son, weight)
 , robot_(robot)
 , time_(0)
 , dT_(dt)
-, time_to_converge_(-1)
+, max_velocity_(-1)
+, min_time_(-1)
 {
 	if(robot_)
 	{
@@ -39,11 +41,11 @@ Edge<Milestone>(dad, son, weight)
 	}
 }
 
-MotionBehaviour::MotionBehaviour(TiXmlElement* motion_behaviour_xml, const Milestone * dad, const Milestone * son, rxSystem* robot, double dt):
-Edge(dad, son),
-robot_(robot),
-time_to_converge_(0),
-dT_(dt)
+MotionBehaviour::MotionBehaviour(TiXmlElement* motion_behaviour_xml, const Milestone * dad, const Milestone * son, rxSystem* robot, double dt): Edge(dad, son)
+, robot_(robot)
+, dT_(dt)
+, max_velocity_(-1)
+, min_time_(-1)
 {
 	XMLDeserializer xml_deserializer_(motion_behaviour_xml);
 	TiXmlElement* control_set_element = motion_behaviour_xml->FirstChildElement("ControlSet");
@@ -83,7 +85,8 @@ Edge(motion_behaviour_copy),
 robot_(motion_behaviour_copy.robot_),
 time_(motion_behaviour_copy.time_),
 dT_(motion_behaviour_copy.dT_),
-time_to_converge_(motion_behaviour_copy.time_to_converge_)
+min_time_(motion_behaviour_copy.min_time_),
+max_velocity_(motion_behaviour_copy.max_velocity_)
 {
 	// NOTE (Roberto): Should we avoid copying the value of time_? We are creating a new MB, maybe time_ should be 0
 	if(motion_behaviour_copy.control_set_)
@@ -136,15 +139,6 @@ void MotionBehaviour::addController_(TiXmlElement * rxController_xml)
 
 	// Create the Controller
 	rxController* controller = NULL;
-	// HACK (Roberto): The total time to complete the motion between both nodes must be bigger than the sum of the 
-	// partial timings between via points. BUT, HOW MUCH BIGGER?
-	//ctrl_total_time += 1;	//1 seconds to complete the motion!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-	//if(time_to_converge_ < ctrl_total_time)
-#ifdef NOT_IN_RT
-	time_to_converge_ = 10;
-#else
-	time_to_converge_ = 10;
-#endif
 
 	switch(type_of_controller.first)
 	{
@@ -217,51 +211,66 @@ void MotionBehaviour::activate()
 				switch((*it)->type()) {
 					case rxController::eControlType_Joint:
 						{
-							double max_velocity = 0.3;// in rad/s
-							time_to_converge_ = 0.5;
+							double default_max_velocity = 0.3;// in rad/s
+							double default_min_time = 0.5;
+							double time = min_time_;
+
+							// q1 and q2 to interpolate between
 							dVector current_q = robot_->q();//parent->getConfiguration();
 							dVector desired_q = child->getConfiguration();
-							dVector current_qd = current_q;
+
+							// qd1 and qd2
+							dVector current_qd(current_q.size());
 							current_qd.zero();
-							dVector desired_qd = current_q;
+							dVector desired_qd(current_q.size());
 							desired_qd.zero();
-							for (unsigned int i = 0; i < current_q.size(); i++) {
-								time_to_converge_ = max( fabs((6 * desired_q[i] - 6 * current_q[i]) / (current_qd[i] + desired_qd[i] + 4 * max_velocity)), time_to_converge_ );
+
+							if (max_velocity_ > 0 || min_time_ <= 0 ) {
+								double velocity = max_velocity_;
+								if (max_velocity_ <= 0) {
+									velocity = default_max_velocity;
+									time = default_min_time;
+								}
+								for (unsigned int i = 0; i < current_q.size(); i++) {
+									time = max( fabs((6 * desired_q[i] - 6 * current_q[i]) / (current_qd[i] + desired_qd[i] + 4 * velocity)), time);
+								}
 							}
-							std::cout << "time of trajectory: " << time_to_converge_ << std::endl;
-							dynamic_cast<rxJointController*>(*it)->addPoint(desired_q, time_to_converge_, false, eInterpolatorType_Cubic);
+
+							//std::cout << "time of trajectory: " << time << std::endl;
+
+							dynamic_cast<rxJointController*>(*it)->addPoint(desired_q, time, false, eInterpolatorType_Cubic);
 							break;
 						}
 					case rxController::eControlType_Displacement:
 						{
-							time_to_converge_ = 10.0;
+							double time = (min_time_ > 0) ? min_time_ : 10.0;
 							dVector goal = child->getConfiguration();
 							Vector3D goal_3D(goal[0],goal[1],goal[2]);
-							dynamic_cast<rxDisplacementController*>(*it)->addPoint(goal_3D, time_to_converge_, false);
+							dynamic_cast<rxDisplacementController*>(*it)->addPoint(goal_3D, time, false);
 							break;
 						}
 					case rxController::eControlType_Orientation:
 						{
-							time_to_converge_ = 10.0;
+							double time = (min_time_ > 0) ? min_time_ : 10.0;
 							dVector goal = child->getConfiguration();
 							Rotation goal_rot(goal[3], goal[4], goal[5]);		
 							//NOTE: Suposses that the orientation is defined with 
 							// goal[3] = roll
 							// goal[4] = pitch
 							// goal[5] = yaw
-							dynamic_cast<rxOrientationController*>(*it)->addPoint(goal_rot, time_to_converge_, false);
+							dynamic_cast<rxOrientationController*>(*it)->addPoint(goal_rot, time, false);
 							break;
 						}
 					case rxController::eControlType_HTransform:
 						{
-							time_to_converge_ = 10.0;
+							double time = (min_time_ > 0) ? min_time_ : 10.0;
 							dVector goal = child->getConfiguration();
 							Vector3D goal_3D(goal[0],goal[1],goal[2]);
 							Rotation goal_rot(goal[3], goal[4], goal[5]);		//NOTE: Suposses that the orientation is defined with 
 							// goal[3] = roll
 							// goal[4] = pitch
 							// goal[5] = yaw
-							dynamic_cast<rxHTransformController*>(*it)->addPoint(HTransform(goal_rot, goal_3D), time_to_converge_, false);
+							dynamic_cast<rxHTransformController*>(*it)->addPoint(HTransform(goal_rot, goal_3D), time, false);
 							break;
 						}
 				}
@@ -282,7 +291,7 @@ bool MotionBehaviour::hasConverged()
 {
 	//NOTE (Roberto) : How could we check if it has converged? There is no way to check automatically all the controllers through the control set.
 	//We wait until the time to converge is exceeded and then we check if the error is small.
-	if(time_ > time_to_converge_)
+	if(time_ > min_time_)
 	{
 		dVector error = this->control_set_->e();
 
