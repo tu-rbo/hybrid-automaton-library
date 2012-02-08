@@ -119,8 +119,9 @@ public:
 	/**
 	* Add an rxController to the control set. 
 	* @param ctrl Pointer to the rxController object to be added.
+	* @param is_goal_controller Flag to mark if this controller must be checked for convergence of the MB
 	*/
-	void addController(rxController* ctrl);
+	void addController(rxController* ctrl, bool is_goal_controller);
 
 	/**
 	* Activate the controllers stored in the rxControlSet through the vector of rxController's (NOT WORKING!!!!)
@@ -274,6 +275,8 @@ private:
 
 	double											max_velocity_;		// maximum desired velocity at joint or tip (depending on controller); used for calculating the interpolation time
 	double											min_time_;			// minimum time that is used for interpolation (if max_velocity constraint is not set)
+	
+	std::map<string_type, bool>						goal_controllers_;	// tells us if a controller is goal controller or not (if its convergence must be checked or not) 
 };
 
 #endif

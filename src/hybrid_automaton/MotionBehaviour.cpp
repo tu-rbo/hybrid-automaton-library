@@ -101,7 +101,8 @@ robot_(motion_behaviour_copy.robot_),
 time_(motion_behaviour_copy.time_),
 dT_(motion_behaviour_copy.dT_),
 min_time_(motion_behaviour_copy.min_time_),
-max_velocity_(motion_behaviour_copy.max_velocity_)
+max_velocity_(motion_behaviour_copy.max_velocity_),
+goal_controllers_(motion_behaviour_copy.goal_controllers_)
 {
 	// NOTE (Roberto): Should we avoid copying the value of time_? We are creating a new MB, maybe time_ should be 0
 	if(motion_behaviour_copy.control_set_)
@@ -166,6 +167,8 @@ void MotionBehaviour::addController_(TiXmlElement * rxController_xml)
 	std::stringstream kp_vector_ss = std::stringstream(xml_deserializer_.deserializeString("kp"));
 	std::stringstream kv_vector_ss = std::stringstream(xml_deserializer_.deserializeString("kv"));
 	std::stringstream invL2sqr_vector_ss = std::stringstream(xml_deserializer_.deserializeString("invL2sqr"));
+	bool is_goal_controller = xml_deserializer_.deserializeBoolean("goalController");
+	int priority = xml_deserializer_.deserializeInteger("priority");
 
 	dVector kp_vector;
 	dVector kv_vector;
@@ -217,12 +220,13 @@ void MotionBehaviour::addController_(TiXmlElement * rxController_xml)
 	wss << "controller_" << control_set_->getControllers().size();
 	controller->setName(wss.str());
 
-	this->addController(controller);	// The controller is deactivated when added
+	controller->setPriority(priority);
+	this->addController(controller, is_goal_controller);	// The controller is deactivated when added
 	controller->setIKMode(controller_ik_bool);
 	controller->setGain(kv_vector, kp_vector, invL2sqr_vector);	
 }
 
-void MotionBehaviour::addController(rxController* ctrl) 
+void MotionBehaviour::addController(rxController* ctrl, bool is_goal_controller) 
 {
 	if(ctrl){
 		if(ctrl->dt() != this->dT_)
@@ -230,7 +234,8 @@ void MotionBehaviour::addController(rxController* ctrl)
 			throw std::string("ERROR: [MotionBehaviour::addController(rxController* ctrl)] Time intervals of MotionBehaviour and all its controllers must be the same.");
 		}
 		ctrl->deactivate();
-		control_set_->addController(ctrl, ctrl->name());
+		goal_controllers_[ctrl->name()] = is_goal_controller;
+		control_set_->addController(ctrl, ctrl->name(), ctrl->priority());
 	}
 	else
 	{
@@ -509,6 +514,8 @@ TiXmlElement* MotionBehaviour::toElementXML() const
 			TiXmlElement * rxController_xml = new TiXmlElement("Controller");
 			control_set_element->LinkEndChild(rxController_xml);
 			this->RLabInfoString2ElementXML_(controller_to_string, rxController_xml);
+			rxController_xml->SetAttribute("goalController", (goal_controllers_.find((*controllers_it)->name())->second ? "true" : "false"));
+			rxController_xml->SetAttribute("priority", (*controllers_it)->priority());
 	}
 	return mb_element;
 }
@@ -677,6 +684,7 @@ MotionBehaviour& MotionBehaviour::operator=(const MotionBehaviour & motion_behav
 	this->robot_ = motion_behaviour_assignment.robot_;
 	this->time_ = motion_behaviour_assignment.time_;
 	this->dT_ = motion_behaviour_assignment.dT_;
+	this->goal_controllers_ = motion_behaviour_assignment.goal_controllers_;
 
 	// Delete the current stored control set
 	if(this->control_set_)
