@@ -265,7 +265,7 @@ private:
 	rxController* createNullMotionController_(int null_motion_subtype, double controller_duration) const;
 
 
-	rxControlSet*									control_set_;		// Stores the set of rxController's defining this MotionBehaviour
+	rxControlSetBase*								control_set_;		// Stores the set of rxController's defining this MotionBehaviour
 	rxSystem*										robot_;	
 	double											time_;				// Execution time. Counts the time that the MotionBehaviour is active 
 																		// (for convergence check including time)

@@ -69,8 +69,23 @@ MotionBehaviour::MotionBehaviour(TiXmlElement* motion_behaviour_xml, const Miles
 			control_set_ = NULL;
 		}
 	}
+	else if(control_set_type==std::string("rxTPOperationalSpaceControlSet"))
+	{
+		if(robot_)
+		{
+			control_set_ = new rxTPOperationalSpaceControlSet(robot, dT_);
+			control_set_->setGravity(0,0,-GRAV_ACC);
+			control_set_->setInverseDynamicsAlgorithm(new rxAMBSGravCompensation(this->robot_));
+			control_set_->nullMotionController()->setGain(0.02,0.0,0.01);
+		}
+		else
+		{
+			control_set_ = NULL;
+		}
+	}
 	else
 	{
+		std::cout << control_set_type << std::endl;
 		throw std::string("ERROR: [MotionBehaviour::MotionBehaviour(TiXmlElement* motion_xml, const Milestone * dad, const Milestone * son, rxSystem* robot)] Unknown type of rxControlSet.");
 	}	
 
@@ -91,7 +106,39 @@ max_velocity_(motion_behaviour_copy.max_velocity_)
 	// NOTE (Roberto): Should we avoid copying the value of time_? We are creating a new MB, maybe time_ should be 0
 	if(motion_behaviour_copy.control_set_)
 	{
-		this->control_set_ = new rxControlSet((*motion_behaviour_copy.control_set_));
+		// NOTE (Roberto): Two ugly options:
+		// Use typeid(control_set_).name() as we do when serializing
+		// Drawback: typeid has no standard behaviour
+		// Use dynamic_cast to different types and check if the resulting pointer is NULL (not possible to cast->
+		// it is not of this type) or not NULL (possible to cast -> of this type)
+		// Drawback: we can always cast to base classes, we should check only if we can to derived ones
+		// Implemented: mixture of both :(
+		// CHANGE: Use dynamic_cast tree, because now control_set_ is a rxControlSetBase*, and that is what we 
+		// get if we use typeid
+		//
+		//std::string control_set_name = std::string(typeid(motion_behaviour_copy.control_set_).name());
+		//std::string control_set_name2 = control_set_name.substr(6);		//Ignore the 'class ' part
+		//control_set_name2.resize(control_set_name2.size()-2);	//Ignore the ' *' part
+		//if(control_set_name2 == std::string("rxControlSet"))
+		//{
+		//	this->control_set_ = new rxControlSet((*dynamic_cast<rxControlSet*>(motion_behaviour_copy.control_set_)));
+		//}
+		//else if(control_set_name2==std::string("rxTPOperationalSpaceControlSet"))
+		//{
+		//	this->control_set_ = new rxTPOperationalSpaceControlSet((*dynamic_cast<rxTPOperationalSpaceControlSet*>(motion_behaviour_copy.control_set_)));
+		//}
+		//else // Use the base class if there is something wrong
+		//{
+		//	this->control_set_ = new rxControlSet((*dynamic_cast<rxControlSet*>(motion_behaviour_copy.control_set_)));
+		//}
+		if(dynamic_cast<rxTPOperationalSpaceControlSet*>(motion_behaviour_copy.control_set_))
+		{
+			this->control_set_ = new rxTPOperationalSpaceControlSet((*dynamic_cast<rxTPOperationalSpaceControlSet*>(motion_behaviour_copy.control_set_)));
+		}
+		else if(dynamic_cast<rxControlSet*>(motion_behaviour_copy.control_set_))
+		{
+			this->control_set_ = new rxControlSet((*dynamic_cast<rxControlSet*>(motion_behaviour_copy.control_set_)));
+		}
 	}
 	else
 	{
@@ -164,12 +211,12 @@ void MotionBehaviour::addController_(TiXmlElement * rxController_xml)
 		throw std::string("ERROR: [MotionBehaviour::addController_(TiXmlElement * rxController_xml)] Unexpected Controller group.");
 		break;
 	}
-	
+
 	// we need unique names for all controllers in a single control set, otherwise RLAB will complain
 	std::wstringstream wss;
 	wss << "controller_" << control_set_->getControllers().size();
 	controller->setName(wss.str());
-	
+
 	this->addController(controller);	// The controller is deactivated when added
 	controller->setIKMode(controller_ik_bool);
 	controller->setGain(kv_vector, kp_vector, invL2sqr_vector);	
@@ -438,10 +485,20 @@ TiXmlElement* MotionBehaviour::toElementXML() const
 	TiXmlElement * mb_element = new TiXmlElement("MotionBehaviour");
 	TiXmlElement * control_set_element = new TiXmlElement("ControlSet");
 	mb_element->LinkEndChild(control_set_element);
-	std::string control_set_name = std::string(typeid(control_set_).name());
-	std::string control_set_name2 = control_set_name.substr(6);		//Ignore the 'class ' part
-	control_set_name2.resize(control_set_name2.size()-2);	//Ignore the ' *' part
-	control_set_element->SetAttribute("type", control_set_name2.c_str());
+	// NOTE: This doesn't work anymore since control_set_ is now rxControlSetBase*
+	//std::string control_set_name = std::string(typeid(control_set_).name());
+	//std::string control_set_name2 = control_set_name.substr(6);		//Ignore the 'class ' part
+	//control_set_name2.resize(control_set_name2.size()-2);	//Ignore the ' *' part
+	//control_set_element->SetAttribute("type", control_set_name2.c_str());
+
+	if(dynamic_cast<rxTPOperationalSpaceControlSet*>(control_set_))
+	{
+		control_set_element->SetAttribute("type", "rxTPOperationalSpaceControlSet");
+	}
+	else if(dynamic_cast<rxControlSet*>(control_set_))
+	{
+		control_set_element->SetAttribute("type", "rxControlSet");
+	}
 
 	std::list<rxController*> controllers = control_set_->getControllers();
 	string_type controllers_to_string;
@@ -631,7 +688,16 @@ MotionBehaviour& MotionBehaviour::operator=(const MotionBehaviour & motion_behav
 	// Copy the new control set
 	if(motion_behaviour_assignment.control_set_)
 	{
-		this->control_set_ = new rxControlSet(*(motion_behaviour_assignment.control_set_));
+		// Now are different types of control set allowed
+		if(dynamic_cast<rxTPOperationalSpaceControlSet*>(motion_behaviour_assignment.control_set_))
+		{
+			this->control_set_ = new rxTPOperationalSpaceControlSet((*dynamic_cast<rxTPOperationalSpaceControlSet*>(motion_behaviour_assignment.control_set_)));
+		}
+		else if(dynamic_cast<rxControlSet*>(motion_behaviour_assignment.control_set_))
+		{
+			this->control_set_ = new rxControlSet((*dynamic_cast<rxControlSet*>(motion_behaviour_assignment.control_set_)));
+		}
+		//this->control_set_ = new rxControlSet(*(motion_behaviour_assignment.control_set_));
 		this->control_set_->setGravity(0,0,-GRAV_ACC);
 		//this->control_set_->setInverseDynamicsAlgorithm(new rxAMBSGravCompensation(this->robot_));
 	}
