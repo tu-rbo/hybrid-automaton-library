@@ -288,8 +288,8 @@ void MotionBehaviour::activate()
 								}
 							}
 
-							//std::cout << "time of trajectory: " << time << std::endl;
-
+							std::cout << "time of trajectory: " << time << std::endl;
+							min_time_=time;
 							dynamic_cast<rxJointController*>(*it)->addPoint(desired_q, time, false, eInterpolatorType_Cubic);
 							break;
 						}
@@ -350,11 +350,11 @@ bool MotionBehaviour::hasConverged()
 		for(int i = 0; i < error.size(); ++i)
 		{
 			//HACK (George) : This is because I couldn't get the error between the current position and the desired position at the END of the trajectory
-			if (::std::abs(error[i]) > 0.01 )
+			if (::std::abs(error[i]) > 0.1 )
 			{
-#ifdef NOT_IN_RT
+//#ifdef NOT_IN_RT
 				std::cout << "Error in " << i << " is to large = " << ::std::abs(error[i]) << std::endl;
-#endif
+//#endif
 				return false;
 			}
 		}
