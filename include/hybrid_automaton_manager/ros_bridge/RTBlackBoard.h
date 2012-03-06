@@ -47,6 +47,7 @@ private:
 	DataMap outputMap;
 
 	HANDLE copyInputBufferMutex;
+	HANDLE accessOutputMapMutex;
 
 	/*
 	* how often step() is called (not used)
@@ -137,8 +138,18 @@ private:
 		// write it infinitely to the network
 		while (WaitForSingleObject(black_board->isAboutToBeDestructedEvent, 0) != WAIT_OBJECT_0) {
 			// copy the stuff from the output buffer
-			// TODO: let's see
-			(*(black_board->net)) << *(it->second);
+			// TODO: use separate mutexes for every data item
+			DWORD rc = WaitForSingleObject(black_board->accessOutputMapMutex, 0);
+			if (rc == WAIT_FAILED) {
+				std::cerr << "Cannot lock accessOutputMapMutex (RTBlackBoard::writeToNetwork)" << std::endl;
+			}
+
+			if (rc != WAIT_TIMEOUT)
+				(*(black_board->net)) << *(it->second);
+
+			if (!ReleaseMutex(black_board->accessOutputMapMutex)) {
+				std::cerr << "Cannot release accessOutputMapMutex (RTBlackBoard::writeToNetwork)" << std::endl;
+			}
 
 			Sleep(20);
 

@@ -121,7 +121,7 @@ void HybridAutomatonManager::update(const rTime& t)
 void HybridAutomatonManager::updateBlackboard()
 {
 	_blackboard->setJointState("joint_state", _q_BB, _qdot_BB, _torque_BB);
-	rxBody* ee = _robot->findBody(_T("Body7"));
+	rxBody* ee = _robot->findBody(_T("EE"));
 	HTransform h = ee->T();
 	_blackboard->setTransform("ee", h, "base");
 	_blackboard->step();

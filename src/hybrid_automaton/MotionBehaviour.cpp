@@ -171,8 +171,8 @@ void MotionBehaviour::addController_(TiXmlElement * rxController_xml)
 	std::stringstream kp_vector_ss = std::stringstream(xml_deserializer_.deserializeString("kp"));
 	std::stringstream kv_vector_ss = std::stringstream(xml_deserializer_.deserializeString("kv"));
 	std::stringstream invL2sqr_vector_ss = std::stringstream(xml_deserializer_.deserializeString("invL2sqr"));
-	bool is_goal_controller = xml_deserializer_.deserializeBoolean("goalController");
-	int priority = xml_deserializer_.deserializeInteger("priority");
+	bool is_goal_controller = xml_deserializer_.deserializeBoolean("goalController", true);
+	int priority = xml_deserializer_.deserializeInteger("priority", 1);
 
 	dVector kp_vector;
 	dVector kv_vector;

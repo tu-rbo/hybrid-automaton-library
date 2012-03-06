@@ -87,6 +87,12 @@ RTBlackBoard::RTBlackBoard(const std::string& rlab_host, int rlab_port, const st
 		throw(std::string("Mutex was not created (copyInputBufferMutex)"));
 	}
 
+	// initialize mutex to output map
+	accessOutputMapMutex = CreateMutex(0, FALSE, 0);
+	if( !accessOutputMapMutex ) {
+		throw(std::string("Mutex was not created (accessOutputMapMutex)"));
+	}
+
 	isAboutToBeDestructedEvent = CreateEvent(NULL, true, false, NULL);
 	if (isAboutToBeDestructedEvent == NULL)
 	{
@@ -181,7 +187,10 @@ void RTBlackBoard::set(rlab::NetworkData* data, DataMap& map) {
 */
 
 void RTBlackBoard::setFloat64(const std::string& topic, double value) {
-	setFloat64(topic, value, outputMap);
+	if (WaitForSingleObject(accessOutputMapMutex, 0) != WAIT_TIMEOUT) {
+		setFloat64(topic, value, outputMap);
+		ReleaseMutex(accessOutputMapMutex);
+	}
 }
 
 void RTBlackBoard::setFloat64(const std::string& topic, double value, DataMap &map) {
@@ -202,7 +211,10 @@ void RTBlackBoard::setFloat64(const std::string& topic, double value, DataMap &m
 }
 
 void RTBlackBoard::setString(const std::string& topic, const std::string& value) {
-	setString(topic, value, outputMap);
+	if (WaitForSingleObject(accessOutputMapMutex, 0) != WAIT_TIMEOUT) {
+		setString(topic, value, outputMap);
+		ReleaseMutex(accessOutputMapMutex);
+	}
 }
 
 void RTBlackBoard::setString(const std::string& topic, const std::string& value, DataMap &map) {
@@ -223,7 +235,10 @@ void RTBlackBoard::setString(const std::string& topic, const std::string& value,
 }
 
 void RTBlackBoard::setFloat64MultiArray(const std::string& topic, const std::vector<double>& value) {
-	setFloat64MultiArray(topic, value, outputMap);
+	if (WaitForSingleObject(accessOutputMapMutex, 0) != WAIT_TIMEOUT) {
+		setFloat64MultiArray(topic, value, outputMap);
+		ReleaseMutex(accessOutputMapMutex);
+	}
 }
 
 void RTBlackBoard::setFloat64MultiArray(const std::string& topic, const std::vector<double>& value, DataMap &map) {
@@ -244,7 +259,10 @@ void RTBlackBoard::setFloat64MultiArray(const std::string& topic, const std::vec
 }
 
 void RTBlackBoard::setJointState(const std::string& topic, const std::vector<double>& position, const std::vector<double>& velocity, const std::vector<double>& effort) {
-	setJointState(topic, position, velocity, effort, outputMap);
+	if (WaitForSingleObject(accessOutputMapMutex, 0) != WAIT_TIMEOUT) {
+		setJointState(topic, position, velocity, effort, outputMap);
+		ReleaseMutex(accessOutputMapMutex);
+	}
 }
 
 void RTBlackBoard::setJointState(const std::string& topic, const std::vector<double>& position, const std::vector<double>& velocity, const std::vector<double>& effort, DataMap &map) {
@@ -268,7 +286,10 @@ void RTBlackBoard::setJointState(const std::string& topic, const std::vector<dou
 }
 
 void RTBlackBoard::setTransform(const std::string& topic, rMath::HTransform& transform, const std::string& parent) {
-	setTransform(topic, transform, parent, outputMap);
+	if (WaitForSingleObject(accessOutputMapMutex, 0) != WAIT_TIMEOUT) {
+		setTransform(topic, transform, parent, outputMap);
+		ReleaseMutex(accessOutputMapMutex);
+	}
 }
 
 void RTBlackBoard::setTransform(const std::string& topic, rMath::HTransform& transform, const std::string& parent, DataMap &map) {
@@ -400,7 +421,7 @@ void RTBlackBoard::step() {
 
 		// copy all the data from the networkInputBuffer to the inputMap
 		DWORD rc = WaitForSingleObject(copyInputBufferMutex, 0);
-		if( rc == WAIT_FAILED ) {
+		if( rc == WAIT_FAILED || rc == WAIT_TIMEOUT ) {
 			std::cerr << "Cannot lock copyInputBufferMutex (RTBlackBoard::step)" << std::endl;
 			return;
 		}

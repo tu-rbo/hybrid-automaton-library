@@ -32,6 +32,25 @@ bool XMLDeserializer::deserializeBoolean(const char * field_name)
 	return return_boolean;
 }
 
+bool XMLDeserializer::deserializeBoolean(const char * field_name, bool default_value)
+{
+	const char* value = xml_element->Attribute(field_name);
+
+	if (value == NULL)
+	{
+		return default_value;
+	}
+	else if (strcmp(value, "true"))
+	{
+		return true;
+	}
+	else if (strcmp(value, "false"))
+	{
+		return false;
+	}
+	return default_value;
+}
+
 int XMLDeserializer::deserializeInteger(const char * field_name)
 {
 	int return_integer = -1;
@@ -40,6 +59,13 @@ int XMLDeserializer::deserializeInteger(const char * field_name)
 		std::string exception_str = std::string("ERROR: [XMLDeserializer::deserializeInteger(const char * field_name)] Attribute ") + std::string(field_name) + std::string(" was not found in XML element.");
 		throw exception_str;
 	}
+	return return_integer;
+}
+
+int XMLDeserializer::deserializeInteger(const char * field_name, int default_value)
+{
+	int return_integer = default_value;
+	xml_element->Attribute(field_name, &return_integer);
 	return return_integer;
 }
 

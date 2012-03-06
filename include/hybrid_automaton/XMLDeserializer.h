@@ -13,8 +13,10 @@ public:
 	virtual ~XMLDeserializer();
 
 	bool deserializeBoolean(const char * field_name);
+	bool deserializeBoolean(const char * field_name, bool default_value);
 
 	int deserializeInteger(const char * field_name);
+	int deserializeInteger(const char * field_name, int default_value);
 
 	double deserializeDouble(const char * field_name);
 
