@@ -17,6 +17,7 @@ Edge<Milestone>(NULL, NULL, -1)
 , dT_(-1)
 , max_velocity_(-1)
 , min_time_(-1)
+, time_to_converge_(0.0)
 {
 }
 
@@ -27,6 +28,7 @@ Edge<Milestone>(dad, son, weight)
 , dT_(dt)
 , max_velocity_(-1)
 , min_time_(-1)
+, time_to_converge_(0.0)
 {
 	if(robot_)
 	{
@@ -46,6 +48,7 @@ MotionBehaviour::MotionBehaviour(TiXmlElement* motion_behaviour_xml, const Miles
 , dT_(dt)
 , max_velocity_(-1)
 , min_time_(-1)
+, time_to_converge_(0.0)
 {
 	XMLDeserializer xml_deserializer_(motion_behaviour_xml);
 	TiXmlElement* control_set_element = motion_behaviour_xml->FirstChildElement("ControlSet");
@@ -102,7 +105,8 @@ time_(motion_behaviour_copy.time_),
 dT_(motion_behaviour_copy.dT_),
 min_time_(motion_behaviour_copy.min_time_),
 max_velocity_(motion_behaviour_copy.max_velocity_),
-goal_controllers_(motion_behaviour_copy.goal_controllers_)
+goal_controllers_(motion_behaviour_copy.goal_controllers_),
+time_to_converge_(motion_behaviour_copy.time_to_converge_)
 {
 	// NOTE (Roberto): Should we avoid copying the value of time_? We are creating a new MB, maybe time_ should be 0
 	if(motion_behaviour_copy.control_set_)
@@ -289,7 +293,7 @@ void MotionBehaviour::activate()
 							}
 
 							std::cout << "time of trajectory: " << time << std::endl;
-							min_time_=time;
+							time_to_converge_=time;
 							dynamic_cast<rxJointController*>(*it)->addPoint(desired_q, time, false, eInterpolatorType_Cubic);
 							break;
 						}
@@ -343,7 +347,7 @@ bool MotionBehaviour::hasConverged()
 {
 	//NOTE (Roberto) : How could we check if it has converged? There is no way to check automatically all the controllers through the control set.
 	//We wait until the time to converge is exceeded and then we check if the error is small.
-	if(time_ > min_time_)
+	if(time_ > time_to_converge_)
 	{
 		dVector error = this->control_set_->e();
 
