@@ -14,22 +14,23 @@ XMLDeserializer::~XMLDeserializer()
 
 bool XMLDeserializer::deserializeBoolean(const char * field_name)
 {
-	bool return_boolean;
-	std::string string_bool = std::string(xml_element->Attribute(field_name));
-	if(string_bool == std::string("true"))
-	{
-		return_boolean = true;
-	}
-	else if(string_bool == std::string("false"))
-	{
-		return_boolean = false;
-	}
-	else
+	const char* value = xml_element->Attribute(field_name);
+
+	if (value == NULL)
 	{
 		std::string exception_str = std::string("ERROR: [XMLDeserializer::deserializeBoolean(const char * field_name)] Attribute ") + std::string(field_name) + std::string(" was not found in XML element.");
 		throw exception_str;
 	}
-	return return_boolean;
+	else if (strcmp(value, "true") == 0)
+	{
+		return true;
+	}
+	else if (strcmp(value, "false") == 0)
+	{
+		return false;
+	}
+	std::string exception_str = std::string("ERROR: [XMLDeserializer::deserializeBoolean(const char * field_name)] Attribute ") + std::string(field_name) + std::string(" was not found in XML element.");
+	throw exception_str;
 }
 
 bool XMLDeserializer::deserializeBoolean(const char * field_name, bool default_value)
@@ -40,11 +41,11 @@ bool XMLDeserializer::deserializeBoolean(const char * field_name, bool default_v
 	{
 		return default_value;
 	}
-	else if (strcmp(value, "true"))
+	else if (strcmp(value, "true") == 0)
 	{
 		return true;
 	}
-	else if (strcmp(value, "false"))
+	else if (strcmp(value, "false") == 0)
 	{
 		return false;
 	}

@@ -270,12 +270,12 @@ private:
 	rxSystem*										robot_;	
 	double											time_;				// Execution time. Counts the time that the MotionBehaviour is active 
 																		// (for convergence check including time)
+	double											time_to_converge_;	// duration of the interpolation
 	double											dT_;				// Control interval
 	static std::map<std::string, ControllerType>	controller_map_;	// Translation between class name (string) of the controllers and their type
 
 	double											max_velocity_;		// maximum desired velocity at joint or tip (depending on controller); used for calculating the interpolation time
 	double											min_time_;			// minimum time that is used for interpolation (if max_velocity constraint is not set)
-    double                                          time_to_converge_;   // time that the behaviour need for converging
 	
 	std::map<string_type, bool>						goal_controllers_;	// tells us if a controller is goal controller or not (if its convergence must be checked or not) 
 };
