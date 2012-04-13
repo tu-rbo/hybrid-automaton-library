@@ -181,6 +181,11 @@ public:
 	// USE WITH CARE!!! - mainly for ERM internal speed-up!
 	virtual void setControlSetByPointerOnly(rxControlSetBase* control_set){this->control_set_ = control_set;};
 
+
+	void setMaxVelocityForInterpolation(double max_velocity);
+	void setMinTimeForInterpolation(double min_time);
+
+
 private:
 	/**
 	* Create the mapping to translate class names (string) to controller type (pair of integers: group and subgroup)

@@ -67,7 +67,8 @@ HybridAutomatonManager::~HybridAutomatonManager()
 {
 	delete _activeMotionBehavior;
 
-	delete _blackboard;
+	if(_blackboard)
+		delete _blackboard;
 
 	//delete _defaultMotionBehavior;
 
@@ -79,8 +80,10 @@ void HybridAutomatonManager::init(int mode)
 	//std::wcout << _path << std::endl;
 	//std::wcout << _aml << std::endl;
 
-	_robot =  LOAD_SYSTEM(_path, _aml, _T0, _q0);
+	_robot = LOAD_SYSTEM(_path, _aml, _T0, _q0);
 	assert(_robot);
+
+	std::cerr << " ROBOT " << _robot << std::endl;
 
 	_dof = _robot->jointDOF() + _robot->earthDOF() + _robot->constraintDOF();
 
@@ -102,12 +105,45 @@ void HybridAutomatonManager::init(int mode)
 	_robotDevice = findDevice(_T("ROBOT"));
 	RASSERT(_robotDevice != INVALID_RHANDLE);
 
-	_blackboard = RTBlackBoard::getInstance("130.149.238.180", 1888, "130.149.238.184", 1999);
+	_blackboard = NULL;
 
 	_defaultMotionBehavior = new MotionBehaviour(new Milestone(), new Milestone(),_robot);
 	_activeMotionBehavior = _defaultMotionBehavior;
 }
 
+void HybridAutomatonManager::activateBlackboard(std::string &rlab_host, int rlab_port, std::string &ros_host, int ros_port)
+{
+	_blackboard = RTBlackBoard::getInstance(rlab_host, rlab_port, ros_host, ros_port);
+}
+
+bool HybridAutomatonManager::isBlackboardActive() const
+{
+	return (_blackboard != NULL);
+}
+
+void HybridAutomatonManager::setHybridAutomaton(std::string  _new_hybrid_automaton_str)
+{
+
+	DeserializingThreadArguments* thread_args = new DeserializingThreadArguments();
+	thread_args->_robot = this->_robot;
+	thread_args->_string = _new_hybrid_automaton_str;
+	thread_args->_dT = this->_dT;
+	thread_args->_deserialize_mutex = &(this->_deserialize_mutex);
+	thread_args->_deserialized_hybrid_automatons = &(this->_deserialized_hybrid_automatons);
+
+	if (_beginthreadex(NULL, 0, deserializeHybridAutomaton, (void*)thread_args, 0, NULL) == 0)
+	{
+		std::cerr << "[HybridAutomatonManager::updateHybridAutomaton()] Error creating thread to deserialize xml string!" << std::endl;
+	}
+
+}
+
+void HybridAutomatonManager::setHybridAutomaton(HybridAutomaton*  _new_hybrid_automaton)
+{
+	WaitForSingleObject(_deserialize_mutex, INFINITE);
+	this->_deserialized_hybrid_automatons.push_back(_new_hybrid_automaton);
+	ReleaseMutex(_deserialize_mutex);
+}
 
 void HybridAutomatonManager::update(const rTime& t)
 {
@@ -120,6 +156,9 @@ void HybridAutomatonManager::update(const rTime& t)
 
 void HybridAutomatonManager::updateBlackboard()
 {
+	if(!this->isBlackboardActive())
+		return;
+
 	_blackboard->setJointState("joint_state", _q_BB, _qdot_BB, _torque_BB);
 	rxBody* ee = _robot->findBody(_T("EE"));
 	HTransform h = ee->T();
@@ -129,6 +168,9 @@ void HybridAutomatonManager::updateBlackboard()
 
 void HybridAutomatonManager::updateHybridAutomaton()
 {
+	if(!this->isBlackboardActive())
+		return;
+
 	if (_blackboard->isUpdated("update_hybrid_automaton"))
 	{
 		rlab::String* ha_xml = dynamic_cast<rlab::String*>(_blackboard->getData("update_hybrid_automaton"));
@@ -207,6 +249,7 @@ void HybridAutomatonManager::_writeDevices()
 	}
 	int written = writeDeviceValue(_robotDevice, torque, _dof * sizeof(double));
 	RASSERT(written > 0);
+	//std::cerr << "written: " <<written << std::endl;
 	_torque_BB = convert(_torque);
 	delete[] torque;
 }

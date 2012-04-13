@@ -267,8 +267,8 @@ void MotionBehaviour::activate()
 				switch((*it)->type()) {
 					case rxController::eControlType_Joint:
 						{
-							double default_max_velocity = 0.3;// in rad/s
-							double default_min_time = 0.5;
+							double default_max_velocity = 0.30;// in rad/s
+							double default_min_time = 5.;
 							double time = min_time_;
 
 							// q1 and q2 to interpolate between
@@ -1187,4 +1187,12 @@ void MotionBehaviour::print()
 			//		}
 
 	}
+}
+
+void MotionBehaviour::setMaxVelocityForInterpolation(double max_velocity) {
+	max_velocity_ = max_velocity;
+}
+
+void MotionBehaviour::setMinTimeForInterpolation(double min_time) {
+	min_time_ = min_time;
 }

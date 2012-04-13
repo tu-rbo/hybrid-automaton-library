@@ -41,6 +41,13 @@ public:
 	virtual void collect(vector<double>& data, int channel = -1);
 	virtual void onSetInterestFrame(const TCHAR* name, const HTransform& T);
 
+	virtual void activateBlackboard(std::string &rlab_host, int rlab_port, std::string &ros_host, int ros_port);
+	virtual void setHybridAutomaton(HybridAutomaton*  _new_hybrid_automaton);
+	virtual void setHybridAutomaton(std::string  _new_hybrid_automaton_str);
+	virtual bool isBlackboardActive() const;
+
+	rxSystem*			_robot;
+
 private:
 	virtual void _estimate();
 	virtual void _readDevices();
@@ -48,12 +55,15 @@ private:
 	virtual void _reflect();
 	virtual void _compute(const rTime& t);
 
+	/**
+	* Check if a new HA was written on the Blackboard and creates a new thread to deserialize it.
+	*/
 	void updateHybridAutomaton();
 	void updateBlackboard();
 
 	HybridAutomaton*	_hybrid_automaton;
 
-	rxSystem*			_robot;
+	
 	rHANDLE				_robotDevice;
 
 	MotionBehaviour*	_activeMotionBehavior;
