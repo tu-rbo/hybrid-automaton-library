@@ -88,6 +88,8 @@ public:
 
 	//void setType(MilestoneType typ);
 
+	virtual bool hasConverged(rxSystem* sys);
+
 protected:
 
 	Status			status_;

@@ -309,9 +309,17 @@ CSpaceMilestone& CSpaceMilestone::operator=(const CSpaceMilestone & cmilestone_a
 
 bool CSpaceMilestone::hasConverged(rxSystem* sys) 
 {
-	// TODO
-	std::cout << "CSpaceMilestone::hasConverged" << std::endl;
-	std::cout << "sys: " << sys << std::endl;
+	assert (sys != NULL);
+
+	const dVector& q = sys->q();
+	for (int i = 0; i < sys->jdof(); i++) {
+		double e = ::std::abs(q[i] - configuration_[i]);
+		if (e > region_convergence_radius_[i])
+		{
+			//std::cout << "Error in " << i << " is too large = " << e << std::endl;
+			return false;
+		}
+	}
 	return true;
 }
 

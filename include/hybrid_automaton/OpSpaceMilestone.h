@@ -67,15 +67,18 @@ public:
 
 	virtual PosiOriSelector getPosiOriSelector() const;
 
+	virtual bool hasConverged(rxSystem* sys);
+
 protected:
 
 	std::vector<double>		configuration_;						// Position = 3 first values
-																// Orientation = 3 second values
+																// Orientation = 3 second values 
+																//		(Euler angles ZYX)
 																// Total size = 6
 	MotionBehaviour*		motion_behaviour_;
 	std::vector<double>		region_convergence_radius_;			// Position = 3 first values
-																// Orientation = 3 second values
-																// Total size = 6
+																// Orientation = 1 second value
+																// Total size = 4
 	//int						object_id_;
 	std::vector<Point>		handle_points_;
 	PosiOriSelector			posi_ori_selection_;				// Position/Orientation/Both values defined in this Milestone

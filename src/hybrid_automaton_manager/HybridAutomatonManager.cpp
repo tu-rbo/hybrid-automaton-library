@@ -289,9 +289,9 @@ void HybridAutomatonManager::_compute(const double& t)
 			ReleaseMutex(_deserialize_mutex);
 		}
 	}
-//	else if(_activeMotionBehavior->getChild()->hasConverged(_robot) ){
-	else if(_activeMotionBehavior->hasConverged() ){/*
-		this->_q.print(_T("configuration"));*/
+	else if(_activeMotionBehavior->getChild()->hasConverged(_robot) ){
+	//else if(_activeMotionBehavior->hasConverged() ){
+		/*this->_q.print(_T("configuration"));*/
 		if (_hybrid_automaton && !_hybrid_automaton->outgoingEdges(*(_activeMotionBehavior->getChild())).empty()) {
 			std::cout << "Switching controller" << std::endl;
 			_activeMotionBehavior->deactivate();

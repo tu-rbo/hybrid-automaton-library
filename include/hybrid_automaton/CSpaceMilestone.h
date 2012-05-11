@@ -50,6 +50,8 @@ public:
 
 	virtual dVector getConfiguration() const;
 
+	virtual bool hasConverged(rxSystem* sys);
+
 protected:
 
 	//int						dofs_;

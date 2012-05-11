@@ -5,6 +5,7 @@
 
 #include "tinyxml.h"
 #include "XMLDeserializer.h"
+#include "Quaternion.h"
 
 using namespace std;
 
@@ -24,7 +25,7 @@ Milestone()
 {
 	posi_ori_selection_ = posi_ori_selection;
 	configuration_.resize(6, -1.0);
-	region_convergence_radius_.resize(6, -1.0);
+	region_convergence_radius_.resize(4, -1.0);
 	int counter_offset = -1;
 	int max_count = -1;
 	switch(posi_ori_selection_){
@@ -34,11 +35,11 @@ Milestone()
 			break;
 		case ORIENTATION_SELECTION:
 			counter_offset = 3;
-			max_count = 6;
+			max_count = 4;
 			break;
 		case POS_AND_ORI_SELECTION:
 			counter_offset = 0;
-			max_count = 6;
+			max_count = 4;
 			break;
 		default:
 			throw std::string("ERROR [OpSpaceMilestone::OpSpaceMilestone(std::vector<double>& posi_ori_value, PosiOriSelection posi_ori_selection, MotionBehaviour * motion_behaviour, std::vector<double>& region_convergence_radius,int object_id)]: Wrong posi_ori_selection value.");
@@ -440,12 +441,61 @@ PosiOriSelector OpSpaceMilestone::getPosiOriSelector() const
 
 bool OpSpaceMilestone::hasConverged(rxSystem* sys) 
 {
-	// TODO
-	std::cout << "OpSpaceMilestone::hasConverged" << std::endl;
-	std::cout << "sys: " << sys << std::endl;
+	assert (sys != NULL);
+
+	if (posi_ori_selection_ == POSITION_SELECTION
+		|| posi_ori_selection_ == POS_AND_ORI_SELECTION)
+	{
+		for (int i = 0; i < 3; i++) {
+			double e = ::std::abs(sys->T().r[i] - configuration_[i]);
+			if (e > region_convergence_radius_[i])
+			{
+				std::cout << "Error in pos " << i << " is too large = " << e << std::endl;
+				return false;
+			}
+		}
+	}
+
+	if (posi_ori_selection_ == ORIENTATION_SELECTION
+		|| posi_ori_selection_ == POS_AND_ORI_SELECTION)
+	{
+		// desired orientation
+		Rotation Rd(configuration_[3],
+			configuration_[4],
+			configuration_[5]);
+
+		dVector quatd;
+		Rd.GetQuaternion(quatd);
+		Quaternion qd(quatd);
+
+		// current orientation
+		dVector quat;
+		sys->T().R.GetQuaternion(quat);
+		Quaternion q(quat);
+
+		q.invert();
+		Quaternion qres = q*qd;
+		dVector axis;
+		double angle;
+		qres.to_axis_angle(axis, angle);
+
+		double e = ::std::abs(angle);
+		if (e > region_convergence_radius_[3]) 
+		{
+			std::cout << "Error in orientation is too large = " << e << std::endl;
+			return false;
+		}
+	}
+
 	return true;
 }
 
+
+int main() {
+	std::cout << "Hello" << std::endl;
+
+	return 0;
+}
 
 //bool OpSpaceMilestone::operator ==(const Milestone * n) const{
 //	const OpSpaceMilestone* n_cspace = dynamic_cast<const OpSpaceMilestone*>(n);
