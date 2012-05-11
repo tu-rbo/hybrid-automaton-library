@@ -299,11 +299,22 @@ CSpaceMilestone& CSpaceMilestone::operator=(const CSpaceMilestone & cmilestone_a
 	{
 		this->motion_behaviour_ = NULL;
 	}
+
+
 	this->region_convergence_radius_ = cmilestone_assignment.region_convergence_radius_;
 	//this->object_id_ = cmilestone_assignment.object_id_;
 	this->handle_points_ = cmilestone_assignment.handle_points_;
 	return *this;
 }
+
+bool CSpaceMilestone::hasConverged(rxSystem* sys) 
+{
+	// TODO
+	std::cout << "CSpaceMilestone::hasConverged" << std::endl;
+	std::cout << "sys: " << sys << std::endl;
+	return true;
+}
+
 
 //bool CSpaceMilestone::operator ==(const Milestone * n) const{
 //	const CSpaceMilestone* n_cspace = dynamic_cast<const CSpaceMilestone*>(n);

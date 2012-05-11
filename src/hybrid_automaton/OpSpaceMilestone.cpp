@@ -438,6 +438,15 @@ PosiOriSelector OpSpaceMilestone::getPosiOriSelector() const
 	return posi_ori_selection_;
 }
 
+bool OpSpaceMilestone::hasConverged(rxSystem* sys) 
+{
+	// TODO
+	std::cout << "OpSpaceMilestone::hasConverged" << std::endl;
+	std::cout << "sys: " << sys << std::endl;
+	return true;
+}
+
+
 //bool OpSpaceMilestone::operator ==(const Milestone * n) const{
 //	const OpSpaceMilestone* n_cspace = dynamic_cast<const OpSpaceMilestone*>(n);
 //	if(n_cspace)

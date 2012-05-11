@@ -78,6 +78,13 @@ std::string Milestone::getName() const
 	return this->name_;
 }
 
+bool Milestone::hasConverged(rxSystem* sys)
+{
+	std::string s("[Milestone::hasConverged(rxSystem*)]: Error hasConverged method not implemented");
+	std::cout << s << std::endl;
+	throw s;
+}
+
 /*
 MilestoneType Milestone::getType() const
 {
