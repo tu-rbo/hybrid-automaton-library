@@ -1,4 +1,8 @@
 #include "XMLDeserializer.h"
+
+#include "CSpaceMilestone.h"
+#include "OpSpaceMilestone.h"
+
 #include "rControlalgorithm\rControlalgorithm.h"
 #include "rxControlSDK\rxControlSDK.h"
 
@@ -9,6 +13,111 @@ xml_element(xml_element_in)
 
 XMLDeserializer::~XMLDeserializer()
 {
+}
+
+HybridAutomaton* XMLDeserializer::createHybridAutomaton(const std::string& xml_string, rxSystem* robot, double dT)
+{
+	HybridAutomaton* automaton = new HybridAutomaton();
+
+	// Create the DOM-model
+ 	TiXmlDocument document;
+	if(document.Parse(xml_string.c_str()) == NULL) 	{
+		std::cout << document.ErrorDesc() << std::endl;
+		delete automaton;
+		return NULL;
+	}
+	TiXmlHandle docHandle(&document);
+
+	// Find the first (there should be the only one) HybridAutomaton element in the base document
+	TiXmlElement* ha_element = docHandle.FirstChild("HybridAutomaton").Element();
+
+	// Check if the HybridAutomaton element was found
+	if (ha_element == NULL) {
+		throw std::string("ERROR [HybridAutomaton::fromStringXML]: Child Element \"HybridAutomaton\" not found in XML element docHandle.");
+		delete automaton;
+		return NULL;
+	}
+
+	std::string start_node = std::string(ha_element->Attribute("InitialMilestone"));
+	if(start_node == std::string("")) {
+		std::cout << "WARNING [HybridAutomaton::fromStringXML]: Attribute \"InitialMilestone\" not found in XML element hsElement." << std::endl;
+		delete automaton;
+		return NULL;
+	}
+
+	// Print out a message with the general properties of the new HybridAutomaton.
+	std::cout << "Creating hybrid system '" << ha_element->Attribute("Name") << "'. Initial Milestone: " << start_node << std::endl;
+
+	// Read the data of the nodes-milestones and create them
+	for (TiXmlElement* mst_element = ha_element->FirstChildElement("Milestone"); mst_element != 0; mst_element = mst_element->NextSiblingElement("Milestone")) {
+		Milestone* mst;
+		std::string mst_type(mst_element->Attribute("type"));
+		if(mst_type == "CSpace")
+		{
+			mst = new CSpaceMilestone(mst_element, robot, dT);
+		}
+		else if(mst_type == "OpSpace")
+		{
+			mst = new OpSpaceMilestone(mst_element, robot, dT);
+		}
+		else
+		{
+			throw ("ERROR [HybridAutomaton::fromStringXML]: Unknown type of milestone: " + mst_type);
+			delete automaton;
+			return NULL;
+		}
+		automaton->addNode(mst);
+	}
+
+	// Set the start node-milestone
+	automaton->setStartNode(automaton->getMilestoneByName(start_node));
+
+	if (!automaton->getStartNode()) {
+		throw ("ERROR [HybridAutomaton::fromStringXML]: The name of the initial node '" + start_node + "' does not match with the name of any milestone.");
+		delete automaton;
+		return NULL;
+	}
+
+	// Read the data of the edges-motionbehaviours and create them
+	for (TiXmlElement* mb_element = ha_element->FirstChildElement("MotionBehaviour"); mb_element != 0; mb_element = mb_element->NextSiblingElement("MotionBehaviour")) {
+		std::string ms_parent(mb_element->Attribute("Parent"));
+		std::string ms_child(mb_element->Attribute("Child"));
+		if(ms_parent == std::string(""))
+		{
+			throw std::string("ERROR [HybridAutomaton::fromStringXML]: Attribute \"Parent\" not found in XML element edgeElement.");
+			delete automaton;
+			return NULL;
+		}
+
+		Milestone* ms_parent_ptr = automaton->getMilestoneByName(ms_parent);
+
+		if(ms_parent_ptr == NULL) {
+			throw std::string("ERROR [HybridAutomaton::fromStringXML]: The name of the parent node does not match with the name of any milestone.");
+			delete automaton;
+			return NULL;
+		}
+		
+		if(ms_child == std::string(""))
+		{
+			throw std::string("ERROR [HybridAutomaton::fromStringXML]: Attribute \"Child\" not found in XML element edgeElement.");
+			delete automaton;
+			return NULL;
+		}
+		
+		Milestone* ms_child_ptr = automaton->getMilestoneByName(ms_child);
+
+		if(ms_child_ptr == NULL)
+		{
+			throw ("ERROR [HybridAutomaton::fromStringXML]: The name of the child node '" + ms_child + "' does not match the name of any milestone.");
+			delete automaton;
+			return NULL;
+		}
+
+		MotionBehaviour* mb = new MotionBehaviour(mb_element, ms_parent_ptr, ms_child_ptr, robot, dT);
+		automaton->addEdge(mb);
+	}
+
+	return automaton;
 }
 
 
@@ -78,6 +187,13 @@ double XMLDeserializer::deserializeDouble(const char * field_name)
 		std::string exception_str = std::string("ERROR: [XMLDeserializer::deserializeDouble(const char * field_name)] Attribute ") + std::string(field_name) + std::string(" was not found in XML element.");
 		throw exception_str;
 	}
+	return return_double;
+}
+
+double XMLDeserializer::deserializeDouble(const char * field_name, double default_value)
+{
+	double return_double = default_value;
+	xml_element->Attribute(field_name, &return_double);
 	return return_double;
 }
 

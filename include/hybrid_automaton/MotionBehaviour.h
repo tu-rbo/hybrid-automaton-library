@@ -5,6 +5,7 @@
 #include "Milestone.h"
 #include "rControlalgorithm\rControlalgorithm.h"
 #include "rxControlSDK\rxControlSDK.h"
+#include "collision_detection\collision_interface\include\CollisionInterface.h"
 
 #include "tinyxml.h"
 
@@ -17,7 +18,10 @@ typedef enum {
 	WITH_COMPLIANCE		= 2,
 	WITH_IMPEDANCE		= 4,
 	WITH_INTERPOLATION	= 8,
-	WITH_GRADIENT		= 16
+	WITH_GRADIENT		= 16,
+	ATTRACTOR			= 32,
+	SUBDISPLACEMENT		= 64,
+	OBSTACLE_AVOIDANCE	= 128
 } ControllerSubtype;
 
 // impossible to replace int by ControllerSubtype because then no combinations of subtypes are allowed!
@@ -104,6 +108,15 @@ public:
 	* @param dt Control interval of the controllers in this MB.
 	*/
 	MotionBehaviour(TiXmlElement* motion_behaviour_xml , const Milestone *dad, const Milestone *son , rxSystem* robot, double dt );
+
+	/**
+	* Constructor
+	* @param dad Pointer to the parent milestone (MotionBehaviour-Edge stores directly the pointer, no internal copy!).
+	* @param son Pointer to the child milestone (MotionBehaviour-Edge stores directly the pointer, no internal copy!).
+	* @param control_set Pointer to the control set, which is used to get the pointer to the RLab system object and the control interval of the controllers in this MB.
+	* @param weight Weight of the edge in the graph
+	*/
+	MotionBehaviour(const Milestone * dad, const Milestone * son, rxControlSet* control_set, double weight = 1.0);
 
 	/**
 	* Copy constructor - Create a new MotionBehaviour that is a copy of the MotionBehaviour given as parameter
@@ -272,6 +285,14 @@ private:
 	* @param controller_duration Time interval of the controller to be created.
 	*/
 	rxController* createNullMotionController_(int null_motion_subtype, double controller_duration) const;
+
+	/**
+	* Recreate a Functional controller
+	* @param functional_subtype Subgroup of the controller to be created within the Null Motion Controller group.
+	* @param dimension Dimension to be controlled
+	* @param controller_duration Time interval of the controller to be created.
+	*/
+	rxController* createFunctionalController_(int functional_subtype, int dimension, double controller_duration, TiXmlElement* rxController_xml) const;
 
 
 	rxControlSetBase*								control_set_;		// Stores the set of rxController's defining this MotionBehaviour

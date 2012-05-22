@@ -4,6 +4,10 @@
 
 #include "XMLDeserializer.h"
 
+#include "FeatureAttractorController.h"
+#include "SubdisplacementController.h"
+#include "ObstacleAvoidanceController.h"
+
 //#define NOT_IN_RT
 
 using namespace std;
@@ -32,6 +36,7 @@ Edge<Milestone>(dad, son, weight)
 {
 	if(robot_)
 	{
+
 		control_set_ = new rxControlSet(robot_, dT_);
 		control_set_->setGravity(0,0,-GRAV_ACC);
 		control_set_->setInverseDynamicsAlgorithm(new rxAMBSGravCompensation(this->robot_));
@@ -43,7 +48,33 @@ Edge<Milestone>(dad, son, weight)
 	}
 }
 
-MotionBehaviour::MotionBehaviour(TiXmlElement* motion_behaviour_xml, const Milestone * dad, const Milestone * son, rxSystem* robot, double dt): Edge(dad, son)
+MotionBehaviour::MotionBehaviour(const Milestone * dad, const Milestone * son, rxControlSet* control_set, double weight ):
+Edge<Milestone>(dad, son, weight)
+, time_(0)
+, max_velocity_(-1)
+, min_time_(-1)
+, time_to_converge_(0.0)
+, control_set_(control_set)
+{
+	if(control_set_)
+	{
+		dT_ = control_set->dt();
+		robot_ = const_cast<rxSystem*>(control_set->sys());
+
+		// TODO: should this be done by the caller?
+		control_set_->setGravity(0,0,-GRAV_ACC);
+		control_set_->setInverseDynamicsAlgorithm(new rxAMBSGravCompensation(this->robot_));
+		control_set_->nullMotionController()->setGain(0.02,0.0,0.01);
+	}
+	else
+	{
+		dT_ = 0.002;
+		robot_ = NULL;
+	}
+}
+
+
+MotionBehaviour::MotionBehaviour(TiXmlElement* motion_behaviour_xml, const Milestone * dad, const Milestone * son, rxSystem* robot, double dt ): Edge(dad, son)
 , robot_(robot)
 , dT_(dt)
 , max_velocity_(-1)
@@ -172,6 +203,16 @@ void MotionBehaviour::addController_(TiXmlElement * rxController_xml)
 	std::stringstream kv_vector_ss = std::stringstream(xml_deserializer_.deserializeString("kv"));
 	std::stringstream invL2sqr_vector_ss = std::stringstream(xml_deserializer_.deserializeString("invL2sqr"));
 	bool is_goal_controller = xml_deserializer_.deserializeBoolean("goalController", true);
+	dVector controller_goal;
+	double controller_goal_value;
+	if(!is_goal_controller)
+	{
+		std::stringstream controller_goal_ss = std::stringstream(xml_deserializer_.deserializeString("controllerGoal"));
+		while(controller_goal_ss >> controller_goal_value)
+		{	
+			controller_goal.expand(1,controller_goal_value);		
+		}
+	}
 	int priority = xml_deserializer_.deserializeInteger("priority", 1);
 
 	dVector kp_vector;
@@ -214,6 +255,12 @@ void MotionBehaviour::addController_(TiXmlElement * rxController_xml)
 	case rxController::eControlType_NullMotion:
 		controller = this->createNullMotionController_(type_of_controller.second, this->dT_);
 		break;
+	case rxController::eControlType_Functional:
+		{
+			int dimension = xml_deserializer_.deserializeInteger("dimension", 0);
+			controller = this->createFunctionalController_(type_of_controller.second, dimension, this->dT_, rxController_xml);
+			break;
+		}
 	default:
 		throw std::string("ERROR: [MotionBehaviour::addController_(TiXmlElement * rxController_xml)] Unexpected Controller group.");
 		break;
@@ -223,6 +270,31 @@ void MotionBehaviour::addController_(TiXmlElement * rxController_xml)
 	std::wstringstream wss;
 	wss << "controller_" << control_set_->getControllers().size();
 	controller->setName(wss.str());
+
+	switch(controller->type()) {
+		case rxController::eControlType_Joint:
+			{
+				dynamic_cast<rxJointController*>(controller)->addPoint(controller_goal, time_, false, eInterpolatorType_Cubic);
+				break;
+			}
+		case rxController::eControlType_Displacement:
+			{
+				dynamic_cast<rxDisplacementController*>(controller)->addPoint(controller_goal, time_, false, eInterpolatorType_Cubic);
+				break;
+			}
+		case rxController::eControlType_Orientation:
+			{
+				dynamic_cast<rxOrientationController*>(controller)->addPoint(controller_goal, time_, false);
+				break;
+			}
+		case rxController::eControlType_HTransform:
+			{
+				Vector3D goal_3D(controller_goal[0],controller_goal[1],controller_goal[2]);
+				Rotation goal_rot(controller_goal[3], controller_goal[4], controller_goal[5]);		//NOTE: Suposses that the orientation is defined with 
+				dynamic_cast<rxHTransformController*>(controller)->addPoint(HTransform(goal_rot, goal_3D), time_, false);
+				break;
+			}
+	}
 
 	controller->setPriority(priority);
 	this->addController(controller, is_goal_controller);	// The controller is deactivated when added
@@ -277,7 +349,7 @@ void MotionBehaviour::activate()
 
 							// qd1 and qd2
 							dVector current_qd(current_q.size());
-							current_qd.zero();
+							current_qd = robot_->qdot();
 							dVector desired_qd(current_q.size());
 							desired_qd.zero();
 
@@ -299,10 +371,36 @@ void MotionBehaviour::activate()
 						}
 					case rxController::eControlType_Displacement:
 						{
-							double time = (min_time_ > 0) ? min_time_ : 10.0;
-							dVector goal = child->getConfiguration();
-							Vector3D goal_3D(goal[0],goal[1],goal[2]);
-							dynamic_cast<rxDisplacementController*>(*it)->addPoint(goal_3D, time, false);
+							double default_max_velocity = 0.20;// in m/s
+							double default_min_time = 5.;
+							double time = min_time_;
+
+							// q1 and q2 to interpolate between
+							std::cout << robot_ << std::endl;
+							std::cout << robot_->findBody(_T("EE")) << std::endl;
+							dVector current_r = robot_->findBody(_T("EE"))->T().r; //parent->getConfiguration();
+							dVector desired_r = child->getConfiguration();
+
+							// qd1 and qd2
+							dVector current_rd(current_r.size());
+							current_rd.zero();
+							dVector desired_rd(current_r.size());
+							desired_rd.zero();
+
+							if (max_velocity_ > 0 || min_time_ <= 0 ) {
+								double velocity = max_velocity_;
+								if (max_velocity_ <= 0) {
+									velocity = default_max_velocity;
+									time = default_min_time;
+								}
+								for (unsigned int i = 0; i < current_r.size(); i++) {
+									time = max( fabs((6 * desired_r[i] - 6 * current_r[i]) / (current_rd[i] + desired_rd[i] + 4 * velocity)), time);
+								}
+							}
+
+							std::cout << "time of trajectory: " << time << std::endl;
+							time_to_converge_=time;
+							dynamic_cast<rxDisplacementController*>(*it)->addPoint(desired_r, time, false, eInterpolatorType_Cubic);
 							break;
 						}
 					case rxController::eControlType_Orientation:
@@ -349,16 +447,28 @@ bool MotionBehaviour::hasConverged()
 	//We wait until the time to converge is exceeded and then we check if the error is small.
 	if(time_ > time_to_converge_)
 	{
+
+		//change this!!!!!!!!!!!!!!!!
 		dVector error = this->control_set_->e();
+
+
+
+		//this->robot_->findBody(_T("EE"))->T().r
+		//std::list<rxController*> controllers = this->control_set_->getControllers();
+		//std::list<rxController*>::iterator it = controllers.begin();
+		//dynamic_cast<rxInterpolatedDisplacementComplianceController*>(*it)->
+		//dynamic_cast<rxInterpolatedDisplacementComplianceController*>(*it)->r_beta_target()
+
+		//controllers.front()
 
 		for(int i = 0; i < error.size(); ++i)
 		{
 			//HACK (George) : This is because I couldn't get the error between the current position and the desired position at the END of the trajectory
 			if (::std::abs(error[i]) > 0.1 )
 			{
-//#ifdef NOT_IN_RT
+				//#ifdef NOT_IN_RT
 				std::cout << "Error in " << i << " is to large = " << ::std::abs(error[i]) << std::endl;
-//#endif
+				//#endif
 				return false;
 			}
 		}
@@ -519,6 +629,16 @@ TiXmlElement* MotionBehaviour::toElementXML() const
 			control_set_element->LinkEndChild(rxController_xml);
 			this->RLabInfoString2ElementXML_(controller_to_string, rxController_xml);
 			rxController_xml->SetAttribute("goalController", (goal_controllers_.find((*controllers_it)->name())->second ? "true" : "false"));
+			dVector controller_goal;
+	double controller_goal_value;
+	if(!is_goal_controller)
+	{
+		std::stringstream controller_goal_ss = std::stringstream(xml_deserializer_.deserializeString("controllerGoal"));
+		while(controller_goal_ss >> controller_goal_value)
+		{	
+			controller_goal.expand(1,controller_goal_value);		
+		}
+	}
 			rxController_xml->SetAttribute("priority", (*controllers_it)->priority());
 	}
 	return mb_element;
@@ -770,6 +890,10 @@ std::map<std::string, ControllerType> MotionBehaviour::createControllerMapping_(
 	mapping["rxNullMotionComplianceController"]				= ControllerType(rxController::eControlType_NullMotion, WITH_COMPLIANCE);
 	mapping["rxGradientNullMotionController"]				= ControllerType(rxController::eControlType_NullMotion, WITH_GRADIENT);
 
+	mapping["FeatureAttractorController"]					= ControllerType(rxController::eControlType_Displacement, WITH_IMPEDANCE | ATTRACTOR);
+	mapping["SubdisplacementController"]					= ControllerType(rxController::eControlType_Functional, WITH_IMPEDANCE | SUBDISPLACEMENT);
+	mapping["ObstacleAvoidanceController"]					= ControllerType(rxController::eControlType_Functional, OBSTACLE_AVOIDANCE);
+
 	return mapping;
 }
 
@@ -904,6 +1028,13 @@ rxController* MotionBehaviour::createDisplacementController_(int displacement_su
 	case WITH_INTERPOLATION | WITH_IMPEDANCE:
 		controller = new rxInterpolatedDisplacementImpedanceController(this->robot_, beta, Displacement(beta_displacement), alpha, Displacement(alpha_displacement), controller_duration );
 		break;
+	case WITH_IMPEDANCE | ATTRACTOR:
+		{
+			double desired_distance = xml_deserializer_.deserializeDouble("desiredDistance", 1.);
+			double max_force = xml_deserializer_.deserializeDouble("maxForce", 1.);
+			controller = new FeatureAttractorController(this->robot_, beta, Displacement(beta_displacement), controller_duration, desired_distance, max_force );
+			break;
+		}
 	default:
 		throw std::string("ERROR: [MotionBehaviour::createDisplacementController_(ControllerSubgroup displacement_subtype, double controller_duration, std::vector<ViaPointBase*> via_points_ptr, TiXmlElement* rxController_xml)] Unexpected Controller subgroup.");
 		break;
@@ -1068,10 +1199,10 @@ rxController* MotionBehaviour::createHTransformController_(int htransform_subtyp
 	case WITH_INTERPOLATION:
 		controller = new rxInterpolatedHTransformController(this->robot_, beta, HTransform(beta_rotation, beta_displacement), alpha, HTransform(alpha_rotation, alpha_displacement), controller_duration );
 		break;
-	case WITH_INTERPOLATION + WITH_COMPLIANCE:
+	case WITH_INTERPOLATION | WITH_COMPLIANCE:
 		controller = new rxInterpolatedHTransformComplianceController(this->robot_, beta, HTransform(beta_rotation, beta_displacement), alpha, HTransform(alpha_rotation, alpha_displacement), controller_duration );
 		break;
-	case WITH_INTERPOLATION + WITH_IMPEDANCE:
+	case WITH_INTERPOLATION | WITH_IMPEDANCE:
 		controller = new rxInterpolatedHTransformImpedanceController(this->robot_, beta, HTransform(beta_rotation, beta_displacement), alpha, HTransform(alpha_rotation, alpha_displacement), controller_duration );
 		break;
 	default:
@@ -1140,6 +1271,95 @@ rxController* MotionBehaviour::createNullMotionController_(int null_motion_subty
 		break;
 	default:
 		throw std::string("ERROR: [MotionBehaviour::createNullMotionController_(ControllerSubgroup null_motion_subtype, double controller_duration)] Unexpected Controller subgroup.");
+		break;
+	}
+	return controller;
+}
+
+rxController* MotionBehaviour::createFunctionalController_(int functional_subtype, int dimension, double controller_duration, TiXmlElement* rxController_xml) const
+{
+	rxController* controller = NULL;
+	switch(functional_subtype)
+	{
+	case NONE:
+		//controller = new rxFunctionController(this->robot_, dimension, controller_duration);
+		break;
+	case WITH_IMPEDANCE | SUBDISPLACEMENT:
+	case OBSTACLE_AVOIDANCE:{
+		rxBody*   alpha = NULL;
+		rxBody*   beta = NULL;
+		rxController* controller = NULL;
+		XMLDeserializer xml_deserializer_(rxController_xml);
+		std::string alpha_str = xml_deserializer_.deserializeString("alpha");
+		alpha = robot_->findBody(string2wstring_(alpha_str));
+		std::stringstream alpha_rot_ss = std::stringstream(xml_deserializer_.deserializeString("alphaRotation"));
+		double alpha_value = -1.0;
+		dVector alpha_rotation;
+		while((alpha_rot_ss >> alpha_value))
+		{
+			alpha_rotation.expand(1,alpha_value);
+		}
+		std::stringstream alpha_disp_ss = std::stringstream(xml_deserializer_.deserializeString("alphaDisplacement"));
+		dVector alpha_displacement;
+		while((alpha_disp_ss >> alpha_value))
+		{
+			alpha_displacement.expand(1,alpha_value);
+		}
+
+		std::string beta_str = xml_deserializer_.deserializeString("beta");
+		beta = robot_->findBody(string2wstring_(beta_str));
+		std::stringstream beta_rot_ss = std::stringstream(xml_deserializer_.deserializeString("betaRotation"));
+		double beta_value = -1.0;
+		dVector beta_rotation;
+		while((beta_rot_ss >> beta_value))
+		{
+			beta_rotation.expand(1,beta_value);
+		}			
+		std::stringstream beta_disp_ss = std::stringstream(xml_deserializer_.deserializeString("betaDisplacement"));
+		dVector beta_displacement;
+		while((beta_disp_ss >> beta_value))
+		{
+			beta_displacement.expand(1,beta_value);
+		}
+		std::stringstream index_ss = std::stringstream(xml_deserializer_.deserializeString("index"));
+		std::vector<long> index;
+		long index_value;
+		while((index_ss >> index_value))
+		{
+			index.push_back(index_value);
+		}
+		if(functional_subtype == (WITH_IMPEDANCE | SUBDISPLACEMENT))
+		{
+			double max_force = xml_deserializer_.deserializeDouble("maxForce", 1.);
+			std::string limit_body = xml_deserializer_.deserializeString("limitBody");
+			double distance_limit = xml_deserializer_.deserializeDouble("distanceLimit", 0.);
+			controller = new SubdisplacementController(this->robot_,beta, beta_displacement, alpha, alpha_displacement,
+				controller_duration, index, max_force, this->robot_->findBody(string_type(string2wstring_(limit_body))), distance_limit );
+			if(index.size() == 1 && index.at(0) ==1)
+			{
+				dynamic_cast<SubdisplacementController*>(controller)->setTaskConstraints(0.);
+			}else if (index.size() ==2 && index.at(0) ==1 && index.at(1) == 1)
+			{
+				dynamic_cast<SubdisplacementController*>(controller)->setTaskConstraints(0., 0.);
+			}
+			break;
+		}
+		if(functional_subtype == OBSTACLE_AVOIDANCE)
+		{
+			double distance_threshold = xml_deserializer_.deserializeDouble("distanceThreshold", 1.);
+			double deactivation_threshold = xml_deserializer_.deserializeDouble("deactivationThreshold", 1.);
+			if(CollisionInterface::instance)
+			{
+				controller = new ObstacleAvoidanceController(this->robot_, beta, beta_displacement, distance_threshold, 
+					CollisionInterface::instance, controller_duration, deactivation_threshold);
+			}else{
+				throw std::string("ERROR: [MotionBehaviour::createFunctionalController]: Obstacle Avoidance needs Collision interface.");
+			}
+			break;
+		}
+							}
+	default:
+		throw std::string("ERROR: [MotionBehaviour::createFunctionalController_(ControllerSubgroup functional_subtype, double controller_duration)] Unexpected Controller subgroup.");
 		break;
 	}
 	return controller;

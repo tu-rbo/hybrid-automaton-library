@@ -37,6 +37,12 @@ public:
 	void setStartNode(Milestone* nodeID);
 
 	/**
+	* Return the pointer of a specific Milestone or NULL if it doesn't exist.
+	* @param name Name of the Milestone.
+	*/
+	Milestone* getMilestoneByName(const std::string& name) const;
+
+	/**
 	* Return a string with XML format with all required parameters of the HybridAutomaton to recreate it 
 	* in the other side of a network connection.
 	* Note: It uses tinyXML library to create the string with XML format.

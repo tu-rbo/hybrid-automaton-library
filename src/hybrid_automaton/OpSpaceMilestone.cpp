@@ -12,15 +12,23 @@ using namespace std;
 #define RADIUS 0.4
 
 OpSpaceMilestone::OpSpaceMilestone() :
-Milestone(),
+Milestone("Default"),
 motion_behaviour_(NULL),
 //object_id_(-1),
 posi_ori_selection_(POSITION_SELECTION)	// Default value in the default constructor
 {
 }
 
-OpSpaceMilestone::OpSpaceMilestone(std::vector<double>& posi_ori_value, PosiOriSelector posi_ori_selection, MotionBehaviour * motion_behaviour, std::vector<double>& region_convergence_radius) :
-Milestone()
+OpSpaceMilestone::OpSpaceMilestone(std::string osm_name) :
+Milestone(osm_name),
+motion_behaviour_(NULL),
+//object_id_(-1),
+posi_ori_selection_(POSITION_SELECTION)	// Default value in the default constructor
+{
+}
+
+OpSpaceMilestone::OpSpaceMilestone(std::string osm_name, std::vector<double>& posi_ori_value, PosiOriSelector posi_ori_selection, MotionBehaviour * motion_behaviour, std::vector<double>& region_convergence_radius) :
+Milestone(osm_name)
 //object_id_(object_id)
 {
 	posi_ori_selection_ = posi_ori_selection;
@@ -95,7 +103,7 @@ motion_behaviour_(NULL)
 //object_id_(-1)
 {
 	XMLDeserializer xml_deserializer_(milestone_xml);
-	this->setStatus((Status)xml_deserializer_.deserializeInteger("status"));
+	this->status_ = (Status)xml_deserializer_.deserializeInteger("status");
 	this->name_ = xml_deserializer_.deserializeString("name");
 	//this->object_id_ = xml_deserializer_.deserializeInteger("ObjectId");
 	this->posi_ori_selection_ = (PosiOriSelector)xml_deserializer_.deserializeInteger("PosiOriSelector");
@@ -337,6 +345,7 @@ TiXmlElement* OpSpaceMilestone::toElementXML() const
 	TiXmlElement* op_space_ms_xml = new TiXmlElement("Milestone");
 	op_space_ms_xml->SetAttribute("type", "OpSpace");
 	op_space_ms_xml->SetAttribute("status", this->getStatus());
+	op_space_ms_xml->SetAttribute("name", this->name_.c_str());
 	//op_space_ms_xml->SetAttribute("ObjectId", object_id_);
 	op_space_ms_xml->SetAttribute("PosiOriSelector", posi_ori_selection_);
 

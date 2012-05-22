@@ -28,6 +28,18 @@ void HybridAutomaton::setStartNode(Milestone* nodeID)
 	start_node_id_ = nodeID; 
 }
 
+Milestone* HybridAutomaton::getMilestoneByName(const std::string& name) const
+{
+	for(int i=0; i<this->nodeList.size(); i++)
+	{
+		if(this->nodeList[i]->getName() == name)
+		{
+			return this->nodeList[i];
+		}
+	}
+	return NULL;
+}
+
 std::string HybridAutomaton::toStringXML() const
 {
 	// If the HybridAutomaton is empty, return the corresponding string

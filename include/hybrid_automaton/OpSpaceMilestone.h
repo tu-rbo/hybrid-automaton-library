@@ -23,7 +23,9 @@ public:
 
 	OpSpaceMilestone();  
 
-	OpSpaceMilestone(std::vector<double>& posi_ori_value, PosiOriSelector posi_ori_selection, MotionBehaviour * motion_behaviour, std::vector<double>& region_convergence_radius);
+	OpSpaceMilestone(std::string osm_name);  
+
+	OpSpaceMilestone(std::string osm_name, std::vector<double>& posi_ori_value, PosiOriSelector posi_ori_selection, MotionBehaviour * motion_behaviour, std::vector<double>& region_convergence_radius);
 
 	OpSpaceMilestone(TiXmlElement* milestone_xml, rxSystem* robot, double dt);
 

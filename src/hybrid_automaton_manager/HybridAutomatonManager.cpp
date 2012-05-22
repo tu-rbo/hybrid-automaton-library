@@ -67,6 +67,7 @@ HybridAutomatonManager::~HybridAutomatonManager()
 {
 	delete _activeMotionBehavior;
 
+	delete _blackboard;
 	if(_blackboard)
 		delete _blackboard;
 
@@ -107,6 +108,8 @@ void HybridAutomatonManager::init(int mode)
 
 	_blackboard = NULL;
 
+	activateBlackboard(std::string("130.149.238.179"), 1888, std::string("130.149.238.187"), 1999);
+
 	_defaultMotionBehavior = new MotionBehaviour(new Milestone(), new Milestone(),_robot);
 	_activeMotionBehavior = _defaultMotionBehavior;
 }
@@ -121,9 +124,8 @@ bool HybridAutomatonManager::isBlackboardActive() const
 	return (_blackboard != NULL);
 }
 
-void HybridAutomatonManager::setHybridAutomaton(std::string  _new_hybrid_automaton_str)
+void HybridAutomatonManager::setHybridAutomaton(std::string _new_hybrid_automaton_str)
 {
-
 	DeserializingThreadArguments* thread_args = new DeserializingThreadArguments();
 	thread_args->_robot = this->_robot;
 	thread_args->_string = _new_hybrid_automaton_str;
@@ -138,7 +140,7 @@ void HybridAutomatonManager::setHybridAutomaton(std::string  _new_hybrid_automat
 
 }
 
-void HybridAutomatonManager::setHybridAutomaton(HybridAutomaton*  _new_hybrid_automaton)
+void HybridAutomatonManager::setHybridAutomaton(HybridAutomaton* _new_hybrid_automaton)
 {
 	WaitForSingleObject(_deserialize_mutex, INFINITE);
 	this->_deserialized_hybrid_automatons.push_back(_new_hybrid_automaton);
@@ -296,12 +298,19 @@ void HybridAutomatonManager::_compute(const double& t)
 			std::cout << "Switching controller" << std::endl;
 			_activeMotionBehavior->deactivate();
 			
+			std::cout << "BEFORE " << _activeMotionBehavior << std::endl;
+			std::cout << "number of out edges: " << _hybrid_automaton->outgoingEdges(*(_activeMotionBehavior->getChild())).size() << std::endl;
+
 			_activeMotionBehavior = _hybrid_automaton->outgoingEdges(*(_activeMotionBehavior->getChild()))[0];
+
+			std::cout << "AFTER " << _activeMotionBehavior << std::endl;
+
 			_activeMotionBehavior->activate();
 
-#ifdef NOT_IN_RT
+#ifdef NOT_IN_RT 
 			std::cout << _activeMotionBehavior->toStringXML() << ::std::endl;
 			_activeMotionBehavior->print();
+			_hybrid_automaton->__printMatrix();
 #endif
 		}
 	}

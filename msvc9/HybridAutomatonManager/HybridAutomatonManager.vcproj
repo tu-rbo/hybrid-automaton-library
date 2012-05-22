@@ -41,7 +41,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="&quot;$(RLAB_INC_PATH)&quot;;&quot;$(ProjectDir)..\..\..\graph\include&quot;;&quot;$(ProjectDir)..\..\include\hybrid_automaton&quot;;&quot;$(ProjectDir)..\..\thirdparty\tinyxml\include&quot;;&quot;$(ProjectDir)..\..\include\hybrid_automaton_manager&quot;;&quot;$(ProjectDir)..\..\include\hybrid_automaton_manager\ros_bridge&quot;"
+				AdditionalIncludeDirectories="&quot;$(RSWIN_ROOT)&quot;;&quot;$(RLAB_INC_PATH)&quot;;&quot;$(ProjectDir)..\..\..\graph\include&quot;;&quot;$(ProjectDir)..\..\include\hybrid_automaton&quot;;&quot;$(ProjectDir)..\..\thirdparty\tinyxml\include&quot;;&quot;$(ProjectDir)..\..\include\hybrid_automaton_manager&quot;;&quot;$(ProjectDir)..\..\include\hybrid_automaton_manager\ros_bridge&quot;"
 				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_USRDLL;HYBRIDAUTOMATONMANAGER_EXPORTS;R_EXPORTS"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -119,13 +119,13 @@
 				Optimization="2"
 				EnableIntrinsicFunctions="true"
 				WholeProgramOptimization="false"
-				AdditionalIncludeDirectories="&quot;$(RLAB_INC_PATH)&quot;;&quot;$(ProjectDir)..\..\..\graph\include&quot;;&quot;$(ProjectDir)..\..\include\hybrid_automaton&quot;;&quot;$(ProjectDir)..\..\thirdparty\tinyxml\include&quot;;&quot;$(ProjectDir)..\..\include\hybrid_automaton_manager&quot;;&quot;$(ProjectDir)..\..\include\hybrid_automaton_manager\ros_bridge&quot;"
+				AdditionalIncludeDirectories="&quot;$(RSWIN_ROOT)&quot;;&quot;$(RLAB_INC_PATH)&quot;;&quot;$(ProjectDir)..\..\..\graph\include&quot;;&quot;$(ProjectDir)..\..\include\hybrid_automaton&quot;;&quot;$(ProjectDir)..\..\thirdparty\tinyxml\include&quot;;&quot;$(ProjectDir)..\..\include\hybrid_automaton_manager&quot;;&quot;$(ProjectDir)..\..\include\hybrid_automaton_manager\ros_bridge&quot;"
 				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_USRDLL;HYBRIDAUTOMATONMANAGER_EXPORTS;R_EXPORTS"
 				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="true"
 				UsePrecompiledHeader="0"
 				WarningLevel="3"
-				DebugInformationFormat="0"
+				DebugInformationFormat="3"
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"
@@ -247,6 +247,26 @@
 					</File>
 				</Filter>
 			</Filter>
+			<Filter
+				Name="controllers"
+				>
+				<File
+					RelativePath="..\..\..\collision_detection\collision_interface\src\CollisionInterface.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\..\controllers\src\FeatureAttractorController.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\..\controllers\src\ObstacleAvoidanceController.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\..\controllers\src\SubdisplacementController.cpp"
+					>
+				</File>
+			</Filter>
 		</Filter>
 		<Filter
 			Name="Header Files"
@@ -324,6 +344,26 @@
 						>
 					</File>
 				</Filter>
+			</Filter>
+			<Filter
+				Name="controllers"
+				>
+				<File
+					RelativePath="..\..\..\collision_detection\collision_interface\include\CollisionInterface.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\..\controllers\include\FeatureAttractorController.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\..\controllers\include\ObstacleAvoidanceController.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\..\controllers\include\SubdisplacementController.h"
+					>
+				</File>
 			</Filter>
 		</Filter>
 		<Filter

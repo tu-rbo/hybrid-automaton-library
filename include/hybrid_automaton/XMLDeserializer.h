@@ -3,15 +3,18 @@
 
 #include <string>
 #include "tinyxml.h"
+
+#include "HybridAutomaton.h"
 #include "MotionBehaviour.h"
 
 class XMLDeserializer
 {
 public:
 	XMLDeserializer(TiXmlElement * xml_element_in);
-
 	virtual ~XMLDeserializer();
-
+	
+	static HybridAutomaton* createHybridAutomaton(const std::string& xml_string, rxSystem* robot, double dT);
+	
 	bool deserializeBoolean(const char * field_name);
 	bool deserializeBoolean(const char * field_name, bool default_value);
 
@@ -19,6 +22,7 @@ public:
 	int deserializeInteger(const char * field_name, int default_value);
 
 	double deserializeDouble(const char * field_name);
+	double deserializeDouble(const char * field_name, double default_value);
 
 	std::string deserializeString(const char * field_name);
 
