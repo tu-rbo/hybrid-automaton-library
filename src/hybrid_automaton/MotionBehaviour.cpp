@@ -631,14 +631,14 @@ TiXmlElement* MotionBehaviour::toElementXML() const
 			rxController_xml->SetAttribute("goalController", (goal_controllers_.find((*controllers_it)->name())->second ? "true" : "false"));
 			dVector controller_goal;
 	double controller_goal_value;
-	if(!is_goal_controller)
-	{
-		std::stringstream controller_goal_ss = std::stringstream(xml_deserializer_.deserializeString("controllerGoal"));
-		while(controller_goal_ss >> controller_goal_value)
-		{	
-			controller_goal.expand(1,controller_goal_value);		
-		}
-	}
+	//if(!is_goal_controller)
+	//{
+	//	std::stringstream controller_goal_ss = std::stringstream(xml_deserializer_.deserializeString("controllerGoal"));
+	//	while(controller_goal_ss >> controller_goal_value)
+	//	{	
+	//		controller_goal.expand(1,controller_goal_value);		
+	//	}
+	//}
 			rxController_xml->SetAttribute("priority", (*controllers_it)->priority());
 	}
 	return mb_element;
