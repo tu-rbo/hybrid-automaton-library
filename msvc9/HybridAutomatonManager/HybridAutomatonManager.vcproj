@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="Windows-1252"?>
 <VisualStudioProject
 	ProjectType="Visual C++"
-	Version="9.00"
+	Version="9,00"
 	Name="HybridAutomatonManager"
 	ProjectGUID="{C48E2081-E337-4D79-BD9C-B798C18AEFEE}"
 	RootNamespace="HybridAutomatonManager"
@@ -41,7 +41,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="&quot;$(RSWIN_ROOT)&quot;;&quot;$(RLAB_INC_PATH)&quot;;&quot;$(ProjectDir)..\..\..\graph\include&quot;;&quot;$(ProjectDir)..\..\include\hybrid_automaton&quot;;&quot;$(ProjectDir)..\..\thirdparty\tinyxml\include&quot;;&quot;$(ProjectDir)..\..\include\hybrid_automaton_manager&quot;;&quot;$(ProjectDir)..\..\include\hybrid_automaton_manager\ros_bridge&quot;"
+				AdditionalIncludeDirectories="&quot;$(RSWIN_ROOT)&quot;;&quot;$(RLAB_INC_PATH)&quot;;&quot;$(ProjectDir)..\..\..\graph\include&quot;;&quot;$(ProjectDir)..\..\include\hybrid_automaton&quot;;&quot;$(ProjectDir)..\..\thirdparty\tinyxml\include&quot;;&quot;$(ProjectDir)..\..\include\hybrid_automaton_manager&quot;;&quot;$(RSWIN_ROOT)\ros_bridge\include&quot;"
 				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_USRDLL;HYBRIDAUTOMATONMANAGER_EXPORTS;R_EXPORTS"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -119,7 +119,7 @@
 				Optimization="2"
 				EnableIntrinsicFunctions="true"
 				WholeProgramOptimization="false"
-				AdditionalIncludeDirectories="&quot;$(RSWIN_ROOT)&quot;;&quot;$(RLAB_INC_PATH)&quot;;&quot;$(ProjectDir)..\..\..\graph\include&quot;;&quot;$(ProjectDir)..\..\include\hybrid_automaton&quot;;&quot;$(ProjectDir)..\..\thirdparty\tinyxml\include&quot;;&quot;$(ProjectDir)..\..\include\hybrid_automaton_manager&quot;;&quot;$(ProjectDir)..\..\include\hybrid_automaton_manager\ros_bridge&quot;"
+				AdditionalIncludeDirectories="&quot;$(RSWIN_ROOT)&quot;;&quot;$(RLAB_INC_PATH)&quot;;&quot;$(ProjectDir)..\..\..\graph\include&quot;;&quot;$(ProjectDir)..\..\include\hybrid_automaton&quot;;&quot;$(ProjectDir)..\..\thirdparty\tinyxml\include&quot;;&quot;$(ProjectDir)..\..\include\hybrid_automaton_manager&quot;;&quot;$(RSWIN_ROOT)\ros_bridge\include&quot;"
 				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_USRDLL;HYBRIDAUTOMATONMANAGER_EXPORTS;R_EXPORTS"
 				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="true"
@@ -184,70 +184,6 @@
 				>
 			</File>
 			<Filter
-				Name="ros_bridge"
-				>
-				<File
-					RelativePath="..\..\src\hybrid_automaton_manager\ros_bridge\Network.cpp"
-					>
-				</File>
-				<File
-					RelativePath="..\..\src\hybrid_automaton_manager\ros_bridge\NetworkUpdatable.cpp"
-					>
-				</File>
-				<File
-					RelativePath="..\..\src\hybrid_automaton_manager\ros_bridge\RTBlackBoard.cpp"
-					>
-				</File>
-				<File
-					RelativePath="..\..\src\hybrid_automaton_manager\ros_bridge\TCPclient.cpp"
-					>
-				</File>
-				<File
-					RelativePath="..\..\src\hybrid_automaton_manager\ros_bridge\TCPcomm.cpp"
-					>
-				</File>
-				<File
-					RelativePath="..\..\src\hybrid_automaton_manager\ros_bridge\TCPserver.cpp"
-					>
-				</File>
-				<Filter
-					Name="msgs"
-					>
-					<File
-						RelativePath="..\..\src\hybrid_automaton_manager\ros_bridge\msgs\DataObject.cpp"
-						>
-					</File>
-					<File
-						RelativePath="..\..\src\hybrid_automaton_manager\ros_bridge\msgs\Float64.cpp"
-						>
-					</File>
-					<File
-						RelativePath="..\..\src\hybrid_automaton_manager\ros_bridge\msgs\Float64MultiArray.cpp"
-						>
-					</File>
-					<File
-						RelativePath="..\..\src\hybrid_automaton_manager\ros_bridge\msgs\JointState.cpp"
-						>
-					</File>
-					<File
-						RelativePath="..\..\src\hybrid_automaton_manager\ros_bridge\msgs\NetworkData.cpp"
-						>
-					</File>
-					<File
-						RelativePath="..\..\src\hybrid_automaton_manager\ros_bridge\msgs\RequestROSSubscription.cpp"
-						>
-					</File>
-					<File
-						RelativePath="..\..\src\hybrid_automaton_manager\ros_bridge\msgs\String.cpp"
-						>
-					</File>
-					<File
-						RelativePath="..\..\src\hybrid_automaton_manager\ros_bridge\msgs\Transform.cpp"
-						>
-					</File>
-				</Filter>
-			</Filter>
-			<Filter
 				Name="controllers"
 				>
 				<File
@@ -281,70 +217,6 @@
 				RelativePath="..\..\include\hybrid_automaton_manager\HybridAutomatonManagerCmd.h"
 				>
 			</File>
-			<Filter
-				Name="ros_bridge"
-				>
-				<File
-					RelativePath="..\..\include\hybrid_automaton_manager\ros_bridge\Network.h"
-					>
-				</File>
-				<File
-					RelativePath="..\..\include\hybrid_automaton_manager\ros_bridge\NetworkUpdatable.h"
-					>
-				</File>
-				<File
-					RelativePath="..\..\include\hybrid_automaton_manager\ros_bridge\RTBlackBoard.h"
-					>
-				</File>
-				<File
-					RelativePath="..\..\include\hybrid_automaton_manager\ros_bridge\TCPclient.h"
-					>
-				</File>
-				<File
-					RelativePath="..\..\include\hybrid_automaton_manager\ros_bridge\TCPcomm.h"
-					>
-				</File>
-				<File
-					RelativePath="..\..\include\hybrid_automaton_manager\ros_bridge\TCPserver.h"
-					>
-				</File>
-				<Filter
-					Name="msgs"
-					>
-					<File
-						RelativePath="..\..\include\hybrid_automaton_manager\ros_bridge\msgs\DataObject.h"
-						>
-					</File>
-					<File
-						RelativePath="..\..\include\hybrid_automaton_manager\ros_bridge\msgs\Float64.h"
-						>
-					</File>
-					<File
-						RelativePath="..\..\include\hybrid_automaton_manager\ros_bridge\msgs\Float64MultiArray.h"
-						>
-					</File>
-					<File
-						RelativePath="..\..\include\hybrid_automaton_manager\ros_bridge\msgs\JointState.h"
-						>
-					</File>
-					<File
-						RelativePath="..\..\include\hybrid_automaton_manager\ros_bridge\msgs\NetworkData.h"
-						>
-					</File>
-					<File
-						RelativePath="..\..\include\hybrid_automaton_manager\ros_bridge\msgs\RequestROSSubscription.h"
-						>
-					</File>
-					<File
-						RelativePath="..\..\include\hybrid_automaton_manager\ros_bridge\msgs\String.h"
-						>
-					</File>
-					<File
-						RelativePath="..\..\include\hybrid_automaton_manager\ros_bridge\msgs\Transform.h"
-						>
-					</File>
-				</Filter>
-			</Filter>
 			<Filter
 				Name="controllers"
 				>
