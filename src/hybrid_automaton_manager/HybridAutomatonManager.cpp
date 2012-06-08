@@ -67,7 +67,6 @@ HybridAutomatonManager::~HybridAutomatonManager()
 {
 	delete _activeMotionBehavior;
 
-	delete _blackboard;
 	if(_blackboard)
 		delete _blackboard;
 
@@ -78,13 +77,10 @@ HybridAutomatonManager::~HybridAutomatonManager()
 
 void HybridAutomatonManager::init(int mode)
 {
-	//std::wcout << _path << std::endl;
-	//std::wcout << _aml << std::endl;
-
 	_robot = LOAD_SYSTEM(_path, _aml, _T0, _q0);
 	assert(_robot);
 
-	std::cerr << " ROBOT " << _robot << std::endl;
+	//std::cerr << " ROBOT " << _robot << std::endl;
 
 	_dof = _robot->jointDOF() + _robot->earthDOF() + _robot->constraintDOF();
 
@@ -107,8 +103,7 @@ void HybridAutomatonManager::init(int mode)
 	RASSERT(_robotDevice != INVALID_RHANDLE);
 
 	_blackboard = NULL;
-
-	activateBlackboard(std::string("130.149.238.179"), 1888, std::string("130.149.238.187"), 1999);
+	activateBlackboard(std::string("130.149.238.179"), 1888, std::string("130.149.238.184"), 1999);
 
 	_defaultMotionBehavior = new MotionBehaviour(new Milestone(), new Milestone(),_robot);
 	_activeMotionBehavior = _defaultMotionBehavior;
