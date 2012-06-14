@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="Windows-1252"?>
 <VisualStudioProject
 	ProjectType="Visual C++"
-	Version="9,00"
+	Version="9.00"
 	Name="HybridAutomatonManager"
 	ProjectGUID="{C48E2081-E337-4D79-BD9C-B798C18AEFEE}"
 	RootNamespace="HybridAutomatonManager"
@@ -183,26 +183,6 @@
 				RelativePath="..\..\src\hybrid_automaton_manager\HybridAutomatonManager.cpp"
 				>
 			</File>
-			<Filter
-				Name="controllers"
-				>
-				<File
-					RelativePath="..\..\..\collision_detection\collision_interface\src\CollisionInterface.cpp"
-					>
-				</File>
-				<File
-					RelativePath="..\..\..\controllers\src\FeatureAttractorController.cpp"
-					>
-				</File>
-				<File
-					RelativePath="..\..\..\controllers\src\ObstacleAvoidanceController.cpp"
-					>
-				</File>
-				<File
-					RelativePath="..\..\..\controllers\src\SubdisplacementController.cpp"
-					>
-				</File>
-			</Filter>
 		</Filter>
 		<Filter
 			Name="Header Files"

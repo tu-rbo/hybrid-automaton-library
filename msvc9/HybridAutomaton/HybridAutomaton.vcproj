@@ -182,6 +182,26 @@
 				RelativePath="..\..\src\hybrid_automaton\XMLDeserializer.cpp"
 				>
 			</File>
+			<Filter
+				Name="controllers"
+				>
+				<File
+					RelativePath="..\..\..\collision_detection\collision_interface\src\CollisionInterface.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\..\controllers\src\FeatureAttractorController.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\..\controllers\src\ObstacleAvoidanceController.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\..\controllers\src\SubdisplacementController.cpp"
+					>
+				</File>
+			</Filter>
 		</Filter>
 		<Filter
 			Name="Header Files"

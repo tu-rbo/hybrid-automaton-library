@@ -93,7 +93,7 @@ MotionBehaviour::MotionBehaviour(TiXmlElement* motion_behaviour_xml, const Miles
 	{
 		if(robot_)
 		{
-			control_set_ = new rxControlSet(robot, dT_);
+			control_set_ = new rxControlSet(robot_, dT_);
 			control_set_->setGravity(0,0,-GRAV_ACC);
 			control_set_->setInverseDynamicsAlgorithm(new rxAMBSGravCompensation(this->robot_));
 			control_set_->nullMotionController()->setGain(0.02,0.0,0.01);
@@ -107,7 +107,7 @@ MotionBehaviour::MotionBehaviour(TiXmlElement* motion_behaviour_xml, const Miles
 	{
 		if(robot_)
 		{
-			control_set_ = new rxTPOperationalSpaceControlSet(robot, dT_);
+			control_set_ = new rxTPOperationalSpaceControlSet(robot_, dT_);
 			control_set_->setGravity(0,0,-GRAV_ACC);
 			control_set_->setInverseDynamicsAlgorithm(new rxAMBSGravCompensation(this->robot_));
 			control_set_->nullMotionController()->setGain(0.02,0.0,0.01);
@@ -271,29 +271,32 @@ void MotionBehaviour::addController_(TiXmlElement * rxController_xml)
 	wss << "controller_" << control_set_->getControllers().size();
 	controller->setName(wss.str());
 
-	switch(controller->type()) {
-		case rxController::eControlType_Joint:
-			{
-				dynamic_cast<rxJointController*>(controller)->addPoint(controller_goal, time_, false, eInterpolatorType_Cubic);
-				break;
-			}
-		case rxController::eControlType_Displacement:
-			{
-				dynamic_cast<rxDisplacementController*>(controller)->addPoint(controller_goal, time_, false, eInterpolatorType_Cubic);
-				break;
-			}
-		case rxController::eControlType_Orientation:
-			{
-				dynamic_cast<rxOrientationController*>(controller)->addPoint(controller_goal, time_, false);
-				break;
-			}
-		case rxController::eControlType_HTransform:
-			{
-				Vector3D goal_3D(controller_goal[0],controller_goal[1],controller_goal[2]);
-				Rotation goal_rot(controller_goal[3], controller_goal[4], controller_goal[5]);		//NOTE: Suposses that the orientation is defined with 
-				dynamic_cast<rxHTransformController*>(controller)->addPoint(HTransform(goal_rot, goal_3D), time_, false);
-				break;
-			}
+	if(!is_goal_controller)
+	{
+		switch(controller->type()) {
+	case rxController::eControlType_Joint:
+		{
+			dynamic_cast<rxJointController*>(controller)->addPoint(controller_goal, time_, false, eInterpolatorType_Cubic);
+			break;
+		}
+	case rxController::eControlType_Displacement:
+		{
+			dynamic_cast<rxDisplacementController*>(controller)->addPoint(controller_goal, time_, false, eInterpolatorType_Cubic);
+			break;
+		}
+	case rxController::eControlType_Orientation:
+		{
+			dynamic_cast<rxOrientationController*>(controller)->addPoint(controller_goal, time_, false);
+			break;
+		}
+	case rxController::eControlType_HTransform:
+		{
+			Vector3D goal_3D(controller_goal[0],controller_goal[1],controller_goal[2]);
+			Rotation goal_rot(controller_goal[3], controller_goal[4], controller_goal[5]);		//NOTE: Suposses that the orientation is defined with 
+			dynamic_cast<rxHTransformController*>(controller)->addPoint(HTransform(goal_rot, goal_3D), time_, false);
+			break;
+		}
+		}
 	}
 
 	controller->setPriority(priority);
@@ -630,15 +633,15 @@ TiXmlElement* MotionBehaviour::toElementXML() const
 			this->RLabInfoString2ElementXML_(controller_to_string, rxController_xml);
 			rxController_xml->SetAttribute("goalController", (goal_controllers_.find((*controllers_it)->name())->second ? "true" : "false"));
 			dVector controller_goal;
-	double controller_goal_value;
-	//if(!is_goal_controller)
-	//{
-	//	std::stringstream controller_goal_ss = std::stringstream(xml_deserializer_.deserializeString("controllerGoal"));
-	//	while(controller_goal_ss >> controller_goal_value)
-	//	{	
-	//		controller_goal.expand(1,controller_goal_value);		
-	//	}
-	//}
+			double controller_goal_value;
+			//if(!is_goal_controller)
+			//{
+			//	std::stringstream controller_goal_ss = std::stringstream(xml_deserializer_.deserializeString("controllerGoal"));
+			//	while(controller_goal_ss >> controller_goal_value)
+			//	{	
+			//		controller_goal.expand(1,controller_goal_value);		
+			//	}
+			//}
 			rxController_xml->SetAttribute("priority", (*controllers_it)->priority());
 	}
 	return mb_element;

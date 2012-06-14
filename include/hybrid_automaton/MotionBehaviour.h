@@ -148,6 +148,8 @@ public:
 
 	/**
 	* Check if the motion has been succesfully executed until the goal point
+	*
+	* @deprecated
 	*/
 	bool hasConverged();
 
