@@ -59,7 +59,7 @@ public:
 	static MotionBehaviour* createMotionBehaviour(TiXmlElement* motion_behaviour_xml , const Milestone *dad, const Milestone *son , rxSystem* robot, double dT );
 
 	static rxController* createController(TiXmlElement* rxController_xml , const Milestone *dad, const Milestone *son , rxSystem* robot, double dT, 
-		bool goal_controller, dVector controller_goal, int controller_counter);
+		bool goal_controller, int controller_counter);
 
 	/**
 	* Recreate a Joint controller

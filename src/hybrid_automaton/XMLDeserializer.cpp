@@ -345,14 +345,17 @@ CSpaceMilestone* XMLDeserializer::createCSpaceMilestone(TiXmlElement* milestone_
 		}
 	}
 
+	
+
+	CSpaceMilestone* mst = new CSpaceMilestone(mst_name, mst_configuration, NULL, mst_epsilon, mst_status, mst_handle_points);
+
 	TiXmlElement* mb_element = milestone_xml->FirstChildElement("MotionBehaviour");
 	MotionBehaviour* mst_mb = NULL;
 	if(mb_element)
 	{
-		//mst_mb = new MotionBehaviour(mb_element, this, this, robot, dt);
+		mst_mb = XMLDeserializer::createMotionBehaviour(mb_element, mst, mst, robot, dT);
+		mst->setMotionBehaviour(mst_mb);
 	}
-
-	CSpaceMilestone* mst = new CSpaceMilestone(mst_name, mst_configuration, mst_mb, mst_epsilon, mst_status, mst_handle_points);
 	return mst;
 }
 
@@ -382,14 +385,15 @@ OpSpaceMilestone* XMLDeserializer::createOpSpaceMilestone(TiXmlElement* mileston
 		}
 	}
 
+	OpSpaceMilestone* mst = new OpSpaceMilestone(mst_name, mst_configuration, mst_pos, NULL, mst_epsilon, mst_status, mst_handle_points);
+
 	TiXmlElement* mb_element = milestone_xml->FirstChildElement("MotionBehaviour");
 	MotionBehaviour* mst_mb = NULL;
 	if(mb_element)
 	{
-		//mst_mb = new MotionBehaviour(mb_element, this, this, robot, dt);
+		mst_mb = XMLDeserializer::createMotionBehaviour(mb_element, mst, mst, robot, dT);
+		mst->setMotionBehaviour(mst_mb);
 	}
-
-	OpSpaceMilestone* mst = new OpSpaceMilestone(mst_name, mst_configuration, mst_pos, mst_mb, mst_epsilon, mst_status, mst_handle_points);
 	return mst;
 }
 
@@ -432,17 +436,7 @@ MotionBehaviour* XMLDeserializer::createMotionBehaviour(TiXmlElement* motion_beh
 	for(TiXmlElement* rxController_xml = control_set_element->FirstChildElement("Controller"); rxController_xml; rxController_xml = rxController_xml->NextSiblingElement())
 	{	
 		bool mb_goal_controller = deserializeBoolean(rxController_xml, "goalController", true);		
-		dVector mb_controller_goal;
-		if(!mb_goal_controller)
-		{			
-			double controller_goal_value;
-			std::stringstream controller_goal_ss = std::stringstream(deserializeString(rxController_xml,"controllerGoal"));
-			while(controller_goal_ss >> controller_goal_value)
-			{	
-				mb_controller_goal.expand(1,controller_goal_value);		
-			}
-		}
-		rxController* mb_controller = XMLDeserializer::createController(rxController_xml, dad, son, robot, dT, mb_goal_controller, mb_controller_goal, mb_controller_counter);
+		rxController* mb_controller = XMLDeserializer::createController(rxController_xml, dad, son, robot, dT, mb_goal_controller, mb_controller_counter);
 		mb->addController(mb_controller, mb_goal_controller);
 		mb_controller_counter++;
 	}
@@ -451,7 +445,7 @@ MotionBehaviour* XMLDeserializer::createMotionBehaviour(TiXmlElement* motion_beh
 
 
 rxController* XMLDeserializer::createController(TiXmlElement *rxController_xml, const Milestone *dad, const Milestone *son, 
-												rxSystem *robot, double dT, bool goal_controller, dVector controller_goal, int controller_counter)
+												rxSystem *robot, double dT, bool goal_controller, int controller_counter)
 {
 	std::string controller_class_name = deserializeString(rxController_xml, "type");
 	ControllerType type_of_controller = XMLDeserializer::controller_map_[controller_class_name];
@@ -519,27 +513,75 @@ rxController* XMLDeserializer::createController(TiXmlElement *rxController_xml, 
 
 	if(!goal_controller)
 	{
+
+		double time_goal = deserializeElement<double>(rxController_xml, "timeGoal");
+		bool reuse_goal = deserializeElement<double>(rxController_xml, "reuseGoal");
+		int type_goal = deserializeElement<double>(rxController_xml, "typeGoal");
+
 		switch(controller->type()) {
 	case rxController::eControlType_Joint:
 		{
-			dynamic_cast<rxJointController*>(controller)->addPoint(controller_goal, 0, false, eInterpolatorType_Cubic);
+			std::stringstream goal_ss = std::stringstream(deserializeString(rxController_xml,"dVectorGoal"));
+			dVector goal_vector;
+			double goal_value = -1.0;
+			while(goal_ss >> goal_value)
+			{	
+				goal_vector.expand(1,goal_value);		
+			}
+			dynamic_cast<rxJointController*>(controller)->addPoint(goal_vector, time_goal, reuse_goal, eInterpolatorType_Cubic);
 			break;
 		}
 	case rxController::eControlType_Displacement:
 		{
-			dynamic_cast<rxDisplacementController*>(controller)->addPoint(controller_goal, 0, false, eInterpolatorType_Cubic);
+			std::stringstream goal_ss = std::stringstream(deserializeString(rxController_xml,"Vector3DGoal"));
+			Vector3D goal_vector;
+			double goal_value = -1.0;
+			while(goal_ss >> goal_value)
+			{	
+				goal_vector.expand(1,goal_value);		
+			}
+			dynamic_cast<rxDisplacementController*>(controller)->addPoint(goal_vector, time_goal, reuse_goal, eInterpolatorType_Cubic);
 			break;
 		}
 	case rxController::eControlType_Orientation:
 		{
-			dynamic_cast<rxOrientationController*>(controller)->addPoint(controller_goal, 0, false);
+			std::stringstream goal_ss = std::stringstream(deserializeString(rxController_xml, "RGoal"));
+			double goal_value = -1.0;
+			std::vector<double> goal_values;
+			for(int i=0; i<9; i++)
+			{
+				goal_ss >> goal_value;
+				goal_values.push_back(goal_value);
+			}
+			Rotation goal_Rotation(goal_values[0], goal_values[1],goal_values[2],goal_values[3],
+				goal_values[4],goal_values[5],goal_values[6],goal_values[7],goal_values[8]);
+			dynamic_cast<rxOrientationController*>(controller)->addPoint(goal_Rotation, time_goal, reuse_goal);
 			break;
 		}
 	case rxController::eControlType_HTransform:
 		{
-			Vector3D goal_3D(controller_goal[0],controller_goal[1],controller_goal[2]);
-			Rotation goal_rot(controller_goal[3], controller_goal[4], controller_goal[5]);		//NOTE: Suposses that the orientation is defined with 
-			dynamic_cast<rxHTransformController*>(controller)->addPoint(HTransform(goal_rot, goal_3D), 0, false);
+			std::stringstream goal_ss = std::stringstream(deserializeString(rxController_xml, "RGoal"));
+			double goal_value = -1.0;
+			std::vector<double> goal_values;
+			for(int i=0; i<9; i++)
+			{
+				goal_ss >> goal_value;
+				goal_values.push_back(goal_value);
+			}
+			Rotation goal_Rotation(goal_values[0], goal_values[1],goal_values[2],goal_values[3],
+				goal_values[4],goal_values[5],goal_values[6],goal_values[7],goal_values[8]);
+
+			std::stringstream goal_ss2 = std::stringstream(deserializeString(rxController_xml, "rGoal"));
+			goal_values.clear();
+			for(int i=0; i<9; i++)
+			{
+				goal_ss2 >> goal_value;
+				goal_values.push_back(goal_value);
+			}
+			Displacement goal_Displacement(goal_values[0], goal_values[1],goal_values[2]);		
+
+			HTransform goal_HTransform(goal_Rotation, goal_Displacement);
+			dynamic_cast<rxHTransformController*>(controller)->addPoint(goal_HTransform, time_goal, reuse_goal);
 			break;
 		}
 		}

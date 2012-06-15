@@ -192,17 +192,14 @@ public:
 
 
 private:
-	/**
-	* Create the mapping to translate class names (string) to controller type (pair of integers: group and subgroup)
-	*/
-	static std::map<std::string, ControllerType> createControllerMapping_();
 
 	/**
 	* Extract the information to regenerate an rxController from the string provided by RLab and convert it into an XML Element for tinyXML.
 	* @param string_data String (wstring on Windows) containing the information of the rxController.
 	* @param out_xml_element TinyXML Element where the information of the rxController is written.
+	* @param is_goal_controller If it is not a goal controller it could contain its goal as the first via point. If it is a goal controller we ignore the via points.
 	*/
-	void RLabInfoString2ElementXML_(string_type string_data, TiXmlElement* out_xml_element) const;
+	void RLabInfoString2ElementXML_(string_type string_data, TiXmlElement* out_xml_element, bool is_goal_controller) const;
 
 	rxControlSetBase*								control_set_;		// Stores the set of rxController's defining this MotionBehaviour
 	rxSystem*										robot_;	

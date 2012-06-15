@@ -23,6 +23,7 @@ Edge<Milestone>(NULL, NULL, -1)
 
 MotionBehaviour::MotionBehaviour(const Milestone * dad, const Milestone * son, rxSystem* robot, double weight, double dt ):
 Edge<Milestone>(dad, son, weight)
+, control_set_(NULL)
 , robot_(robot)
 , time_(0)
 , dT_(dt)
@@ -32,7 +33,6 @@ Edge<Milestone>(dad, son, weight)
 {
 	if(robot_)
 	{
-
 		control_set_ = new rxControlSet(robot_, dT_);
 		control_set_->setGravity(0,0,-GRAV_ACC);
 		control_set_->setInverseDynamicsAlgorithm(new rxAMBSGravCompensation(this->robot_));
@@ -44,13 +44,15 @@ Edge<Milestone>(dad, son, weight)
 	}
 }
 
-MotionBehaviour::MotionBehaviour(const Milestone * dad, const Milestone * son, rxControlSetBase* control_set, double weight ):
+MotionBehaviour::MotionBehaviour(const Milestone * dad, const Milestone * son, rxControlSetBase* control_set, double weight):
 Edge<Milestone>(dad, son, weight)
+, control_set_(control_set)
+, robot_(NULL)
 , time_(0)
+, dT_(-1)
 , max_velocity_(-1)
 , min_time_(-1)
 , time_to_converge_(0.0)
-, control_set_(control_set)
 {
 	if(control_set_)
 	{
@@ -65,7 +67,6 @@ Edge<Milestone>(dad, son, weight)
 	else
 	{
 		dT_ = 0.002;
-		robot_ = NULL;
 	}
 }
 
@@ -159,15 +160,19 @@ void MotionBehaviour::activate()
 		{
 			if (*it)
 			{
-				if (((*it)->activated()))
+				if ((*it)->activated())
 				{
 					(*it)->deactivate();
 				}
 
 				(*it)->activate();
 
-				// add the goal of the child milestone
-				switch((*it)->type()) {
+				// We only add the goal defined by the child milestone to the controller if it is a goal controller
+				// If it is not a goal controller, it contains already its special goal
+				if(this->goal_controllers_.find((*it)->name())->second)
+				{
+					// add the goal of the child milestone
+					switch((*it)->type()) {
 					case rxController::eControlType_Joint:
 						{
 							double default_max_velocity = 0.30;// in rad/s
@@ -258,6 +263,7 @@ void MotionBehaviour::activate()
 							dynamic_cast<rxHTransformController*>(*it)->addPoint(HTransform(goal_rot, goal_3D), time, false);
 							break;
 						}
+					}
 				}
 			}
 		}
@@ -274,38 +280,7 @@ void MotionBehaviour::deactivate()
 
 bool MotionBehaviour::hasConverged() 
 {
-	//NOTE (Roberto) : How could we check if it has converged? There is no way to check automatically all the controllers through the control set.
-	//We wait until the time to converge is exceeded and then we check if the error is small.
-	if(time_ > time_to_converge_)
-	{
-
-		//change this!!!!!!!!!!!!!!!!
-		dVector error = this->control_set_->e();
-
-
-
-		//this->robot_->findBody(_T("EE"))->T().r
-		//std::list<rxController*> controllers = this->control_set_->getControllers();
-		//std::list<rxController*>::iterator it = controllers.begin();
-		//dynamic_cast<rxInterpolatedDisplacementComplianceController*>(*it)->
-		//dynamic_cast<rxInterpolatedDisplacementComplianceController*>(*it)->r_beta_target()
-
-		//controllers.front()
-
-		for(int i = 0; i < error.size(); ++i)
-		{
-			//HACK (George) : This is because I couldn't get the error between the current position and the desired position at the END of the trajectory
-			if (::std::abs(error[i]) > 0.1 )
-			{
-				//#ifdef NOT_IN_RT
-				std::cout << "Error in " << i << " is to large = " << ::std::abs(error[i]) << std::endl;
-				//#endif
-				return false;
-			}
-		}
-		//std::cout << "CONVERGED!!!" << std::endl;
-		return true;
-	}
+	std::cout << "[MotionBehaviour::hasConverged] ERROR: This function is deprecated and should not be called!" << std::endl;
 	return false;
 }
 
@@ -435,11 +410,6 @@ TiXmlElement* MotionBehaviour::toElementXML() const
 	TiXmlElement * mb_element = new TiXmlElement("MotionBehaviour");
 	TiXmlElement * control_set_element = new TiXmlElement("ControlSet");
 	mb_element->LinkEndChild(control_set_element);
-	// NOTE: This doesn't work anymore since control_set_ is now rxControlSetBase*
-	//std::string control_set_name = std::string(typeid(control_set_).name());
-	//std::string control_set_name2 = control_set_name.substr(6);		//Ignore the 'class ' part
-	//control_set_name2.resize(control_set_name2.size()-2);	//Ignore the ' *' part
-	//control_set_element->SetAttribute("type", control_set_name2.c_str());
 
 	if(dynamic_cast<rxTPOperationalSpaceControlSet*>(control_set_))
 	{
@@ -457,25 +427,16 @@ TiXmlElement* MotionBehaviour::toElementXML() const
 			string_type controller_to_string;
 			(*controllers_it)->toString(controller_to_string);
 			TiXmlElement * rxController_xml = new TiXmlElement("Controller");
-			control_set_element->LinkEndChild(rxController_xml);
-			this->RLabInfoString2ElementXML_(controller_to_string, rxController_xml);
-			rxController_xml->SetAttribute("goalController", (goal_controllers_.find((*controllers_it)->name())->second ? "true" : "false"));
-			dVector controller_goal;
-			double controller_goal_value;
-			//if(!is_goal_controller)
-			//{
-			//	std::stringstream controller_goal_ss = std::stringstream(xml_deserializer_.deserializeString("controllerGoal"));
-			//	while(controller_goal_ss >> controller_goal_value)
-			//	{	
-			//		controller_goal.expand(1,controller_goal_value);		
-			//	}
-			//}
+			control_set_element->LinkEndChild(rxController_xml);			
+			bool is_goal_controller = this->goal_controllers_.find((*controllers_it)->name())->second;
+			this->RLabInfoString2ElementXML_(controller_to_string, rxController_xml, is_goal_controller);
+			rxController_xml->SetAttribute("goalController", (is_goal_controller ? "true" : "false"));
 			rxController_xml->SetAttribute("priority", (*controllers_it)->priority());
 	}
 	return mb_element;
 }
 
-void MotionBehaviour::RLabInfoString2ElementXML_(string_type string_data, TiXmlElement* out_xml_element) const
+void MotionBehaviour::RLabInfoString2ElementXML_(string_type string_data, TiXmlElement* out_xml_element, bool is_goal_controller) const
 {
 #ifdef NOT_IN_RT
 	//std::wcout << string_data.c_str() << std::endl;
@@ -530,26 +491,62 @@ void MotionBehaviour::RLabInfoString2ElementXML_(string_type string_data, TiXmlE
 
 	for(int i=0; i< num_via_points_int; i++)
 	{
-		std::getline(data_ss, temp_st);		// Discard field "time" of via points
-		std::getline(data_ss, temp_st);		// Discard field "type" of via points
-		std::getline(data_ss, temp_st);		// Discard field "reuse" of via points 
+		std::getline(data_ss, temp_st);		// Field "time" of via points
+		if(!is_goal_controller)
+		{
+			std::wstringstream time_goal_ss(temp_st.substr(temp_st.find(L"=") + 1, temp_st.find(L"\n")));
+			double time_goal = -1.;
+			time_goal_ss >> time_goal;
+			out_xml_element->SetAttribute("timeGoal", time_goal) ;
+		}
+		std::getline(data_ss, temp_st);		// Field "type" of via points
+		if(!is_goal_controller)
+		{
+			std::wstringstream type_goal_ss(temp_st.substr(temp_st.find(L"=") + 1, temp_st.find(L"\n")));
+			int type_goal = -1;
+			type_goal_ss >> type_goal;
+			out_xml_element->SetAttribute("typeGoal", type_goal) ;
+		}
+		std::getline(data_ss, temp_st);		// Field "reuse" of via points
+		if(!is_goal_controller)
+		{
+			std::string reuse_s = wstring2string(temp_st.substr(temp_st.find(L"=") + 1, temp_st.find(L"\n")));			
+			out_xml_element->SetAttribute("reuseGoal",reuse_s.c_str() ) ;			
+		}
 		switch( type_of_controller.first )
 		{
 		case rxController::eControlType_Joint:
 			std::getline(data_ss, temp_st);		// Discard field "dVector" of via points 
+			if(!is_goal_controller)
+			{
+				out_xml_element->SetAttribute("dVectorGoal", wstring2string(temp_st.substr(temp_st.find(L"=") + 1, temp_st.find(L"\n"))).c_str());
+			}
 			break;
 		case rxController::eControlType_Displacement:
 			std::getline(data_ss, temp_st);		// Discard field "Vector3D" of via points 
+			if(!is_goal_controller)
+			{
+				out_xml_element->SetAttribute("Vector3DGoal", wstring2string(temp_st.substr(temp_st.find(L"=") + 1, temp_st.find(L"\n"))).c_str());
+			}
 			break;
 		case rxController::eControlType_Orientation:
 			std::getline(data_ss, temp_st);	
-			//via_point_xml->SetAttribute("R", wstring2string(temp_st.substr(temp_st.find(L"=") + 1, temp_st.find(L"\n"))).c_str());
+			if(!is_goal_controller)
+			{
+				out_xml_element->SetAttribute("RGoal", wstring2string(temp_st.substr(temp_st.find(L"=") + 1, temp_st.find(L"\n"))).c_str());
+			}
 			break;
 		case rxController::eControlType_HTransform:
 			std::getline(data_ss, temp_st);	
-			//via_point_xml->SetAttribute("R", wstring2string(temp_st.substr(temp_st.find(L"=") + 1, temp_st.find(L"\n"))).c_str());
+			if(!is_goal_controller)
+			{
+				out_xml_element->SetAttribute("RGoal", wstring2string(temp_st.substr(temp_st.find(L"=") + 1, temp_st.find(L"\n"))).c_str());
+			}
 			std::getline(data_ss, temp_st);	
-			//via_point_xml->SetAttribute("r", wstring2string(temp_st.substr(temp_st.find(L"=") + 1, temp_st.find(L"\n"))).c_str());
+			if(!is_goal_controller)
+			{
+				out_xml_element->SetAttribute("rGoal", wstring2string(temp_st.substr(temp_st.find(L"=") + 1, temp_st.find(L"\n"))).c_str());
+			}
 			break;
 		default:
 			break;
