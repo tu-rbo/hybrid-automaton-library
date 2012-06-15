@@ -14,7 +14,6 @@ using namespace std;
 OpSpaceMilestone::OpSpaceMilestone() :
 Milestone("Default"),
 motion_behaviour_(NULL),
-//object_id_(-1),
 posi_ori_selection_(POSITION_SELECTION)	// Default value in the default constructor
 {
 }
@@ -22,16 +21,14 @@ posi_ori_selection_(POSITION_SELECTION)	// Default value in the default construc
 OpSpaceMilestone::OpSpaceMilestone(std::string osm_name) :
 Milestone(osm_name),
 motion_behaviour_(NULL),
-//object_id_(-1),
 posi_ori_selection_(POSITION_SELECTION)	// Default value in the default constructor
 {
 }
 
 OpSpaceMilestone::OpSpaceMilestone(std::string osm_name, std::vector<double>& posi_ori_value, PosiOriSelector posi_ori_selection, MotionBehaviour * motion_behaviour, std::vector<double>& region_convergence_radius) :
-Milestone(osm_name)
-//object_id_(object_id)
+Milestone(osm_name),
+posi_ori_selection_(posi_ori_selection)
 {
-	posi_ori_selection_ = posi_ori_selection;
 	configuration_.resize(6, -1.0);
 	region_convergence_radius_.resize(4, -1.0);
 	int counter_offset = -1;
@@ -83,66 +80,53 @@ Milestone(osm_name)
 	handle_points_.push_back(tmp);
 	tmp.y -= 2 * RADIUS;
 	handle_points_.push_back(tmp);
-	//	if(this->motion_behaviour_)
-	//	{
-	//		this->motion_behaviour_->activate();
-	//		double t = 0.0;
-	//		for(int i = 0; i < 1000; ++i)
-	//		{
-	//			this->motion_behaviour_->update(t);
-	//			t += 0.001;
-	//		}
-	//		::std::cout << " finished computing milestone" << ::std::endl;
-	//		//this->motion_behaviour_->deactivate();
-	//	}
 }
 
-OpSpaceMilestone::OpSpaceMilestone(TiXmlElement* milestone_xml, rxSystem* robot, double dt):
-Milestone(),
-motion_behaviour_(NULL)
-//object_id_(-1)
+OpSpaceMilestone::OpSpaceMilestone(std::string osm_name, std::vector<double>& posi_ori_value, PosiOriSelector posi_ori_selection, 
+								   MotionBehaviour * motion_behaviour, std::vector<double>& region_convergence_radius, Milestone::Status status, 
+								   std::vector<Point> handle_points):
+Milestone(osm_name),
+posi_ori_selection_(posi_ori_selection),
+handle_points_(handle_points)
 {
-	XMLDeserializer xml_deserializer_(milestone_xml);
-	this->status_ = (Status)xml_deserializer_.deserializeInteger("status");
-	this->name_ = xml_deserializer_.deserializeString("name");
-	//this->object_id_ = xml_deserializer_.deserializeInteger("ObjectId");
-	this->posi_ori_selection_ = (PosiOriSelector)xml_deserializer_.deserializeInteger("PosiOriSelector");
-
-	this->configuration_ = xml_deserializer_.deserializeVectorDouble("value");
-	if(this->configuration_.size()==0)
-	{
-		throw std::string("ERROR: [OpSpaceMilestone::OpSpaceMilestone(TiXmlElement* milestone_xml, rxSystem* robot)] Child Element named \"Configuration\" not found in XML element milestone_xml.");
+	this->status_ = status;
+	configuration_.resize(6, -1.0);
+	region_convergence_radius_.resize(4, -1.0);
+	int counter_offset = -1;
+	int max_count = -1;
+	switch(posi_ori_selection_){
+		case POSITION_SELECTION:
+			counter_offset = 0;
+			max_count = 3;
+			break;
+		case ORIENTATION_SELECTION:
+			counter_offset = 3;
+			max_count = 4;
+			break;
+		case POS_AND_ORI_SELECTION:
+			counter_offset = 0;
+			max_count = 4;
+			break;
+		default:
+			throw std::string("ERROR [OpSpaceMilestone::OpSpaceMilestone(std::vector<double>& posi_ori_value, PosiOriSelection posi_ori_selection, MotionBehaviour * motion_behaviour, std::vector<double>& region_convergence_radius,int object_id)]: Wrong posi_ori_selection value.");
+			break;
 	}
-
-	this->region_convergence_radius_ = xml_deserializer_.deserializeVectorDouble("epsilon");
-	if(this->region_convergence_radius_.size() == 0)
-	{
-		throw std::string("ERROR: [OpSpaceMilestone::OpSpaceMilestone(TiXmlElement* milestone_xml, rxSystem* robot)] Child Element named \"RadiusRoC\" not found in XML element milestone_xml.");
+	int i = counter_offset;
+	int n = 0;
+	for(; i<max_count; i++, n++){
+		configuration_[i] = posi_ori_value[n];
+		region_convergence_radius_[i] = region_convergence_radius[n];
 	}
-
-	TiXmlElement* handle_point_set_element = milestone_xml->FirstChildElement("HandlePoints");
-	if(handle_point_set_element == NULL)
+	if(motion_behaviour)
 	{
-		throw std::string("ERROR: [OpSpaceMilestone::OpSpaceMilestone(TiXmlElement* milestone_xml, rxSystem* robot)] Child Element named \"HandlePoints\" not found in XML element milestone_xml.");
+		this->motion_behaviour_ = motion_behaviour->clone();
+		// Force motion_behaviour to have this milestone as parent and child
+		this->motion_behaviour_->setChild(this);
+		this->motion_behaviour_->setParent(this);
 	}
-
-	for(TiXmlElement* handle_point_element = handle_point_set_element->FirstChildElement("HandlePoint"); handle_point_element; handle_point_element = handle_point_element->NextSiblingElement())
+	else
 	{
-		XMLDeserializer xml_deserializer_handle_point(handle_point_element);
-		Point handle_point_value(-1.f,-1.f,-1.f);
-		handle_point_value.x = xml_deserializer_handle_point.deserializeDouble("x");
-		//std::cout << handle_point_value.x << std::endl;
-		handle_point_value.y = xml_deserializer_handle_point.deserializeDouble("y");
-		//std::cout << handle_point_value.y << std::endl;
-		handle_point_value.z = xml_deserializer_handle_point.deserializeDouble("z");
-		//std::cout << handle_point_value.z << std::endl;
-		(this->handle_points_).push_back(handle_point_value);
-	}
-
-	TiXmlElement* mb_element = milestone_xml->FirstChildElement("MotionBehaviour");
-	if(mb_element)
-	{
-		this->motion_behaviour_ = new MotionBehaviour(mb_element, this, this, robot, dt);
+		this->motion_behaviour_ = NULL;
 	}
 }
 
@@ -150,7 +134,6 @@ OpSpaceMilestone::OpSpaceMilestone(const OpSpaceMilestone & op_milestone_cpy) :
 Milestone(op_milestone_cpy),
 configuration_(op_milestone_cpy.configuration_),
 region_convergence_radius_(op_milestone_cpy.region_convergence_radius_),
-//object_id_(op_milestone_cpy.object_id_),
 handle_points_(op_milestone_cpy.handle_points_),
 posi_ori_selection_(op_milestone_cpy.posi_ori_selection_)
 {
@@ -308,11 +291,6 @@ dVector OpSpaceMilestone::getConfiguration() const
 	return ret_value;
 }
 
-//int OpSpaceMilestone::getObjectId() const
-//{
-//	return this->object_id_;
-//}
-
 void OpSpaceMilestone::update()
 {
 	if(motion_behaviour_ != NULL){
@@ -346,7 +324,6 @@ TiXmlElement* OpSpaceMilestone::toElementXML() const
 	op_space_ms_xml->SetAttribute("type", "OpSpace");
 	op_space_ms_xml->SetAttribute("status", this->getStatus());
 	op_space_ms_xml->SetAttribute("name", this->name_.c_str());
-	//op_space_ms_xml->SetAttribute("ObjectId", object_id_);
 	op_space_ms_xml->SetAttribute("PosiOriSelector", posi_ori_selection_);
 
 	std::stringstream value_ss;
@@ -390,40 +367,6 @@ OpSpaceMilestone* OpSpaceMilestone::clone() const
 	return new_op_space_milestone;
 }
 
-//bool OpSpaceMilestone::operator ==(const OpSpaceMilestone & n) const
-//{
-//	return (this->name_ == n.getName());
-//	//return (this->configuration_ == n.getConfigurationSTDVector() 
-//	//	&& posi_ori_selection_ == n.posi_ori_selection_ && this->handle_points_ == n.handle_points_ 
-//	//	&& this->object_id_ == n.getObjectId());
-//}
-//
-//bool OpSpaceMilestone::operator ==(const Milestone & n) const
-//{
-//	const OpSpaceMilestone* n_opspace = dynamic_cast<const OpSpaceMilestone*>(&n);
-//	if(n_opspace)
-//	{
-//		//return (this->configuration_ == n_opspace->getConfigurationSTDVector() 
-//		//&& this->posi_ori_selection_ == n_opspace->posi_ori_selection_ && this->handle_points_ == n_opspace->handle_points_ 
-//		//&& this->object_id_ == n_opspace->getObjectId());
-//		return (this->name_ == n_opspace->getName());
-//	}
-//	else
-//	{
-//		return false;
-//	}
-//}
-//
-//bool OpSpaceMilestone::operator !=(const OpSpaceMilestone & n) const
-//{
-//	return !(*this==n);
-//}
-//
-//bool OpSpaceMilestone::operator !=(const Milestone & n) const
-//{
-//	return !(*this==n);
-//}
-
 OpSpaceMilestone& OpSpaceMilestone::operator=(const OpSpaceMilestone & op_milestone_assignment)
 {
 	Milestone::operator=(op_milestone_assignment);
@@ -459,7 +402,9 @@ bool OpSpaceMilestone::hasConverged(rxSystem* sys)
 			double e = ::std::abs(sys->T().r[i] - configuration_[i]);
 			if (e > region_convergence_radius_[i])
 			{
+#ifdef NOT_IN_RT
 				std::cout << "Error in pos " << i << " is too large = " << e << std::endl;
+#endif
 				return false;
 			}
 		}
@@ -491,32 +436,12 @@ bool OpSpaceMilestone::hasConverged(rxSystem* sys)
 		double e = ::std::abs(angle);
 		if (e > region_convergence_radius_[3]) 
 		{
+#ifdef NOT_IN_RT
 			std::cout << "Error in orientation is too large = " << e << std::endl;
+#endif
 			return false;
 		}
 	}
 
 	return true;
 }
-
-
-int main() {
-	std::cout << "Hello" << std::endl;
-
-	return 0;
-}
-
-//bool OpSpaceMilestone::operator ==(const Milestone * n) const{
-//	const OpSpaceMilestone* n_cspace = dynamic_cast<const OpSpaceMilestone*>(n);
-//	if(n_cspace)
-//		return (configuration_ == n_cspace->configuration_);
-//	else
-//		return false;
-//}
-//bool OpSpaceMilestone::operator ==(const OpSpaceMilestone * n) const{
-//	return (configuration_ == n->configuration_);
-//}
-//
-//bool OpSpaceMilestone::operator ==(OpSpaceMilestone * n) const{
-//	return (configuration_ == n->configuration_);
-//}

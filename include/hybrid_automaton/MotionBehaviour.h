@@ -101,22 +101,12 @@ public:
 
 	/**
 	* Constructor
-	* @param motion_behaviour_xml TinyXML element containing the information to (re)construct a new MotionBehaviour - usually transmitted over a network.
-	* @param dad Pointer to the parent milestone (MotionBehaviour-Edge stores directly the pointer, no internal copy!).
-	* @param son Pointer to the child milestone (MotionBehaviour-Edge stores directly the pointer, no internal copy!).
-	* @param robot Pointer to the RLab system object.
-	* @param dt Control interval of the controllers in this MB.
-	*/
-	MotionBehaviour(TiXmlElement* motion_behaviour_xml , const Milestone *dad, const Milestone *son , rxSystem* robot, double dt );
-
-	/**
-	* Constructor
 	* @param dad Pointer to the parent milestone (MotionBehaviour-Edge stores directly the pointer, no internal copy!).
 	* @param son Pointer to the child milestone (MotionBehaviour-Edge stores directly the pointer, no internal copy!).
 	* @param control_set Pointer to the control set, which is used to get the pointer to the RLab system object and the control interval of the controllers in this MB.
 	* @param weight Weight of the edge in the graph
 	*/
-	MotionBehaviour(const Milestone * dad, const Milestone * son, rxControlSet* control_set, double weight = 1.0);
+	MotionBehaviour(const Milestone * dad, const Milestone * son, rxControlSetBase* control_set, double weight = 1.0);
 
 	/**
 	* Copy constructor - Create a new MotionBehaviour that is a copy of the MotionBehaviour given as parameter
@@ -214,96 +204,12 @@ private:
 	*/
 	void RLabInfoString2ElementXML_(string_type string_data, TiXmlElement* out_xml_element) const;
 
-	/**
-	* Add an rxController to the control set. First the information to generate the controller is extracted from an XML element.
-	* Then, the controller is created and added.
-	* @param rxController_xml Pointer to tinyXML Element with the information to generate the controller.
-	*/
-	void addController_(TiXmlElement * rxController_xml);
-
-	/**
-	* Convert a wstring into a string.
-	* @param wstr Wide string to be converted.
-	*/
-	std::string wstring2string_(const std::wstring& wstr) const;
-
-	/**
-	* Convert a string into a wstring.
-	* @param str String to be converted.
-	*/
-	std::wstring string2wstring_(const std::string& str) const;
-
-	/**
-	* Replace the colons of a string with white spaces.
-	* @param text String to be processed.
-	*/
-	std::string colon2space_(std::string text) const;
-
-	/**
-	* Recreate a Joint controller
-	* @param joint_subgroup Subgroup of the controller to be created within the Joint Controller group.
-	* @param controller_duration Time interval of the controller to be created.
-	* @param via_points_ptr Via points of the controller to be created.
-	*/
-	rxController* createJointController_(int joint_subtype, double controller_duration, std::vector<ViaPointBase*> via_points_ptr, TiXmlElement* rxController_xml) const;
-
-	/**
-	* Recreate a Displacement controller
-	* @param displacement_subgroup Subgroup of the controller to be created within the Displacement Controller group.
-	* @param controller_duration Time interval of the controller to be created.
-	* @param via_points_ptr Via points of the controller to be created.
-	* @param rxController_xml TinyXML Element with some other required information (alpha, alpha displacement, beta, beta displacement).
-	*/
-	rxController* createDisplacementController_(int displacement_subtype, double controller_duration, std::vector<ViaPointBase*> via_points_ptr, TiXmlElement* rxController_xml) const;
-
-	/**
-	* Recreate an Orientation controller
-	* @param orientation_subgroup Subgroup of the controller to be created within the Orientation Controller group.
-	* @param controller_duration Time interval of the controller to be created.
-	* @param via_points_ptr Via points of the controller to be created.
-	* @param rxController_xml TinyXML Element with some other required information (alpha, alpha orientation, beta, beta orientation).
-	*/
-	rxController* createOrientationController_(int orientation_subtype, double controller_duration, std::vector<ViaPointBase*> via_points_ptr, TiXmlElement* rxController_xml) const;
-
-	/**
-	* Recreate a HTransform controller
-	* @param htransform_subgroup Subgroup of the controller to be created within the HTransform Controller group.
-	* @param controller_duration Time interval of the controller to be created.
-	* @param via_points_ptr Via points of the controller to be created.
-	* @param rxController_xml TinyXML Element with some other required information (alpha, alpha htransform, beta, beta htransform).
-	*/
-	rxController* createHTransformController_(int htransform_subtype, double controller_duration, std::vector<ViaPointBase*> via_points_ptr, TiXmlElement* rxController_xml) const;
-
-	/**
-	* Recreate a QuasiCoord controller
-	* @param quasi_coord_subgroup Subgroup of the controller to be created within the Joint Controller group.
-	* @param controller_duration Time interval of the controller to be created.
-	*/
-	rxController* createQuasiCoordController_(int quasi_coord_subtype, double controller_duration) const;
-
-	/**
-	* Recreate a NullMotion controller
-	* @param null_motion_coord_subgroup Subgroup of the controller to be created within the Null Motion Controller group.
-	* @param controller_duration Time interval of the controller to be created.
-	*/
-	rxController* createNullMotionController_(int null_motion_subtype, double controller_duration) const;
-
-	/**
-	* Recreate a Functional controller
-	* @param functional_subtype Subgroup of the controller to be created within the Null Motion Controller group.
-	* @param dimension Dimension to be controlled
-	* @param controller_duration Time interval of the controller to be created.
-	*/
-	rxController* createFunctionalController_(int functional_subtype, int dimension, double controller_duration, TiXmlElement* rxController_xml) const;
-
-
 	rxControlSetBase*								control_set_;		// Stores the set of rxController's defining this MotionBehaviour
 	rxSystem*										robot_;	
 	double											time_;				// Execution time. Counts the time that the MotionBehaviour is active 
 																		// (for convergence check including time)
 	double											time_to_converge_;	// duration of the interpolation
 	double											dT_;				// Control interval
-	static std::map<std::string, ControllerType>	controller_map_;	// Translation between class name (string) of the controllers and their type
 
 	double											max_velocity_;		// maximum desired velocity at joint or tip (depending on controller); used for calculating the interpolation time
 	double											min_time_;			// minimum time that is used for interpolation (if max_velocity constraint is not set)

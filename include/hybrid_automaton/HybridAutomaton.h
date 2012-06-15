@@ -56,7 +56,7 @@ public:
 	* @param dT Interval to be used by all the controllers in this HybridSystem
 	* Note: It uses tinyXML library to read the string with XML format.
 	*/
-	virtual void fromStringXML(const std::string& xml_string, rxSystem* robot, double dT);
+	//virtual void fromStringXML(const std::string& xml_string, rxSystem* robot, double dT);
 
 private:
 	Milestone* start_node_id_;	// Pointer to the first Milestone (if exists). 

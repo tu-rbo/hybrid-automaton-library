@@ -25,9 +25,12 @@ public:
 
 	OpSpaceMilestone(std::string osm_name);  
 
-	OpSpaceMilestone(std::string osm_name, std::vector<double>& posi_ori_value, PosiOriSelector posi_ori_selection, MotionBehaviour * motion_behaviour, std::vector<double>& region_convergence_radius);
+	OpSpaceMilestone(std::string osm_name, std::vector<double>& posi_ori_value, PosiOriSelector posi_ori_selection, 
+		MotionBehaviour * motion_behaviour, std::vector<double>& region_convergence_radius);
 
-	OpSpaceMilestone(TiXmlElement* milestone_xml, rxSystem* robot, double dt);
+	OpSpaceMilestone(std::string osm_name, std::vector<double>& posi_ori_value, PosiOriSelector posi_ori_selection, 
+		MotionBehaviour * motion_behaviour, std::vector<double>& region_convergence_radius, Milestone::Status status, 
+		std::vector<Point> handle_points);
 
 	OpSpaceMilestone(const OpSpaceMilestone & op_milestone_cpy);
 
@@ -43,10 +46,6 @@ public:
 
 	virtual dVector getConfiguration() const;
 
-	//int getObjectId() const;
-
-	//int getDofs() const;
-
 	void update();
 
 	virtual std::string toStringXML() const;
@@ -56,14 +55,6 @@ public:
 	virtual OpSpaceMilestone* clone() const;
 
 	void addHandlePoint( const Point & point_to_add );
-
-	//virtual bool operator ==(const OpSpaceMilestone & n) const ;
-
-	//virtual bool operator ==(const Milestone & n) const ;
-
-	//virtual bool operator !=(const OpSpaceMilestone & n) const ;
-
-	//virtual bool operator !=(const Milestone & n) const ;
 
 	virtual OpSpaceMilestone& operator=(const OpSpaceMilestone & op_milestone_assignment);
 
@@ -81,7 +72,6 @@ protected:
 	std::vector<double>		region_convergence_radius_;			// Position = 3 first values
 																// Orientation = 1 second value
 																// Total size = 4
-	//int						object_id_;
 	std::vector<Point>		handle_points_;
 	PosiOriSelector			posi_ori_selection_;				// Position/Orientation/Both values defined in this Milestone
 

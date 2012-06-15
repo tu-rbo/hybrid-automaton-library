@@ -42,11 +42,6 @@ typedef struct Point
 
 }point;
 
-/*enum MilestoneType
-{
-	MILESTONE, CSPACE, OPSPACE, CURRENT_POS, GOAL
-};*/
-
 class Milestone : public Node 
 {
 
@@ -84,22 +79,12 @@ public:
 
 	virtual std::string getName() const;
 
-	//MilestoneType getType() const;
-
-	//void setType(MilestoneType typ);
-
 	virtual bool hasConverged(rxSystem* sys);
 
 protected:
 
 	Status			status_;
 	std::string		name_;
-	//MilestoneType type_;
-
-
 };
 
 #endif // MILESTONE_
-
-//bool operator== (const Node& n) const;
-//bool operator!= (const Node& n) const;

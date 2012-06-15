@@ -6,6 +6,8 @@
 #include "HybridAutomatonManager.h"
 #include "HybridAutomatonManagerCmd.h"
 
+#include "XMLDeserializer.h"
+
 #include "msgs\String.h"
 
 #include <process.h>
@@ -15,14 +17,14 @@
 unsigned __stdcall deserializeHybridAutomaton(void *udata)
 {
 	DeserializingThreadArguments* thread_args = static_cast<DeserializingThreadArguments*>(udata);
-	HybridAutomaton* ha = new HybridAutomaton();
+	HybridAutomaton* ha = NULL;
 
 	try {
-		ha->fromStringXML(thread_args->_string, thread_args->_robot, thread_args->_dT);
+		ha = XMLDeserializer::createHybridAutomaton(thread_args->_string, thread_args->_robot, thread_args->_dT);
 	}
 	catch(std::string e)
 	{
-		std::cerr << "ERROR while deserializing hybrid automaton!" << std::endl;
+		std::cerr << "[deserializeHybridAutomaton] ERROR while deserializing hybrid automaton!" << std::endl;
 		std::cerr << e << std::endl;
 
 		delete ha;
@@ -59,7 +61,7 @@ HybridAutomatonManager::HybridAutomatonManager(rDC rdc)
 {
 	_deserialize_mutex = CreateMutex(0, FALSE, 0);
 	if( !_deserialize_mutex ) {
-		throw(std::string("[HybridAutomatonManager::HybridAutomatonManager(rDC rdc)] Mutex was not created (_deserialize_mutex)!"));
+		throw(std::string("[HybridAutomatonManager::HybridAutomatonManager] ERROR: Mutex was not created (_deserialize_mutex)!"));
 	}
 }
 
@@ -103,7 +105,7 @@ void HybridAutomatonManager::init(int mode)
 	RASSERT(_robotDevice != INVALID_RHANDLE);
 
 	_blackboard = NULL;
-	activateBlackboard(std::string("130.149.238.179"), 1888, std::string("130.149.238.184"), 1999);
+	//activateBlackboard(std::string("130.149.238.179"), 1888, std::string("130.149.238.184"), 1999);
 
 	_defaultMotionBehavior = new MotionBehaviour(new Milestone(), new Milestone(),_robot);
 	_activeMotionBehavior = _defaultMotionBehavior;
@@ -130,7 +132,7 @@ void HybridAutomatonManager::setHybridAutomaton(std::string _new_hybrid_automato
 
 	if (_beginthreadex(NULL, 0, deserializeHybridAutomaton, (void*)thread_args, 0, NULL) == 0)
 	{
-		std::cerr << "[HybridAutomatonManager::updateHybridAutomaton()] Error creating thread to deserialize xml string!" << std::endl;
+		std::cerr << "[HybridAutomatonManager::updateHybridAutomaton] Error creating thread to deserialize xml string!" << std::endl;
 	}
 
 }
@@ -182,12 +184,12 @@ void HybridAutomatonManager::updateHybridAutomaton()
 
 			if (_beginthreadex(NULL, 0, deserializeHybridAutomaton, (void*)thread_args, 0, NULL) == 0)
 			{
-				std::cerr << "[HybridAutomatonManager::updateHybridAutomaton()] Error creating thread to deserialize xml string!" << std::endl;
+				std::cerr << "[HybridAutomatonManager::updateHybridAutomaton] Error creating thread to deserialize xml string!" << std::endl;
 			}
 		}
 		catch(::std::string e)
 		{
-			std::cout << "Error caught: " << std::endl;
+			std::cout << "[HybridAutomatonManager::updateHybridAutomaton] Error caught: " << std::endl;
 			::std::cout << e << ::std::endl;
 		}
 	}
@@ -239,14 +241,12 @@ void HybridAutomatonManager::_writeDevices()
 	{
 		if(_servo_on){
 			torque[i] = static_cast<double>(_torque[i]);
-			//std::cerr << torque[i] << std::endl;
 		}else{
 			torque[i] =0;
 		}
 	}
 	int written = writeDeviceValue(_robotDevice, torque, _dof * sizeof(double));
 	RASSERT(written > 0);
-	//std::cerr << "written: " <<written << std::endl;
 	_torque_BB = convert(_torque);
 	delete[] torque;
 }
@@ -272,7 +272,7 @@ void HybridAutomatonManager::_compute(const double& t)
 			_hybrid_automaton = _deserialized_hybrid_automatons.front();
 			_deserialized_hybrid_automatons.pop_front();
 			
-			std::cout << "New Hybrid Automaton" << std::endl;
+			std::cout << "[HybridAutomatonManager::_compute] INFO: New Hybrid Automaton" << std::endl;
 			Milestone* tmpMilestone = _hybrid_automaton->getStartNode();
 			_activeMotionBehavior->deactivate();
 			_activeMotionBehavior = _hybrid_automaton->outgoingEdges(*tmpMilestone)[0];
@@ -287,19 +287,10 @@ void HybridAutomatonManager::_compute(const double& t)
 		}
 	}
 	else if(_activeMotionBehavior->getChild()->hasConverged(_robot) ){
-	//else if(_activeMotionBehavior->hasConverged() ){
-		/*this->_q.print(_T("configuration"));*/
 		if (_hybrid_automaton && !_hybrid_automaton->outgoingEdges(*(_activeMotionBehavior->getChild())).empty()) {
-			std::cout << "Switching controller" << std::endl;
+			std::cout << "[HybridAutomatonManager::_compute] INFO: Switching controller" << std::endl;
 			_activeMotionBehavior->deactivate();
-			
-			std::cout << "BEFORE " << _activeMotionBehavior << std::endl;
-			std::cout << "number of out edges: " << _hybrid_automaton->outgoingEdges(*(_activeMotionBehavior->getChild())).size() << std::endl;
-
 			_activeMotionBehavior = _hybrid_automaton->outgoingEdges(*(_activeMotionBehavior->getChild()))[0];
-
-			std::cout << "AFTER " << _activeMotionBehavior << std::endl;
-
 			_activeMotionBehavior->activate();
 
 #ifdef NOT_IN_RT 
@@ -342,7 +333,7 @@ int HybridAutomatonManager::command(const short& cmd, const int& arg)
 	case SERVO_ON:
 		{
 			_servo_on = true;
-			std::cout << "Servo ON" << std::endl;
+			std::cout << "[HybridAutomatonManager::command] INFO: Servo ON" << std::endl;
 		}
 		break;
 

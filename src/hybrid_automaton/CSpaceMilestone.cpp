@@ -14,26 +14,20 @@ using namespace std;
 
 CSpaceMilestone::CSpaceMilestone() :
 Milestone("Default"),
-//dofs_(-1),
 motion_behaviour_(NULL)
-//object_id_(-1)
 {
 }
 
 CSpaceMilestone::CSpaceMilestone(std::string csm_name) : 
 Milestone(csm_name),
-//dofs_(dofs),
 motion_behaviour_(NULL)
-//object_id_(-1)
 {
 }
 
 CSpaceMilestone::CSpaceMilestone(std::string csm_name, std::vector<double>& configuration, MotionBehaviour * motion_behaviour, std::vector<double>& region_convergence_radius) :
 Milestone(csm_name),
-//dofs_(dofs),
 configuration_(configuration),
 region_convergence_radius_(region_convergence_radius)
-//object_id_(object_id)
 {
 	if(motion_behaviour)
 	{
@@ -57,69 +51,33 @@ region_convergence_radius_(region_convergence_radius)
 	handle_points_.push_back(tmp);
 	tmp.y -= 2 * RADIUS;
 	handle_points_.push_back(tmp);
-	//	if(this->motion_behaviour_)
-	//	{
-	//		this->motion_behaviour_->activate();
-	//		double t = 0.0;
-	//		for(int i = 0; i < 1000; ++i)
-	//		{
-	//			this->motion_behaviour_->update(t);
-	//			t += 0.001;
-	//		}
-	//		::std::cout << " finished computing milestone" << ::std::endl;
-	//		//this->motion_behaviour_->deactivate();
-	//	}
 }
 
-CSpaceMilestone::CSpaceMilestone(TiXmlElement* milestone_xml, rxSystem* robot, double dt):
-Milestone("temp"),
-//dofs_(-1),
-motion_behaviour_(NULL)
-//object_id_(-1)
+CSpaceMilestone::CSpaceMilestone(std::string csm_name, std::vector<double>& configuration, MotionBehaviour * motion_behaviour,
+								 std::vector<double>& region_convergence_radius, Milestone::Status status, std::vector<Point> handle_points):
+Milestone(csm_name),
+configuration_(configuration),
+region_convergence_radius_(region_convergence_radius),
+handle_points_(handle_points)
 {
-	XMLDeserializer xml_deserializer_(milestone_xml);
-	this->status_ = (Status)xml_deserializer_.deserializeInteger("status");
-	this->name_ = xml_deserializer_.deserializeString("name");
-	//this->object_id_ = xml_deserializer_.deserializeInteger("objectId");
-	//this->dofs_ = xml_deserializer_.deserializeInteger("DOFs");
-	this->configuration_ = xml_deserializer_.deserializeVectorDouble("value");
-	if(this->configuration_.size()==0)
+	this->status_ = status;
+	if(motion_behaviour)
 	{
-		throw std::string("ERROR: [CSpaceMilestone::CSpaceMilestone(TiXmlElement* milestone_xml, rxSystem* robot)] Child Element named \"value\" not found in XML element milestone_xml.");
+		this->motion_behaviour_ = motion_behaviour->clone();
+		// Force motion_behaviour to have this milestone as parent and child
+		this->motion_behaviour_->setChild(this);
+		this->motion_behaviour_->setParent(this);
 	}
-	this->region_convergence_radius_ = xml_deserializer_.deserializeVectorDouble("epsilon");
-	if(this->region_convergence_radius_.size() == 0)
+	else
 	{
-		throw std::string("ERROR: [CSpaceMilestone::CSpaceMilestone(TiXmlElement* milestone_xml, rxSystem* robot)] Child Element named \"epsilon\" not found in XML element milestone_xml.");
-	}
-
-	TiXmlElement* handle_point_set_element = milestone_xml->FirstChildElement("HandlePoints");
-	if(handle_point_set_element != NULL)
-	{
-	for(TiXmlElement* handle_point_element = handle_point_set_element->FirstChildElement("HandlePoint"); handle_point_element; handle_point_element = handle_point_element->NextSiblingElement())
-	{
-		XMLDeserializer xml_deserializer_handle_point(handle_point_element);
-		Point handle_point_value(-1.f,-1.f,-1.f);
-		handle_point_value.x = xml_deserializer_handle_point.deserializeDouble("x");
-		handle_point_value.y = xml_deserializer_handle_point.deserializeDouble("y");
-		handle_point_value.z = xml_deserializer_handle_point.deserializeDouble("z");
-		(this->handle_points_).push_back(handle_point_value);
-	}
-	}
-
-	TiXmlElement* mb_element = milestone_xml->FirstChildElement("MotionBehaviour");
-	if(mb_element)
-	{
-		this->motion_behaviour_ = new MotionBehaviour(mb_element, this, this, robot, dt);
+		this->motion_behaviour_ = NULL;
 	}
 }
 
 CSpaceMilestone::CSpaceMilestone(const CSpaceMilestone & cmilestone_cpy) :
 Milestone(cmilestone_cpy),
-//dofs_(cmilestone_cpy.dofs_),
 configuration_(cmilestone_cpy.configuration_),
 region_convergence_radius_(cmilestone_cpy.region_convergence_radius_),
-//object_id_(cmilestone_cpy.object_id_),
 handle_points_(cmilestone_cpy.handle_points_)
 {
 	if(cmilestone_cpy.motion_behaviour_)
@@ -170,22 +128,12 @@ dVector CSpaceMilestone::getConfiguration() const
 	return ret_value;
 }
 
-//int CSpaceMilestone::getObjectId() const
-//{
-//	return this->object_id_;
-//}
-//
-//int CSpaceMilestone::getDofs() const
-//{
-//	return this->dofs_;
-//}
-
 void CSpaceMilestone::update()
 {
 	if(motion_behaviour_ != NULL){
-		cout << "CSM> Updating CS Milestone" << endl;
+		cout << "[CSpaceMilestone::update] Updating CS Milestone (not implemented)" << endl;
 	}else{
-		cout << "CSM> Can't update anything, motion_behaviour_ is NULL!!!" << endl;
+		cout << "[CSpaceMilestone::update] Can't update anything, motion_behaviour_ is NULL!!!" << endl;
 	}
 }
 
@@ -213,7 +161,6 @@ TiXmlElement* CSpaceMilestone::toElementXML() const
 	cspace_ms_xml->SetAttribute("type", "CSpace");
 	cspace_ms_xml->SetAttribute("status", this->status_);
 	cspace_ms_xml->SetAttribute("name", this->name_.c_str());
-	//cspace_ms_xml->SetAttribute("ObjectId", object_id_);
 
 	std::stringstream value_ss;
 	for(int i=0; i<this->configuration_.size()-1; i++)
@@ -256,40 +203,9 @@ CSpaceMilestone* CSpaceMilestone::clone() const
 	return new_c_space_milestone;
 }
 
-//bool CSpaceMilestone::operator ==(const CSpaceMilestone & n) const
-//{
-//	return (this->name_ == n.getName());
-//	//return (this->configuration_ == n.getConfigurationSTDVector() 
-//	//	&& this->dofs_==n.getDofs() && this->handle_points_ == n.handle_points_ 
-//	//	&& this->object_id_ == n.getObjectId());
-//}
-//
-//bool CSpaceMilestone::operator ==(const Milestone & n) const
-//{
-//	const CSpaceMilestone* n_cspace = dynamic_cast<const CSpaceMilestone*>(&n);
-//	if(n_cspace)
-//		return (this->name_ == n_cspace->getName());
-//		//return (this->configuration_ == n_cspace->getConfigurationSTDVector() 
-//		//&& this->dofs_==n_cspace->getDofs() && this->handle_points_ == n_cspace->handle_points_ 
-//		//&& this->object_id_ == n_cspace->getObjectId());
-//	else
-//		return false;
-//}
-//
-//bool CSpaceMilestone::operator !=(const CSpaceMilestone & n) const
-//{
-//	return !(*this==n);
-//}
-//
-//bool CSpaceMilestone::operator !=(const Milestone & n) const
-//{
-//	return !(*this==n);
-//}
-
 CSpaceMilestone& CSpaceMilestone::operator=(const CSpaceMilestone & cmilestone_assignment)
 {
 	Milestone::operator=(cmilestone_assignment);
-	//this->dofs_ = cmilestone_assignment.dofs_;
 	this->configuration_ = cmilestone_assignment.configuration_;
 	if(cmilestone_assignment.motion_behaviour_)
 	{
@@ -302,7 +218,6 @@ CSpaceMilestone& CSpaceMilestone::operator=(const CSpaceMilestone & cmilestone_a
 
 
 	this->region_convergence_radius_ = cmilestone_assignment.region_convergence_radius_;
-	//this->object_id_ = cmilestone_assignment.object_id_;
 	this->handle_points_ = cmilestone_assignment.handle_points_;
 	return *this;
 }
@@ -316,25 +231,11 @@ bool CSpaceMilestone::hasConverged(rxSystem* sys)
 		double e = ::std::abs(q[i] - configuration_[i]);
 		if (e > region_convergence_radius_[i])
 		{
-			//std::cout << "Error in " << i << " is too large = " << e << std::endl;
+#ifdef NOT_IN_RT
+			std::cout << "Error in " << i << " is too large = " << e << std::endl;
+#endif
 			return false;
 		}
 	}
 	return true;
 }
-
-
-//bool CSpaceMilestone::operator ==(const Milestone * n) const{
-//	const CSpaceMilestone* n_cspace = dynamic_cast<const CSpaceMilestone*>(n);
-//	if(n_cspace)
-//		return (configuration_ == n_cspace->configuration_);
-//	else
-//		return false;
-//}
-//bool CSpaceMilestone::operator ==(const CSpaceMilestone * n) const{
-//	return (configuration_ == n->configuration_);
-//}
-//
-//bool CSpaceMilestone::operator ==(CSpaceMilestone * n) const{
-//	return (configuration_ == n->configuration_);
-//}
