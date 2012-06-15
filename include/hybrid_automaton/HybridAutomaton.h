@@ -16,7 +16,7 @@ class HybridAutomaton : public DiGraph < Milestone, MotionBehaviour >
 public:
 
 	/**
-	* Constructor.
+	* Constructor. Creates an empty graph.
 	*/
 	HybridAutomaton();
 

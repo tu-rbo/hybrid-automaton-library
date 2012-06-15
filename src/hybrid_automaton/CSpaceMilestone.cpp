@@ -18,14 +18,14 @@ motion_behaviour_(NULL)
 {
 }
 
-CSpaceMilestone::CSpaceMilestone(std::string csm_name) : 
-Milestone(csm_name),
+CSpaceMilestone::CSpaceMilestone(const std::string& name) : 
+Milestone(name),
 motion_behaviour_(NULL)
 {
 }
 
-CSpaceMilestone::CSpaceMilestone(std::string csm_name, std::vector<double>& configuration, MotionBehaviour * motion_behaviour, std::vector<double>& region_convergence_radius) :
-Milestone(csm_name),
+CSpaceMilestone::CSpaceMilestone(const std::string& name, const std::vector<double>& configuration, MotionBehaviour * motion_behaviour, const std::vector<double>& region_convergence_radius) :
+Milestone(name),
 configuration_(configuration),
 region_convergence_radius_(region_convergence_radius)
 {
@@ -53,9 +53,9 @@ region_convergence_radius_(region_convergence_radius)
 	handle_points_.push_back(tmp);
 }
 
-CSpaceMilestone::CSpaceMilestone(std::string csm_name, std::vector<double>& configuration, MotionBehaviour * motion_behaviour,
-								 std::vector<double>& region_convergence_radius, Milestone::Status status, std::vector<Point> handle_points):
-Milestone(csm_name),
+CSpaceMilestone::CSpaceMilestone(const std::string& name, const std::vector<double>& configuration, MotionBehaviour * motion_behaviour,
+								 const std::vector<double>& region_convergence_radius, Milestone::Status status, const std::vector<Point>& handle_points):
+Milestone(name),
 configuration_(configuration),
 region_convergence_radius_(region_convergence_radius),
 handle_points_(handle_points)
