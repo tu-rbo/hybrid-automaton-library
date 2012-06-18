@@ -189,7 +189,7 @@ std::wstring string2wstring(const std::string& str)
 
 std::string colon2space(std::string text)
 {
-	for(int i = 0; i < text.length(); i++)
+	for(unsigned int i = 0; i < text.length(); i++)
 	{
 		if( text[i] == ',' )
 			text[i] = ' ';
@@ -515,8 +515,8 @@ rxController* XMLDeserializer::createController(TiXmlElement *rxController_xml, 
 	{
 
 		double time_goal = deserializeElement<double>(rxController_xml, "timeGoal");
-		bool reuse_goal = deserializeElement<double>(rxController_xml, "reuseGoal");
-		int type_goal = deserializeElement<double>(rxController_xml, "typeGoal");
+		bool reuse_goal = deserializeBoolean(rxController_xml, "reuseGoal");
+		int type_goal = deserializeElement<int>(rxController_xml, "typeGoal");
 
 		switch(controller->type()) {
 	case rxController::eControlType_Joint:

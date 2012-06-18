@@ -121,7 +121,7 @@ std::vector<double> CSpaceMilestone::getConfigurationSTDVector() const
 dVector CSpaceMilestone::getConfiguration() const
 {
 	dVector ret_value;
-	for(int i = 0; i<configuration_.size(); i++)
+	for(unsigned int i = 0; i<configuration_.size(); i++)
 	{
 		ret_value.expand(1, configuration_[i]);
 	}
@@ -163,7 +163,7 @@ TiXmlElement* CSpaceMilestone::toElementXML() const
 	cspace_ms_xml->SetAttribute("name", this->name_.c_str());
 
 	std::stringstream value_ss;
-	for(int i=0; i<this->configuration_.size()-1; i++)
+	for(unsigned int i=0; i<this->configuration_.size()-1; i++)
 	{
 		value_ss << configuration_.at(i) << " ";
 	}
@@ -171,7 +171,7 @@ TiXmlElement* CSpaceMilestone::toElementXML() const
 	cspace_ms_xml->SetAttribute("value", value_ss.str().c_str());
 
 	std::stringstream epsilon_ss;
-	for(int i=0; i<this->region_convergence_radius_.size()-1; i++)
+	for(unsigned int i=0; i<this->region_convergence_radius_.size()-1; i++)
 	{
 		epsilon_ss << region_convergence_radius_.at(i) << " ";
 	}
