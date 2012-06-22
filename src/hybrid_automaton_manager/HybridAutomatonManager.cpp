@@ -18,7 +18,6 @@ unsigned __stdcall deserializeHybridAutomaton(void *udata)
 {
 	DeserializingThreadArguments* thread_args = static_cast<DeserializingThreadArguments*>(udata);
 	HybridAutomaton* ha = NULL;
-
 	try {
 		ha = XMLDeserializer::createHybridAutomaton(thread_args->_string, thread_args->_robot, thread_args->_dT);
 	}
@@ -121,8 +120,12 @@ bool HybridAutomatonManager::isBlackboardActive() const
 	return (_blackboard != NULL);
 }
 
-void HybridAutomatonManager::setHybridAutomaton(std::string _new_hybrid_automaton_str)
+void HybridAutomatonManager::setHybridAutomaton(std::string _new_hybrid_automaton_str, CollisionInterface* collision_interface)
 {
+	if(!CollisionInterface::instance)
+	{
+		CollisionInterface::instance = collision_interface;
+	}
 	DeserializingThreadArguments* thread_args = new DeserializingThreadArguments();
 	thread_args->_robot = this->_robot;
 	thread_args->_string = _new_hybrid_automaton_str;

@@ -497,9 +497,8 @@ rxController* XMLDeserializer::createController(TiXmlElement *rxController_xml, 
 		break;
 	case rxController::eControlType_Functional:
 		{
-			int dimension = deserializeElement<int>(rxController_xml,"dimension", 0);
-			controller = XMLDeserializer::createFunctionalController(type_of_controller.second, dimension, dT, rxController_xml, robot);
-			break;
+		controller = XMLDeserializer::createFunctionalController(type_of_controller.second, dT, rxController_xml, robot);
+		break;
 		}
 	default:
 		throw std::string("[XMLDeserializer::createController] ERROR: Unexpected Controller group.");
@@ -511,7 +510,7 @@ rxController* XMLDeserializer::createController(TiXmlElement *rxController_xml, 
 	wss << "controller_" << controller_counter;
 	controller->setName(wss.str());
 
-	if(!goal_controller)
+	if(!goal_controller && !(type_of_controller.second & OBSTACLE_AVOIDANCE) )
 	{
 
 		double time_goal = deserializeElement<double>(rxController_xml, "timeGoal");
@@ -944,59 +943,54 @@ rxController* XMLDeserializer::createNullMotionController(int null_motion_subtyp
 	return controller;
 }
 
-rxController* XMLDeserializer::createFunctionalController(int functional_subtype, int dimension, double controller_duration, TiXmlElement* rxController_xml, rxSystem* robot)
+rxController* XMLDeserializer::createFunctionalController(int functional_subtype, double controller_duration, TiXmlElement* rxController_xml, rxSystem* robot)
 {
 	rxController* controller = NULL;
 	switch(functional_subtype)
 	{
-	case NONE:
-		//controller = new rxFunctionController(robot, dimension, controller_duration);
-		break;
 	case WITH_IMPEDANCE | SUBDISPLACEMENT:
-	case OBSTACLE_AVOIDANCE:{
-		rxBody*   alpha = NULL;
-		rxBody*   beta = NULL;
-		rxController* controller = NULL;
-		std::string alpha_str = deserializeString(rxController_xml,"alpha");
-		alpha = robot->findBody(string2wstring(alpha_str));
-		std::stringstream alpha_rot_ss = std::stringstream(deserializeString(rxController_xml,"alphaRotation"));
-		double alpha_value = -1.0;
-		dVector alpha_rotation;
-		while((alpha_rot_ss >> alpha_value))
 		{
-			alpha_rotation.expand(1,alpha_value);
-		}
-		std::stringstream alpha_disp_ss = std::stringstream(deserializeString(rxController_xml,"alphaDisplacement"));
-		dVector alpha_displacement;
-		while((alpha_disp_ss >> alpha_value))
-		{
-			alpha_displacement.expand(1,alpha_value);
-		}
+			rxBody*   alpha = NULL;
+			rxBody*   beta = NULL;
+			std::string alpha_str = deserializeString(rxController_xml,"alpha");
+			alpha = robot->findBody(string2wstring(alpha_str));
+			std::stringstream alpha_rot_ss = std::stringstream(deserializeString(rxController_xml,"alphaRotation"));
+			double alpha_value = -1.0;
+			dVector alpha_rotation;
+			while((alpha_rot_ss >> alpha_value))
+			{
+				alpha_rotation.expand(1,alpha_value);
+			}
+			std::stringstream alpha_disp_ss = std::stringstream(deserializeString(rxController_xml,"alphaDisplacement"));
+			dVector alpha_displacement;
+			while((alpha_disp_ss >> alpha_value))
+			{
+				alpha_displacement.expand(1,alpha_value);
+			}
 
-		std::string beta_str = deserializeString(rxController_xml, "beta");
-		beta = robot->findBody(string2wstring(beta_str));
-		std::stringstream beta_rot_ss = std::stringstream(deserializeString(rxController_xml,"betaRotation"));
-		double beta_value = -1.0;
-		dVector beta_rotation;
-		while((beta_rot_ss >> beta_value))
-		{
-			beta_rotation.expand(1,beta_value);
-		}			
-		std::stringstream beta_disp_ss = std::stringstream(deserializeString(rxController_xml,"betaDisplacement"));
-		dVector beta_displacement;
-		while((beta_disp_ss >> beta_value))
-		{
-			beta_displacement.expand(1,beta_value);
-		}
-		std::stringstream index_ss = std::stringstream(deserializeString(rxController_xml,"index"));
-		std::vector<long> index;
-		long index_value;
-		while((index_ss >> index_value))
-		{
-			index.push_back(index_value);
-		}
-		if(functional_subtype == (WITH_IMPEDANCE | SUBDISPLACEMENT))
-		{
+			std::string beta_str = deserializeString(rxController_xml, "beta");
+			beta = robot->findBody(string2wstring(beta_str));
+			std::stringstream beta_rot_ss = std::stringstream(deserializeString(rxController_xml,"betaRotation"));
+			double beta_value = -1.0;
+			dVector beta_rotation;
+			while((beta_rot_ss >> beta_value))
+			{
+				beta_rotation.expand(1,beta_value);
+			}			
+			std::stringstream beta_disp_ss = std::stringstream(deserializeString(rxController_xml,"betaDisplacement"));
+			dVector beta_displacement;
+			while((beta_disp_ss >> beta_value))
+			{
+				beta_displacement.expand(1,beta_value);
+			}
+			std::stringstream index_ss = std::stringstream(deserializeString(rxController_xml,"index"));
+			std::vector<long> index;
+			long index_value;
+			while((index_ss >> index_value))
+			{
+				index.push_back(index_value);
+			}
+
 			double max_force = deserializeElement<double>(rxController_xml,"maxForce", 1.);
 			std::string limit_body = deserializeString(rxController_xml,"limitBody");
 			double distance_limit = deserializeElement<double>(rxController_xml,"distanceLimit", 0.);
@@ -1009,22 +1003,32 @@ rxController* XMLDeserializer::createFunctionalController(int functional_subtype
 			{
 				dynamic_cast<SubdisplacementController*>(controller)->setTaskConstraints(0., 0.);
 			}
-			break;
 		}
-		if(functional_subtype == OBSTACLE_AVOIDANCE)
+		break;
+	case OBSTACLE_AVOIDANCE:
 		{
+			rxBody*   alpha = NULL;
+			std::string alpha_str = deserializeString(rxController_xml,"alpha");
+			alpha = robot->findBody(string2wstring(alpha_str));
+			std::stringstream alpha_disp_ss = std::stringstream(deserializeString(rxController_xml,"alphaDisplacement"));
+			dVector alpha_displacement;
+			double alpha_value = -1.0;
+			while((alpha_disp_ss >> alpha_value))
+			{
+				alpha_displacement.expand(1,alpha_value);
+			}
+
 			double distance_threshold = deserializeElement<double>(rxController_xml,"distanceThreshold", 1.);
 			double deactivation_threshold = deserializeElement<double>(rxController_xml,"deactivationThreshold", 1.);
 			if(CollisionInterface::instance)
 			{
-				controller = new ObstacleAvoidanceController(robot, beta, beta_displacement, distance_threshold, 
+				controller = new ObstacleAvoidanceController(robot, alpha, alpha_displacement, distance_threshold, 
 					CollisionInterface::instance, controller_duration, deactivation_threshold);
 			}else{
 				throw std::string("[XMLDeserializer::createFunctionalController] ERROR Obstacle Avoidance needs Collision interface.");
 			}
-			break;
 		}
-							}
+		break;
 	default:
 		throw std::string("[XMLDeserializer::createFunctionalController] ERROR: Unexpected Controller subgroup.");
 		break;

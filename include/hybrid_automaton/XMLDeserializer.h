@@ -117,10 +117,9 @@ public:
 	/**
 	* Recreate a Functional controller
 	* @param functional_subtype Subgroup of the controller to be created within the Null Motion Controller group.
-	* @param dimension Dimension to be controlled
 	* @param controller_duration Time interval of the controller to be created.
 	*/
-	static rxController* createFunctionalController(int functional_subtype, int dimension, double controller_duration, TiXmlElement* rxController_xml,
+	static rxController* createFunctionalController(int functional_subtype, double controller_duration, TiXmlElement* rxController_xml,
 		rxSystem* robot);
 
 	static std::map<std::string, ControllerType> createControllerMapping();

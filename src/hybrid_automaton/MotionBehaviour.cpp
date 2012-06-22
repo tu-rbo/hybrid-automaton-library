@@ -78,7 +78,8 @@ dT_(motion_behaviour_copy.dT_),
 min_time_(motion_behaviour_copy.min_time_),
 max_velocity_(motion_behaviour_copy.max_velocity_),
 goal_controllers_(motion_behaviour_copy.goal_controllers_),
-time_to_converge_(motion_behaviour_copy.time_to_converge_)
+time_to_converge_(motion_behaviour_copy.time_to_converge_),
+_onDemand_controllers(motion_behaviour_copy._onDemand_controllers)
 {
 	// NOTE (Roberto): Should we avoid copying the value of time_? We are creating a new MB, maybe time_ should be 0
 	if(motion_behaviour_copy.control_set_)
@@ -148,7 +149,12 @@ void MotionBehaviour::addController(rxController* ctrl, bool is_goal_controller)
 	else
 	{
 		throw std::string("[MotionBehaviour::addController] ERROR: The pointer to rxController to be added is NULL.");
-	}				
+	}
+	OnDemandController* is_on_demand_controller = dynamic_cast<OnDemandController*>(ctrl);
+	if(is_on_demand_controller)
+	{
+		this->_onDemand_controllers.push_back(is_on_demand_controller);
+	}
 }
 
 void MotionBehaviour::activate() 
@@ -381,6 +387,13 @@ dVector MotionBehaviour::getCurrentDotDotReference() const
 
 dVector MotionBehaviour::update(double t)
 {
+	for(unsigned int i = 0; i < _onDemand_controllers.size(); i++)
+	{
+		// before performing the update, activate/deactivate the onDemand controllers
+		// depending on the measurements they make.
+		_onDemand_controllers[i]->updateMeasurement();
+	}
+
 	dVector torque;
 	control_set_->compute(t,torque);
 	time_ += dT_;
@@ -556,6 +569,7 @@ void MotionBehaviour::RLabInfoString2ElementXML_(string_type string_data, TiXmlE
 	switch(type_of_controller.first)
 	{
 	case rxController::eControlType_Displacement:
+	case rxController::eControlType_Orientation:
 		std::getline(data_ss, temp_st);	
 		out_xml_element->SetAttribute("alpha", colon2space( wstring2string( temp_st.substr( temp_st.find(L"=") + 1, temp_st.find(L"\n") ) ) ).c_str() );
 
@@ -567,19 +581,6 @@ void MotionBehaviour::RLabInfoString2ElementXML_(string_type string_data, TiXmlE
 
 		std::getline(data_ss, temp_st);	
 		out_xml_element->SetAttribute("betaDisplacement",colon2space( wstring2string(temp_st.substr(temp_st.find(L"=") + 1, temp_st.find(L"\n")))).c_str() );
-		break;
-	case rxController::eControlType_Orientation:
-		std::getline(data_ss, temp_st);	
-		out_xml_element->SetAttribute("alpha", colon2space(wstring2string(temp_st.substr(temp_st.find(L"=") + 1, temp_st.find(L"\n")))).c_str() );
-
-		std::getline(data_ss, temp_st);	
-		out_xml_element->SetAttribute("alphaRotation", colon2space(wstring2string(temp_st.substr(temp_st.find(L"=") + 1, temp_st.find(L"\n")))).c_str() );
-
-		std::getline(data_ss, temp_st);	
-		out_xml_element->SetAttribute("beta", colon2space(wstring2string(temp_st.substr(temp_st.find(L"=") + 1, temp_st.find(L"\n")))).c_str() );
-
-		std::getline(data_ss, temp_st);	
-		out_xml_element->SetAttribute("betaRotation", colon2space(wstring2string(temp_st.substr(temp_st.find(L"=") + 1, temp_st.find(L"\n")))).c_str() );
 		break;
 	case rxController::eControlType_HTransform:
 		std::getline(data_ss, temp_st);	
@@ -622,6 +623,21 @@ void MotionBehaviour::RLabInfoString2ElementXML_(string_type string_data, TiXmlE
 		out_xml_element->SetAttribute("stiffness_b", stiffness_b.c_str() );
 		out_xml_element->SetAttribute("stiffness_k", stiffness_k.c_str() );
 	}
+
+	if(type_of_controller.second & OBSTACLE_AVOIDANCE)
+	{
+		std::getline(data_ss, temp_st);	
+		out_xml_element->SetAttribute("alpha", colon2space( wstring2string( temp_st.substr( temp_st.find(L"=") + 1, temp_st.find(L"\n") ) ) ).c_str() );
+
+		std::getline(data_ss, temp_st);	
+		out_xml_element->SetAttribute("alphaDisplacement", colon2space(wstring2string(temp_st.substr(temp_st.find(L"=") + 1, temp_st.find(L"\n")))).c_str() );
+
+		std::getline(data_ss, temp_st);	
+		out_xml_element->SetAttribute("distanceThreshold", wstring2string(temp_st.substr(temp_st.find(L"=") + 1, temp_st.find(L"\n"))).c_str() );
+
+		std::getline(data_ss, temp_st);	
+		out_xml_element->SetAttribute("deactivationThreshold", wstring2string(temp_st.substr(temp_st.find(L"=") + 1, temp_st.find(L"\n"))).c_str() );		
+	}
 }
 
 MotionBehaviour* MotionBehaviour::clone() const 
@@ -637,6 +653,7 @@ MotionBehaviour& MotionBehaviour::operator=(const MotionBehaviour & motion_behav
 	this->time_ = motion_behaviour_assignment.time_;
 	this->dT_ = motion_behaviour_assignment.dT_;
 	this->goal_controllers_ = motion_behaviour_assignment.goal_controllers_;
+	this->_onDemand_controllers = motion_behaviour_assignment._onDemand_controllers;
 
 	// Delete the current stored control set
 	if(this->control_set_)

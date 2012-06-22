@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="Windows-1252"?>
 <VisualStudioProject
 	ProjectType="Visual C++"
-	Version="9.00"
+	Version="9,00"
 	Name="HybridAutomaton"
 	ProjectGUID="{207FD383-F8DB-4E03-A885-D7A17AEBCA15}"
 	RootNamespace="libhybrid_automaton"
@@ -236,6 +236,26 @@
 				RelativePath="..\..\include\hybrid_automaton\XMLDeserializer.h"
 				>
 			</File>
+			<Filter
+				Name="controllers"
+				>
+				<File
+					RelativePath="..\..\..\collision_detection\collision_interface\include\CollisionInterface.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\..\controllers\include\FeatureAttractorController.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\..\controllers\include\ObstacleAvoidanceController.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\..\controllers\include\SubdisplacementController.h"
+					>
+				</File>
+			</Filter>
 		</Filter>
 		<Filter
 			Name="Resource Files"

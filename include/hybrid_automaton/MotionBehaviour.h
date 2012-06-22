@@ -7,6 +7,8 @@
 #include "rxControlSDK\rxControlSDK.h"
 #include "collision_detection\collision_interface\include\CollisionInterface.h"
 
+#include "controllers\include\OnDemandController.h"
+
 #include "tinyxml.h"
 
 #include <map>
@@ -212,6 +214,9 @@ private:
 	double											min_time_;			// minimum time that is used for interpolation (if max_velocity constraint is not set)
 	
 	std::map<string_type, bool>						goal_controllers_;	// tells us if a controller is goal controller or not (if its convergence must be checked or not) 
+
+		// obstacle avoidance, etc...
+	std::vector<OnDemandController*>				_onDemand_controllers;
 };
 
 #endif
