@@ -60,10 +60,10 @@ bool deserializeBoolean(TiXmlElement * xml_element, const char * field_name, boo
 	return default_value;
 }
 
-std::string deserializeString(TiXmlElement * xml_element, const char * field_name)
+std::string deserializeString(TiXmlElement * xml_element, const char * field_name, bool error_if_not_found)
 {
 	std::string return_string = std::string(xml_element->Attribute(field_name));
-	if(return_string == std::string(""))
+	if(return_string == std::string("") && error_if_not_found)
 	{
 		std::string exception_str = std::string("[deserializeString] ERROR: Attribute ") 
 			+ std::string(field_name) + std::string(" was not found in XML element.");
@@ -510,7 +510,7 @@ rxController* XMLDeserializer::createController(TiXmlElement *rxController_xml, 
 	wss << "controller_" << controller_counter;
 	controller->setName(wss.str());
 
-	if(!goal_controller && !(type_of_controller.second & OBSTACLE_AVOIDANCE) )
+	if(!goal_controller && !(type_of_controller.second & OBSTACLE_AVOIDANCE) &&!(type_of_controller.second & SUBDISPLACEMENT) )
 	{
 
 		double time_goal = deserializeElement<double>(rxController_xml, "timeGoal");
@@ -654,24 +654,34 @@ rxController* XMLDeserializer::createDisplacementController(int displacement_sub
 	rxBody*   alpha = NULL;
 	rxBody*   beta = NULL;
 	rxController* controller = NULL;
+	dVector alpha_displacement;
 	std::string alpha_str = deserializeString(rxController_xml,"alpha");
 	alpha = robot->findBody(string2wstring(alpha_str));
-	std::stringstream alpha_ss = std::stringstream(deserializeString(rxController_xml,"alphaDisplacement"));
-	double alpha_value = -1.0;
-	dVector alpha_displacement;
-	while ((alpha_ss >> alpha_value))
+	if(alpha)
 	{
-		alpha_displacement.expand(1,alpha_value);
+		std::stringstream alpha_ss = std::stringstream(deserializeString(rxController_xml,"alphaDisplacement"));
+		double alpha_value = -1.0;
+		while ((alpha_ss >> alpha_value))
+		{
+			alpha_displacement.expand(1,alpha_value);
+		}
+	}else{
+		alpha_displacement = dVector(3,0.);
 	}
 
+	dVector beta_displacement;
 	std::string beta_str = deserializeString(rxController_xml,"beta");
 	beta = robot->findBody(string2wstring(beta_str));
-	std::stringstream beta_ss = std::stringstream(deserializeString(rxController_xml,"betaDisplacement"));
-	double beta_value = -1.0;
-	dVector beta_displacement;
-	while((beta_ss >> beta_value))
+	if(beta)
 	{
-		beta_displacement.expand(1,beta_value);
+		std::stringstream beta_ss = std::stringstream(deserializeString(rxController_xml,"betaDisplacement"));
+		double beta_value = -1.0;	
+		while((beta_ss >> beta_value))
+		{
+			beta_displacement.expand(1,beta_value);
+		}
+	}else{
+		beta_displacement = dVector(3,0.);
 	}
 
 	switch(displacement_subtype)
@@ -953,6 +963,7 @@ rxController* XMLDeserializer::createFunctionalController(int functional_subtype
 			rxBody*   alpha = NULL;
 			rxBody*   beta = NULL;
 			std::string alpha_str = deserializeString(rxController_xml,"alpha");
+
 			alpha = robot->findBody(string2wstring(alpha_str));
 			std::stringstream alpha_rot_ss = std::stringstream(deserializeString(rxController_xml,"alphaRotation"));
 			double alpha_value = -1.0;
@@ -991,17 +1002,25 @@ rxController* XMLDeserializer::createFunctionalController(int functional_subtype
 				index.push_back(index_value);
 			}
 
+			std::stringstream tc_ss = std::stringstream(deserializeString(rxController_xml,"taskConstraints"));
+			std::vector<double> tc;
+			double tc_value;
+			while((tc_ss >> tc_value))
+			{
+				tc.push_back(tc_value);
+			}
+
 			double max_force = deserializeElement<double>(rxController_xml,"maxForce", 1.);
 			std::string limit_body = deserializeString(rxController_xml,"limitBody");
 			double distance_limit = deserializeElement<double>(rxController_xml,"distanceLimit", 0.);
 			controller = new SubdisplacementController(robot,beta, beta_displacement, alpha, alpha_displacement,
 				controller_duration, index, max_force, robot->findBody(string_type(string2wstring(limit_body))), distance_limit );
-			if(index.size() == 1 && index.at(0) ==1)
+			if(index.size() == 1)
 			{
-				dynamic_cast<SubdisplacementController*>(controller)->setTaskConstraints(0.);
-			}else if (index.size() ==2 && index.at(0) ==1 && index.at(1) == 1)
+				dynamic_cast<SubdisplacementController*>(controller)->setTaskConstraints(tc[0]);
+			}else if (index.size() ==2)
 			{
-				dynamic_cast<SubdisplacementController*>(controller)->setTaskConstraints(0., 0.);
+				dynamic_cast<SubdisplacementController*>(controller)->setTaskConstraints(tc[0], tc[1]);
 			}
 		}
 		break;

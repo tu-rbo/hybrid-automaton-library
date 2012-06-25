@@ -19,7 +19,7 @@ T deserializeElement(TiXmlElement * xml_element, const char * field_name, T defa
 
 bool deserializeBoolean(TiXmlElement * xml_element, const char * field_name, bool default_value = false);
 
-std::string deserializeString(TiXmlElement * xml_element, const char * field_name);
+std::string deserializeString(TiXmlElement * xml_element, const char * field_name, bool error_if_not_found=true);
 
 std::vector<double> deserializeVectorDouble(TiXmlElement * xml_element, const char * field_name);
 

@@ -566,46 +566,54 @@ void MotionBehaviour::RLabInfoString2ElementXML_(string_type string_data, TiXmlE
 		}
 	}
 
+	string_type alpha_string(_T("alpha"));
+	string_type beta_string(_T("beta"));
+	std::getline(data_ss, temp_st);	
 	switch(type_of_controller.first)
 	{
 	case rxController::eControlType_Displacement:
-	case rxController::eControlType_Orientation:
-		std::getline(data_ss, temp_st);	
-		out_xml_element->SetAttribute("alpha", colon2space( wstring2string( temp_st.substr( temp_st.find(L"=") + 1, temp_st.find(L"\n") ) ) ).c_str() );
-
-		std::getline(data_ss, temp_st);	
-		out_xml_element->SetAttribute("alphaDisplacement", colon2space(wstring2string(temp_st.substr(temp_st.find(L"=") + 1, temp_st.find(L"\n")))).c_str() );
-
-		std::getline(data_ss, temp_st);	
-		out_xml_element->SetAttribute("beta", colon2space(wstring2string(temp_st.substr(temp_st.find(L"=") + 1, temp_st.find(L"\n")))).c_str() );
-
-		std::getline(data_ss, temp_st);	
-		out_xml_element->SetAttribute("betaDisplacement",colon2space( wstring2string(temp_st.substr(temp_st.find(L"=") + 1, temp_st.find(L"\n")))).c_str() );
+	case rxController::eControlType_Orientation:		
+		if(temp_st.compare(0, 5, alpha_string)==0)
+		{
+			out_xml_element->SetAttribute("alpha", colon2space( wstring2string( temp_st.substr( temp_st.find(L"=") + 1, temp_st.find(L"\n") ) ) ).c_str() );
+			std::getline(data_ss, temp_st);	
+			out_xml_element->SetAttribute("alphaDisplacement", colon2space(wstring2string(temp_st.substr(temp_st.find(L"=") + 1, temp_st.find(L"\n")))).c_str() );
+			std::getline(data_ss, temp_st);	
+		}		
+		if(temp_st.compare( 0, 4, beta_string)==0)
+		{
+			out_xml_element->SetAttribute("beta", colon2space(wstring2string(temp_st.substr(temp_st.find(L"=") + 1, temp_st.find(L"\n")))).c_str() );
+			std::getline(data_ss, temp_st);	
+			out_xml_element->SetAttribute("betaDisplacement",colon2space( wstring2string(temp_st.substr(temp_st.find(L"=") + 1, temp_st.find(L"\n")))).c_str() );
+			std::getline(data_ss, temp_st);	
+		}
 		break;
 	case rxController::eControlType_HTransform:
-		std::getline(data_ss, temp_st);	
-		out_xml_element->SetAttribute("alpha", colon2space(wstring2string(temp_st.substr(temp_st.find(L"=") + 1, temp_st.find(L"\n")))).c_str() );
-
-		std::getline(data_ss, temp_st);	
-		out_xml_element->SetAttribute("alphaRotation", colon2space(wstring2string(temp_st.substr(temp_st.find(L"=") + 1, temp_st.find(L"\n")))).c_str() );
-
-
-		std::getline(data_ss, temp_st);	
-		out_xml_element->SetAttribute("alphaDisplacement", colon2space(wstring2string(temp_st.substr(temp_st.find(L"=") + 1, temp_st.find(L"\n")))).c_str() );
-
-		std::getline(data_ss, temp_st);	
-		out_xml_element->SetAttribute("beta", colon2space(wstring2string(temp_st.substr(temp_st.find(L"=") + 1, temp_st.find(L"\n")))).c_str() );
-
-		std::getline(data_ss, temp_st);	
-		out_xml_element->SetAttribute("betaRotation", colon2space(wstring2string(temp_st.substr(temp_st.find(L"=") + 1, temp_st.find(L"\n")))).c_str() );
-
-		std::getline(data_ss, temp_st);	
-		out_xml_element->SetAttribute("betaDisplacement", colon2space(wstring2string(temp_st.substr(temp_st.find(L"=") + 1, temp_st.find(L"\n")))).c_str() );
+		if(temp_st.compare(0, 5, alpha_string)==0)
+		{
+			out_xml_element->SetAttribute("alpha", colon2space(wstring2string(temp_st.substr(temp_st.find(L"=") + 1, temp_st.find(L"\n")))).c_str() );
+			std::getline(data_ss, temp_st);	
+			out_xml_element->SetAttribute("alphaRotation", colon2space(wstring2string(temp_st.substr(temp_st.find(L"=") + 1, temp_st.find(L"\n")))).c_str() );
+			std::getline(data_ss, temp_st);	
+			out_xml_element->SetAttribute("alphaDisplacement", colon2space(wstring2string(temp_st.substr(temp_st.find(L"=") + 1, temp_st.find(L"\n")))).c_str() );
+			std::getline(data_ss, temp_st);	
+		}		
+		if(temp_st.compare( 0, 4, beta_string)==0)
+		{
+			out_xml_element->SetAttribute("beta", colon2space(wstring2string(temp_st.substr(temp_st.find(L"=") + 1, temp_st.find(L"\n")))).c_str() );
+			std::getline(data_ss, temp_st);	
+			out_xml_element->SetAttribute("betaRotation", colon2space(wstring2string(temp_st.substr(temp_st.find(L"=") + 1, temp_st.find(L"\n")))).c_str() );
+			std::getline(data_ss, temp_st);	
+			out_xml_element->SetAttribute("betaDisplacement", colon2space(wstring2string(temp_st.substr(temp_st.find(L"=") + 1, temp_st.find(L"\n")))).c_str() );
+			std::getline(data_ss, temp_st);	
+		}
 		break;
 	default:
 		break;
 	}
 
+	// We put the WITH_COMPLIANCE out of the second switch in case some of the special controllers can have also compliance
+	// NOTE: HACK -> The compliance values are set manually!!!!!
 	if(type_of_controller.second & WITH_COMPLIANCE)
 	{
 		std::string stiffness_b;
@@ -624,19 +632,58 @@ void MotionBehaviour::RLabInfoString2ElementXML_(string_type string_data, TiXmlE
 		out_xml_element->SetAttribute("stiffness_k", stiffness_k.c_str() );
 	}
 
-	if(type_of_controller.second & OBSTACLE_AVOIDANCE)
+
+	switch(type_of_controller.second)
 	{
-		std::getline(data_ss, temp_st);	
-		out_xml_element->SetAttribute("alpha", colon2space( wstring2string( temp_st.substr( temp_st.find(L"=") + 1, temp_st.find(L"\n") ) ) ).c_str() );
+	case(OBSTACLE_AVOIDANCE):
+		{
+			if(temp_st.compare(0, 5, alpha_string)==0)
+			{
+				out_xml_element->SetAttribute("alpha", colon2space( wstring2string( temp_st.substr( temp_st.find(L"=") + 1, temp_st.find(L"\n") ) ) ).c_str() );
+				std::getline(data_ss, temp_st);	
+				out_xml_element->SetAttribute("alphaDisplacement", colon2space(wstring2string(temp_st.substr(temp_st.find(L"=") + 1, temp_st.find(L"\n")))).c_str() );
+				std::getline(data_ss, temp_st);	
+			}	
+			out_xml_element->SetAttribute("distanceThreshold", wstring2string(temp_st.substr(temp_st.find(L"=") + 1, temp_st.find(L"\n"))).c_str() );
+			std::getline(data_ss, temp_st);	
+			out_xml_element->SetAttribute("deactivationThreshold", wstring2string(temp_st.substr(temp_st.find(L"=") + 1, temp_st.find(L"\n"))).c_str() );		
+		}
+		break;
+	case(SUBDISPLACEMENT):
+		{
+			out_xml_element->SetAttribute("limitBody", colon2space( wstring2string( temp_st.substr( temp_st.find(L"=") + 1, temp_st.find(L"\n") ) ) ).c_str() );
+			string_type index_st;
+			string_type tc_st;
+			for(int i=0; i<dimension_int ; i++)
+			{
+				std::getline(data_ss, temp_st);	
+				index_st += temp_st.substr(temp_st.find(L"=") + 1, temp_st.find(L"\n"));
+				if(i!=dimension_int-1)
+					index_st += L" ";
 
-		std::getline(data_ss, temp_st);	
-		out_xml_element->SetAttribute("alphaDisplacement", colon2space(wstring2string(temp_st.substr(temp_st.find(L"=") + 1, temp_st.find(L"\n")))).c_str() );
-
-		std::getline(data_ss, temp_st);	
-		out_xml_element->SetAttribute("distanceThreshold", wstring2string(temp_st.substr(temp_st.find(L"=") + 1, temp_st.find(L"\n"))).c_str() );
-
-		std::getline(data_ss, temp_st);	
-		out_xml_element->SetAttribute("deactivationThreshold", wstring2string(temp_st.substr(temp_st.find(L"=") + 1, temp_st.find(L"\n"))).c_str() );		
+				std::getline(data_ss, temp_st);	
+				tc_st += temp_st.substr(temp_st.find(L"=") + 1, temp_st.find(L"\n"));
+				if(i!=dimension_int-1)
+					tc_st += L" ";
+			}
+			out_xml_element->SetAttribute("index",wstring2string(index_st).c_str());
+			out_xml_element->SetAttribute("taskConstraints",wstring2string(tc_st).c_str());
+			std::getline(data_ss, temp_st);	
+			out_xml_element->SetAttribute("distanceLimit", wstring2string(temp_st.substr(temp_st.find(L"=") + 1, temp_st.find(L"\n"))).c_str() );		
+		}
+		break;
+	case(ATTRACTOR):
+		{
+			out_xml_element->SetAttribute("desiredDistance", wstring2string(temp_st.substr(temp_st.find(L"=") + 1, temp_st.find(L"\n"))).c_str() );		
+			std::getline(data_ss, temp_st);	
+			out_xml_element->SetAttribute("maxForce", wstring2string(temp_st.substr(temp_st.find(L"=") + 1, temp_st.find(L"\n"))).c_str() );		
+		}
+		break;
+	default:
+		{
+			
+		}
+		break;
 	}
 }
 
