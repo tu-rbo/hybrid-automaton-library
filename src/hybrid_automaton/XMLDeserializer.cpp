@@ -62,14 +62,19 @@ bool deserializeBoolean(TiXmlElement * xml_element, const char * field_name, boo
 
 std::string deserializeString(TiXmlElement * xml_element, const char * field_name, bool error_if_not_found)
 {
-	std::string return_string = std::string(xml_element->Attribute(field_name));
-	if(return_string == std::string("") && error_if_not_found)
+	const char* ret_char_ptr = xml_element->Attribute(field_name);
+	if(ret_char_ptr)
 	{
-		std::string exception_str = std::string("[deserializeString] ERROR: Attribute ") 
-			+ std::string(field_name) + std::string(" was not found in XML element.");
-		throw exception_str;
+		return std::string(ret_char_ptr);
+	}else{
+		if(error_if_not_found)
+		{
+			std::string exception_str = std::string("[deserializeString] ERROR: Attribute ") 
+				+ std::string(field_name) + std::string(" was not found in XML element.");
+			throw exception_str;
+		}
 	}
-	return return_string;
+	return std::string();
 }
 
 std::vector<double> deserializeVectorDouble(TiXmlElement * xml_element, const char * field_name)
@@ -655,7 +660,7 @@ rxController* XMLDeserializer::createDisplacementController(int displacement_sub
 	rxBody*   beta = NULL;
 	rxController* controller = NULL;
 	dVector alpha_displacement;
-	std::string alpha_str = deserializeString(rxController_xml,"alpha");
+	std::string alpha_str = deserializeString(rxController_xml,"alpha", false);
 	alpha = robot->findBody(string2wstring(alpha_str));
 	if(alpha)
 	{
@@ -666,11 +671,11 @@ rxController* XMLDeserializer::createDisplacementController(int displacement_sub
 			alpha_displacement.expand(1,alpha_value);
 		}
 	}else{
-		alpha_displacement = dVector(3,0.);
+		alpha_displacement = dVector();
 	}
 
 	dVector beta_displacement;
-	std::string beta_str = deserializeString(rxController_xml,"beta");
+	std::string beta_str = deserializeString(rxController_xml,"beta", false);
 	beta = robot->findBody(string2wstring(beta_str));
 	if(beta)
 	{
@@ -681,7 +686,7 @@ rxController* XMLDeserializer::createDisplacementController(int displacement_sub
 			beta_displacement.expand(1,beta_value);
 		}
 	}else{
-		beta_displacement = dVector(3,0.);
+		beta_displacement = dVector();
 	}
 
 	switch(displacement_subtype)
@@ -962,37 +967,36 @@ rxController* XMLDeserializer::createFunctionalController(int functional_subtype
 		{
 			rxBody*   alpha = NULL;
 			rxBody*   beta = NULL;
-			std::string alpha_str = deserializeString(rxController_xml,"alpha");
+			dVector alpha_displacement;
+			std::string alpha_str = deserializeString(rxController_xml,"alpha", false);
 
 			alpha = robot->findBody(string2wstring(alpha_str));
-			std::stringstream alpha_rot_ss = std::stringstream(deserializeString(rxController_xml,"alphaRotation"));
-			double alpha_value = -1.0;
-			dVector alpha_rotation;
-			while((alpha_rot_ss >> alpha_value))
+
+			if(alpha)
 			{
-				alpha_rotation.expand(1,alpha_value);
-			}
-			std::stringstream alpha_disp_ss = std::stringstream(deserializeString(rxController_xml,"alphaDisplacement"));
-			dVector alpha_displacement;
-			while((alpha_disp_ss >> alpha_value))
-			{
-				alpha_displacement.expand(1,alpha_value);
+				std::stringstream alpha_ss = std::stringstream(deserializeString(rxController_xml,"alphaDisplacement"));
+				double alpha_value = -1.0;
+				while ((alpha_ss >> alpha_value))
+				{
+					alpha_displacement.expand(1,alpha_value);
+				}
+			}else{
+				alpha_displacement = dVector(3,0.);
 			}
 
-			std::string beta_str = deserializeString(rxController_xml, "beta");
-			beta = robot->findBody(string2wstring(beta_str));
-			std::stringstream beta_rot_ss = std::stringstream(deserializeString(rxController_xml,"betaRotation"));
-			double beta_value = -1.0;
-			dVector beta_rotation;
-			while((beta_rot_ss >> beta_value))
-			{
-				beta_rotation.expand(1,beta_value);
-			}			
-			std::stringstream beta_disp_ss = std::stringstream(deserializeString(rxController_xml,"betaDisplacement"));
 			dVector beta_displacement;
-			while((beta_disp_ss >> beta_value))
+			std::string beta_str = deserializeString(rxController_xml,"beta", false);
+			beta = robot->findBody(string2wstring(beta_str));
+			if(beta)
 			{
-				beta_displacement.expand(1,beta_value);
+				std::stringstream beta_ss = std::stringstream(deserializeString(rxController_xml,"betaDisplacement"));
+				double beta_value = -1.0;	
+				while((beta_ss >> beta_value))
+				{
+					beta_displacement.expand(1,beta_value);
+				}
+			}else{
+				beta_displacement = dVector(3,0.);
 			}
 			std::stringstream index_ss = std::stringstream(deserializeString(rxController_xml,"index"));
 			std::vector<long> index;

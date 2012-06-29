@@ -649,8 +649,22 @@ void MotionBehaviour::RLabInfoString2ElementXML_(string_type string_data, TiXmlE
 			out_xml_element->SetAttribute("deactivationThreshold", wstring2string(temp_st.substr(temp_st.find(L"=") + 1, temp_st.find(L"\n"))).c_str() );		
 		}
 		break;
-	case(SUBDISPLACEMENT):
+	case(SUBDISPLACEMENT | WITH_IMPEDANCE):
 		{
+			if(temp_st.compare(0, 5, alpha_string)==0)
+			{
+				out_xml_element->SetAttribute("alpha", colon2space( wstring2string( temp_st.substr( temp_st.find(L"=") + 1, temp_st.find(L"\n") ) ) ).c_str() );
+				std::getline(data_ss, temp_st);	
+				out_xml_element->SetAttribute("alphaDisplacement", colon2space(wstring2string(temp_st.substr(temp_st.find(L"=") + 1, temp_st.find(L"\n")))).c_str() );
+				std::getline(data_ss, temp_st);	
+			}		
+			if(temp_st.compare( 0, 4, beta_string)==0)
+			{
+				out_xml_element->SetAttribute("beta", colon2space(wstring2string(temp_st.substr(temp_st.find(L"=") + 1, temp_st.find(L"\n")))).c_str() );
+				std::getline(data_ss, temp_st);	
+				out_xml_element->SetAttribute("betaDisplacement",colon2space( wstring2string(temp_st.substr(temp_st.find(L"=") + 1, temp_st.find(L"\n")))).c_str() );
+				std::getline(data_ss, temp_st);	
+			}
 			out_xml_element->SetAttribute("limitBody", colon2space( wstring2string( temp_st.substr( temp_st.find(L"=") + 1, temp_st.find(L"\n") ) ) ).c_str() );
 			string_type index_st;
 			string_type tc_st;
@@ -669,10 +683,12 @@ void MotionBehaviour::RLabInfoString2ElementXML_(string_type string_data, TiXmlE
 			out_xml_element->SetAttribute("index",wstring2string(index_st).c_str());
 			out_xml_element->SetAttribute("taskConstraints",wstring2string(tc_st).c_str());
 			std::getline(data_ss, temp_st);	
-			out_xml_element->SetAttribute("distanceLimit", wstring2string(temp_st.substr(temp_st.find(L"=") + 1, temp_st.find(L"\n"))).c_str() );		
+			out_xml_element->SetAttribute("distanceLimit", wstring2string(temp_st.substr(temp_st.find(L"=") + 1, temp_st.find(L"\n"))).c_str() );
+			std::getline(data_ss, temp_st);	
+			out_xml_element->SetAttribute("maxForce", wstring2string(temp_st.substr(temp_st.find(L"=") + 1, temp_st.find(L"\n"))).c_str() );
 		}
 		break;
-	case(ATTRACTOR):
+	case(WITH_IMPEDANCE | ATTRACTOR):
 		{
 			out_xml_element->SetAttribute("desiredDistance", wstring2string(temp_st.substr(temp_st.find(L"=") + 1, temp_st.find(L"\n"))).c_str() );		
 			std::getline(data_ss, temp_st);	
