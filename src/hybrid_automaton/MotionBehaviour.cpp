@@ -218,9 +218,11 @@ void MotionBehaviour::activate()
 							double time = min_time_;
 
 							// q1 and q2 to interpolate between
-							std::cout << robot_ << std::endl;
-							std::cout << robot_->findBody(_T("EE")) << std::endl;
-							dVector current_r = robot_->findBody(_T("EE"))->T().r; //parent->getConfiguration();
+							HTransform ht;
+							//std::cout << robot_ << std::endl;
+							//std::cout << robot_->getUCSBody(_T("EE"),ht) << std::endl;
+							rxBody* EE = robot_->getUCSBody(_T("EE"),ht);
+							dVector current_r = ht.r + EE->T().r; //parent->getConfiguration();
 							dVector desired_r = child->getConfiguration();
 
 							// qd1 and qd2
@@ -532,7 +534,7 @@ void MotionBehaviour::RLabInfoString2ElementXML_(string_type string_data, TiXmlE
 			std::getline(data_ss, temp_st);		// Discard field "dVector" of via points 
 			if(!is_goal_controller)
 			{
-				out_xml_element->SetAttribute("dVectorGoal", wstring2string(temp_st.substr(temp_st.find(L"=") + 1, temp_st.find(L"\n"))).c_str());
+				out_xml_element->SetAttribute("dVectorGoal", colon2space(wstring2string(temp_st.substr(temp_st.find(L"=") + 1, temp_st.find(L"\n")))).c_str());
 			}
 			break;
 		case rxController::eControlType_Displacement:

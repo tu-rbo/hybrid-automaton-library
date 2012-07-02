@@ -20,6 +20,8 @@ unsigned __stdcall deserializeHybridAutomaton(void *udata)
 	HybridAutomaton* ha = NULL;
 	try {
 		ha = XMLDeserializer::createHybridAutomaton(thread_args->_string, thread_args->_robot, thread_args->_dT);
+		std::cout << "--------------------------------------------------------------" << std::endl;
+		std::cout << ha->toStringXML() << std::endl;
 	}
 	catch(std::string e)
 	{
@@ -162,9 +164,10 @@ void HybridAutomatonManager::updateBlackboard()
 		return;
 
 	_blackboard->setJointState("joint_state", _q_BB, _qdot_BB, _torque_BB);
-	rxBody* ee = _robot->findBody(_T("EE"));
-	HTransform h = ee->T();
-	_blackboard->setTransform("ee", h, "base");
+	HTransform ht;
+	rxBody* EE = _robot->getUCSBody(_T("EE"),ht);
+	dVector current_r = ht.r + EE->T().r;
+	_blackboard->setTransform("ee", ht, "base");
 	_blackboard->step();
 }
 
