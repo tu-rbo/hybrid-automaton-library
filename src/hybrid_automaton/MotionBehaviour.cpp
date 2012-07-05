@@ -244,7 +244,15 @@ void MotionBehaviour::activate()
 
 							std::cout << "[MotionBehaviour::activate] INFO: Time of trajectory: " << time << std::endl;
 							time_to_converge_=time;
-							dynamic_cast<rxDisplacementController*>(*it)->addPoint(desired_r, time, false, eInterpolatorType_Cubic);
+							FeatureAttractorController* fac = dynamic_cast<FeatureAttractorController*>(*it);
+							if(fac)
+							{
+								fac->updateFeaturePosition(desired_r[0],desired_r[1],desired_r[2]);
+							}
+							else
+							{
+								dynamic_cast<rxDisplacementController*>(*it)->addPoint(desired_r, time, false, eInterpolatorType_Cubic);
+							}
 							break;
 						}
 					case rxController::eControlType_Orientation:

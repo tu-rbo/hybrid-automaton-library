@@ -8,6 +8,7 @@
 #include "collision_detection\collision_interface\include\CollisionInterface.h"
 
 #include "controllers\include\OnDemandController.h"
+#include "controllers\include\FeatureAttractorController.h"
 
 #include "tinyxml.h"
 

@@ -620,6 +620,7 @@ rxController* XMLDeserializer::createJointController(int joint_subtype, double c
 		break;
 	case WITH_INTERPOLATION | WITH_IMPEDANCE:
 		controller = new rxInterpolatedJointImpedanceController(robot, controller_duration);
+		dynamic_cast<rxInterpolatedJointImpedanceController*>(controller)->setImpedance(0.5,3.0,2.0);
 		break;
 	default:
 		throw std::string("[XMLDeserializer::createJointController] ERROR: Unexpected Controller subgroup.");
@@ -718,6 +719,7 @@ rxController* XMLDeserializer::createDisplacementController(int displacement_sub
 			double desired_distance = deserializeElement<double>(rxController_xml,"desiredDistance", 1.);
 			double max_force = deserializeElement<double>(rxController_xml,"maxForce", 1.);
 			controller = new FeatureAttractorController(robot, beta, Displacement(beta_displacement), controller_duration, desired_distance, max_force );
+			dynamic_cast<FeatureAttractorController*>(controller)->setImpedance(0.2,8.0,20.0);
 			break;
 		}
 	default:
@@ -1026,6 +1028,7 @@ rxController* XMLDeserializer::createFunctionalController(int functional_subtype
 			{
 				dynamic_cast<SubdisplacementController*>(controller)->setTaskConstraints(tc[0], tc[1]);
 			}
+			dynamic_cast<SubdisplacementController*>(controller)->setImpedance(0.2,8.0,20.0);
 		}
 		break;
 	case OBSTACLE_AVOIDANCE:
