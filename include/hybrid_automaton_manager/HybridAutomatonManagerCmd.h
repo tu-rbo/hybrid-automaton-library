@@ -13,5 +13,18 @@
 #define PAUSE			(RCMD_USER + 3)
 #define RESUME			(RCMD_USER + 4)
 #define SERVO_ON		(RCMD_USER + 5)
+#define BLACKBOARD_ON	(RCMD_USER + 6)
+
+#define URI_LOCAL			0
+#define URI_BOTTOM_1		1
+#define URI_BOTTOM_1_STRING	"130.149.238.178"
+#define URI_BOTTOM_2		2
+#define URI_BOTTOM_2_STRING	"130.149.238.179"
+#define URI_BOTTOM_3		3
+#define URI_BOTTOM_3_STRING	"130.149.238.180"
+#define URI_HASMA			10
+#define URI_HASMA_STRING	"130.149.238.184"
+#define URI_LEIBNIZ			11
+#define URI_LEIBNIZ_STRING	"130.149.238.185"
 
 #endif

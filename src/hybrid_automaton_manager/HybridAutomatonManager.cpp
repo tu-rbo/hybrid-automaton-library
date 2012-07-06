@@ -107,6 +107,7 @@ void HybridAutomatonManager::init(int mode)
 
 	_blackboard = NULL;
 	//activateBlackboard(std::string("130.149.238.179"), 1888, std::string("130.149.238.184"), 1999);
+	activateBlackboard(std::string("130.149.238.180"), 1999, std::string("130.149.238.186"), 1888);
 
 	_defaultMotionBehavior = new MotionBehaviour(new Milestone(), new Milestone(),_robot);
 	_activeMotionBehavior = _defaultMotionBehavior;
@@ -322,28 +323,55 @@ int HybridAutomatonManager::command(const short& cmd, const int& arg)
 	switch (cmd)
 	{
 	case EXECUTE_PLAN:
-		{
-		}
-		break;
 	case PAUSE:
-		{
-
-		}
-		break;
 	case RESUME:
-		{
-
-		}
 		break;
 
 	case SERVO_ON:
 		{
 			_servo_on = true;
-			std::cout << "[HybridAutomatonManager::command] INFO: Servo ON" << std::endl;
+			std::cout << "[HybridAutomatonManager::command] Servo ON" << std::endl;
 		}
 		break;
-
-	default:
+		
+	case BLACKBOARD_ON:
+		{
+			int hosts[2];
+			hosts[0] = arg >> 16;
+			hosts[1] = arg & 0xFFFF;
+			std::string hostnames[2];
+			
+			for (size_t i = 0; i < 1; ++i)
+			{
+				switch (hosts[i])
+				{
+				case URI_LOCAL:
+					hostnames[i] = "";
+					break;
+				case URI_BOTTOM_1:
+					hostnames[i] = URI_BOTTOM_1_STRING;
+					break;
+				case URI_BOTTOM_2:
+					hostnames[i] = URI_BOTTOM_2_STRING;
+					break;
+				case URI_BOTTOM_3:
+					hostnames[i] = URI_BOTTOM_3_STRING;
+					break;
+				case URI_HASMA:
+					hostnames[i] = URI_HASMA_STRING;
+					break;
+				case URI_LEIBNIZ:
+					hostnames[i] = URI_LEIBNIZ_STRING;
+					break;
+				default:
+					std::cout << "[HybridAutomatonManager::command] Unknown host: " << hosts[i] << std::endl;
+					break;
+				}
+			}
+		
+			std::cout << "[HybridAutomatonManager::command] BlackBoard ON. Connection between " << hostnames[0] << " and " << hostnames[1] << std::endl;	
+			activateBlackboard(hostnames[0], 1999, hostnames[1], 1999);
+		}
 		break;
 	}
 
