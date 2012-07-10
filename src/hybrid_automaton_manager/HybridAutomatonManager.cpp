@@ -105,10 +105,6 @@ void HybridAutomatonManager::init(int mode)
 	_robotDevice = findDevice(_T("ROBOT"));
 	RASSERT(_robotDevice != INVALID_RHANDLE);
 
-	_blackboard = NULL;
-	//activateBlackboard(std::string("130.149.238.179"), 1888, std::string("130.149.238.184"), 1999);
-	activateBlackboard(std::string("130.149.238.180"), 1999, std::string("130.149.238.186"), 1888);
-
 	_defaultMotionBehavior = new MotionBehaviour(new Milestone(), new Milestone(),_robot);
 	_activeMotionBehavior = _defaultMotionBehavior;
 }
@@ -249,7 +245,7 @@ void HybridAutomatonManager::_writeDevices()
 		if(_servo_on){
 			torque[i] = static_cast<double>(_torque[i]);
 		}else{
-			torque[i] =0;
+			torque[i] = 0;
 		}
 	}
 	int written = writeDeviceValue(_robotDevice, torque, _dof * sizeof(double));
@@ -336,41 +332,33 @@ int HybridAutomatonManager::command(const short& cmd, const int& arg)
 		
 	case BLACKBOARD_ON:
 		{
-			int hosts[2];
-			hosts[0] = arg >> 16;
-			hosts[1] = arg & 0xFFFF;
-			std::string hostnames[2];
+			std::map<int, std::string> domain_names;
+			domain_names[URI_LOCAL] = "";
+			domain_names[URI_BOTTOM_1] = "130.149.238.178";
+			domain_names[URI_BOTTOM_2] = "130.149.238.179";
+			domain_names[URI_BOTTOM_3] = "130.149.238.180";
+			domain_names[URI_HASMA] = "130.149.238.184";
+			domain_names[URI_LEIBNIZ] = "130.149.238.185";
+
+			int bit_code = arg;
 			
-			for (size_t i = 0; i < 1; ++i)
+			int port = bit_code >> 16;
+			bit_code &= ~(port << 16);
+			
+			int local_host = bit_code >> 8;
+			bit_code &= ~(local_host << 8);
+
+			int remote_host = bit_code;
+			
+			std::cout << "Enabled BlackBoard. Establishing connection between " << domain_names[local_host] << ":" << port << " and " << domain_names[remote_host] << ":" << port << "." << std::endl;	
+			
+			if (local_host != URI_LOCAL && domain_names[local_host].empty() ||
+				remote_host != URI_LOCAL && domain_names[remote_host].empty())
 			{
-				switch (hosts[i])
-				{
-				case URI_LOCAL:
-					hostnames[i] = "";
-					break;
-				case URI_BOTTOM_1:
-					hostnames[i] = URI_BOTTOM_1_STRING;
-					break;
-				case URI_BOTTOM_2:
-					hostnames[i] = URI_BOTTOM_2_STRING;
-					break;
-				case URI_BOTTOM_3:
-					hostnames[i] = URI_BOTTOM_3_STRING;
-					break;
-				case URI_HASMA:
-					hostnames[i] = URI_HASMA_STRING;
-					break;
-				case URI_LEIBNIZ:
-					hostnames[i] = URI_LEIBNIZ_STRING;
-					break;
-				default:
-					std::cout << "[HybridAutomatonManager::command] Unknown host: " << hosts[i] << std::endl;
-					break;
-				}
+				std::cout << "WARNING! Unknown host: " << local_host << " or " << remote_host << "! (Will only establish unconnected BlackBoard)" << std::endl;
 			}
-		
-			std::cout << "[HybridAutomatonManager::command] BlackBoard ON. Connection between " << hostnames[0] << " and " << hostnames[1] << std::endl;	
-			activateBlackboard(hostnames[0], 1999, hostnames[1], 1999);
+
+			activateBlackboard(domain_names[local_host], port, domain_names[remote_host], port);
 		}
 		break;
 	}

@@ -201,7 +201,7 @@ void MotionBehaviour::activate()
 									velocity = default_max_velocity;
 									time = default_min_time;
 								}
-								for (unsigned int i = 0; i < current_q.size(); i++) {
+								for (int i = 0; i < current_q.size(); i++) {
 									time = max( fabs((6 * desired_q[i] - 6 * current_q[i]) / (current_qd[i] + desired_qd[i] + 4 * velocity)), time);
 								}
 							}
@@ -237,7 +237,7 @@ void MotionBehaviour::activate()
 									velocity = default_max_velocity;
 									time = default_min_time;
 								}
-								for (unsigned int i = 0; i < current_r.size(); i++) {
+								for (int i = 0; i < current_r.size(); i++) {
 									time = max( fabs((6 * desired_r[i] - 6 * current_r[i]) / (current_rd[i] + desired_rd[i] + 4 * velocity)), time);
 								}
 							}
@@ -467,9 +467,9 @@ void MotionBehaviour::RLabInfoString2ElementXML_(string_type string_data, TiXmlE
 	std::wstringstream data_ss(string_data);
 	string_type temp_st;
 	std::getline(data_ss, temp_st);	
-	out_xml_element->SetAttribute("type", wstring2string(temp_st.substr(temp_st.find(L"=") + 1, temp_st.find(L"\n"))).c_str());
+	out_xml_element->SetAttribute("type", XMLDeserializer::wstring2string(temp_st.substr(temp_st.find(L"=") + 1, temp_st.find(L"\n"))).c_str());
 
-	ControllerType type_of_controller = XMLDeserializer::controller_map_[wstring2string(temp_st.substr(temp_st.find(L"=") + 1, temp_st.find(L"\n")))];
+	ControllerType type_of_controller = XMLDeserializer::controller_map_[XMLDeserializer::wstring2string(temp_st.substr(temp_st.find(L"=") + 1, temp_st.find(L"\n")))];
 
 	std::getline(data_ss, temp_st);		// Discard field "name"
 	std::getline(data_ss, temp_st);		// Discard field "system"
@@ -481,7 +481,7 @@ void MotionBehaviour::RLabInfoString2ElementXML_(string_type string_data, TiXmlE
 	std::getline(data_ss, temp_st);		// Discard field "dt"
 	std::getline(data_ss, temp_st);		// Discard field "activated"
 	std::getline(data_ss, temp_st);		// Field "ik"
-	out_xml_element->SetAttribute("ik", wstring2string(temp_st.substr(temp_st.find(L"=") + 1, temp_st.find(L"\n"))).c_str());
+	out_xml_element->SetAttribute("ik", XMLDeserializer::wstring2string(temp_st.substr(temp_st.find(L"=") + 1, temp_st.find(L"\n"))).c_str());
 
 	string_type kp_st;
 	string_type kv_st;
@@ -503,9 +503,9 @@ void MotionBehaviour::RLabInfoString2ElementXML_(string_type string_data, TiXmlE
 		if(i!=dimension_int-1)
 			invL2sqr_st += L" ";
 	}
-	out_xml_element->SetAttribute("kp",wstring2string(kp_st).c_str());
-	out_xml_element->SetAttribute("kv",wstring2string(kv_st).c_str());
-	out_xml_element->SetAttribute("invL2sqr",wstring2string(invL2sqr_st).c_str());
+	out_xml_element->SetAttribute("kp",XMLDeserializer::wstring2string(kp_st).c_str());
+	out_xml_element->SetAttribute("kv",XMLDeserializer::wstring2string(kv_st).c_str());
+	out_xml_element->SetAttribute("invL2sqr",XMLDeserializer::wstring2string(invL2sqr_st).c_str());
 
 	std::getline(data_ss, temp_st);			// Field "number of via points"
 	int num_via_points_int = -1;
@@ -520,7 +520,7 @@ void MotionBehaviour::RLabInfoString2ElementXML_(string_type string_data, TiXmlE
 			std::wstringstream time_goal_ss(temp_st.substr(temp_st.find(L"=") + 1, temp_st.find(L"\n")));
 			double time_goal = -1.;
 			time_goal_ss >> time_goal;
-			out_xml_element->SetAttribute("timeGoal", time_goal) ;
+			out_xml_element->SetDoubleAttribute("timeGoal", time_goal);
 		}
 		std::getline(data_ss, temp_st);		// Field "type" of via points
 		if(!is_goal_controller)
@@ -533,7 +533,7 @@ void MotionBehaviour::RLabInfoString2ElementXML_(string_type string_data, TiXmlE
 		std::getline(data_ss, temp_st);		// Field "reuse" of via points
 		if(!is_goal_controller)
 		{
-			std::string reuse_s = wstring2string(temp_st.substr(temp_st.find(L"=") + 1, temp_st.find(L"\n")));			
+			std::string reuse_s = XMLDeserializer::wstring2string(temp_st.substr(temp_st.find(L"=") + 1, temp_st.find(L"\n")));			
 			out_xml_element->SetAttribute("reuseGoal",reuse_s.c_str() ) ;			
 		}
 		switch( type_of_controller.first )
@@ -542,33 +542,33 @@ void MotionBehaviour::RLabInfoString2ElementXML_(string_type string_data, TiXmlE
 			std::getline(data_ss, temp_st);		// Discard field "dVector" of via points 
 			if(!is_goal_controller)
 			{
-				out_xml_element->SetAttribute("dVectorGoal", colon2space(wstring2string(temp_st.substr(temp_st.find(L"=") + 1, temp_st.find(L"\n")))).c_str());
+				out_xml_element->SetAttribute("dVectorGoal", colon2space(XMLDeserializer::wstring2string(temp_st.substr(temp_st.find(L"=") + 1, temp_st.find(L"\n")))).c_str());
 			}
 			break;
 		case rxController::eControlType_Displacement:
 			std::getline(data_ss, temp_st);		// Discard field "Vector3D" of via points 
 			if(!is_goal_controller)
 			{
-				out_xml_element->SetAttribute("Vector3DGoal", wstring2string(temp_st.substr(temp_st.find(L"=") + 1, temp_st.find(L"\n"))).c_str());
+				out_xml_element->SetAttribute("Vector3DGoal", XMLDeserializer::wstring2string(temp_st.substr(temp_st.find(L"=") + 1, temp_st.find(L"\n"))).c_str());
 			}
 			break;
 		case rxController::eControlType_Orientation:
 			std::getline(data_ss, temp_st);	
 			if(!is_goal_controller)
 			{
-				out_xml_element->SetAttribute("RGoal", wstring2string(temp_st.substr(temp_st.find(L"=") + 1, temp_st.find(L"\n"))).c_str());
+				out_xml_element->SetAttribute("RGoal", XMLDeserializer::wstring2string(temp_st.substr(temp_st.find(L"=") + 1, temp_st.find(L"\n"))).c_str());
 			}
 			break;
 		case rxController::eControlType_HTransform:
 			std::getline(data_ss, temp_st);	
 			if(!is_goal_controller)
 			{
-				out_xml_element->SetAttribute("RGoal", wstring2string(temp_st.substr(temp_st.find(L"=") + 1, temp_st.find(L"\n"))).c_str());
+				out_xml_element->SetAttribute("RGoal", XMLDeserializer::wstring2string(temp_st.substr(temp_st.find(L"=") + 1, temp_st.find(L"\n"))).c_str());
 			}
 			std::getline(data_ss, temp_st);	
 			if(!is_goal_controller)
 			{
-				out_xml_element->SetAttribute("rGoal", wstring2string(temp_st.substr(temp_st.find(L"=") + 1, temp_st.find(L"\n"))).c_str());
+				out_xml_element->SetAttribute("rGoal", XMLDeserializer::wstring2string(temp_st.substr(temp_st.find(L"=") + 1, temp_st.find(L"\n"))).c_str());
 			}
 			break;
 		default:
@@ -585,36 +585,36 @@ void MotionBehaviour::RLabInfoString2ElementXML_(string_type string_data, TiXmlE
 	case rxController::eControlType_Orientation:		
 		if(temp_st.compare(0, 5, alpha_string)==0)
 		{
-			out_xml_element->SetAttribute("alpha", colon2space( wstring2string( temp_st.substr( temp_st.find(L"=") + 1, temp_st.find(L"\n") ) ) ).c_str() );
+			out_xml_element->SetAttribute("alpha", colon2space( XMLDeserializer::wstring2string( temp_st.substr( temp_st.find(L"=") + 1, temp_st.find(L"\n") ) ) ).c_str() );
 			std::getline(data_ss, temp_st);	
-			out_xml_element->SetAttribute("alphaDisplacement", colon2space(wstring2string(temp_st.substr(temp_st.find(L"=") + 1, temp_st.find(L"\n")))).c_str() );
+			out_xml_element->SetAttribute("alphaDisplacement", colon2space(XMLDeserializer::wstring2string(temp_st.substr(temp_st.find(L"=") + 1, temp_st.find(L"\n")))).c_str() );
 			std::getline(data_ss, temp_st);	
 		}		
 		if(temp_st.compare( 0, 4, beta_string)==0)
 		{
-			out_xml_element->SetAttribute("beta", colon2space(wstring2string(temp_st.substr(temp_st.find(L"=") + 1, temp_st.find(L"\n")))).c_str() );
+			out_xml_element->SetAttribute("beta", colon2space(XMLDeserializer::wstring2string(temp_st.substr(temp_st.find(L"=") + 1, temp_st.find(L"\n")))).c_str() );
 			std::getline(data_ss, temp_st);	
-			out_xml_element->SetAttribute("betaDisplacement",colon2space( wstring2string(temp_st.substr(temp_st.find(L"=") + 1, temp_st.find(L"\n")))).c_str() );
+			out_xml_element->SetAttribute("betaDisplacement",colon2space( XMLDeserializer::wstring2string(temp_st.substr(temp_st.find(L"=") + 1, temp_st.find(L"\n")))).c_str() );
 			std::getline(data_ss, temp_st);	
 		}
 		break;
 	case rxController::eControlType_HTransform:
 		if(temp_st.compare(0, 5, alpha_string)==0)
 		{
-			out_xml_element->SetAttribute("alpha", colon2space(wstring2string(temp_st.substr(temp_st.find(L"=") + 1, temp_st.find(L"\n")))).c_str() );
+			out_xml_element->SetAttribute("alpha", colon2space(XMLDeserializer::wstring2string(temp_st.substr(temp_st.find(L"=") + 1, temp_st.find(L"\n")))).c_str() );
 			std::getline(data_ss, temp_st);	
-			out_xml_element->SetAttribute("alphaRotation", colon2space(wstring2string(temp_st.substr(temp_st.find(L"=") + 1, temp_st.find(L"\n")))).c_str() );
+			out_xml_element->SetAttribute("alphaRotation", colon2space(XMLDeserializer::wstring2string(temp_st.substr(temp_st.find(L"=") + 1, temp_st.find(L"\n")))).c_str() );
 			std::getline(data_ss, temp_st);	
-			out_xml_element->SetAttribute("alphaDisplacement", colon2space(wstring2string(temp_st.substr(temp_st.find(L"=") + 1, temp_st.find(L"\n")))).c_str() );
+			out_xml_element->SetAttribute("alphaDisplacement", colon2space(XMLDeserializer::wstring2string(temp_st.substr(temp_st.find(L"=") + 1, temp_st.find(L"\n")))).c_str() );
 			std::getline(data_ss, temp_st);	
 		}		
 		if(temp_st.compare( 0, 4, beta_string)==0)
 		{
-			out_xml_element->SetAttribute("beta", colon2space(wstring2string(temp_st.substr(temp_st.find(L"=") + 1, temp_st.find(L"\n")))).c_str() );
+			out_xml_element->SetAttribute("beta", colon2space(XMLDeserializer::wstring2string(temp_st.substr(temp_st.find(L"=") + 1, temp_st.find(L"\n")))).c_str() );
 			std::getline(data_ss, temp_st);	
-			out_xml_element->SetAttribute("betaRotation", colon2space(wstring2string(temp_st.substr(temp_st.find(L"=") + 1, temp_st.find(L"\n")))).c_str() );
+			out_xml_element->SetAttribute("betaRotation", colon2space(XMLDeserializer::wstring2string(temp_st.substr(temp_st.find(L"=") + 1, temp_st.find(L"\n")))).c_str() );
 			std::getline(data_ss, temp_st);	
-			out_xml_element->SetAttribute("betaDisplacement", colon2space(wstring2string(temp_st.substr(temp_st.find(L"=") + 1, temp_st.find(L"\n")))).c_str() );
+			out_xml_element->SetAttribute("betaDisplacement", colon2space(XMLDeserializer::wstring2string(temp_st.substr(temp_st.find(L"=") + 1, temp_st.find(L"\n")))).c_str() );
 			std::getline(data_ss, temp_st);	
 		}
 		break;
@@ -649,33 +649,33 @@ void MotionBehaviour::RLabInfoString2ElementXML_(string_type string_data, TiXmlE
 		{
 			if(temp_st.compare(0, 5, alpha_string)==0)
 			{
-				out_xml_element->SetAttribute("alpha", colon2space( wstring2string( temp_st.substr( temp_st.find(L"=") + 1, temp_st.find(L"\n") ) ) ).c_str() );
+				out_xml_element->SetAttribute("alpha", colon2space( XMLDeserializer::wstring2string( temp_st.substr( temp_st.find(L"=") + 1, temp_st.find(L"\n") ) ) ).c_str() );
 				std::getline(data_ss, temp_st);	
-				out_xml_element->SetAttribute("alphaDisplacement", colon2space(wstring2string(temp_st.substr(temp_st.find(L"=") + 1, temp_st.find(L"\n")))).c_str() );
+				out_xml_element->SetAttribute("alphaDisplacement", colon2space(XMLDeserializer::wstring2string(temp_st.substr(temp_st.find(L"=") + 1, temp_st.find(L"\n")))).c_str() );
 				std::getline(data_ss, temp_st);	
 			}	
-			out_xml_element->SetAttribute("distanceThreshold", wstring2string(temp_st.substr(temp_st.find(L"=") + 1, temp_st.find(L"\n"))).c_str() );
+			out_xml_element->SetAttribute("distanceThreshold", XMLDeserializer::wstring2string(temp_st.substr(temp_st.find(L"=") + 1, temp_st.find(L"\n"))).c_str() );
 			std::getline(data_ss, temp_st);	
-			out_xml_element->SetAttribute("deactivationThreshold", wstring2string(temp_st.substr(temp_st.find(L"=") + 1, temp_st.find(L"\n"))).c_str() );		
+			out_xml_element->SetAttribute("deactivationThreshold", XMLDeserializer::wstring2string(temp_st.substr(temp_st.find(L"=") + 1, temp_st.find(L"\n"))).c_str() );		
 		}
 		break;
 	case(SUBDISPLACEMENT | WITH_IMPEDANCE):
 		{
 			if(temp_st.compare(0, 5, alpha_string)==0)
 			{
-				out_xml_element->SetAttribute("alpha", colon2space( wstring2string( temp_st.substr( temp_st.find(L"=") + 1, temp_st.find(L"\n") ) ) ).c_str() );
+				out_xml_element->SetAttribute("alpha", colon2space( XMLDeserializer::wstring2string( temp_st.substr( temp_st.find(L"=") + 1, temp_st.find(L"\n") ) ) ).c_str() );
 				std::getline(data_ss, temp_st);	
-				out_xml_element->SetAttribute("alphaDisplacement", colon2space(wstring2string(temp_st.substr(temp_st.find(L"=") + 1, temp_st.find(L"\n")))).c_str() );
+				out_xml_element->SetAttribute("alphaDisplacement", colon2space(XMLDeserializer::wstring2string(temp_st.substr(temp_st.find(L"=") + 1, temp_st.find(L"\n")))).c_str() );
 				std::getline(data_ss, temp_st);	
 			}		
 			if(temp_st.compare( 0, 4, beta_string)==0)
 			{
-				out_xml_element->SetAttribute("beta", colon2space(wstring2string(temp_st.substr(temp_st.find(L"=") + 1, temp_st.find(L"\n")))).c_str() );
+				out_xml_element->SetAttribute("beta", colon2space(XMLDeserializer::wstring2string(temp_st.substr(temp_st.find(L"=") + 1, temp_st.find(L"\n")))).c_str() );
 				std::getline(data_ss, temp_st);	
-				out_xml_element->SetAttribute("betaDisplacement",colon2space( wstring2string(temp_st.substr(temp_st.find(L"=") + 1, temp_st.find(L"\n")))).c_str() );
+				out_xml_element->SetAttribute("betaDisplacement",colon2space( XMLDeserializer::wstring2string(temp_st.substr(temp_st.find(L"=") + 1, temp_st.find(L"\n")))).c_str() );
 				std::getline(data_ss, temp_st);	
 			}
-			out_xml_element->SetAttribute("limitBody", colon2space( wstring2string( temp_st.substr( temp_st.find(L"=") + 1, temp_st.find(L"\n") ) ) ).c_str() );
+			out_xml_element->SetAttribute("limitBody", colon2space( XMLDeserializer::wstring2string( temp_st.substr( temp_st.find(L"=") + 1, temp_st.find(L"\n") ) ) ).c_str() );
 			string_type index_st;
 			string_type tc_st;
 			for(int i=0; i<dimension_int ; i++)
@@ -690,19 +690,19 @@ void MotionBehaviour::RLabInfoString2ElementXML_(string_type string_data, TiXmlE
 				if(i!=dimension_int-1)
 					tc_st += L" ";
 			}
-			out_xml_element->SetAttribute("index",wstring2string(index_st).c_str());
-			out_xml_element->SetAttribute("taskConstraints",wstring2string(tc_st).c_str());
+			out_xml_element->SetAttribute("index",XMLDeserializer::wstring2string(index_st).c_str());
+			out_xml_element->SetAttribute("taskConstraints",XMLDeserializer::wstring2string(tc_st).c_str());
 			std::getline(data_ss, temp_st);	
-			out_xml_element->SetAttribute("distanceLimit", wstring2string(temp_st.substr(temp_st.find(L"=") + 1, temp_st.find(L"\n"))).c_str() );
+			out_xml_element->SetAttribute("distanceLimit", XMLDeserializer::wstring2string(temp_st.substr(temp_st.find(L"=") + 1, temp_st.find(L"\n"))).c_str() );
 			std::getline(data_ss, temp_st);	
-			out_xml_element->SetAttribute("maxForce", wstring2string(temp_st.substr(temp_st.find(L"=") + 1, temp_st.find(L"\n"))).c_str() );
+			out_xml_element->SetAttribute("maxForce", XMLDeserializer::wstring2string(temp_st.substr(temp_st.find(L"=") + 1, temp_st.find(L"\n"))).c_str() );
 		}
 		break;
 	case(WITH_IMPEDANCE | ATTRACTOR):
 		{
-			out_xml_element->SetAttribute("desiredDistance", wstring2string(temp_st.substr(temp_st.find(L"=") + 1, temp_st.find(L"\n"))).c_str() );		
+			out_xml_element->SetAttribute("desiredDistance", XMLDeserializer::wstring2string(temp_st.substr(temp_st.find(L"=") + 1, temp_st.find(L"\n"))).c_str() );		
 			std::getline(data_ss, temp_st);	
-			out_xml_element->SetAttribute("maxForce", wstring2string(temp_st.substr(temp_st.find(L"=") + 1, temp_st.find(L"\n"))).c_str() );		
+			out_xml_element->SetAttribute("maxForce", XMLDeserializer::wstring2string(temp_st.substr(temp_st.find(L"=") + 1, temp_st.find(L"\n"))).c_str() );		
 		}
 		break;
 	default:
@@ -784,13 +784,13 @@ void MotionBehaviour::print()
 			//	break;
 			//case rxController::eControlType_Orientation:
 			//	std::getline(data_ss, temp_st);	
-			//	//via_point_xml->SetAttribute("R", wstring2string(temp_st.substr(temp_st.find(L"=") + 1, temp_st.find(L"\n"))).c_str());
+			//	//via_point_xml->SetAttribute("R", XMLDeserializer::wstring2string(temp_st.substr(temp_st.find(L"=") + 1, temp_st.find(L"\n"))).c_str());
 			//	break;
 			//case rxController::eControlType_HTransform:
 			//	std::getline(data_ss, temp_st);	
-			//	//via_point_xml->SetAttribute("R", wstring2string(temp_st.substr(temp_st.find(L"=") + 1, temp_st.find(L"\n"))).c_str());
+			//	//via_point_xml->SetAttribute("R", XMLDeserializer::wstring2string(temp_st.substr(temp_st.find(L"=") + 1, temp_st.find(L"\n"))).c_str());
 			//	std::getline(data_ss, temp_st);	
-			//	//via_point_xml->SetAttribute("r", wstring2string(temp_st.substr(temp_st.find(L"=") + 1, temp_st.find(L"\n"))).c_str());
+			//	//via_point_xml->SetAttribute("r", XMLDeserializer::wstring2string(temp_st.substr(temp_st.find(L"=") + 1, temp_st.find(L"\n"))).c_str());
 			//	break;
 			//default:
 			//	break;

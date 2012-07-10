@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="Windows-1252"?>
 <VisualStudioProject
 	ProjectType="Visual C++"
-	Version="9,00"
+	Version="9.00"
 	Name="HybridAutomaton"
 	ProjectGUID="{207FD383-F8DB-4E03-A885-D7A17AEBCA15}"
 	RootNamespace="libhybrid_automaton"
@@ -110,7 +110,7 @@
 				Optimization="2"
 				EnableIntrinsicFunctions="true"
 				WholeProgramOptimization="false"
-				AdditionalIncludeDirectories="&quot;$(RLAB_INC_PATH)&quot;;&quot;$(ProjectDir)..\..\include\hybrid_automaton&quot;;&quot;$(ProjectDir)..\..\thirdparty\tinyxml\include&quot;;&quot;$(RSWIN_ROOT)&quot;;&quot;$(ProjectDir)..\..\..\graph\include&quot;;&quot;$(RSWIN_ROOT)\controllers\include&quot;"
+				AdditionalIncludeDirectories="&quot;$(RLAB_INC_PATH)&quot;;&quot;$(ProjectDir)..\..\include\hybrid_automaton&quot;;&quot;$(ProjectDir)..\..\thirdparty\tinyxml\include&quot;;&quot;$(RSWIN_ROOT)&quot;;&quot;$(ProjectDir)..\..\..\graph\include&quot;;&quot;$(RSWIN_ROOT)\controllers\include&quot;;&quot;$(RSWIN_ROOT)\ros_bridge\include&quot;"
 				PreprocessorDefinitions="WIN32;NDEBUG;_LIB"
 				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="true"
@@ -159,6 +159,10 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
+				RelativePath="..\..\src\hybrid_automaton\CSpaceBlackBoardMilestone.cpp"
+				>
+			</File>
+			<File
 				RelativePath="..\..\src\hybrid_automaton\CSpaceMilestone.cpp"
 				>
 			</File>
@@ -194,6 +198,10 @@
 					>
 				</File>
 				<File
+					RelativePath="..\..\..\controllers\src\JointBlackBoardController.cpp"
+					>
+				</File>
+				<File
 					RelativePath="..\..\..\controllers\src\ObstacleAvoidanceController.cpp"
 					>
 				</File>
@@ -208,6 +216,10 @@
 			Filter="h;hpp;hxx;hm;inl;inc;xsd"
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
+			<File
+				RelativePath="..\..\include\hybrid_automaton\CSpaceBlackBoardMilestone.h"
+				>
+			</File>
 			<File
 				RelativePath="..\..\include\hybrid_automaton\CSpaceMilestone.h"
 				>
@@ -245,6 +257,10 @@
 				</File>
 				<File
 					RelativePath="..\..\..\controllers\include\FeatureAttractorController.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\..\controllers\include\JointBlackBoardController.h"
 					>
 				</File>
 				<File

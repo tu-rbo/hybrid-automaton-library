@@ -10,7 +10,7 @@
 #include "FeatureAttractorController.h"
 #include "SubdisplacementController.h"
 #include "ObstacleAvoidanceController.h"
-
+#include "JointBlackBoardController.h"
 
 std::map<std::string, ControllerType> XMLDeserializer::controller_map_ = XMLDeserializer::createControllerMapping();
 
@@ -34,11 +34,7 @@ template<class T>
 T deserializeElement(TiXmlElement * xml_element, const char * field_name, T default_value)
 {
 	T return_value = default_value;
-	if(!xml_element->Attribute(field_name, &return_value))
-	{
-		std::string exception_str = std::string("[deserializeElement] ERROR: Attribute ") + std::string(field_name) + std::string(" was not found in XML element.");
-		throw exception_str;
-	}
+	xml_element->Attribute(field_name, &return_value);
 	return return_value;
 }
 
@@ -178,18 +174,20 @@ ViaPointBase * deserializeViaPoint(TiXmlElement * xml_element, ControllerType ty
 	return return_value;
 }
 
-std::string wstring2string(const std::wstring& wstr)
+std::string XMLDeserializer::wstring2string(const std::wstring& wstr)
 {
-	std::string str(wstr.length(),' ');
+	/*std::string str(wstr.length(),' ');
 	copy(wstr.begin(),wstr.end(),str.begin());
-	return str;
+	return str;*/
+	return std::string(wstr.begin(), wstr.end());
 }
 
-std::wstring string2wstring(const std::string& str)
+std::wstring XMLDeserializer::string2wstring(const std::string& str)
 {
-	std::wstring wstr(str.length(),L' ');
+	/*std::wstring wstr(str.length(),L' ');
 	copy(str.begin(),str.end(),wstr.begin());
-	return wstr;
+	return wstr;*/
+	return std::wstring(str.begin(), str.end());
 }
 
 std::string colon2space(std::string text)
@@ -264,6 +262,10 @@ HybridAutomaton* XMLDeserializer::createHybridAutomaton(const std::string& xml_s
 		else if(mst_type == "OpSpace")
 		{
 			mst = XMLDeserializer::createOpSpaceMilestone(mst_element, robot, dT);
+		}
+		else if(mst_type == "CSpaceBlackBoard")
+		{
+			mst = XMLDeserializer::createCSpaceBlackBoardMilestone(mst_element, robot, dT);
 		}
 		else
 		{
@@ -364,6 +366,38 @@ CSpaceMilestone* XMLDeserializer::createCSpaceMilestone(TiXmlElement* milestone_
 	return mst;
 }
 
+CSpaceBlackBoardMilestone* XMLDeserializer::createCSpaceBlackBoardMilestone(TiXmlElement* milestone_xml, rxSystem* robot, double dT)
+{
+	Milestone::Status mst_status = (Milestone::Status)deserializeElement<int>(milestone_xml, "status");
+	std::string mst_name = deserializeString(milestone_xml, "name");
+	std::vector<double> mst_configuration = deserializeVectorDouble(milestone_xml, "value");
+	std::vector<double> mst_epsilon = deserializeVectorDouble(milestone_xml, "epsilon");
+	if(mst_configuration.size()==0 || mst_epsilon.size()==0)
+	{
+		throw std::string("[XMLDeserializer::createCSpaceMilestone] ERROR: The milestone configuration or region of convergence (\"value\" or \"epsilon\") is not defined in the XML string.");
+	}
+
+	TiXmlElement* handle_point_set_element = milestone_xml->FirstChildElement("HandlePoints");
+	std::vector<Point> mst_handle_points;
+	if(handle_point_set_element != NULL)
+	{
+		for(TiXmlElement* handle_point_element = handle_point_set_element->FirstChildElement("HandlePoint"); handle_point_element; handle_point_element = handle_point_element->NextSiblingElement())
+		{
+			Point handle_point_value(-1.f,-1.f,-1.f);
+			handle_point_value.x = deserializeElement<double>(handle_point_element, "x");
+			handle_point_value.y = deserializeElement<double>(handle_point_element, "y");
+			handle_point_value.z = deserializeElement<double>(handle_point_element, "z");
+			mst_handle_points.push_back(handle_point_value);
+		}
+	}
+
+	CSpaceBlackBoardMilestone* mst = new CSpaceBlackBoardMilestone(mst_name, mst_configuration, NULL, mst_epsilon, mst_status, mst_handle_points);
+
+	mst->setBlackBoardVariableName(mst->getBlackBoardVariableName());
+	
+	return mst;
+}
+
 OpSpaceMilestone* XMLDeserializer::createOpSpaceMilestone(TiXmlElement* milestone_xml, rxSystem* robot, double dT)
 {
 	Milestone::Status mst_status = (Milestone::Status)deserializeElement<int>(milestone_xml, "status");
@@ -458,7 +492,7 @@ rxController* XMLDeserializer::createController(TiXmlElement *rxController_xml, 
 	std::stringstream kp_vector_ss = std::stringstream(deserializeString(rxController_xml,"kp"));
 	std::stringstream kv_vector_ss = std::stringstream(deserializeString(rxController_xml,"kv"));
 	std::stringstream invL2sqr_vector_ss = std::stringstream(deserializeString(rxController_xml,"invL2sqr"));
-	int priority = deserializeElement<int>(rxController_xml,"priority", 1);
+	int priority = deserializeElement<int>(rxController_xml, "priority", 1);
 
 	dVector kp_vector;
 	dVector kv_vector;
@@ -622,6 +656,9 @@ rxController* XMLDeserializer::createJointController(int joint_subtype, double c
 		controller = new rxInterpolatedJointImpedanceController(robot, controller_duration);
 		dynamic_cast<rxInterpolatedJointImpedanceController*>(controller)->setImpedance(0.5,3.0,2.0);
 		break;
+	case BLACKBOARD_ACCESS:
+		controller = new JointBlackBoardController(robot, controller_duration);
+		break;
 	default:
 		throw std::string("[XMLDeserializer::createJointController] ERROR: Unexpected Controller subgroup.");
 		break;
@@ -649,6 +686,14 @@ rxController* XMLDeserializer::createJointController(int joint_subtype, double c
 			stiffness_k_displacement.expand(1,stiffness_k_value);
 		}
 		dynamic_cast<rxJointComplianceController*>(controller)->setStiffness(stiffness_b_displacement, stiffness_k_displacement);
+	}
+
+	if (joint_subtype & BLACKBOARD_ACCESS)
+	{
+		// parse the name of the blackboard variable to be accessed
+		// if not given --- use default
+		JointBlackBoardController* bb_controller = dynamic_cast<JointBlackBoardController*>(controller);
+		bb_controller->setBlackBoardVariableName(bb_controller->getBlackBoardVariableName());
 	}
 
 	return controller;
@@ -1119,6 +1164,7 @@ std::map<std::string, ControllerType> XMLDeserializer::createControllerMapping()
 	mapping["FeatureAttractorController"]					= ControllerType(rxController::eControlType_Displacement, WITH_IMPEDANCE | ATTRACTOR);
 	mapping["SubdisplacementController"]					= ControllerType(rxController::eControlType_Functional, WITH_IMPEDANCE | SUBDISPLACEMENT);
 	mapping["ObstacleAvoidanceController"]					= ControllerType(rxController::eControlType_Functional, OBSTACLE_AVOIDANCE);
+	mapping["JointBlackBoardController"]					= ControllerType(rxController::eControlType_Joint, BLACKBOARD_ACCESS);
 
 	return mapping;
 }

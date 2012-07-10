@@ -15,16 +15,14 @@
 #define SERVO_ON		(RCMD_USER + 5)
 #define BLACKBOARD_ON	(RCMD_USER + 6)
 
+// use this scheme as follows:
+// control->command(BLACKBOARD_ON, (1999 << 16) | (URI_BOTTOM_2 << 8) | (URI_HASMA << 0));
+// where 1999 means which port to use (on both ends)
 #define URI_LOCAL			0
 #define URI_BOTTOM_1		1
-#define URI_BOTTOM_1_STRING	"130.149.238.178"
 #define URI_BOTTOM_2		2
-#define URI_BOTTOM_2_STRING	"130.149.238.179"
 #define URI_BOTTOM_3		3
-#define URI_BOTTOM_3_STRING	"130.149.238.180"
 #define URI_HASMA			10
-#define URI_HASMA_STRING	"130.149.238.184"
 #define URI_LEIBNIZ			11
-#define URI_LEIBNIZ_STRING	"130.149.238.185"
 
 #endif

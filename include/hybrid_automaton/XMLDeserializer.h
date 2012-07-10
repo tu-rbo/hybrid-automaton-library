@@ -9,6 +9,7 @@
 #include "MotionBehaviour.h"
 #include "Milestone.h"
 #include "CSpaceMilestone.h"
+#include "CSpaceBlackBoardMilestone.h"
 #include "OpSpaceMilestone.h"
 
 template<class T>
@@ -26,18 +27,6 @@ std::vector<double> deserializeVectorDouble(TiXmlElement * xml_element, const ch
 ViaPointBase * deserializeViaPoint(TiXmlElement * xml_element, ControllerType type_of_controller, int controller_dimension);
 
 /**
-* Convert a wstring into a string.
-* @param wstr Wide string to be converted.
-*/
-std::string wstring2string(const std::wstring& wstr);
-
-/**
-* Convert a string into a wstring.
-* @param str String to be converted.
-*/
-std::wstring string2wstring(const std::string& str);
-
-/**
 * Replace the colons of a string with white spaces.
 * @param text String to be processed.
 */
@@ -47,12 +36,26 @@ std::string colon2space(std::string text);
 class XMLDeserializer
 {
 public:
+	/**
+	* Convert a wstring into a string.
+	* @param wstr Wide string to be converted.
+	*/
+	static std::string wstring2string(const std::wstring& wstr);
+
+	/**
+	* Convert a string into a wstring.
+	* @param str String to be converted.
+	*/
+	static std::wstring string2wstring(const std::string& str);
+
+
 	XMLDeserializer();
 	virtual ~XMLDeserializer();
 
 	static HybridAutomaton* createHybridAutomaton(const std::string& xml_string, rxSystem* robot, double dT);
 
 	static CSpaceMilestone* createCSpaceMilestone(TiXmlElement* milestone_xml, rxSystem* robot, double dT);
+	static CSpaceBlackBoardMilestone* createCSpaceBlackBoardMilestone(TiXmlElement* milestone_xml, rxSystem* robot, double dT);
 
 	static OpSpaceMilestone* createOpSpaceMilestone(TiXmlElement* milestone_xml, rxSystem* robot, double dT);
 

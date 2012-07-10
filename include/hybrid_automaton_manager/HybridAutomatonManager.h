@@ -17,6 +17,7 @@
 #include "Milestone.h"
 #include "HybridAutomaton.h"
 
+#define _USE_RCONTROLALGORITHM_EX_
 
 typedef struct DeserializingThreadArguments {
 	std::string _string;
