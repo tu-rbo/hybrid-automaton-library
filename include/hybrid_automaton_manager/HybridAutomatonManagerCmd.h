@@ -22,6 +22,7 @@
 #define URI_BOTTOM_1		1
 #define URI_BOTTOM_2		2
 #define URI_BOTTOM_3		3
+#define URI_LOHENGRIN		4
 #define URI_HASMA			10
 #define URI_LEIBNIZ			11
 

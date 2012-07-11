@@ -717,7 +717,7 @@ rxController* XMLDeserializer::createDisplacementController(int displacement_sub
 			alpha_displacement.expand(1,alpha_value);
 		}
 	}else{
-		alpha_displacement = dVector();
+		alpha_displacement = Displacement();
 	}
 
 	dVector beta_displacement;
@@ -732,7 +732,7 @@ rxController* XMLDeserializer::createDisplacementController(int displacement_sub
 			beta_displacement.expand(1,beta_value);
 		}
 	}else{
-		beta_displacement = dVector();
+		beta_displacement = Displacement();
 	}
 
 	switch(displacement_subtype)

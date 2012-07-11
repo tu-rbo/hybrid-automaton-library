@@ -106,10 +106,12 @@ void HybridAutomatonManager::init(int mode)
 	RASSERT(_robotDevice != INVALID_RHANDLE);
 
 	_defaultMotionBehavior = new MotionBehaviour(new Milestone(), new Milestone(),_robot);
-	/*rxJointController* jc = new rxJointController(_sys,_dT);
-	jc->addPoint(_sys->q(),0,true);
-	_defaultMotionBehavior->addController(jc);*/
+	rxJointController* jc = new rxJointController(_robot,_dT);
+	jc->addPoint(_robot->q(),5,true);
+	jc->setGain(50.0,200.0);
+	_defaultMotionBehavior->addController(jc,false);
 	_activeMotionBehavior = _defaultMotionBehavior;
+	_activeMotionBehavior->activate();
 }
 
 void HybridAutomatonManager::activateBlackboard(std::string &rlab_host, int rlab_port, std::string &ros_host, int ros_port)
@@ -120,6 +122,11 @@ void HybridAutomatonManager::activateBlackboard(std::string &rlab_host, int rlab
 bool HybridAutomatonManager::isBlackboardActive() const
 {
 	return (_blackboard != NULL);
+}
+
+void HybridAutomatonManager::setCollisionInterface(CollisionInterface* collision_interface)
+{
+		CollisionInterface::instance = collision_interface;
 }
 
 void HybridAutomatonManager::setHybridAutomaton(std::string _new_hybrid_automaton_str, CollisionInterface* collision_interface)
@@ -139,7 +146,6 @@ void HybridAutomatonManager::setHybridAutomaton(std::string _new_hybrid_automato
 	{
 		std::cerr << "[HybridAutomatonManager::updateHybridAutomaton] Error creating thread to deserialize xml string!" << std::endl;
 	}
-
 }
 
 void HybridAutomatonManager::setHybridAutomaton(HybridAutomaton* _new_hybrid_automaton)
@@ -340,6 +346,7 @@ int HybridAutomatonManager::command(const short& cmd, const int& arg)
 			domain_names[URI_BOTTOM_1] = "130.149.238.178";
 			domain_names[URI_BOTTOM_2] = "130.149.238.179";
 			domain_names[URI_BOTTOM_3] = "130.149.238.180";
+			domain_names[URI_LOHENGRIN] = "130.149.238.186";
 			domain_names[URI_HASMA] = "130.149.238.184";
 			domain_names[URI_LEIBNIZ] = "130.149.238.185";
 

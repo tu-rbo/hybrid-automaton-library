@@ -45,6 +45,7 @@ public:
 	virtual void activateBlackboard(std::string &rlab_host, int rlab_port, std::string &ros_host, int ros_port);
 	virtual void setHybridAutomaton(HybridAutomaton*  _new_hybrid_automaton);
 	virtual void setHybridAutomaton(std::string  _new_hybrid_automaton_str, CollisionInterface* collision_interface);
+	virtual void setCollisionInterface(CollisionInterface* collision_interface);
 	virtual bool isBlackboardActive() const;
 
 	rxSystem*			_robot;
