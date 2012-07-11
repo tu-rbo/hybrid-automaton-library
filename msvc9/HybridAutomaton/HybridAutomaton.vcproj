@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="Windows-1252"?>
 <VisualStudioProject
 	ProjectType="Visual C++"
-	Version="9.00"
+	Version="9,00"
 	Name="HybridAutomaton"
 	ProjectGUID="{207FD383-F8DB-4E03-A885-D7A17AEBCA15}"
 	RootNamespace="libhybrid_automaton"
@@ -41,7 +41,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="&quot;$(RLAB_INC_PATH)&quot;;&quot;$(ProjectDir)..\..\include\hybrid_automaton&quot;;&quot;$(ProjectDir)..\..\thirdparty\tinyxml\include&quot;;&quot;$(RSWIN_ROOT)&quot;;&quot;$(ProjectDir)..\..\..\graph\include&quot;;&quot;$(RSWIN_ROOT)\controllers\include&quot;"
+				AdditionalIncludeDirectories="&quot;$(RLAB_INC_PATH)&quot;;&quot;$(ProjectDir)..\..\include\hybrid_automaton&quot;;&quot;$(ProjectDir)..\..\thirdparty\tinyxml\include&quot;;&quot;$(RSWIN_ROOT)&quot;;&quot;$(ProjectDir)..\..\..\graph\include&quot;;&quot;$(RSWIN_ROOT)\controllers\include&quot;;&quot;$(RSWIN_ROOT)\ros_bridge\include&quot;"
 				PreprocessorDefinitions="WIN32;_DEBUG;_LIB"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"

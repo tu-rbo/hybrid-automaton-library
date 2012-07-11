@@ -106,6 +106,9 @@ void HybridAutomatonManager::init(int mode)
 	RASSERT(_robotDevice != INVALID_RHANDLE);
 
 	_defaultMotionBehavior = new MotionBehaviour(new Milestone(), new Milestone(),_robot);
+	/*rxJointController* jc = new rxJointController(_sys,_dT);
+	jc->addPoint(_sys->q(),0,true);
+	_defaultMotionBehavior->addController(jc);*/
 	_activeMotionBehavior = _defaultMotionBehavior;
 }
 
