@@ -106,12 +106,12 @@ void HybridAutomatonManager::init(int mode)
 	RASSERT(_robotDevice != INVALID_RHANDLE);
 
 	_defaultMotionBehavior = new MotionBehaviour(new Milestone(), new Milestone(),_robot);
-	rxJointController* jc = new rxJointController(_robot,_dT);
+	/*rxJointController* jc = new rxJointController(_robot,_dT);
 	jc->addPoint(_robot->q(),5,true);
 	jc->setGain(50.0,200.0);
-	_defaultMotionBehavior->addController(jc,false);
+	_defaultMotionBehavior->addController(jc,false);*/
 	_activeMotionBehavior = _defaultMotionBehavior;
-	_activeMotionBehavior->activate();
+	//_activeMotionBehavior->activate();
 }
 
 void HybridAutomatonManager::activateBlackboard(std::string &rlab_host, int rlab_port, std::string &ros_host, int ros_port)
@@ -334,8 +334,8 @@ int HybridAutomatonManager::command(const short& cmd, const int& arg)
 
 	case SERVO_ON:
 		{
-			_servo_on = true;
-			std::cout << "[HybridAutomatonManager::command] Servo ON" << std::endl;
+			_servo_on = !_servo_on;
+			std::cout << "[HybridAutomatonManager::command] Servo ON: " << _servo_on << std::endl;
 		}
 		break;
 		
@@ -394,22 +394,22 @@ void HybridAutomatonManager::datanames(vector<string_type>& names, int channel)
 
 void HybridAutomatonManager::collect(vector<double>& data, int channel)
 {
-	if (channel == 1)
+	if (channel == PLOT_TORQUE)
 	{
 		for(int i = 0; i < _dof; ++i)
 			data.push_back(_torque[i]);
 	}
-	else if (channel == 2)
+	else if (channel == PLOT_Q)
 	{
 		for(int i = 0; i < _dof; ++i)
 			data.push_back(_q[i]);
 	}
-	else if (channel == 3)
+	else if (channel == PLOT_VELOCITY)
 	{
 		for(int i = 0; i < _dof; ++i)
 			data.push_back(_qdot[i]);
 	}
-	else if (channel == 4)
+	else if (channel == PLOT_ERROR)
 	{
 		dVector e = _activeMotionBehavior->getError();
 		if (e.size() > 0) {
@@ -421,7 +421,7 @@ void HybridAutomatonManager::collect(vector<double>& data, int channel)
 				data.push_back(666);
 		}
 	}
-	else if (channel == 5)
+	else if (channel == PLOT_DESIRED_Q)
 	{
 		dVector d = _activeMotionBehavior->getDesired();
 		if (d.size() > 0) {
@@ -433,7 +433,7 @@ void HybridAutomatonManager::collect(vector<double>& data, int channel)
 				data.push_back(666);
 		}
 	}
-	else if (channel == 6)
+	else if (channel == PLOT_ERROR_VELOCITY)
 	{
 		dVector d = _activeMotionBehavior->getErrorDot();
 		if (d.size() > 0) {
@@ -469,7 +469,7 @@ void HybridAutomatonManager::collect(vector<double>& data, int channel)
 				data.push_back(666);
 		}
 	}
-	else if (channel == 9)
+	else if (channel == PLOT_DESIRED_VELOCITY)
 	{
 		dVector d = _activeMotionBehavior->getDesiredDot();
 		if (d.size() > 0) {

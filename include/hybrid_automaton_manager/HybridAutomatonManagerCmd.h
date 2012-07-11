@@ -26,4 +26,14 @@
 #define URI_HASMA			10
 #define URI_LEIBNIZ			11
 
+// this is for plotting from the rxApplication
+// (so you don't have to remember which channel to plot)
+#define PLOT_TORQUE					1
+#define PLOT_Q						2
+#define PLOT_VELOCITY				3
+#define PLOT_ERROR					4
+#define PLOT_DESIRED_Q				5
+#define PLOT_ERROR_VELOCITY			6
+#define PLOT_DESIRED_VELOCITY		9
+
 #endif
