@@ -224,8 +224,11 @@ HybridAutomaton* XMLDeserializer::createHybridAutomaton(const std::string& xml_s
 
 	// Create the DOM-model
 	TiXmlDocument document;
-	if(document.Parse(xml_string.c_str()) == NULL) 	{
+	const char* ret_val = document.Parse(xml_string.c_str());
+	if(ret_val == NULL && document.Error()) 	{
+		std::cout << "ERROR CODE: " <<  document.ErrorId() << std::endl;
 		std::cout << document.ErrorDesc() << std::endl;
+		throw std::string("[XMLDeserializer::createHybridAutomaton] ERROR: Parsing the string.");
 		delete automaton;
 		return NULL;
 	}
