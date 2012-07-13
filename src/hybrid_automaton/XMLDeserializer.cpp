@@ -459,8 +459,9 @@ MotionBehaviour* XMLDeserializer::createMotionBehaviour(TiXmlElement* motion_beh
 		{		
 			mb_control_set = new rxTPOperationalSpaceControlSet(robot, dT);
 			mb_control_set->setGravity(0,0,-GRAV_ACC);
-			mb_control_set->setInverseDynamicsAlgorithm(new rxAMBSGravCompensation(robot));
-			mb_control_set->nullMotionController()->setGain(0.02,0.0,0.01);		
+			//mb_control_set->setInverseDynamicsAlgorithm(new rxAMBSGravCompensation(robot));
+			//mb_control_set->nullMotionController()->setGain(0.02,0.0,0.01);
+			mb_control_set->nullMotionController()->setGain(10.0,1.0); // taken from ERM values...
 		}
 		else
 		{

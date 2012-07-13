@@ -395,11 +395,15 @@ bool OpSpaceMilestone::hasConverged(rxSystem* sys)
 {
 	assert (sys != NULL);
 
+	
+	HTransform ht;
+	rxBody* EE = sys->getUCSBody(_T("EE"),ht);
 	if (posi_ori_selection_ == POSITION_SELECTION
 		|| posi_ori_selection_ == POS_AND_ORI_SELECTION)
 	{
-		for (int i = 0; i < 3; i++) {
-			double e = ::std::abs(sys->T().r[i] - configuration_[i]);
+		Displacement current_r = ht.r + EE->T().r; //parent->getConfiguration();
+		for (int i = 0; i < 3; i++) {;
+			double e = ::std::abs(current_r[i] - configuration_[i]);
 			if (e > region_convergence_radius_[i])
 			{
 #ifdef NOT_IN_RT
@@ -424,7 +428,7 @@ bool OpSpaceMilestone::hasConverged(rxSystem* sys)
 
 		// current orientation
 		dVector quat;
-		sys->T().R.GetQuaternion(quat);
+		EE->T().R.GetQuaternion(quat);
 		Quaternion q(quat);
 
 		q.invert();

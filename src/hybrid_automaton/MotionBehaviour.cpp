@@ -60,9 +60,9 @@ Edge<Milestone>(dad, son, weight)
 		robot_ = const_cast<rxSystem*>(control_set->sys());
 
 		// TODO: should this be done by the caller?
-		control_set_->setGravity(0,0,-GRAV_ACC);
+		/*control_set_->setGravity(0,0,-GRAV_ACC);
 		control_set_->setInverseDynamicsAlgorithm(new rxAMBSGravCompensation(this->robot_));
-		control_set_->nullMotionController()->setGain(0.02,0.0,0.01);
+		control_set_->nullMotionController()->setGain(0.02,0.0,0.01);*/
 	}
 	else
 	{
@@ -404,7 +404,16 @@ dVector MotionBehaviour::update(double t)
 		_onDemand_controllers[i]->updateMeasurement();
 	}
 
-	dVector torque;
+	//dVector torque(robot_->jointDOF()); // This does not work for XR4000+WAM
+	int dof = 0;
+	list<rxJoint*>::iterator it;
+	for(it = robot_->joints().begin(); it !=  robot_->joints().end(); it++)
+	{
+		dVector ll, ul;
+		(*it)->getLimits(ll,ul);
+		dof += ll.size();
+	}
+	dVector torque(dof);
 	control_set_->compute(t,torque);
 	time_ += dT_;
 	return torque;
