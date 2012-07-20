@@ -47,6 +47,7 @@ public:
 	virtual void setHybridAutomaton(std::string  _new_hybrid_automaton_str, CollisionInterface* collision_interface);
 	virtual void setCollisionInterface(CollisionInterface* collision_interface);
 	virtual bool isBlackboardActive() const;
+	RTBlackBoard* getBlackboard(){return this->_blackboard;};
 
 	rxSystem*			_robot;
 
