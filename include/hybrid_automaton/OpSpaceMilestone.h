@@ -62,6 +62,8 @@ public:
 
 	virtual bool hasConverged(rxSystem* sys);
 
+	virtual Displacement getHandlePoint(int i);
+
 protected:
 
 	std::vector<double>		configuration_;						// Position = 3 first values
