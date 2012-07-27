@@ -209,7 +209,19 @@
 					>
 				</File>
 				<File
+					RelativePath="..\..\..\controllers\include\JointLimitAvoidanceControllerOnDemand.h"
+					>
+				</File>
+				<File
 					RelativePath="..\..\..\controllers\include\ObstacleAvoidanceController.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\..\controllers\include\OpSpaceSingularityAvoidanceController.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\..\controllers\include\SingularityAvoidanceController.h"
 					>
 				</File>
 				<File

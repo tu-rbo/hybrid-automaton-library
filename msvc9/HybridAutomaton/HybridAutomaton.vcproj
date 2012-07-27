@@ -202,7 +202,19 @@
 					>
 				</File>
 				<File
+					RelativePath="..\..\..\controllers\src\JointLimitAvoidanceControllerOnDemand.cpp"
+					>
+				</File>
+				<File
 					RelativePath="..\..\..\controllers\src\ObstacleAvoidanceController.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\..\controllers\src\OpSpaceSingularityAvoidanceController.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\..\controllers\src\SingularityAvoidanceController.cpp"
 					>
 				</File>
 				<File
@@ -264,7 +276,19 @@
 					>
 				</File>
 				<File
+					RelativePath="..\..\..\controllers\include\JointLimitAvoidanceControllerOnDemand.h"
+					>
+				</File>
+				<File
 					RelativePath="..\..\..\controllers\include\ObstacleAvoidanceController.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\..\controllers\include\OpSpaceSingularityAvoidanceController.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\..\controllers\include\SingularityAvoidanceController.h"
 					>
 				</File>
 				<File
