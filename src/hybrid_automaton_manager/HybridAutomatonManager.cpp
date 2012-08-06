@@ -275,6 +275,7 @@ void HybridAutomatonManager::_reflect()
 void HybridAutomatonManager::_compute(const double& t)
 {
 	_torque = _activeMotionBehavior->update(t);	
+    Milestone* childMs=(Milestone*)(_activeMotionBehavior->getChild());
 
 	if( !_deserialized_hybrid_automatons.empty() )
 	{
@@ -287,7 +288,7 @@ void HybridAutomatonManager::_compute(const double& t)
 			std::cout << "[HybridAutomatonManager::_compute] INFO: New Hybrid Automaton" << std::endl;
 			Milestone* tmpMilestone = _hybrid_automaton->getStartNode();
 			_activeMotionBehavior->deactivate();
-			_activeMotionBehavior = _hybrid_automaton->outgoingEdges(*tmpMilestone)[0];
+			_activeMotionBehavior = _hybrid_automaton->getNextMotionBehaviour(tmpMilestone);
 			_activeMotionBehavior->activate();
 #ifdef NOT_IN_RT
 			std::cout << _activeMotionBehavior->toStringXML() << ::std::endl;
@@ -298,11 +299,11 @@ void HybridAutomatonManager::_compute(const double& t)
 			ReleaseMutex(_deserialize_mutex);
 		}
 	}
-	else if(_activeMotionBehavior->getChild()->hasConverged(_robot) ){
-		if (_hybrid_automaton && !_hybrid_automaton->outgoingEdges(*(_activeMotionBehavior->getChild())).empty()) {
+	else if(childMs->hasConverged(_robot) ){
+		if (_hybrid_automaton && _hybrid_automaton->getNextMotionBehaviour(childMs) != NULL) {
 			std::cout << "[HybridAutomatonManager::_compute] INFO: Switching controller" << std::endl;
 			_activeMotionBehavior->deactivate();
-			_activeMotionBehavior = _hybrid_automaton->outgoingEdges(*(_activeMotionBehavior->getChild()))[0];
+			_activeMotionBehavior = _hybrid_automaton->getNextMotionBehaviour(childMs);
 			_activeMotionBehavior->activate();
 
 #ifdef NOT_IN_RT 
@@ -349,6 +350,7 @@ int HybridAutomatonManager::command(const short& cmd, const int& arg)
 			domain_names[URI_LOHENGRIN] = "130.149.238.186";
 			domain_names[URI_HASMA] = "130.149.238.184";
 			domain_names[URI_LEIBNIZ] = "130.149.238.185";
+            domain_names[URI_POSEIDON] = "130.149.238.193";
 
 			int bit_code = arg;
 			

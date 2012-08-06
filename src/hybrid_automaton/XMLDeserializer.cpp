@@ -439,7 +439,7 @@ OpSpaceMilestone* XMLDeserializer::createOpSpaceMilestone(TiXmlElement* mileston
 	return mst;
 }
 
-MotionBehaviour* XMLDeserializer::createMotionBehaviour(TiXmlElement* motion_behaviour_xml , const Milestone *dad, const Milestone *son , rxSystem* robot, double dT )
+MotionBehaviour* XMLDeserializer::createMotionBehaviour(TiXmlElement* motion_behaviour_xml , Milestone *dad, Milestone *son , rxSystem* robot, double dT )
 {
 	TiXmlElement* control_set_element = motion_behaviour_xml->FirstChildElement("ControlSet");
 	if(control_set_element == NULL)

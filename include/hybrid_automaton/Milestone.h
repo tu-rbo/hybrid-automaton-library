@@ -57,6 +57,8 @@ public:
 
 	Milestone(const char* milestone_name);
 
+    Milestone(const Milestone &milestone_cpy);
+
 	virtual ~Milestone();
 
 	Milestone::Status getStatus() const;

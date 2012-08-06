@@ -11,7 +11,7 @@
 * HybridAutomaton class. 
 * @brief Class extending DiGraph. It defines the types for the template to be Milestone and MotionBehaviour. Adds the required parser/deparser functionalities.
 */
-class HybridAutomaton : public DiGraph < Milestone, MotionBehaviour >
+class HybridAutomaton : public DiGraph
 {
 public:
 
@@ -57,6 +57,12 @@ public:
 	* Note: It uses tinyXML library to read the string with XML format.
 	*/
 	//virtual void fromStringXML(const std::string& xml_string, rxSystem* robot, double dT);
+
+    /**
+    * Returns the next motion behavior to execute when at currentMs.
+    * Currently the first motion in the list of childs is executed.
+    */
+    MotionBehaviour* getNextMotionBehaviour(const Milestone* currentMs);
 
 private:
 	Milestone* start_node_id_;	// Pointer to the first Milestone (if exists). 

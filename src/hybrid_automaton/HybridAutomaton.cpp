@@ -30,14 +30,23 @@ void HybridAutomaton::setStartNode(Milestone* nodeID)
 
 Milestone* HybridAutomaton::getMilestoneByName(const std::string& name) const
 {
-	for(int i=0; i<this->nodeList.size(); i++)
+	for(unsigned int i=0; i<this->nodeList.size(); i++)
 	{
-		if(this->nodeList[i]->getName() == name)
+        Milestone* ms=(Milestone*)nodeList[i];
+		if(ms->getName() == name)
 		{
-			return this->nodeList[i];
+			return ms;
 		}
 	}
 	return NULL;
+}
+
+MotionBehaviour* HybridAutomaton::getNextMotionBehaviour(const Milestone* currentMs)
+{
+    if(outgoingEdges(currentMs).size() > 0 )
+        return (MotionBehaviour*)(outgoingEdges(currentMs)[0]);
+    else
+        return NULL;
 }
 
 std::string HybridAutomaton::toStringXML() const
@@ -72,8 +81,9 @@ std::string HybridAutomaton::toStringXML() const
 
 	// Add the data of the nodes-milestones
 	for(unsigned int i = 0; i<nodeNumber ; i++){
-		if(nodeList.at(i)!=NULL){
-			TiXmlElement * mst_element = (nodeList.at(i))->toElementXML();
+        Milestone* ms=(Milestone*)nodeList.at(i);
+		if(ms!=NULL){
+			TiXmlElement * mst_element = ms->toElementXML();
 			hyb->LinkEndChild(mst_element);			
 		}
 	}
@@ -81,13 +91,10 @@ std::string HybridAutomaton::toStringXML() const
 	// Add the data of the edges-motionbehaviours
 	for(unsigned int i = 0; i<nodeNumber ; i++){
 		for(unsigned int j = 0; j<nodeNumber ; j++){
-			if( adjacencyMatrix.at(i).at(j) != NULL){
-				TiXmlElement * mb_element = (adjacencyMatrix.at(i).at(j))->toElementXML();
+            MotionBehaviour* mb=(MotionBehaviour*)adjacencyMatrix.at(i).at(j); 
+			if( mb != NULL){
+				TiXmlElement * mb_element = mb->toElementXML();
 				hyb->LinkEndChild(mb_element);
-				// Parent and Child indexes cannot be retrieved by the Edge itself, because they are define at the 
-				// HybridAutomaton level. They must be added at this level.
-				mb_element->SetAttribute("Parent", (adjacencyMatrix.at(i).at(j))->getParent()->getName().c_str());
-				mb_element->SetAttribute("Child", (adjacencyMatrix.at(i).at(j))->getChild()->getName().c_str());
 			}
 		}
 	}

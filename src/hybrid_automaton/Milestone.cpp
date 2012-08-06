@@ -24,6 +24,13 @@ status_(INVALID)
 	this->name_ = std::string(milestone_name);
 }
 
+Milestone::Milestone(const Milestone &milestone_cpy) : 
+Node(),
+status_(milestone_cpy.status_)
+{
+	this->name_ = milestone_cpy.name_;
+}
+
 Milestone::~Milestone()
 {
 }

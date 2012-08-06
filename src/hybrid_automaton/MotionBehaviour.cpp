@@ -10,7 +10,7 @@
 using namespace std;
 
 MotionBehaviour::MotionBehaviour() :
-Edge<Milestone>(NULL, NULL, -1)
+Edge(NULL, NULL, -1)
 , control_set_(NULL)
 , robot_(NULL)
 , time_(-1)
@@ -21,8 +21,8 @@ Edge<Milestone>(NULL, NULL, -1)
 {
 }
 
-MotionBehaviour::MotionBehaviour(const Milestone * dad, const Milestone * son, rxSystem* robot, double weight, double dt ):
-Edge<Milestone>(dad, son, weight)
+MotionBehaviour::MotionBehaviour(Milestone * dad, Milestone * son, rxSystem* robot, double weight, double dt ):
+Edge(dad, son, weight)
 , control_set_(NULL)
 , robot_(robot)
 , time_(0)
@@ -44,8 +44,8 @@ Edge<Milestone>(dad, son, weight)
 	}
 }
 
-MotionBehaviour::MotionBehaviour(const Milestone * dad, const Milestone * son, rxControlSetBase* control_set, double weight):
-Edge<Milestone>(dad, son, weight)
+MotionBehaviour::MotionBehaviour(Milestone * dad, Milestone * son, rxControlSetBase* control_set, double weight):
+Edge(dad, son, weight)
 , control_set_(control_set)
 , robot_(NULL)
 , time_(0)
@@ -187,7 +187,7 @@ void MotionBehaviour::activate()
 
 							// q1 and q2 to interpolate between
 							dVector current_q = robot_->q();//parent->getConfiguration();
-							dVector desired_q = child->getConfiguration();
+                            dVector desired_q = ((Milestone*)child)->getConfiguration();
 
 							// qd1 and qd2
 							dVector current_qd(current_q.size());
@@ -223,7 +223,7 @@ void MotionBehaviour::activate()
 							//std::cout << robot_->getUCSBody(_T("EE"),ht) << std::endl;
 							rxBody* EE = robot_->getUCSBody(_T("EE"),ht);
 							dVector current_r = ht.r + EE->T().r; //parent->getConfiguration();
-							dVector desired_r = child->getConfiguration();
+							dVector desired_r = ((Milestone*)child)->getConfiguration();
 
 							// qd1 and qd2
 							dVector current_rd(current_r.size());
@@ -258,7 +258,7 @@ void MotionBehaviour::activate()
 					case rxController::eControlType_Orientation:
 						{
 							double time = (min_time_ > 0) ? min_time_ : 10.0;
-							dVector goal = child->getConfiguration();
+							dVector goal = ((Milestone*)child)->getConfiguration();
 							Rotation goal_rot(goal[3], goal[4], goal[5]);		
 							//NOTE: Suposses that the orientation is defined with 
 							// goal[3] = roll
@@ -270,7 +270,7 @@ void MotionBehaviour::activate()
 					case rxController::eControlType_HTransform:
 						{
 							double time = (min_time_ > 0) ? min_time_ : 10.0;
-							dVector goal = child->getConfiguration();
+							dVector goal = ((Milestone*)child)->getConfiguration();
 							Vector3D goal_3D(goal[0],goal[1],goal[2]);
 							Rotation goal_rot(goal[3], goal[4], goal[5]);		//NOTE: Suposses that the orientation is defined with 
 							// goal[3] = roll
@@ -465,6 +465,10 @@ TiXmlElement* MotionBehaviour::toElementXML() const
 			rxController_xml->SetAttribute("goalController", (is_goal_controller ? "true" : "false"));
 			rxController_xml->SetAttribute("priority", (*controllers_it)->priority());
 	}
+	
+    mb_element->SetAttribute("Parent",  ((Milestone*)parent)->getName().c_str());
+    mb_element->SetAttribute("Child",   ((Milestone*)child )->getName().c_str());
+
 	return mb_element;
 }
 

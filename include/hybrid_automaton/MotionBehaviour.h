@@ -22,7 +22,7 @@ typedef enum {
 	WITH_IMPEDANCE		= 4,
 	WITH_INTERPOLATION	= 8,
 	WITH_GRADIENT		= 16,
-	ATTRACTOR			= 32,
+	ATTRACTOR			= 32, 
 	SUBDISPLACEMENT		= 64,
 	OBSTACLE_AVOIDANCE	= 128,
 	BLACKBOARD_ACCESS	= 256
@@ -83,7 +83,7 @@ struct ViaPointHTransform : ViaPointBase{
 };
 
 
-class MotionBehaviour: public Edge<Milestone> 
+class MotionBehaviour: public Edge
 {
 
 private:
@@ -101,7 +101,7 @@ public:
 	* @param weight Weight of the edge in the graph
 	* @param dt Control interval
 	*/
-	MotionBehaviour(const Milestone * dad, const Milestone * son, rxSystem* robot, double weight = 1.0, double dt = 0.002);
+	MotionBehaviour(Milestone * dad, Milestone * son, rxSystem* robot, double weight = 1.0, double dt = 0.002);
 
 	/**
 	* Constructor
@@ -110,7 +110,7 @@ public:
 	* @param control_set Pointer to the control set, which is used to get the pointer to the RLab system object and the control interval of the controllers in this MB.
 	* @param weight Weight of the edge in the graph
 	*/
-	MotionBehaviour(const Milestone * dad, const Milestone * son, rxControlSetBase* control_set, double weight = 1.0);
+	MotionBehaviour(Milestone * dad, Milestone * son, rxControlSetBase* control_set, double weight = 1.0);
 
 	/**
 	* Copy constructor - Create a new MotionBehaviour that is a copy of the MotionBehaviour given as parameter
