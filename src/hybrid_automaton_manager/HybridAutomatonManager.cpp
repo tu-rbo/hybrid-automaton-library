@@ -14,14 +14,102 @@
 
 //#define NOT_IN_RT
 
+#ifdef DRAW_HYBRID_AUTOMATON
+
+rID HybridAutomatonManager::drawLine(const rMath::Displacement &start, const rMath::Displacement &end, const rID &drawID, const rColor &color)
+{
+	rID id = drawID;
+	if (drawID != INVALID_RID) // update 
+	{
+		rCustomDrawInfo info;
+		info.flag = CUSTOM_DRAW_UPDATE_POSE;
+		info.id = id;
+
+		info.drawType = 0x20;// update 
+
+		info.T.r = start;
+
+		rMath::Vector3D dir = end - start;
+		double length = dir.Norm();
+
+		dir.Normalize();
+		rMath::Vector3D zAxis(0.0, 0.0, 1.0);
+		rMath::Vector3D axis = zAxis.Cross(dir);
+		double half = acos(zAxis.Dot(dir))*0.5;
+		info.T.R.Set(cos(half), axis[0]*sin(half), axis[1]*sin(half), axis[2]*sin(half) );
+
+		info.scale[0] = 1.0;
+		info.scale[1] = 1.0;
+		info.scale[2] = length;
+
+		_physics_world->customDraw(info);
+	}
+	else
+	{
+		rCustomDrawInfo info;
+		info.flag = CUSTOM_DRAW_NEW;
+		info.id = INVALID_RID;
+
+		info.name = "";
+
+		info.drawType = CUSTOM_DRAW_POLYLINE;
+		info.lineWidth = 3;
+		info.fill = 0;
+
+		info.robotId = 0;
+		info.bodyId = 0;
+
+		info.vertexCnt = 2;
+
+		info.T.r = start;
+
+		rMath::Vector3D dir = end - start;
+		double length = dir.Norm();
+
+		dir.Normalize();
+		rMath::Vector3D zAxis(0.0, 0.0, 1.0);
+		rMath::Vector3D axis = zAxis.Cross(dir);
+		double half = acos(zAxis.Dot(dir))*0.5;
+		info.T.R.Set(cos(half), axis[0]*sin(half), axis[1]*sin(half), axis[2]*sin(half) );
+
+		info.scale[0] = 1.0;
+		info.scale[1] = 1.0;
+		info.scale[2] = length;
+
+		info.vertexPoints.push_back(rMath::Vector3D(0, 0, 0));
+		info.vertexPoints.push_back(rMath::Vector3D(0, 0, 1));
+
+		rMath::Vector3D normal;
+		normal.Set(0.0, 0.0, 1.0);
+		info.vertexNormals.push_back(normal);
+		info.vertexNormals.push_back(normal);
+
+		info.vertexColors.push_back(color);
+		info.vertexColors.push_back(color);
+
+		info.color[0] = color.r;
+		info.color[1] = color.g;
+		info.color[2] = color.b;
+		info.color[3] = color.a;
+
+		info.param[0] = info.param[1] = info.param[2] = 0.0f;
+		id = _physics_world->customDraw(info);
+	}
+
+	return id;
+}
+
+rID path[10] = {INVALID_RID,INVALID_RID,INVALID_RID,INVALID_RID,INVALID_RID,INVALID_RID,INVALID_RID,INVALID_RID,INVALID_RID,INVALID_RID};
+#endif
+
 unsigned __stdcall deserializeHybridAutomaton(void *udata)
 {
 	DeserializingThreadArguments* thread_args = static_cast<DeserializingThreadArguments*>(udata);
 	HybridAutomaton* ha = NULL;
 	try {
 		ha = XMLDeserializer::createHybridAutomaton(thread_args->_string, thread_args->_robot, thread_args->_dT);
-		std::cout << "--------------------------------------------------------------" << std::endl;
-		std::cout << ha->toStringXML() << std::endl;
+		std::cout << "--------------- recieving hybrid automaton ------------------" << std::endl;
+		//std::cout << ha->toStringXML() << std::endl;
 	}
 	catch(std::string e)
 	{
@@ -129,6 +217,11 @@ void HybridAutomatonManager::setCollisionInterface(CollisionInterface* collision
 		CollisionInterface::instance = collision_interface;
 }
 
+void HybridAutomatonManager::setPhysicsWorld(rxWorld* physics_world)
+{
+		_physics_world = physics_world;
+}
+
 void HybridAutomatonManager::setHybridAutomaton(std::string _new_hybrid_automaton_str, CollisionInterface* collision_interface)
 {
 	if(!CollisionInterface::instance)
@@ -170,10 +263,12 @@ void HybridAutomatonManager::updateBlackboard()
 		return;
 
 	_blackboard->setJointState("joint_state", _q_BB, _qdot_BB, _torque_BB);
-	HTransform ht;
-	rxBody* EE = _robot->getUCSBody(_T("EE"),ht);
-	dVector current_r = ht.r + EE->T().r;
-	_blackboard->setTransform("ee", ht, "base");
+
+	HTransform relative_transform;
+	rxBody* end_effector = _robot->getUCSBody(_T("EE"), relative_transform);
+	HTransform absolute_transform = end_effector->T() * relative_transform;
+	_blackboard->setTransform("ee", absolute_transform, "base_link");
+	
 	_blackboard->step();
 }
 
@@ -297,6 +392,24 @@ void HybridAutomatonManager::_compute(const double& t)
 			_hybrid_automaton->__printMatrix();
 #endif
 			ReleaseMutex(_deserialize_mutex);
+#ifdef DRAW_HYBRID_AUTOMATON
+			for(int i = 0; i < 10; i++)
+			{
+				if(!_hybrid_automaton->outgoingEdges(*tmpMilestone).empty())
+				{
+					Milestone* tmpMilestone2 = _hybrid_automaton->outgoingEdges(*tmpMilestone)[0]->getChild();
+					// TODO: Handlepoints should be part of Milestone! All children have them....?
+					cout << "DrawLine" << std::endl;
+					path[i] = drawLine(((OpSpaceMilestone*)tmpMilestone)->getHandlePoint(0),((OpSpaceMilestone*)tmpMilestone2)->getHandlePoint(0),path[i],BLUE);
+					tmpMilestone = tmpMilestone2;
+				}
+				else
+				{
+					_physics_world->eraseCustomDraw(path[i]);
+				}
+
+			}
+#endif
 		}
 	}
 	else if(childMs->hasConverged(_robot) ){

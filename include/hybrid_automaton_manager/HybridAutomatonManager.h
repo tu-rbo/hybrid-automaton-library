@@ -19,6 +19,11 @@
 
 #define _USE_RCONTROLALGORITHM_EX_
 
+//#define DRAW_HYBRID_AUTOMATON
+#ifdef DRAW_HYBRID_AUTOMATON
+#include "rCustomDraw.h"
+#endif
+
 typedef struct DeserializingThreadArguments {
 	std::string _string;
 	rxSystem* _robot;
@@ -46,6 +51,7 @@ public:
 	virtual void setHybridAutomaton(HybridAutomaton*  _new_hybrid_automaton);
 	virtual void setHybridAutomaton(std::string  _new_hybrid_automaton_str, CollisionInterface* collision_interface);
 	virtual void setCollisionInterface(CollisionInterface* collision_interface);
+	virtual void setPhysicsWorld(rxWorld* physics_world); // for debug draw...
 	virtual bool isBlackboardActive() const;
 	RTBlackBoard* getBlackboard(){return this->_blackboard;};
 
@@ -57,6 +63,10 @@ private:
 	virtual void _writeDevices();
 	virtual void _reflect();
 	virtual void _compute(const rTime& t);
+
+#ifdef DRAW_HYBRID_AUTOMATON
+	rID drawLine(const rMath::Displacement &start, const rMath::Displacement &end, const rID &drawID, const rColor &color);
+#endif
 
 	/**
 	* Check if a new HA was written on the Blackboard and creates a new thread to deserialize it.
@@ -93,5 +103,7 @@ private:
 
 	std::deque<HybridAutomaton*> _deserialized_hybrid_automatons;
 	HANDLE				_deserialize_mutex;
+
+	rxWorld*			_physics_world;
 };
 #endif
