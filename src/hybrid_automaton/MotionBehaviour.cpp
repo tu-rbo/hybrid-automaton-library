@@ -469,6 +469,9 @@ TiXmlElement* MotionBehaviour::toElementXML() const
     mb_element->SetAttribute("Parent",  ((Milestone*)parent)->getName().c_str());
     mb_element->SetAttribute("Child",   ((Milestone*)child )->getName().c_str());
 
+    mb_element->SetDoubleAttribute("probability",  this->getProbability());
+    mb_element->SetDoubleAttribute("length",this->getLength());
+
 	return mb_element;
 }
 

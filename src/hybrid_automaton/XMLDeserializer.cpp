@@ -341,6 +341,8 @@ CSpaceMilestone* XMLDeserializer::createCSpaceMilestone(TiXmlElement* milestone_
 		throw std::string("[XMLDeserializer::createCSpaceMilestone] ERROR: The milestone configuration or region of convergence (\"value\" or \"epsilon\") is not defined in the XML string.");
 	}
 
+    double expLength = deserializeElement<double>(milestone_xml, "excpectedLength");
+
 	TiXmlElement* handle_point_set_element = milestone_xml->FirstChildElement("HandlePoints");
 	std::vector<Point> mst_handle_points;
 	if(handle_point_set_element != NULL)
@@ -366,6 +368,9 @@ CSpaceMilestone* XMLDeserializer::createCSpaceMilestone(TiXmlElement* milestone_
 		mst_mb = XMLDeserializer::createMotionBehaviour(mb_element, mst, mst, robot, dT);
 		mst->setMotionBehaviour(mst_mb);
 	}
+    
+    mst->setExpectedLength(expLength);
+
 	return mst;
 }
 
@@ -379,6 +384,8 @@ CSpaceBlackBoardMilestone* XMLDeserializer::createCSpaceBlackBoardMilestone(TiXm
 	{
 		throw std::string("[XMLDeserializer::createCSpaceMilestone] ERROR: The milestone configuration or region of convergence (\"value\" or \"epsilon\") is not defined in the XML string.");
 	}
+
+    double expLength = deserializeElement<double>(milestone_xml, "excpectedLength");
 
 	TiXmlElement* handle_point_set_element = milestone_xml->FirstChildElement("HandlePoints");
 	std::vector<Point> mst_handle_points;
@@ -397,6 +404,8 @@ CSpaceBlackBoardMilestone* XMLDeserializer::createCSpaceBlackBoardMilestone(TiXm
 	CSpaceBlackBoardMilestone* mst = new CSpaceBlackBoardMilestone(mst_name, mst_configuration, NULL, mst_epsilon, mst_status, mst_handle_points);
 
 	mst->setBlackBoardVariableName(mst->getBlackBoardVariableName());
+
+    mst->setExpectedLength(expLength);
 	
 	return mst;
 }
@@ -412,6 +421,8 @@ OpSpaceMilestone* XMLDeserializer::createOpSpaceMilestone(TiXmlElement* mileston
 	{
 		throw std::string("[XMLDeserializer::createOpSpaceMilestone] ERROR: The milestone configuration or region of convergence (\"value\" or \"epsilon\") is not defined in the XML string.");
 	}
+
+    double expLength = deserializeElement<double>(milestone_xml, "excpectedLength");
 
 	TiXmlElement* handle_point_set_element = milestone_xml->FirstChildElement("HandlePoints");
 	std::vector<Point> mst_handle_points;
@@ -436,6 +447,9 @@ OpSpaceMilestone* XMLDeserializer::createOpSpaceMilestone(TiXmlElement* mileston
 		mst_mb = XMLDeserializer::createMotionBehaviour(mb_element, mst, mst, robot, dT);
 		mst->setMotionBehaviour(mst_mb);
 	}
+
+    mst->setExpectedLength(expLength);
+
 	return mst;
 }
 
@@ -483,6 +497,12 @@ MotionBehaviour* XMLDeserializer::createMotionBehaviour(TiXmlElement* motion_beh
 		mb->addController(mb_controller, mb_goal_controller);
 		mb_controller_counter++;
 	}
+
+    double length = deserializeElement<double>(motion_behaviour_xml, "length");
+    double prob   = deserializeElement<double>(motion_behaviour_xml, "prob");
+    mb->setProbability(length);
+    mb->setLength(prob);
+
 	return mb;
 }
 

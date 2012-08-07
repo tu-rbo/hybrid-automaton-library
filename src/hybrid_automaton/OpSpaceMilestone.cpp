@@ -342,6 +342,8 @@ TiXmlElement* OpSpaceMilestone::toElementXML() const
 	epsilon_ss << region_convergence_radius_.at(region_convergence_radius_.size()-1);
 	op_space_ms_xml->SetAttribute("epsilon", epsilon_ss.str().c_str());
 
+    op_space_ms_xml->SetDoubleAttribute("expectedLength", this->getExpectedLength());
+
 	TiXmlElement * handlePoints_txe = new TiXmlElement("HandlePoints");
 	op_space_ms_xml->LinkEndChild(handlePoints_txe);
 	std::vector<Point>::const_iterator handlePoints_it = handle_points_.begin();
