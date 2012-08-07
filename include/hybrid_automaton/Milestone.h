@@ -48,7 +48,7 @@ class Milestone : public MDPNode
 public:
 
 	enum Status {
-		VALID, INVALID, TASK_CONSISTENT, STATUS_NUM, CURRENT_POS, GOAL
+		VALID, INVALID, TASK_CONSISTENT, STATUS_NUM
 	};
 
 	Milestone();
