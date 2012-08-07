@@ -6,6 +6,7 @@
 #include "edge.h"
 #include "Milestone.h"
 #include "MotionBehaviour.h"
+#include "LocalDecisionCriterion.h"
 
 /**
 * HybridAutomaton class. 
@@ -62,7 +63,7 @@ public:
     * Returns the next motion behavior to execute when at currentMs.
     * Currently the first motion in the list of childs is executed.
     */
-    MotionBehaviour* getNextMotionBehaviour(const Milestone* currentMs);
+    MotionBehaviour* getNextMotionBehaviour(const Milestone* currentMs, LocalDecisionCriterion* criterion = NULL);
 
 private:
 	Milestone* start_node_id_;	// Pointer to the first Milestone (if exists). 

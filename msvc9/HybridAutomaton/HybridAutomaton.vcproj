@@ -241,6 +241,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\include\hybrid_automaton\LocalDecisionCriterion.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\include\hybrid_automaton\Milestone.h"
 				>
 			</File>

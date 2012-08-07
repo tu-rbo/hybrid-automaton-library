@@ -41,12 +41,30 @@ Milestone* HybridAutomaton::getMilestoneByName(const std::string& name) const
 	return NULL;
 }
 
-MotionBehaviour* HybridAutomaton::getNextMotionBehaviour(const Milestone* currentMs)
+MotionBehaviour* HybridAutomaton::getNextMotionBehaviour(const Milestone* currentMs, LocalDecisionCriterion* criterion)
 {
-    if(outgoingEdges(currentMs).size() > 0 )
-        return (MotionBehaviour*)(outgoingEdges(currentMs)[0]);
-    else
-        return NULL;
+	if(outgoingEdges(currentMs).size() > 0 )
+	{
+		if(!criterion)
+		{
+			return (MotionBehaviour*)(outgoingEdges(currentMs)[0]);
+		}
+		else
+		{
+			for(int i = 0; i < outgoingEdges(currentMs).size(); i++)
+			{
+				// Assume ordered list!
+				if(((Milestone*)outgoingEdges(currentMs)[i]->getChild())->getStatus() == Milestone::TASK_CONSISTENT) /// Just for now: normally only TC in graph. TODO: Remove
+				{
+					if(criterion->isConnected(currentMs, (Milestone*)outgoingEdges(currentMs)[i]->getChild()))
+					{
+						return (MotionBehaviour*)(outgoingEdges(currentMs)[i]);
+					}
+				}
+			}
+		}
+	}
+	return NULL;
 }
 
 std::string HybridAutomaton::toStringXML() const

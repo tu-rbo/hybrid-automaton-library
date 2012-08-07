@@ -386,9 +386,14 @@ OpSpaceMilestone& OpSpaceMilestone::operator=(const OpSpaceMilestone & op_milest
 	return *this;
 }
 
-Displacement OpSpaceMilestone::getHandlePoint(int i)
+Displacement OpSpaceMilestone::getHandlePoint(int i) const
 {
 	return Displacement(this->handle_points_[i].x, this->handle_points_[i].y, this->handle_points_[i].z);
+}
+
+int OpSpaceMilestone::getHandlePointNumber() const
+{
+	return handle_points_.size();
 }
 
 PosiOriSelector OpSpaceMilestone::getPosiOriSelector() const

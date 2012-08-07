@@ -62,7 +62,9 @@ public:
 
 	virtual bool hasConverged(rxSystem* sys);
 
-	virtual Displacement getHandlePoint(int i);
+	virtual Displacement getHandlePoint(int i) const;
+
+	virtual int getHandlePointNumber() const;
 
 protected:
 
