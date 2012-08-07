@@ -4,28 +4,28 @@
 using namespace std;
 
 Milestone::Milestone() : 
-Node(),
+MDPNode(),
 status_(INVALID)
 {
 	this->name_ = std::string("default");
 }
 
 Milestone::Milestone(std::string milestone_name) : 
-Node(),
+MDPNode(milestone_name),
 status_(INVALID)
 {
 	this->name_ = milestone_name;
 }
 
 Milestone::Milestone(const char* milestone_name) : 
-Node(),
+MDPNode(std::string(milestone_name)),
 status_(INVALID)
 {
 	this->name_ = std::string(milestone_name);
 }
 
 Milestone::Milestone(const Milestone &milestone_cpy) : 
-Node(),
+MDPNode(milestone_cpy),
 status_(milestone_cpy.status_)
 {
 	this->name_ = milestone_cpy.name_;

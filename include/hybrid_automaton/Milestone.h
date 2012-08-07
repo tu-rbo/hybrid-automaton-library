@@ -10,7 +10,7 @@
 #ifndef MILESTONE_
 #define MILESTONE_
 
-#include "node.h"
+#include "MDPNode.h"
 #include <iostream>
 #include "tinyxml.h"
 #include "rxControlSDK\rxControlSDK.h"
@@ -42,7 +42,7 @@ typedef struct Point
 
 }point;
 
-class Milestone : public Node 
+class Milestone : public MDPNode 
 {
 
 public:

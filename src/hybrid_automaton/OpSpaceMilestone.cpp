@@ -327,7 +327,7 @@ TiXmlElement* OpSpaceMilestone::toElementXML() const
 	op_space_ms_xml->SetAttribute("PosiOriSelector", posi_ori_selection_);
 
 	std::stringstream value_ss;
-	for(int i=0; i<this->configuration_.size()-1; i++)
+	for(unsigned int i=0; i<this->configuration_.size()-1; i++)
 	{
 		value_ss << configuration_.at(i) << " ";
 	}
@@ -335,7 +335,7 @@ TiXmlElement* OpSpaceMilestone::toElementXML() const
 	op_space_ms_xml->SetAttribute("value", value_ss.str().c_str());
 
 	std::stringstream epsilon_ss;
-	for(int i=0; i<this->region_convergence_radius_.size()-1; i++)
+	for(unsigned int i=0; i<this->region_convergence_radius_.size()-1; i++)
 	{
 		epsilon_ss << region_convergence_radius_.at(i) << " ";
 	}

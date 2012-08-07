@@ -1,9 +1,9 @@
 #ifndef HYBRID_AUTOMATON_
 #define HYBRID_AUTOMATON_
 
-#include "DiGraph.h"
-#include "node.h"
-#include "edge.h"
+#include "MDP.h"
+#include "MDPNode.h"
+#include "MDPEdge.h"
 #include "Milestone.h"
 #include "MotionBehaviour.h"
 #include "LocalDecisionCriterion.h"
@@ -12,7 +12,7 @@
 * HybridAutomaton class. 
 * @brief Class extending DiGraph. It defines the types for the template to be Milestone and MotionBehaviour. Adds the required parser/deparser functionalities.
 */
-class HybridAutomaton : public DiGraph
+class HybridAutomaton : public MDP
 {
 public:
 

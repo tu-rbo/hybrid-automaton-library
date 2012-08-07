@@ -1,7 +1,7 @@
 #ifndef MOTION_BEHAVIOUR
 #define MOTION_BEHAVIOUR
 
-#include "Edge.h"
+#include "MDPEdge.h"
 #include "Milestone.h"
 #include "rControlalgorithm\rControlalgorithm.h"
 #include "rxControlSDK\rxControlSDK.h"
@@ -83,7 +83,7 @@ struct ViaPointHTransform : ViaPointBase{
 };
 
 
-class MotionBehaviour: public Edge
+class MotionBehaviour: public MDPEdge
 {
 
 private:

@@ -10,7 +10,7 @@
 using namespace std;
 
 MotionBehaviour::MotionBehaviour() :
-Edge(NULL, NULL, -1)
+MDPEdge(NULL, NULL, -1)
 , control_set_(NULL)
 , robot_(NULL)
 , time_(-1)
@@ -22,7 +22,7 @@ Edge(NULL, NULL, -1)
 }
 
 MotionBehaviour::MotionBehaviour(Milestone * dad, Milestone * son, rxSystem* robot, double weight, double dt ):
-Edge(dad, son, weight)
+MDPEdge(dad, son, weight)
 , control_set_(NULL)
 , robot_(robot)
 , time_(0)
@@ -45,7 +45,7 @@ Edge(dad, son, weight)
 }
 
 MotionBehaviour::MotionBehaviour(Milestone * dad, Milestone * son, rxControlSetBase* control_set, double weight):
-Edge(dad, son, weight)
+MDPEdge(dad, son, weight)
 , control_set_(control_set)
 , robot_(NULL)
 , time_(0)
@@ -71,7 +71,7 @@ Edge(dad, son, weight)
 }
 
 MotionBehaviour::MotionBehaviour(const MotionBehaviour & motion_behaviour_copy) :
-Edge(motion_behaviour_copy),
+MDPEdge(motion_behaviour_copy),
 robot_(motion_behaviour_copy.robot_),
 time_(motion_behaviour_copy.time_),
 dT_(motion_behaviour_copy.dT_),

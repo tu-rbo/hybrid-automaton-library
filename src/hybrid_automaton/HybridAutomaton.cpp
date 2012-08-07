@@ -10,6 +10,7 @@
 #include <iostream>
 
 HybridAutomaton::HybridAutomaton() :
+MDP(),
 start_node_id_(NULL)
 {
 }
