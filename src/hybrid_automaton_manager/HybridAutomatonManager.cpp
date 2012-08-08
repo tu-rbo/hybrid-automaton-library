@@ -147,6 +147,8 @@ HybridAutomatonManager::HybridAutomatonManager(rDC rdc)
 , _dof(0)
 , _servo_on(false)
 , _hybrid_automaton(NULL)
+, _physics_world(NULL)
+, _criterion(NULL)
 {
 	_deserialize_mutex = CreateMutex(0, FALSE, 0);
 	if( !_deserialize_mutex ) {
@@ -220,6 +222,11 @@ void HybridAutomatonManager::setCollisionInterface(CollisionInterface* collision
 void HybridAutomatonManager::setPhysicsWorld(rxWorld* physics_world)
 {
 		_physics_world = physics_world;
+}
+
+void HybridAutomatonManager::setLocalDecisionCriterion(LocalDecisionCriterion* criterion)
+{
+	this->_criterion = criterion;
 }
 
 void HybridAutomatonManager::setHybridAutomaton(std::string _new_hybrid_automaton_str, CollisionInterface* collision_interface)
@@ -383,7 +390,7 @@ void HybridAutomatonManager::_compute(const double& t)
 			std::cout << "[HybridAutomatonManager::_compute] INFO: New Hybrid Automaton" << std::endl;
 			Milestone* tmpMilestone = _hybrid_automaton->getStartNode();
 			_activeMotionBehavior->deactivate();
-			_activeMotionBehavior = _hybrid_automaton->getNextMotionBehaviour(tmpMilestone);
+			_activeMotionBehavior = _hybrid_automaton->getNextMotionBehaviour(tmpMilestone, _criterion); // if criterion is not set the old behaviours remains
 			_activeMotionBehavior->activate();
 #ifdef NOT_IN_RT
 			std::cout << _activeMotionBehavior->toStringXML() << ::std::endl;

@@ -51,6 +51,7 @@ public:
 	virtual void setHybridAutomaton(HybridAutomaton*  _new_hybrid_automaton);
 	virtual void setHybridAutomaton(std::string  _new_hybrid_automaton_str, CollisionInterface* collision_interface);
 	virtual void setCollisionInterface(CollisionInterface* collision_interface);
+	virtual void setLocalDecisionCriterion(LocalDecisionCriterion* criterion); // TODO: in future this could be defined in the milestones and serialised!
 	virtual void setPhysicsWorld(rxWorld* physics_world); // for debug draw...
 	virtual bool isBlackboardActive() const;
 	RTBlackBoard* getBlackboard(){return this->_blackboard;};
@@ -105,5 +106,6 @@ private:
 	HANDLE				_deserialize_mutex;
 
 	rxWorld*			_physics_world;
+	LocalDecisionCriterion*	_criterion;
 };
 #endif
