@@ -44,7 +44,7 @@ Milestone* HybridAutomaton::getMilestoneByName(const std::string& name) const
 
 MotionBehaviour* HybridAutomaton::getNextMotionBehaviour(const Milestone* currentMs, LocalDecisionCriterion* criterion)
 {
-	std::vector<MDPEdge*> edges = getSortedOutgoingEdges(currentMs);
+	std::vector<const MDPEdge*> edges = getSortedOutgoingEdges(currentMs);
 	if(edges.size() > 0 )
 	{
 		if(!criterion)
@@ -53,7 +53,7 @@ MotionBehaviour* HybridAutomaton::getNextMotionBehaviour(const Milestone* curren
 		}
 		else
 		{
-			for(int i = 0; i < edges.size(); i++)
+			for(unsigned int i = 0; i < edges.size(); i++)
 			{
 				if(criterion->isConnected(currentMs, (Milestone*)edges[i]->getChild()))
 				{
