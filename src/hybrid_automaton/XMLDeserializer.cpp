@@ -929,62 +929,70 @@ rxController* XMLDeserializer::createOrientationController(int orientation_subty
 rxController* XMLDeserializer::createHTransformController(int htransform_subtype, double controller_duration, std::vector<ViaPointBase*> via_points_ptr,
 														  TiXmlElement* rxController_xml, rxSystem* robot)
 {
-	rxBody*   alpha = NULL;
+    rxBody*   alpha = NULL;
 	rxBody*   beta = NULL;
 	rxController* controller = NULL;
-	std::string alpha_str = deserializeString(rxController_xml,"alpha");
+	Rotation alpha_rotation_matrix;
+    Displacement alpha_displacement;
+	Rotation beta_rotation_matrix;
+    Displacement beta_displacement;
+	std::string alpha_str = deserializeString(rxController_xml,"alpha",false);
 	alpha = robot->findBody(string2wstring(alpha_str));
-	// TODO: Catch alpha/beta doesnt exist
-	// TODO deserialise rotation correctly (see OrientationController)
-	std::stringstream alpha_rot_ss = std::stringstream(deserializeString(rxController_xml,"alphaRotation"));
-	double alpha_value = -1.0;
-	dVector alpha_rotation;
-	while((alpha_rot_ss >> alpha_value))
+	if(alpha)
 	{
-		alpha_rotation.expand(1,alpha_value);
+		alpha_rotation_matrix = string2rotation(deserializeString(rxController_xml,"alphaRotation"));
+        
+        std::stringstream alpha_ss = std::stringstream(deserializeString(rxController_xml,"alphaDisplacement"));
+		double alpha_value = -1.0;
+		while ((alpha_ss >> alpha_value))
+		{
+			alpha_displacement.expand(1,alpha_value);
+		}
 	}
-	std::stringstream alpha_disp_ss = std::stringstream(deserializeString(rxController_xml,"alphaDisplacement"));
-	dVector alpha_displacement;
-	while((alpha_disp_ss >> alpha_value))
+	else
 	{
-		alpha_displacement.expand(1,alpha_value);
+		alpha_rotation_matrix = Rotation();
+        alpha_displacement = Displacement();
 	}
 
-	std::string beta_str = deserializeString(rxController_xml,"beta");
+	std::string beta_str = deserializeString(rxController_xml,"beta",false);
 	beta = robot->findBody(string2wstring(beta_str));
-	std::stringstream beta_rot_ss = std::stringstream(deserializeString(rxController_xml,"betaRotation"));
-	double beta_value = -1.0;
-	dVector beta_rotation;
-	while((beta_rot_ss >> beta_value))
+	if(beta)
 	{
-		beta_rotation.expand(1,beta_value);
-	}			
-	std::stringstream beta_disp_ss = std::stringstream(deserializeString(rxController_xml,"betaDisplacement"));
-	dVector beta_displacement;
-	while((beta_disp_ss >> beta_value))
+		beta_rotation_matrix = string2rotation(deserializeString(rxController_xml,"betaRotation"));
+        
+        std::stringstream beta_ss = std::stringstream(deserializeString(rxController_xml,"betaDisplacement"));
+		double beta_value = -1.0;
+		while ((beta_ss >> beta_value))
+		{
+			beta_displacement.expand(1,beta_value);
+		}
+	}
+	else
 	{
-		beta_displacement.expand(1,beta_value);
+		beta_rotation_matrix = Rotation();
+        beta_displacement = Displacement();
 	}
 
 	switch(htransform_subtype)
 	{
 	case NONE:
-		controller = new rxHTransformController(robot, beta, HTransform(beta_rotation, beta_displacement), alpha, HTransform(alpha_rotation, alpha_displacement), controller_duration );
+		controller = new rxHTransformController(robot, beta, HTransform(beta_rotation_matrix, beta_displacement), alpha, HTransform(alpha_rotation_matrix, alpha_displacement), controller_duration );
 		break;
 	case WITH_COMPLIANCE:
-		controller = new rxHTransformComplianceController(robot, beta, HTransform(beta_rotation, beta_displacement), alpha, HTransform(alpha_rotation, alpha_displacement), controller_duration );
+		controller = new rxHTransformComplianceController(robot, beta, HTransform(beta_rotation_matrix, beta_displacement), alpha, HTransform(alpha_rotation_matrix, alpha_displacement), controller_duration );
 		break;
 	case WITH_IMPEDANCE:
-		controller = new rxHTransformImpedanceController(robot, beta, HTransform(beta_rotation, beta_displacement), alpha, HTransform(alpha_rotation, alpha_displacement), controller_duration );
+		controller = new rxHTransformImpedanceController(robot, beta, HTransform(beta_rotation_matrix, beta_displacement), alpha, HTransform(alpha_rotation_matrix, alpha_displacement), controller_duration );
 		break;
 	case WITH_INTERPOLATION:
-		controller = new rxInterpolatedHTransformController(robot, beta, HTransform(beta_rotation, beta_displacement), alpha, HTransform(alpha_rotation, alpha_displacement), controller_duration );
+		controller = new rxInterpolatedHTransformController(robot, beta, HTransform(beta_rotation_matrix, beta_displacement), alpha, HTransform(alpha_rotation_matrix, alpha_displacement), controller_duration );
 		break;
 	case WITH_INTERPOLATION | WITH_COMPLIANCE:
-		controller = new rxInterpolatedHTransformComplianceController(robot, beta, HTransform(beta_rotation, beta_displacement), alpha, HTransform(alpha_rotation, alpha_displacement), controller_duration );
+		controller = new rxInterpolatedHTransformComplianceController(robot, beta, HTransform(beta_rotation_matrix, beta_displacement), alpha, HTransform(alpha_rotation_matrix, alpha_displacement), controller_duration );
 		break;
 	case WITH_INTERPOLATION | WITH_IMPEDANCE:
-		controller = new rxInterpolatedHTransformImpedanceController(robot, beta, HTransform(beta_rotation, beta_displacement), alpha, HTransform(alpha_rotation, alpha_displacement), controller_duration );
+		controller = new rxInterpolatedHTransformImpedanceController(robot, beta, HTransform(beta_rotation_matrix, beta_displacement), alpha, HTransform(alpha_rotation_matrix, alpha_displacement), controller_duration );
 		break;
 	default:
 		throw std::string("[XMLDeserializer::createHTransformController] ERROR: Unexpected Controller subgroup.");
