@@ -521,8 +521,8 @@ MotionBehaviour* XMLDeserializer::createMotionBehaviour(TiXmlElement* motion_beh
 
     double length = deserializeElement<double>(motion_behaviour_xml, "length");
     double prob   = deserializeElement<double>(motion_behaviour_xml, "probability");
-    mb->setProbability(length);
-    mb->setLength(prob);
+    mb->setLength(length);
+    mb->setProbability(prob);
 
 	return mb;
 }

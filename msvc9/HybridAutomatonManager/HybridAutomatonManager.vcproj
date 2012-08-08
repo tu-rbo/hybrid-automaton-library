@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="Windows-1252"?>
 <VisualStudioProject
 	ProjectType="Visual C++"
-	Version="9,00"
+	Version="9.00"
 	Name="HybridAutomatonManager"
 	ProjectGUID="{C48E2081-E337-4D79-BD9C-B798C18AEFEE}"
 	RootNamespace="HybridAutomatonManager"
@@ -61,7 +61,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="rMath_9d.lib rxControlSDK_9d.lib HybridAutomatond.lib libgraphd.lib tinyxmld.lib"
+				AdditionalDependencies="rxSDK_9d.lib rMath_9d.lib rxControlSDK_9d.lib HybridAutomatond.lib libgraphd.lib tinyxmld.lib"
 				LinkIncremental="2"
 				AdditionalLibraryDirectories="&quot;$(RLAB_LIB_PATH)&quot;;&quot;$(ProjectDir)..\..\bin&quot;;&quot;$(ProjectDir)..\..\thirdparty\tinyxml\bin&quot;;&quot;$(ProjectDir)..\..\..\graph\bin&quot;"
 				GenerateDebugInformation="true"
@@ -138,7 +138,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="rMath_9.lib rxControlSDK_9.lib HybridAutomaton.lib libgraph.lib tinyxml.lib"
+				AdditionalDependencies="rxSDK_9.lib rMath_9.lib rxControlSDK_9.lib HybridAutomaton.lib libgraph.lib tinyxml.lib"
 				LinkIncremental="1"
 				AdditionalLibraryDirectories="&quot;$(RLAB_LIB_PATH)&quot;;&quot;$(ProjectDir)..\..\bin&quot;;&quot;$(ProjectDir)..\..\thirdparty\tinyxml\bin&quot;;&quot;$(ProjectDir)..\..\..\graph\bin&quot;"
 				GenerateDebugInformation="true"

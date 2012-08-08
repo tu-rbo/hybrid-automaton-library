@@ -99,7 +99,9 @@ rID HybridAutomatonManager::drawLine(const rMath::Displacement &start, const rMa
 	return id;
 }
 
-rID path[10] = {INVALID_RID,INVALID_RID,INVALID_RID,INVALID_RID,INVALID_RID,INVALID_RID,INVALID_RID,INVALID_RID,INVALID_RID,INVALID_RID};
+//rID path[10] = {INVALID_RID,INVALID_RID,INVALID_RID,INVALID_RID,INVALID_RID,INVALID_RID,INVALID_RID,INVALID_RID,INVALID_RID,INVALID_RID};
+vector<rID> _path_ids;
+vector<rID> _curr_path_ids;
 #endif
 
 unsigned __stdcall deserializeHybridAutomaton(void *udata)
@@ -390,7 +392,7 @@ void HybridAutomatonManager::_compute(const double& t)
 			std::cout << "[HybridAutomatonManager::_compute] INFO: New Hybrid Automaton" << std::endl;
 			Milestone* tmpMilestone = _hybrid_automaton->getStartNode();
 			_activeMotionBehavior->deactivate();
-			_activeMotionBehavior = _hybrid_automaton->getNextMotionBehaviour(tmpMilestone, _criterion); // if criterion is not set the old behaviours remains
+			_activeMotionBehavior = _hybrid_automaton->getNextMotionBehaviour(tmpMilestone, _criterion); // TODO NK: maybe dont use criterion here? Now: decision from current_pos everytime a new HA arrives...
 			_activeMotionBehavior->activate();
 #ifdef NOT_IN_RT
 			std::cout << _activeMotionBehavior->toStringXML() << ::std::endl;
@@ -400,21 +402,64 @@ void HybridAutomatonManager::_compute(const double& t)
 #endif
 			ReleaseMutex(_deserialize_mutex);
 #ifdef DRAW_HYBRID_AUTOMATON
-			for(int i = 0; i < 10; i++)
+			// delete drawn path
+			for(int i = 0; i < _path_ids.size(); i++)
 			{
-				if(!_hybrid_automaton->outgoingEdges(*tmpMilestone).empty())
+				_physics_world->eraseCustomDraw(_path_ids[i]);
+			}
+			for(int i = 0; i < _curr_path_ids.size(); i++)
+			{
+				_physics_world->eraseCustomDraw(_curr_path_ids[i]);
+			}
+			_path_ids.clear();
+			_curr_path_ids.clear();
+			
+			std::vector<const Node*> milestones = _hybrid_automaton->getNodes();
+			std::vector<const Node*>::iterator mit;
+			for(mit = milestones.begin(); mit != milestones.end(); mit++)
+			{
+				std::vector<const MDPEdge*> outgoing = _hybrid_automaton->getSortedOutgoingEdges((const MDPNode*)(*mit));
+				std::vector<const MDPEdge*>::iterator eit;
+				double color_order = 0.0;
+				for(eit = outgoing.begin(); eit != outgoing.end(); eit++)
 				{
-					Milestone* tmpMilestone2 = _hybrid_automaton->outgoingEdges(*tmpMilestone)[0]->getChild();
-					// TODO: Handlepoints should be part of Milestone! All children have them....?
-					cout << "DrawLine" << std::endl;
-					path[i] = drawLine(((OpSpaceMilestone*)tmpMilestone)->getHandlePoint(0),((OpSpaceMilestone*)tmpMilestone2)->getHandlePoint(0),path[i],BLUE);
-					tmpMilestone = tmpMilestone2;
+					const OpSpaceMilestone* ms1 = (const OpSpaceMilestone*)(*eit)->getParent();
+					const OpSpaceMilestone* ms2 = (const OpSpaceMilestone*)(*eit)->getChild();
+					Displacement pos1 = ms1->getHandlePoint(0);
+					Displacement pos2 = ms2->getHandlePoint(0);
+					pos1[2] += 0.1;
+					pos2[2] += 0.1;
+					_path_ids.push_back(drawLine(pos1,pos2,INVALID_RID,rColor(1.0,(*eit)->getProbability(),0.0)));
+				/*	pos1[2] += 0.3;
+					pos2[2] += 0.3;
+					_path_ids.push_back(drawLine(pos1,pos2,INVALID_RID,rColor(0.0,1.0,color_order)));
+					color_order += 0.2;*/
+					//cout << "drawline: prob " << (*eit)->getProbability() << endl;
 				}
-				else
-				{
-					_physics_world->eraseCustomDraw(path[i]);
-				}
+			}
 
+			// draw current choice + next decision
+			const OpSpaceMilestone* ms1 = (const OpSpaceMilestone*)_activeMotionBehavior->getParent();
+			const OpSpaceMilestone* ms2 = (const OpSpaceMilestone*)_activeMotionBehavior->getChild();
+			Displacement pos1 = ms1->getHandlePoint(0);
+			Displacement pos2 = ms2->getHandlePoint(0);
+			pos1[2] += 0.5;
+			pos2[2] += 0.5;
+			_curr_path_ids.push_back(drawLine(pos1,pos2,INVALID_RID,rColor(0.0,0.0,1.0)));
+			std::vector<const MDPEdge*> outgoing = _hybrid_automaton->getSortedOutgoingEdges(ms2);
+			std::vector<const MDPEdge*>::iterator eit;
+			double color_order = 0.0;
+			for(eit = outgoing.begin(); eit != outgoing.end(); eit++)
+			{
+				const OpSpaceMilestone* ms1 = (const OpSpaceMilestone*)(*eit)->getParent();
+				const OpSpaceMilestone* ms2 = (const OpSpaceMilestone*)(*eit)->getChild();
+				Displacement pos1 = ms1->getHandlePoint(0);
+				Displacement pos2 = ms2->getHandlePoint(0);
+				pos1[2] += 0.5;
+				pos2[2] += 0.5;
+				_curr_path_ids.push_back(drawLine(pos1,pos2,INVALID_RID,rColor(0.0,1.0,color_order)));
+				color_order += 0.2;
+				//cout << "drawline: prob " << (*eit)->getProbability() << endl;
 			}
 #endif
 		}
@@ -423,8 +468,38 @@ void HybridAutomatonManager::_compute(const double& t)
 		if (_hybrid_automaton && _hybrid_automaton->getNextMotionBehaviour(childMs) != NULL) {
 			std::cout << "[HybridAutomatonManager::_compute] INFO: Switching controller" << std::endl;
 			_activeMotionBehavior->deactivate();
-			_activeMotionBehavior = _hybrid_automaton->getNextMotionBehaviour(childMs);
+			_activeMotionBehavior = _hybrid_automaton->getNextMotionBehaviour(childMs,_criterion); // if criterion is not set the old behaviour remains
 			_activeMotionBehavior->activate();
+#ifdef DRAW_HYBRID_AUTOMATON
+			for(int i = 0; i < _curr_path_ids.size(); i++)
+			{
+				_physics_world->eraseCustomDraw(_curr_path_ids[i]);
+			}
+			_curr_path_ids.clear();
+			// draw current choice + next decision
+			const OpSpaceMilestone* ms1 = (const OpSpaceMilestone*)_activeMotionBehavior->getParent();
+			const OpSpaceMilestone* ms2 = (const OpSpaceMilestone*)_activeMotionBehavior->getChild();
+			Displacement pos1 = ms1->getHandlePoint(0);
+			Displacement pos2 = ms2->getHandlePoint(0);
+			pos1[2] += 0.5;
+			pos2[2] += 0.5;
+			_curr_path_ids.push_back(drawLine(pos1,pos2,INVALID_RID,rColor(0.0,0.0,1.0)));
+			std::vector<const MDPEdge*> outgoing = _hybrid_automaton->getSortedOutgoingEdges(ms2);
+			std::vector<const MDPEdge*>::iterator eit;
+			double color_order = 0.0;
+			for(eit = outgoing.begin(); eit != outgoing.end(); eit++)
+			{
+				const OpSpaceMilestone* ms1 = (const OpSpaceMilestone*)(*eit)->getParent();
+				const OpSpaceMilestone* ms2 = (const OpSpaceMilestone*)(*eit)->getChild();
+				Displacement pos1 = ms1->getHandlePoint(0);
+				Displacement pos2 = ms2->getHandlePoint(0);
+				pos1[2] += 0.5;
+				pos2[2] += 0.5;
+				_curr_path_ids.push_back(drawLine(pos1,pos2,INVALID_RID,rColor(0.0,1.0,color_order)));
+				color_order += 0.2;
+				//cout << "drawline: prob " << (*eit)->getProbability() << endl;
+			}
+#endif
 
 #ifdef NOT_IN_RT 
 			std::cout << _activeMotionBehavior->toStringXML() << ::std::endl;
