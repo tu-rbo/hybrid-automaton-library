@@ -48,6 +48,8 @@ public:
 	*/
 	static std::wstring string2wstring(const std::string& str);
 
+	static Rotation string2rotation(const std::string& str);
+
 
 	XMLDeserializer();
 	virtual ~XMLDeserializer();

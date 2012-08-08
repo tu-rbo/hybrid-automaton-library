@@ -190,6 +190,27 @@ std::wstring XMLDeserializer::string2wstring(const std::string& str)
 	return std::wstring(str.begin(), str.end());
 }
 
+Rotation XMLDeserializer::string2rotation(const std::string& str)
+{
+	std::stringstream ss = std::stringstream(str);
+	double value = -1.0;
+	Rotation result;
+	int i = 0;
+	int j = 0;
+	while(ss >> value)
+	{
+		result.set(i,j,value);
+		j++;
+		if(j > 2)
+		{
+			i++;
+			j=0;
+		}
+	}
+	assert(i == j == 3);
+	return result;
+}
+
 std::string colon2space(std::string text)
 {
 	for(unsigned int i = 0; i < text.length(); i++)
@@ -341,7 +362,7 @@ CSpaceMilestone* XMLDeserializer::createCSpaceMilestone(TiXmlElement* milestone_
 		throw std::string("[XMLDeserializer::createCSpaceMilestone] ERROR: The milestone configuration or region of convergence (\"value\" or \"epsilon\") is not defined in the XML string.");
 	}
 
-    double expLength = deserializeElement<double>(milestone_xml, "excpectedLength");
+    double expLength = deserializeElement<double>(milestone_xml, "expectedLength");
 
 	TiXmlElement* handle_point_set_element = milestone_xml->FirstChildElement("HandlePoints");
 	std::vector<Point> mst_handle_points;
@@ -385,7 +406,7 @@ CSpaceBlackBoardMilestone* XMLDeserializer::createCSpaceBlackBoardMilestone(TiXm
 		throw std::string("[XMLDeserializer::createCSpaceMilestone] ERROR: The milestone configuration or region of convergence (\"value\" or \"epsilon\") is not defined in the XML string.");
 	}
 
-    double expLength = deserializeElement<double>(milestone_xml, "excpectedLength");
+    double expLength = deserializeElement<double>(milestone_xml, "expectedLength");
 
 	TiXmlElement* handle_point_set_element = milestone_xml->FirstChildElement("HandlePoints");
 	std::vector<Point> mst_handle_points;
@@ -422,7 +443,7 @@ OpSpaceMilestone* XMLDeserializer::createOpSpaceMilestone(TiXmlElement* mileston
 		throw std::string("[XMLDeserializer::createOpSpaceMilestone] ERROR: The milestone configuration or region of convergence (\"value\" or \"epsilon\") is not defined in the XML string.");
 	}
 
-    double expLength = deserializeElement<double>(milestone_xml, "excpectedLength");
+    double expLength = deserializeElement<double>(milestone_xml, "expectedLength");
 
 	TiXmlElement* handle_point_set_element = milestone_xml->FirstChildElement("HandlePoints");
 	std::vector<Point> mst_handle_points;
@@ -499,7 +520,7 @@ MotionBehaviour* XMLDeserializer::createMotionBehaviour(TiXmlElement* motion_beh
 	}
 
     double length = deserializeElement<double>(motion_behaviour_xml, "length");
-    double prob   = deserializeElement<double>(motion_behaviour_xml, "prob");
+    double prob   = deserializeElement<double>(motion_behaviour_xml, "probability");
     mb->setProbability(length);
     mb->setLength(prob);
 
@@ -828,48 +849,52 @@ rxController* XMLDeserializer::createOrientationController(int orientation_subty
 	rxBody*   alpha = NULL;
 	rxBody*   beta = NULL;
 	rxController* controller = NULL;
-	std::string alpha_str = deserializeString(rxController_xml,"alpha");
+	Rotation alpha_rotation_matrix;
+	Rotation beta_rotation_matrix;
+	std::string alpha_str = deserializeString(rxController_xml,"alpha",false);
 	alpha = robot->findBody(string2wstring(alpha_str));
-	std::stringstream alpha_ss = std::stringstream(deserializeString(rxController_xml,"alphaRotation"));
-	double alpha_value = -1.0;
-	dVector alpha_rotation;
-	while((alpha_ss >> alpha_value))
+	if(alpha)
 	{
-		alpha_rotation.expand(1,alpha_value);
+		alpha_rotation_matrix = string2rotation(deserializeString(rxController_xml,"alphaRotation"));
 	}
-	std::string beta_str = deserializeString(rxController_xml,"beta");
-	beta = robot->findBody(string2wstring(beta_str));
-	std::stringstream beta_ss = std::stringstream(deserializeString(rxController_xml,"betaRotation"));
-	double beta_value = -1.0;
-	dVector beta_rotation;
-	while((beta_ss >> beta_value))
+	else
 	{
-		beta_rotation.expand(1,beta_value);
+		alpha_rotation_matrix = Rotation();
+	}
+	std::string beta_str = deserializeString(rxController_xml,"beta",false);
+	beta = robot->findBody(string2wstring(beta_str));
+	if(beta)
+	{
+		beta_rotation_matrix = string2rotation(deserializeString(rxController_xml,"betaRotation"));
+	}
+	else
+	{
+		beta_rotation_matrix = Rotation();
 	}
 
 	switch(orientation_subtype)
 	{
 	case NONE:
-		controller = new rxOrientationController(robot, beta, Rotation(beta_rotation), alpha, Rotation(alpha_rotation), controller_duration );
+		controller = new rxOrientationController(robot, beta, beta_rotation_matrix, alpha, alpha_rotation_matrix, controller_duration );
 		break;
 	case WITH_COMPLIANCE:
 		{
-			controller = new rxOrientationComplianceController(robot, beta, Rotation(beta_rotation), alpha, Rotation(alpha_rotation), controller_duration );
+			controller = new rxOrientationComplianceController(robot, beta, beta_rotation_matrix, alpha,alpha_rotation_matrix, controller_duration );
 			break;
 		}
 	case WITH_IMPEDANCE:
-		controller = new rxOrientationImpedanceController(robot, beta, Rotation(beta_rotation), alpha, Rotation(alpha_rotation), controller_duration );
+		controller = new rxOrientationImpedanceController(robot, beta, beta_rotation_matrix, alpha,alpha_rotation_matrix, controller_duration );
 		break;
 	case WITH_INTERPOLATION:
-		controller = new rxInterpolatedOrientationController(robot, beta, Rotation(beta_rotation), alpha, Rotation(alpha_rotation), controller_duration );
+		controller = new rxInterpolatedOrientationController(robot, beta, beta_rotation_matrix, alpha,alpha_rotation_matrix, controller_duration );
 		break;
 	case WITH_INTERPOLATION | WITH_COMPLIANCE:
 		{
-			controller = new rxInterpolatedOrientationComplianceController(robot, beta, Rotation(beta_rotation), alpha, Rotation(alpha_rotation), controller_duration );
+			controller = new rxInterpolatedOrientationComplianceController(robot, beta, beta_rotation_matrix, alpha,alpha_rotation_matrix, controller_duration );
 			break;
 		}
 	case WITH_INTERPOLATION | WITH_IMPEDANCE:
-		controller = new rxInterpolatedOrientationImpedanceController(robot, beta, Rotation(beta_rotation), alpha, Rotation(alpha_rotation), controller_duration );
+		controller = new rxInterpolatedOrientationImpedanceController(robot, beta, beta_rotation_matrix, alpha,alpha_rotation_matrix, controller_duration );
 		break;
 	default:
 		throw std::string("[XMLDeserializer::createOrientationController] ERROR:  Unexpected Controller subgroup.");
@@ -909,6 +934,8 @@ rxController* XMLDeserializer::createHTransformController(int htransform_subtype
 	rxController* controller = NULL;
 	std::string alpha_str = deserializeString(rxController_xml,"alpha");
 	alpha = robot->findBody(string2wstring(alpha_str));
+	// TODO: Catch alpha/beta doesnt exist
+	// TODO deserialise rotation correctly (see OrientationController)
 	std::stringstream alpha_rot_ss = std::stringstream(deserializeString(rxController_xml,"alphaRotation"));
 	double alpha_value = -1.0;
 	dVector alpha_rotation;
