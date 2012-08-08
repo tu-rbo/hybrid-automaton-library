@@ -598,7 +598,6 @@ void MotionBehaviour::RLabInfoString2ElementXML_(string_type string_data, TiXmlE
 	switch(type_of_controller.first)
 	{
 	case rxController::eControlType_Displacement:
-	case rxController::eControlType_Orientation:		
 		if(temp_st.compare(0, 5, alpha_string)==0)
 		{
 			out_xml_element->SetAttribute("alpha", colon2space( XMLDeserializer::wstring2string( temp_st.substr( temp_st.find(L"=") + 1, temp_st.find(L"\n") ) ) ).c_str() );
@@ -611,6 +610,22 @@ void MotionBehaviour::RLabInfoString2ElementXML_(string_type string_data, TiXmlE
 			out_xml_element->SetAttribute("beta", colon2space(XMLDeserializer::wstring2string(temp_st.substr(temp_st.find(L"=") + 1, temp_st.find(L"\n")))).c_str() );
 			std::getline(data_ss, temp_st);	
 			out_xml_element->SetAttribute("betaDisplacement",colon2space( XMLDeserializer::wstring2string(temp_st.substr(temp_st.find(L"=") + 1, temp_st.find(L"\n")))).c_str() );
+			std::getline(data_ss, temp_st);	
+		}
+		break;
+	case rxController::eControlType_Orientation:		
+		if(temp_st.compare(0, 5, alpha_string)==0)
+		{
+			out_xml_element->SetAttribute("alpha", colon2space( XMLDeserializer::wstring2string( temp_st.substr( temp_st.find(L"=") + 1, temp_st.find(L"\n") ) ) ).c_str() );
+			std::getline(data_ss, temp_st);	
+			out_xml_element->SetAttribute("alphaRotation", colon2space(XMLDeserializer::wstring2string(temp_st.substr(temp_st.find(L"=") + 1, temp_st.find(L"\n")))).c_str() );
+			std::getline(data_ss, temp_st);	
+		}		
+		if(temp_st.compare( 0, 4, beta_string)==0)
+		{
+			out_xml_element->SetAttribute("beta", colon2space(XMLDeserializer::wstring2string(temp_st.substr(temp_st.find(L"=") + 1, temp_st.find(L"\n")))).c_str() );
+			std::getline(data_ss, temp_st);	
+			out_xml_element->SetAttribute("betaRotation",colon2space( XMLDeserializer::wstring2string(temp_st.substr(temp_st.find(L"=") + 1, temp_st.find(L"\n")))).c_str() );
 			std::getline(data_ss, temp_st);	
 		}
 		break;
