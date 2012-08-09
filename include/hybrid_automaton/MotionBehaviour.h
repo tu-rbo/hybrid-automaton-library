@@ -16,16 +16,19 @@
 #include <math.h>
 
 typedef enum {
-	NONE				= 0,
-	WITH_FUNCTION		= 1,
-	WITH_COMPLIANCE		= 2,
-	WITH_IMPEDANCE		= 4,
-	WITH_INTERPOLATION	= 8,
-	WITH_GRADIENT		= 16,
-	ATTRACTOR			= 32, 
-	SUBDISPLACEMENT		= 64,
-	OBSTACLE_AVOIDANCE	= 128,
-	BLACKBOARD_ACCESS	= 256
+	NONE				    = 0,
+	WITH_FUNCTION		    = 1,
+	WITH_COMPLIANCE		    = 2,
+	WITH_IMPEDANCE	    	= 4,
+	WITH_INTERPOLATION	    = 8,
+	WITH_GRADIENT		    = 16,
+	ATTRACTOR			    = 32, 
+	SUBDISPLACEMENT		    = 64,
+	OBSTACLE_AVOIDANCE	    = 128,
+    SINGULARITY_AVOIDANCE   = 129,
+    JOINT_LIMIT_AVOIDANCE   = 130,
+
+	BLACKBOARD_ACCESS	    = 256
 } ControllerSubtype;
 
 // impossible to replace int by ControllerSubtype because then no combinations of subtypes are allowed!

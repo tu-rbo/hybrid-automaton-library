@@ -690,6 +690,20 @@ void MotionBehaviour::RLabInfoString2ElementXML_(string_type string_data, TiXmlE
 			out_xml_element->SetAttribute("deactivationThreshold", XMLDeserializer::wstring2string(temp_st.substr(temp_st.find(L"=") + 1, temp_st.find(L"\n"))).c_str() );		
 		}
 		break;
+    case(SINGULARITY_AVOIDANCE):
+        {
+			out_xml_element->SetAttribute("maxVel", XMLDeserializer::wstring2string(temp_st.substr(temp_st.find(L"=") + 1, temp_st.find(L"\n"))).c_str() );
+			std::getline(data_ss, temp_st);	
+        }
+        break;
+     case(JOINT_LIMIT_AVOIDANCE):
+        {
+			out_xml_element->SetAttribute("index", XMLDeserializer::wstring2string(temp_st.substr(temp_st.find(L"=") + 1, temp_st.find(L"\n"))).c_str() );
+			std::getline(data_ss, temp_st);	
+            out_xml_element->SetAttribute("safetyThresh", XMLDeserializer::wstring2string(temp_st.substr(temp_st.find(L"=") + 1, temp_st.find(L"\n"))).c_str() );		
+
+        }
+        break;
 	case(SUBDISPLACEMENT | WITH_IMPEDANCE):
 		{
 			if(temp_st.compare(0, 5, alpha_string)==0)

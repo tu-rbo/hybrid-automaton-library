@@ -11,6 +11,9 @@
 #include "SubdisplacementController.h"
 #include "ObstacleAvoidanceController.h"
 #include "JointBlackBoardController.h"
+#include "SingularityAvoidanceController.h"
+#include "JointLimitAvoidanceControllerOnDemand.h"
+#include "OpSpaceSingularityAvoidanceController.h"
 
 std::map<std::string, ControllerType> XMLDeserializer::controller_map_ = XMLDeserializer::createControllerMapping();
 
@@ -207,7 +210,7 @@ Rotation XMLDeserializer::string2rotation(const std::string& str)
 			j=0;
 		}
 	}
-	assert(i == j == 3);
+	assert(i == 3 && j == 3);
 	return result;
 }
 
@@ -704,6 +707,15 @@ rxController* XMLDeserializer::createJointController(int joint_subtype, double c
 	case BLACKBOARD_ACCESS:
 		controller = new JointBlackBoardController(robot, controller_duration);
 		break;
+    case SINGULARITY_AVOIDANCE:
+        {
+            double max_vel = deserializeElement<double>(rxController_xml,"maxVel");
+            HTransform ht;
+            rxBody* EE = robot->getUCSBody(_T("EE"),ht);
+            controller = new SingularityAvoidanceController(robot, EE, controller_duration, max_vel);
+        }
+        break;
+    
 	default:
 		throw std::string("[XMLDeserializer::createJointController] ERROR: Unexpected Controller subgroup.");
 		break;
@@ -812,6 +824,12 @@ rxController* XMLDeserializer::createDisplacementController(int displacement_sub
 			dynamic_cast<FeatureAttractorController*>(controller)->setImpedance(0.2,8.0,20.0);
 			break;
 		}
+    case SINGULARITY_AVOIDANCE:
+        {
+            double max_vel = deserializeElement<double>(rxController_xml,"maxVel", 1.);
+            controller = new OpSpaceSingularityAvoidanceController(robot, beta, alpha, controller_duration, max_vel );
+			break;
+        }
 	default:
 		throw std::string("[XMLDeserializer::createDisplacementController] ERROR: Unexpected Controller subgroup.");
 		break;
@@ -1159,6 +1177,14 @@ rxController* XMLDeserializer::createFunctionalController(int functional_subtype
 			}
 		}
 		break;
+   case JOINT_LIMIT_AVOIDANCE:
+		{
+			long index = (long)deserializeElement<int>(rxController_xml,"index");
+			double safetyThresh = deserializeElement<double>(rxController_xml,"safetyThresh", 1.0);
+            controller = new JointLimitAvoidanceControllerOnDemand(robot, index, safetyThresh, controller_duration); 
+		}
+		break;
+
 	default:
 		throw std::string("[XMLDeserializer::createFunctionalController] ERROR: Unexpected Controller subgroup.");
 		break;
@@ -1224,6 +1250,10 @@ std::map<std::string, ControllerType> XMLDeserializer::createControllerMapping()
 	mapping["SubdisplacementController"]					= ControllerType(rxController::eControlType_Functional, WITH_IMPEDANCE | SUBDISPLACEMENT);
 	mapping["ObstacleAvoidanceController"]					= ControllerType(rxController::eControlType_Functional, OBSTACLE_AVOIDANCE);
 	mapping["JointBlackBoardController"]					= ControllerType(rxController::eControlType_Joint, BLACKBOARD_ACCESS);
+
+    mapping["SingularityAvoidanceController"]				= ControllerType(rxController::eControlType_Joint, SINGULARITY_AVOIDANCE);
+    mapping["OpSpaceSingularityAvoidanceController"]    	= ControllerType(rxController::eControlType_Displacement, SINGULARITY_AVOIDANCE);
+    mapping["JointLimitAvoidanceControllerOnDemand"]		= ControllerType(rxController::eControlType_Functional, JOINT_LIMIT_AVOIDANCE);
 
 	return mapping;
 }
