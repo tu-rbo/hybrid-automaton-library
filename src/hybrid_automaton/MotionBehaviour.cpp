@@ -565,26 +565,26 @@ void MotionBehaviour::RLabInfoString2ElementXML_(string_type string_data, TiXmlE
 			std::getline(data_ss, temp_st);		// Discard field "Vector3D" of via points 
 			if(!is_goal_controller)
 			{
-				out_xml_element->SetAttribute("Vector3DGoal", XMLDeserializer::wstring2string(temp_st.substr(temp_st.find(L"=") + 1, temp_st.find(L"\n"))).c_str());
+				out_xml_element->SetAttribute("Vector3DGoal", colon2space(XMLDeserializer::wstring2string(temp_st.substr(temp_st.find(L"=") + 1, temp_st.find(L"\n")))).c_str());
 			}
 			break;
 		case rxController::eControlType_Orientation:
 			std::getline(data_ss, temp_st);	
 			if(!is_goal_controller)
 			{
-				out_xml_element->SetAttribute("RGoal", XMLDeserializer::wstring2string(temp_st.substr(temp_st.find(L"=") + 1, temp_st.find(L"\n"))).c_str());
+				out_xml_element->SetAttribute("RGoal", colon2space(XMLDeserializer::wstring2string(temp_st.substr(temp_st.find(L"=") + 1, temp_st.find(L"\n")))).c_str());
 			}
 			break;
 		case rxController::eControlType_HTransform:
 			std::getline(data_ss, temp_st);	
 			if(!is_goal_controller)
 			{
-				out_xml_element->SetAttribute("RGoal", XMLDeserializer::wstring2string(temp_st.substr(temp_st.find(L"=") + 1, temp_st.find(L"\n"))).c_str());
+				out_xml_element->SetAttribute("RGoal", colon2space(XMLDeserializer::wstring2string(temp_st.substr(temp_st.find(L"=") + 1, temp_st.find(L"\n")))).c_str());
 			}
 			std::getline(data_ss, temp_st);	
 			if(!is_goal_controller)
 			{
-				out_xml_element->SetAttribute("rGoal", XMLDeserializer::wstring2string(temp_st.substr(temp_st.find(L"=") + 1, temp_st.find(L"\n"))).c_str());
+				out_xml_element->SetAttribute("rGoal", colon2space(XMLDeserializer::wstring2string(temp_st.substr(temp_st.find(L"=") + 1, temp_st.find(L"\n")))).c_str());
 			}
 			break;
 		default:

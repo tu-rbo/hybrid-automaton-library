@@ -202,15 +202,15 @@ Rotation XMLDeserializer::string2rotation(const std::string& str)
 	int j = 0;
 	while(ss >> value)
 	{
-		result.set(i,j,value);
-		j++;
-		if(j > 2)
+		if(j == 3)
 		{
 			i++;
 			j=0;
 		}
+		result.set(i,j,value);
+		j++;
 	}
-	assert(i == 3 && j == 3);
+	assert(i == 2 && j == 3);
 	return result;
 }
 
