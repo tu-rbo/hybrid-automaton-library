@@ -25,10 +25,9 @@ typedef enum {
 	ATTRACTOR			    = 32, 
 	SUBDISPLACEMENT		    = 64,
 	OBSTACLE_AVOIDANCE	    = 128,
-    SINGULARITY_AVOIDANCE   = 129,
-    JOINT_LIMIT_AVOIDANCE   = 130,
-
-	BLACKBOARD_ACCESS	    = 256
+	BLACKBOARD_ACCESS	    = 256,
+    SINGULARITY_AVOIDANCE   = 512,
+    JOINT_LIMIT_AVOIDANCE   = 1024
 } ControllerSubtype;
 
 // impossible to replace int by ControllerSubtype because then no combinations of subtypes are allowed!

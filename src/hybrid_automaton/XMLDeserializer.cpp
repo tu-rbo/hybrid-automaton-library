@@ -597,7 +597,7 @@ rxController* XMLDeserializer::createController(TiXmlElement *rxController_xml, 
 	wss << "controller_" << controller_counter;
 	controller->setName(wss.str());
 
-	if(!goal_controller && !(type_of_controller.second & OBSTACLE_AVOIDANCE) &&!(type_of_controller.second & SUBDISPLACEMENT) )
+	if(!goal_controller && !(type_of_controller.second & OBSTACLE_AVOIDANCE) &&!(type_of_controller.second & SUBDISPLACEMENT) &&!(type_of_controller.second & SINGULARITY_AVOIDANCE) &&!(type_of_controller.second & JOINT_LIMIT_AVOIDANCE))
 	{
 
 		double time_goal = deserializeElement<double>(rxController_xml, "timeGoal");
