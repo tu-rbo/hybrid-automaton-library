@@ -22,6 +22,7 @@
 //#define DRAW_HYBRID_AUTOMATON
 #ifdef DRAW_HYBRID_AUTOMATON
 #include "rCustomDraw.h"
+#include "applications/elastic_roadmap/src/rIdProducer.h"
 #endif
 
 typedef struct DeserializingThreadArguments {

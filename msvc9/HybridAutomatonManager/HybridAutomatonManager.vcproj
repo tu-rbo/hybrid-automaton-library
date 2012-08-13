@@ -183,6 +183,10 @@
 				RelativePath="..\..\src\hybrid_automaton_manager\HybridAutomatonManager.cpp"
 				>
 			</File>
+			<File
+				RelativePath="..\..\..\applications\elastic_roadmap\src\rIdProducer.cpp"
+				>
+			</File>
 		</Filter>
 		<Filter
 			Name="Header Files"
@@ -195,6 +199,10 @@
 			</File>
 			<File
 				RelativePath="..\..\include\hybrid_automaton_manager\HybridAutomatonManagerCmd.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\applications\elastic_roadmap\src\rIdProducer.h"
 				>
 			</File>
 			<Filter
