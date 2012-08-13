@@ -382,6 +382,7 @@ void HybridAutomatonManager::_compute(const double& t)
 {
 	_torque = _activeMotionBehavior->update(t);	
     Milestone* childMs=(Milestone*)(_activeMotionBehavior->getChild());
+	bool drawPath = false;
 
 	if( !_deserialized_hybrid_automatons.empty() )
 	{
@@ -416,8 +417,7 @@ void HybridAutomatonManager::_compute(const double& t)
 			_path_ids.clear();
 			_curr_path_ids.clear();*/
 
-			graph_rid_producer.reset();
-			curr_path_rid_producer.reset();
+		/*	graph_rid_producer.reset();
 			
 			std::vector<const Node*> milestones = _hybrid_automaton->getNodes();
 			std::vector<const Node*>::iterator mit;
@@ -438,34 +438,10 @@ void HybridAutomatonManager::_compute(const double& t)
 					*id = drawLine(pos1,pos2,*id,rColor(1.0,(*eit)->getProbability(),0.0));
 				}
 			}
-			graph_rid_producer.clearUnused();
+			graph_rid_producer.clearUnused();*/
 
 			// draw current choice + next decision
-			const OpSpaceMilestone* ms1 = (const OpSpaceMilestone*)_activeMotionBehavior->getParent();
-			const OpSpaceMilestone* ms2 = (const OpSpaceMilestone*)_activeMotionBehavior->getChild();
-			Displacement pos1 = ms1->getHandlePoint(0);
-			Displacement pos2 = ms2->getHandlePoint(0);
-			pos1[2] += 0.5;
-			pos2[2] += 0.5;
-			rID* id = curr_path_rid_producer.getRID();
-			*id = drawLine(pos1,pos2,*id,rColor(0.0,0.0,1.0));
-			std::vector<const MDPEdge*> outgoing = _hybrid_automaton->getSortedOutgoingEdges(ms2);
-			std::vector<const MDPEdge*>::iterator eit;
-			double color_order = 0.0;
-			for(eit = outgoing.begin(); eit != outgoing.end(); eit++)
-			{
-				const OpSpaceMilestone* ms1 = (const OpSpaceMilestone*)(*eit)->getParent();
-				const OpSpaceMilestone* ms2 = (const OpSpaceMilestone*)(*eit)->getChild();
-				Displacement pos1 = ms1->getHandlePoint(0);
-				Displacement pos2 = ms2->getHandlePoint(0);
-				pos1[2] += 0.5;
-				pos2[2] += 0.5;
-				id = curr_path_rid_producer.getRID();
-				*id = drawLine(pos1,pos2,*id,rColor(0.0,1.0,color_order));
-				color_order += 0.2;
-				//cout << "drawline: prob " << (*eit)->getProbability() << endl;
-			}
-			curr_path_rid_producer.clearUnused();
+			drawPath = true;
 #endif
 		}
 	}
@@ -475,40 +451,7 @@ void HybridAutomatonManager::_compute(const double& t)
 			_activeMotionBehavior->deactivate();
 			_activeMotionBehavior = _hybrid_automaton->getNextMotionBehaviour(childMs,_criterion); // if criterion is not set the old behaviour remains
 			_activeMotionBehavior->activate();
-#ifdef DRAW_HYBRID_AUTOMATON
-			/*for(int i = 0; i < _curr_path_ids.size(); i++)
-			{
-				_physics_world->eraseCustomDraw(_curr_path_ids[i]);
-			}
-			_curr_path_ids.clear();*/
-			curr_path_rid_producer.reset();
-			// draw current choice + next decision
-			const OpSpaceMilestone* ms1 = (const OpSpaceMilestone*)_activeMotionBehavior->getParent();
-			const OpSpaceMilestone* ms2 = (const OpSpaceMilestone*)_activeMotionBehavior->getChild();
-			Displacement pos1 = ms1->getHandlePoint(0);
-			Displacement pos2 = ms2->getHandlePoint(0);
-			pos1[2] += 0.5;
-			pos2[2] += 0.5;
-			rID* id = curr_path_rid_producer.getRID();
-			*id = drawLine(pos1,pos2,*id,rColor(0.0,0.0,1.0));
-			std::vector<const MDPEdge*> outgoing = _hybrid_automaton->getSortedOutgoingEdges(ms2);
-			std::vector<const MDPEdge*>::iterator eit;
-			double color_order = 0.0;
-			for(eit = outgoing.begin(); eit != outgoing.end(); eit++)
-			{
-				const OpSpaceMilestone* ms1 = (const OpSpaceMilestone*)(*eit)->getParent();
-				const OpSpaceMilestone* ms2 = (const OpSpaceMilestone*)(*eit)->getChild();
-				Displacement pos1 = ms1->getHandlePoint(0);
-				Displacement pos2 = ms2->getHandlePoint(0);
-				pos1[2] += 0.5;
-				pos2[2] += 0.5;
-				id = curr_path_rid_producer.getRID();
-				*id = drawLine(pos1,pos2,*id,rColor(0.0,1.0,color_order));
-				color_order += 0.2;
-				//cout << "drawline: prob " << (*eit)->getProbability() << endl;
-			}
-			curr_path_rid_producer.clearUnused();
-#endif
+			drawPath = true;
 
 #ifdef NOT_IN_RT 
 			std::cout << _activeMotionBehavior->toStringXML() << ::std::endl;
@@ -517,6 +460,52 @@ void HybridAutomatonManager::_compute(const double& t)
 #endif
 		}
 	}
+#ifdef DRAW_HYBRID_AUTOMATON
+	if(drawPath)
+	{
+		curr_path_rid_producer.reset();
+		//curr_path_rid_producer.clearUnused();
+		// draw current choice + next decision
+		const OpSpaceMilestone* ms1 = (const OpSpaceMilestone*)_activeMotionBehavior->getParent();
+		const OpSpaceMilestone* ms2 = (const OpSpaceMilestone*)_activeMotionBehavior->getChild();
+		Displacement pos1 = ms1->getHandlePoint(0);
+		Displacement pos2 = ms2->getHandlePoint(0);
+		pos1[2] += 0.5;
+		pos2[2] += 0.5;
+		rID* id = curr_path_rid_producer.getRID();
+		*id = drawLine(pos1,pos2,*id,rColor(0.0,0.0,1.0)); // current path -> blue
+		std::vector<const MDPEdge*> outgoing = _hybrid_automaton->getSortedOutgoingEdges(ms2);
+		if(!outgoing.empty())
+		{
+			// draw outgoing next choice - color coded by expLength or Order
+			std::vector<const MDPEdge*>::iterator eit;
+			double color_order = 0.0;
+			int num = outgoing.size();
+			double lmin =  outgoing.front()->getExpectedEdgeLength();
+			double lmax = outgoing.back()->getExpectedEdgeLength();
+			double norm = lmax - lmin;
+			const OpSpaceMilestone* current_ms = ms1;
+			for(eit = outgoing.begin(); eit != outgoing.end(); eit++)
+			{
+				const OpSpaceMilestone* ms1 = (const OpSpaceMilestone*)(*eit)->getParent();
+				const OpSpaceMilestone* ms2 = (const OpSpaceMilestone*)(*eit)->getChild();
+				Displacement pos1 = ms1->getHandlePoint(0);
+				Displacement pos2 = ms2->getHandlePoint(0);
+				pos1[2] += 0.5;
+				pos2[2] += 0.5;
+				id = curr_path_rid_producer.getRID(); // Draw Expected Length
+				color_order = 1.0 - (((*eit)->getExpectedEdgeLength() - lmin) / norm);
+				if(ms2 != current_ms) // dont draw return path (overlapping)
+				{
+					*id = drawLine(pos1,pos2,*id,rColor(1.0,color_order,0.0));
+				}
+				//color_order += 1.0/num; // Draw Order
+				//cout << "drawline: prob " << (*eit)->getProbability() << endl;
+			}
+		}
+		curr_path_rid_producer.clearUnused();
+	}
+#endif
 	
 	//_torque.print(_T("_torquenew"));
 }
