@@ -42,7 +42,7 @@ Milestone* HybridAutomaton::getMilestoneByName(const std::string& name) const
 	return NULL;
 }
 
-MotionBehaviour* HybridAutomaton::getNextMotionBehaviour(const Milestone* currentMs, LocalDecisionCriterion* criterion)
+MotionBehaviour* HybridAutomaton::getNextMotionBehaviour(const Milestone* currentMs, LocalDecisionCriterion* criterion, vector<pair<std::string,std::string>>* bad_edges)
 {
 	std::vector<const MDPEdge*> edges = getSortedOutgoingEdges(currentMs);
 	if(edges.size() > 0 )
@@ -57,6 +57,18 @@ MotionBehaviour* HybridAutomaton::getNextMotionBehaviour(const Milestone* curren
 			{
 				if(criterion->isConnected(currentMs, (Milestone*)edges[i]->getChild()))
 				{
+					if(bad_edges)
+					{
+						for(int j = 0; j < bad_edges->size(); j++)
+						{
+							// problem: very often the edges are from current_ms!!!
+							if((*bad_edges)[j].first == currentMs->getName() && (*bad_edges)[j].second == ((Milestone*)edges[i]->getChild())->getName())
+							{
+								cout << "** IGNORING BAD EGDE: " << currentMs->getName() << " to " << ((Milestone*)edges[i]->getChild())->getName() <<std::endl;
+								continue; // dont select bad_edge!
+							}
+						}
+					}
 					return (MotionBehaviour*)(edges[i]);
 				}
 			}

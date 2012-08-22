@@ -108,5 +108,6 @@ private:
 
 	rxWorld*			_physics_world;
 	LocalDecisionCriterion*	_criterion;
+	double				_t_old;
 };
 #endif

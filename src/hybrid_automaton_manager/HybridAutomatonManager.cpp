@@ -14,9 +14,10 @@
 
 //#define NOT_IN_RT
 
-#ifdef DRAW_HYBRID_AUTOMATON
 #define SENSOR_FREQUENCY 0.1 // seconds
+//#define SINGULARITY_HANDLING
 
+#ifdef DRAW_HYBRID_AUTOMATON
 rID HybridAutomatonManager::drawLine(const rMath::Displacement &start, const rMath::Displacement &end, const rID &drawID, const rColor &color)
 {
 	rID id = drawID;
@@ -379,9 +380,27 @@ void HybridAutomatonManager::_reflect()
 	_robot->qdot(_qdot);
 }
 
-
+vector<pair<std::string,std::string>> bad_edges;
 void HybridAutomatonManager::_compute(const double& t)
 {
+#ifdef SINGULARITY_HANDLING
+	for(int i = 0; i < _qdot.size(); i++)
+	{
+		if(abs(_qdot[i]) > 10.0)
+		{
+			std::cout << "** Current MB is bad!! Local Minimum! Kernel Panic! General Failure!!" << std::endl;
+			Milestone* parentMs=(Milestone*)(_activeMotionBehavior->getParent());
+			Milestone* childMs=(Milestone*)(_activeMotionBehavior->getChild());
+			std::cout << "** Blocking Edge: " << parentMs->getName() << " to " << childMs->getName() <<std::endl;
+			bad_edges.push_back(pair<std::string,std::string>(childMs->getName(), parentMs->getName()));
+			_activeMotionBehavior->deactivate();
+			_activeMotionBehavior = _hybrid_automaton->getNextMotionBehaviour(parentMs, _criterion, &bad_edges);
+			_activeMotionBehavior->activate();
+		}
+	}
+#endif
+
+
 	_torque = _activeMotionBehavior->update(t);	
     Milestone* childMs=(Milestone*)(_activeMotionBehavior->getChild());
 	bool drawPath = false;
@@ -397,7 +416,7 @@ void HybridAutomatonManager::_compute(const double& t)
 			std::cout << "[HybridAutomatonManager::_compute] INFO: New Hybrid Automaton" << std::endl;
 			Milestone* tmpMilestone = _hybrid_automaton->getStartNode();
 			_activeMotionBehavior->deactivate();
-			_activeMotionBehavior = _hybrid_automaton->getNextMotionBehaviour(tmpMilestone, _criterion); // TODO NK: maybe dont use criterion here? Now: decision from current_pos everytime a new HA arrives...
+			_activeMotionBehavior = _hybrid_automaton->getNextMotionBehaviour(tmpMilestone, _criterion, &bad_edges);
 			_activeMotionBehavior->activate();
 #ifdef NOT_IN_RT
 			std::cout << _activeMotionBehavior->toStringXML() << ::std::endl;
@@ -452,7 +471,7 @@ void HybridAutomatonManager::_compute(const double& t)
 		if (_hybrid_automaton && _hybrid_automaton->getNextMotionBehaviour(childMs) != NULL) {
 			std::cout << "[HybridAutomatonManager::_compute] INFO: Switching controller" << std::endl;
 			_activeMotionBehavior->deactivate();
-			_activeMotionBehavior = _hybrid_automaton->getNextMotionBehaviour(childMs,_criterion); // if criterion is not set the old behaviour remains
+			_activeMotionBehavior = _hybrid_automaton->getNextMotionBehaviour(childMs,_criterion, &bad_edges); // if criterion is not set the old behaviour remains
 			_activeMotionBehavior->activate();
 			drawPath = true;
 			_t_old = t;
@@ -467,7 +486,7 @@ void HybridAutomatonManager::_compute(const double& t)
 	else if(_criterion && (t - _t_old > SENSOR_FREQUENCY)){
 		_t_old = t;
 		// make new local decision:
-		MotionBehaviour* newChoice = _hybrid_automaton->getNextMotionBehaviour((Milestone*)_activeMotionBehavior->getParent(),_criterion);
+		MotionBehaviour* newChoice = _hybrid_automaton->getNextMotionBehaviour((Milestone*)_activeMotionBehavior->getParent(),_criterion, &bad_edges);
 		if(newChoice != _activeMotionBehavior)
 		{
 			std::cout << "[HybridAutomatonManager::_compute] INFO: Switching controller due to local decision!" << std::endl;
