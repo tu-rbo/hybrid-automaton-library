@@ -15,6 +15,7 @@
 //#define NOT_IN_RT
 
 #ifdef DRAW_HYBRID_AUTOMATON
+#define SENSOR_FREQUENCY 0.1 // seconds
 
 rID HybridAutomatonManager::drawLine(const rMath::Displacement &start, const rMath::Displacement &end, const rID &drawID, const rColor &color)
 {
@@ -153,6 +154,7 @@ HybridAutomatonManager::HybridAutomatonManager(rDC rdc)
 , _hybrid_automaton(NULL)
 , _physics_world(NULL)
 , _criterion(NULL)
+, _t_old(0.0)
 {
 	_deserialize_mutex = CreateMutex(0, FALSE, 0);
 	if( !_deserialize_mutex ) {
@@ -442,6 +444,7 @@ void HybridAutomatonManager::_compute(const double& t)
 
 			// draw current choice + next decision
 			drawPath = true;
+			_t_old = t;
 #endif
 		}
 	}
@@ -452,6 +455,7 @@ void HybridAutomatonManager::_compute(const double& t)
 			_activeMotionBehavior = _hybrid_automaton->getNextMotionBehaviour(childMs,_criterion); // if criterion is not set the old behaviour remains
 			_activeMotionBehavior->activate();
 			drawPath = true;
+			_t_old = t;
 
 #ifdef NOT_IN_RT 
 			std::cout << _activeMotionBehavior->toStringXML() << ::std::endl;
@@ -459,6 +463,20 @@ void HybridAutomatonManager::_compute(const double& t)
 			_hybrid_automaton->__printMatrix();
 #endif
 		}
+	}
+	else if(_criterion && (t - _t_old > SENSOR_FREQUENCY)){
+		_t_old = t;
+		// make new local decision:
+		MotionBehaviour* newChoice = _hybrid_automaton->getNextMotionBehaviour((Milestone*)_activeMotionBehavior->getParent(),_criterion);
+		if(newChoice != _activeMotionBehavior)
+		{
+			std::cout << "[HybridAutomatonManager::_compute] INFO: Switching controller due to local decision!" << std::endl;
+			_activeMotionBehavior->deactivate();
+			_activeMotionBehavior = newChoice;
+			_activeMotionBehavior->activate();
+			drawPath = true;
+		}
+
 	}
 #ifdef DRAW_HYBRID_AUTOMATON
 	if(drawPath)
@@ -493,7 +511,7 @@ void HybridAutomatonManager::_compute(const double& t)
 				Displacement pos2 = ms2->getHandlePoint(0);
 				pos1[2] += 0.5;
 				pos2[2] += 0.5;
-				id = curr_path_rid_producer.getRID(); // Draw Expected Length
+				rID* id = curr_path_rid_producer.getRID(); // Draw Expected Length
 				color_order = 1.0 - (((*eit)->getExpectedEdgeLength() - lmin) / norm);
 				if(ms2 != current_ms) // dont draw return path (overlapping)
 				{
