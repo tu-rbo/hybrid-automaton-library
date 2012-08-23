@@ -365,7 +365,7 @@ CSpaceMilestone* XMLDeserializer::createCSpaceMilestone(TiXmlElement* milestone_
 		throw std::string("[XMLDeserializer::createCSpaceMilestone] ERROR: The milestone configuration or region of convergence (\"value\" or \"epsilon\") is not defined in the XML string.");
 	}
 
-    double expLength = deserializeElement<double>(milestone_xml, "expectedLength");
+    double expLength = deserializeElement<double>(milestone_xml, "expectedLength", -1.0);
 
 	TiXmlElement* handle_point_set_element = milestone_xml->FirstChildElement("HandlePoints");
 	std::vector<Point> mst_handle_points;
@@ -409,8 +409,6 @@ CSpaceBlackBoardMilestone* XMLDeserializer::createCSpaceBlackBoardMilestone(TiXm
 		throw std::string("[XMLDeserializer::createCSpaceMilestone] ERROR: The milestone configuration or region of convergence (\"value\" or \"epsilon\") is not defined in the XML string.");
 	}
 
-    double expLength = deserializeElement<double>(milestone_xml, "expectedLength");
-
 	TiXmlElement* handle_point_set_element = milestone_xml->FirstChildElement("HandlePoints");
 	std::vector<Point> mst_handle_points;
 	if(handle_point_set_element != NULL)
@@ -429,6 +427,7 @@ CSpaceBlackBoardMilestone* XMLDeserializer::createCSpaceBlackBoardMilestone(TiXm
 
 	mst->setBlackBoardVariableName(mst->getBlackBoardVariableName());
 
+    double expLength = deserializeElement<double>(milestone_xml, "expectedLength", -1.0);
     mst->setExpectedLength(expLength);
 	
 	return mst;
