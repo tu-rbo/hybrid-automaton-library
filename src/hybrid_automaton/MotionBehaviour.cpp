@@ -359,6 +359,43 @@ dVector MotionBehaviour::getErrorDot() const
 	return error_dot;
 }
 
+dVector MotionBehaviour::getOriTaskError() const
+{
+	dVector error;
+	std::list<rxController*> controllers = control_set_->getControllers();
+	for(std::list<rxController*>::const_iterator it = controllers.begin(); it != controllers.end(); ++it)
+	{
+		if (*it)
+		{
+			if ((*it)->type() == rxController::eControlType_Orientation)
+			{
+				dVector e = (*it)->e();
+				error.expand(e.size(), e);
+			}
+		}
+	}
+	return error;
+}
+
+dVector MotionBehaviour::getLineTaskError() const
+{
+	dVector error;
+	std::list<rxController*> controllers = control_set_->getControllers();
+	for(std::list<rxController*>::const_iterator it = controllers.begin(); it != controllers.end(); ++it)
+	{
+		if (*it)
+		{
+			SubdisplacementController* task = dynamic_cast<SubdisplacementController*>(*it);
+			if (task)
+			{
+				dVector e = task->e();
+				error.expand(e.size(), e);
+			}
+		}
+	}
+	return error;
+}
+
 dVector MotionBehaviour::getCurrentDotReference() const
 {
 	dVector current_dot_ref;

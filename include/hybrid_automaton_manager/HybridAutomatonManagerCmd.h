@@ -36,5 +36,7 @@
 #define PLOT_DESIRED_Q				5
 #define PLOT_ERROR_VELOCITY			6
 #define PLOT_DESIRED_VELOCITY		9
+#define PLOT_ORI_TASK_ERROR			10
+#define PLOT_LINE_TASK_ERRROR		11
 
 #endif

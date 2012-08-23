@@ -101,7 +101,7 @@ rID HybridAutomatonManager::drawLine(const rMath::Displacement &start, const rMa
 	return id;
 }
 
-//rID path[10] = {INVALID_RID,INVALID_RID,INVALID_RID,INVALID_RID,INVALID_RID,INVALID_RID,INVALID_RID,INVALID_RID,INVALID_RID,INVALID_RID};
+rID path[10] = {INVALID_RID,INVALID_RID,INVALID_RID,INVALID_RID,INVALID_RID,INVALID_RID,INVALID_RID,INVALID_RID,INVALID_RID,INVALID_RID};
 //vector<rID> _path_ids;
 //vector<rID> _curr_path_ids;
 rIdProducer graph_rid_producer;
@@ -510,7 +510,8 @@ void HybridAutomatonManager::_compute(const double& t)
 		pos1[2] += 0.5;
 		pos2[2] += 0.5;
 		rID* id = curr_path_rid_producer.getRID();
-		*id = drawLine(pos1,pos2,*id,rColor(0.0,0.0,1.0)); // current path -> blue
+		path[0] = drawLine(pos1,pos2,path[0],rColor(0.0,0.0,1.0)); // current path -> blue
+		int count = 1;
 		std::vector<const MDPEdge*> outgoing = _hybrid_automaton->getSortedOutgoingEdges(ms2);
 		if(!outgoing.empty())
 		{
@@ -534,11 +535,19 @@ void HybridAutomatonManager::_compute(const double& t)
 				color_order = 1.0 - (((*eit)->getExpectedEdgeLength() - lmin) / norm);
 				if(ms2 != current_ms) // dont draw return path (overlapping)
 				{
-					*id = drawLine(pos1,pos2,*id,rColor(1.0,color_order,0.0));
+					path[count] = drawLine(pos1,pos2,path[count],rColor(1.0,color_order,0.0));
 				}
 				//color_order += 1.0/num; // Draw Order
 				//cout << "drawline: prob " << (*eit)->getProbability() << endl;
+				count++;
+				if(count == 10)
+					break;
 			}
+		}
+		for(int i = count; i < 10; i++)
+		{
+			_physics_world->eraseCustomDraw(path[i]);
+			path[i] = INVALID_RID;
 		}
 		curr_path_rid_producer.clearUnused();
 	}
@@ -624,6 +633,9 @@ void HybridAutomatonManager::datanames(vector<string_type>& names, int channel)
 	}
 }
 
+dVector e_old_ori; // smoothing switches
+dVector e_old_line;
+#define TASK_SIZE 1
 void HybridAutomatonManager::collect(vector<double>& data, int channel)
 {
 	if (channel == PLOT_TORQUE)
@@ -713,6 +725,91 @@ void HybridAutomatonManager::collect(vector<double>& data, int channel)
 				data.push_back(666);
 		}
 	}
+	else if (channel == PLOT_ORI_TASK_ERROR)
+	{
+		dVector e = _activeMotionBehavior->getOriTaskError();
+		if (e.size() > 0) {
+
+			bool zero = true;
+			for(int i = 0; i < e.size(); ++i)
+			{
+				if(e[i] != 0)
+				{
+					zero = false;
+				}
+			}
+			if(zero)
+			{
+				if(e_old_ori.size() > 0)
+				{
+					for(int i = 0; i < e_old_ori.size(); ++i)
+						data.push_back(e_old_ori[i]);
+				}
+				else
+				{
+					for(int i = 0; i < 3; ++i)
+						data.push_back(0);
+				}
+			}
+			else
+			{
+				for(int i = 0; i < e.size(); ++i)
+					data.push_back(e[i]);
+				e_old_ori = e;
+			}
+		}
+		else {
+			for(int i = 0; i < 3; ++i)
+				data.push_back(1);
+		}
+	}
+	else if (channel == PLOT_LINE_TASK_ERRROR)
+	{
+		dVector e = _activeMotionBehavior->getLineTaskError();
+		if (e.size() > 0) {
+			bool zero = true;
+			for(int i = 0; i < e.size(); ++i)
+			{
+				if(e[i] != 0)
+				{
+					zero = false;
+				}
+			}
+			if(zero)
+			{
+				if(e_old_line.size() > 0)
+				{
+					for(int i = 0; i < e_old_line.size(); ++i)
+						data.push_back(e_old_line[i]);
+				}
+				else
+				{
+					for(int i = 0; i < TASK_SIZE; ++i)
+						data.push_back(666);
+				}
+			}
+			else
+			{
+				for(int i = 0; i < e.size(); ++i)
+					data.push_back(e[i]);
+				e_old_line = e;
+			}
+		}
+		else {
+			if(e_old_line.size() > 0)
+			{
+				for(int i = 0; i < e_old_line.size(); ++i)
+					data.push_back(e_old_line[i]);
+			}
+			else
+			{
+				for(int i = 0; i < TASK_SIZE; ++i)
+					data.push_back(0);
+			}
+		}
+	}
+
+	// TODO EE Trajectory, Base Trajectory
 }
 
 void HybridAutomatonManager::onSetInterestFrame(const TCHAR* name, const HTransform& T)

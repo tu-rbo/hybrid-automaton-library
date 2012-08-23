@@ -9,6 +9,7 @@
 
 #include "controllers\include\OnDemandController.h"
 #include "controllers\include\FeatureAttractorController.h"
+#include "controllers\include\SubdisplacementController.h"
 
 #include "tinyxml.h"
 
@@ -159,6 +160,8 @@ public:
 	dVector getErrorDot() const;
 	dVector getCurrentDotReference() const;
 	dVector getCurrentDotDotReference() const;
+	dVector getOriTaskError() const;
+	dVector getLineTaskError() const;
 
 	/**
 	* Activate the controllers stored in the rxControlSet through the vector of rxController's (NOT WORKING!!!!)
