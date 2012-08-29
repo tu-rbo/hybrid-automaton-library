@@ -37,6 +37,7 @@ rID HybridAutomatonManager::drawLine(const rMath::Displacement &start, const rMa
 		dir.Normalize();
 		rMath::Vector3D zAxis(0.0, 0.0, 1.0);
 		rMath::Vector3D axis = zAxis.Cross(dir);
+		axis.Normalize();
 		double half = acos(zAxis.Dot(dir))*0.5;
 		info.T.R.Set(cos(half), axis[0]*sin(half), axis[1]*sin(half), axis[2]*sin(half) );
 
@@ -71,6 +72,7 @@ rID HybridAutomatonManager::drawLine(const rMath::Displacement &start, const rMa
 		dir.Normalize();
 		rMath::Vector3D zAxis(0.0, 0.0, 1.0);
 		rMath::Vector3D axis = zAxis.Cross(dir);
+		axis.Normalize();
 		double half = acos(zAxis.Dot(dir))*0.5;
 		info.T.R.Set(cos(half), axis[0]*sin(half), axis[1]*sin(half), axis[2]*sin(half) );
 
