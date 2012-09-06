@@ -10,6 +10,8 @@
 #include "controllers\include\OnDemandController.h"
 #include "controllers\include\FeatureAttractorController.h"
 #include "controllers\include\SubdisplacementController.h"
+#include "controllers\include\ReInterpolatedJointImpedanceController.h"
+
 
 #include "tinyxml.h"
 
@@ -194,6 +196,8 @@ public:
 
 	// USE WITH CARE!!! - mainly for ERM internal speed-up!
 	virtual void setControlSetByPointerOnly(rxControlSetBase* control_set){this->control_set_ = control_set;};
+
+	dVector getGoalConfiguration();
 
 
 	void setMaxVelocityForInterpolation(double max_velocity);

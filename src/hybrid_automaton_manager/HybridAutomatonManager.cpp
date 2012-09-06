@@ -18,96 +18,93 @@
 //#define SINGULARITY_HANDLING
 
 #ifdef DRAW_HYBRID_AUTOMATON
-rID HybridAutomatonManager::drawLine(const rMath::Displacement &start, const rMath::Displacement &end, const rID &drawID, const rColor &color)
+//CustomDrawManager drawDebug;
+
+void HybridAutomatonManager::drawLine(const rMath::Displacement &start, const rMath::Displacement &end, drawLists index, const rColor &color, const char lineWidth)
 {
-	rID id = drawID;
-	if (drawID != INVALID_RID) // update 
+	rCustomDrawInfo info;
+	info.flag = CUSTOM_DRAW_NEW;
+	info.id = INVALID_RID;
+
+	info.name = "";
+
+	info.drawType = CUSTOM_DRAW_POLYLINE;
+	info.lineWidth = lineWidth;
+	info.fill = 0;
+
+	info.robotId = 0;
+	info.bodyId = 0;
+
+	info.vertexCnt = 2;
+
+	info.T.r = start;
+
+	rMath::Vector3D dir = end - start;
+	double length = dir.Norm();
+
+	dir.Normalize();
+	rMath::Vector3D zAxis(0.0, 0.0, 1.0);
+	rMath::Vector3D axis = zAxis.Cross(dir);
+	axis.Normalize();
+	double half = acos(zAxis.Dot(dir))*0.5;
+	info.T.R.Set(cos(half), axis[0]*sin(half), axis[1]*sin(half), axis[2]*sin(half) );
+	/*Vector3D z_axis =  dir;
+	Vector3D y_axis = z_axis.Cross(Vector3D(1,0,0));
+	y_axis.Normalize();
+	Vector3D x_axis = z_axis.Cross(y_axis);
+	x_axis.Normalize();
+	info.T.R.Set(x_axis[0],x_axis[1],x_axis[2],y_axis[0],y_axis[1],y_axis[2],z_axis[0],z_axis[1],z_axis[2],true);*/
+
+	info.scale[0] = 1.0;
+	info.scale[1] = 1.0;
+	info.scale[2] = (float)length;
+
+	info.vertexPoints.push_back(rMath::Vector3D(0, 0, 0));
+	info.vertexPoints.push_back(rMath::Vector3D(0, 0, 1));
+
+	rMath::Vector3D normal;
+	normal.Set(0.0, 0.0, 1.0);
+	info.vertexNormals.push_back(normal);
+	info.vertexNormals.push_back(normal);
+
+	info.vertexColors.push_back(color);
+	info.vertexColors.push_back(color);
+
+	info.color[0] = color.r;
+	info.color[1] = color.g;
+	info.color[2] = color.b;
+	info.color[3] = color.a;
+
+	info.param[0] = info.param[1] = info.param[2] = 0.0f;
+	if(!this->_request_draw[index])
 	{
-		rCustomDrawInfo info;
-		info.flag = CUSTOM_DRAW_UPDATE_POSE;
-		info.id = id;
-
-		info.drawType = 0x20;// update 
-
-		info.T.r = start;
-
-		rMath::Vector3D dir = end - start;
-		double length = dir.Norm();
-
-		dir.Normalize();
-		rMath::Vector3D zAxis(0.0, 0.0, 1.0);
-		rMath::Vector3D axis = zAxis.Cross(dir);
-		axis.Normalize();
-		double half = acos(zAxis.Dot(dir))*0.5;
-		info.T.R.Set(cos(half), axis[0]*sin(half), axis[1]*sin(half), axis[2]*sin(half) );
-
-		info.scale[0] = 1.0;
-		info.scale[1] = 1.0;
-		info.scale[2] = length;
-
-		_physics_world->customDraw(info);
+		_draw_objects[index].push_back(info);
 	}
 	else
 	{
-		rCustomDrawInfo info;
-		info.flag = CUSTOM_DRAW_NEW;
-		info.id = INVALID_RID;
-
-		info.name = "";
-
-		info.drawType = CUSTOM_DRAW_POLYLINE;
-		info.lineWidth = 3;
-		info.fill = 0;
-
-		info.robotId = 0;
-		info.bodyId = 0;
-
-		info.vertexCnt = 2;
-
-		info.T.r = start;
-
-		rMath::Vector3D dir = end - start;
-		double length = dir.Norm();
-
-		dir.Normalize();
-		rMath::Vector3D zAxis(0.0, 0.0, 1.0);
-		rMath::Vector3D axis = zAxis.Cross(dir);
-		axis.Normalize();
-		double half = acos(zAxis.Dot(dir))*0.5;
-		info.T.R.Set(cos(half), axis[0]*sin(half), axis[1]*sin(half), axis[2]*sin(half) );
-
-		info.scale[0] = 1.0;
-		info.scale[1] = 1.0;
-		info.scale[2] = length;
-
-		info.vertexPoints.push_back(rMath::Vector3D(0, 0, 0));
-		info.vertexPoints.push_back(rMath::Vector3D(0, 0, 1));
-
-		rMath::Vector3D normal;
-		normal.Set(0.0, 0.0, 1.0);
-		info.vertexNormals.push_back(normal);
-		info.vertexNormals.push_back(normal);
-
-		info.vertexColors.push_back(color);
-		info.vertexColors.push_back(color);
-
-		info.color[0] = color.r;
-		info.color[1] = color.g;
-		info.color[2] = color.b;
-		info.color[3] = color.a;
-
-		info.param[0] = info.param[1] = info.param[2] = 0.0f;
-		id = _physics_world->customDraw(info);
+		//cout << "requested not drawn!!" << endl;
 	}
-
-	return id;
 }
 
-rID path[10] = {INVALID_RID,INVALID_RID,INVALID_RID,INVALID_RID,INVALID_RID,INVALID_RID,INVALID_RID,INVALID_RID,INVALID_RID,INVALID_RID};
-//vector<rID> _path_ids;
-//vector<rID> _curr_path_ids;
-rIdProducer graph_rid_producer;
-rIdProducer curr_path_rid_producer;
+void HybridAutomatonManager::drawMilestones(const OpSpaceMilestone* ms, drawListsM index)
+{
+	if(this->_request_draw_m[index])
+	{
+		cout << "requested milestones not drawn!! " << index << endl;
+		return;
+	}
+	std::vector<const Edge*> edges = _hybrid_automaton->incomingEdges(ms);
+	for(std::vector<const Edge*>::iterator it = edges.begin(); it != edges.end(); it++)
+	{
+		if((*it)->getChild() == ms)
+		{
+			MotionBehaviour* mb = (MotionBehaviour*)(*it);
+			_draw_objects_m[index].push_back(mb->getGoalConfiguration());
+			return;
+		}
+	}
+//	mb->con
+}
 #endif
 
 unsigned __stdcall deserializeHybridAutomaton(void *udata)
@@ -155,7 +152,7 @@ HybridAutomatonManager::HybridAutomatonManager(rDC rdc)
 , _dof(0)
 , _servo_on(false)
 , _hybrid_automaton(NULL)
-, _physics_world(NULL)
+//, _physics_world(NULL)
 , _criterion(NULL)
 , _t_old(0.0)
 {
@@ -227,11 +224,12 @@ void HybridAutomatonManager::setCollisionInterface(CollisionInterface* collision
 {
 		CollisionInterface::instance = collision_interface;
 }
-
+/*
 void HybridAutomatonManager::setPhysicsWorld(rxWorld* physics_world)
 {
 		_physics_world = physics_world;
-}
+		drawDebug.setPhysicsWorld(physics_world);
+}*/
 
 void HybridAutomatonManager::setLocalDecisionCriterion(LocalDecisionCriterion* criterion)
 {
@@ -415,7 +413,7 @@ void HybridAutomatonManager::_compute(const double& t)
 			_hybrid_automaton = _deserialized_hybrid_automatons.front();
 			_deserialized_hybrid_automatons.pop_front();
 			
-			std::cout << "[HybridAutomatonManager::_compute] INFO: New Hybrid Automaton" << std::endl;
+			//std::cout << "[HybridAutomatonManager::_compute] INFO: New Hybrid Automaton" << std::endl;
 			Milestone* tmpMilestone = _hybrid_automaton->getStartNode();
 			_activeMotionBehavior->deactivate();
 			_activeMotionBehavior = _hybrid_automaton->getNextMotionBehaviour(tmpMilestone, _criterion, &bad_edges);
@@ -465,13 +463,43 @@ void HybridAutomatonManager::_compute(const double& t)
 
 			// draw current choice + next decision
 			drawPath = true;
-			_t_old = t;
+			_t_old = t;	
+			MDPNode* hack_goal = (MDPNode*)_hybrid_automaton->getSortedOutgoingEdges(_hybrid_automaton->getStartNode()).front()->getChild();
+			std::vector<const MDPNode*> milestones = _hybrid_automaton->getShortestPath(_hybrid_automaton->getStartNode(),hack_goal,1.0);
+			int count = 0;
+			int i = 0;
+			const OpSpaceMilestone* ms_old = NULL;
+			for(std::vector<const MDPNode*>::iterator mit = milestones.begin(); mit != milestones.end() && i < 20; mit++)
+			{
+				const OpSpaceMilestone* ms = (const OpSpaceMilestone*)(*mit);
+				/*HTransform ht;
+				ht.Reset();
+				ht.r = ms->getHandlePoint(0);
+				//cout << "draw " << ms->getName() << endl;
+				ht.Print();
+				config[i] = drawDebug.drawCylinder(config[i],ht,0.35,0.78,rColor(1.0,0.0,0.0,0.3));*/
+				drawMilestones(ms,ePATH_MILESTONES);
+				i++;
+				if(ms_old != NULL)
+				{
+					drawLine(ms_old->getHandlePoint(0),ms->getHandlePoint(0),ePATH);
+				}
+				ms_old = ms;
+			}
+			/*for(; i < 19; i++)
+			{
+				_physics_world->eraseCustomDraw(config[i]);
+				config[i] = INVALID_RID;
+			}*/
+			setRequestDraw(ePATH,true);
+			setRequestDrawM(ePATH_MILESTONES,true);
 #endif
 		}
 	}
 	else if(childMs->hasConverged(_robot) ){
-		if (_hybrid_automaton && _hybrid_automaton->getNextMotionBehaviour(childMs) != NULL) {
-			std::cout << "[HybridAutomatonManager::_compute] INFO: Switching controller" << std::endl;
+		if (_hybrid_automaton && _hybrid_automaton->getNextMotionBehaviour(childMs,_criterion, &bad_edges) != NULL && _hybrid_automaton->getNextMotionBehaviour(childMs,_criterion, &bad_edges) != _activeMotionBehavior) {
+			//std::cout << "[HybridAutomatonManager::_compute] INFO: Switching controller" << std::endl;
+			//std::cout << _activeMotionBehavior->getParent() << " versus " << _hybrid_automaton->getNextMotionBehaviour(childMs,_criterion, &bad_edges)->getParent() << std::endl;
 			_activeMotionBehavior->deactivate();
 			_activeMotionBehavior = _hybrid_automaton->getNextMotionBehaviour(childMs,_criterion, &bad_edges); // if criterion is not set the old behaviour remains
 			_activeMotionBehavior->activate();
@@ -491,18 +519,40 @@ void HybridAutomatonManager::_compute(const double& t)
 		MotionBehaviour* newChoice = _hybrid_automaton->getNextMotionBehaviour((Milestone*)_activeMotionBehavior->getParent(),_criterion, &bad_edges);
 		if(newChoice != _activeMotionBehavior)
 		{
-			std::cout << "[HybridAutomatonManager::_compute] INFO: Switching controller due to local decision!" << std::endl;
+			//std::cout << "[HybridAutomatonManager::_compute] INFO: Switching controller due to local decision!" << std::endl;
 			_activeMotionBehavior->deactivate();
 			_activeMotionBehavior = newChoice;
 			_activeMotionBehavior->activate();
 			drawPath = true;
+#ifdef DRAW_LOCAL_DECISION
+			HTransform ht;
+			ht.Reset();
+			OpSpaceMilestone* ms = ((OpSpaceMilestone*) _activeMotionBehavior->getChild());
+			/*ht.r = ms->getHandlePoint(0);
+			//cout << "local decision: " << ms->getName() << endl;
+			ht.Print();
+			if(ld != INVALID_RID)
+			{
+				_physics_world->eraseCustomDraw(ld);
+				ld = INVALID_RID;
+			}
+			ld = drawDebug.drawCylinder(ld,ht,0.35,0.78,rColor(0.0,1.0,0.0,0.3));*/
+			drawMilestones(ms,eLD_MILESTONES);
+			setRequestDrawM(eLD_MILESTONES,true);
+			cout << "Request LD!" << endl;
+		}
+		if(drawPath)
+		{
+			// a new path arrived, if the LD is the same as the path it should be deleted...
+			setRequestDrawM(eLD_MILESTONES,true);
+#endif
 		}
 
 	}
 #ifdef DRAW_HYBRID_AUTOMATON
-	if(drawPath)
+	/*if(drawPath)
 	{
-		curr_path_rid_producer.reset();
+		drawDebug.reset(drawGroups::PATH);
 		//curr_path_rid_producer.clearUnused();
 		// draw current choice + next decision
 		const OpSpaceMilestone* ms1 = (const OpSpaceMilestone*)_activeMotionBehavior->getParent();
@@ -511,8 +561,7 @@ void HybridAutomatonManager::_compute(const double& t)
 		Displacement pos2 = ms2->getHandlePoint(0);
 		pos1[2] += 0.5;
 		pos2[2] += 0.5;
-		rID* id = curr_path_rid_producer.getRID();
-		path[0] = drawLine(pos1,pos2,path[0],rColor(0.0,0.0,1.0)); // current path -> blue
+		drawDebug.drawLine(pos1,pos2,drawGroups::PATH,rColor(0.0,0.0,1.0)); // current path -> blue
 		int count = 1;
 		std::vector<const MDPEdge*> outgoing = _hybrid_automaton->getSortedOutgoingEdges(ms2);
 		if(!outgoing.empty())
@@ -521,8 +570,8 @@ void HybridAutomatonManager::_compute(const double& t)
 			std::vector<const MDPEdge*>::iterator eit;
 			double color_order = 0.0;
 			int num = outgoing.size();
-			double lmin =  outgoing.front()->getExpectedEdgeLength();
-			double lmax = outgoing.back()->getExpectedEdgeLength();
+			double lmin =  outgoing.front()->getTotalExpectedLength();
+			double lmax = outgoing.back()->getTotalExpectedLength();
 			double norm = lmax - lmin;
 			const OpSpaceMilestone* current_ms = ms1;
 			for(eit = outgoing.begin(); eit != outgoing.end(); eit++)
@@ -533,11 +582,10 @@ void HybridAutomatonManager::_compute(const double& t)
 				Displacement pos2 = ms2->getHandlePoint(0);
 				pos1[2] += 0.5;
 				pos2[2] += 0.5;
-				rID* id = curr_path_rid_producer.getRID(); // Draw Expected Length
-				color_order = 1.0 - (((*eit)->getExpectedEdgeLength() - lmin) / norm);
+				color_order = 1.0 - (((*eit)->getTotalExpectedLength() - lmin) / norm);
 				if(ms2 != current_ms) // dont draw return path (overlapping)
 				{
-					path[count] = drawLine(pos1,pos2,path[count],rColor(1.0,color_order,0.0));
+					drawDebug.drawLine(pos1,pos2,drawGroups::PATH,rColor(1.0,color_order,0.0));
 				}
 				//color_order += 1.0/num; // Draw Order
 				//cout << "drawline: prob " << (*eit)->getProbability() << endl;
@@ -546,15 +594,91 @@ void HybridAutomatonManager::_compute(const double& t)
 					break;
 			}
 		}
-		for(int i = count; i < 10; i++)
+		drawDebug.clearUnused(drawGroups::PATH);
+	}*/
+
+	if(drawPath)
+	{
+		//drawDebug.reset(drawGroups::PATH);
+		//drawDebug.clearUnused(drawGroups::PATH);
+		const OpSpaceMilestone* ms1 = (const OpSpaceMilestone*)_activeMotionBehavior->getParent();		
+		std::vector<const MDPEdge*> outgoing = _hybrid_automaton->getSortedOutgoingEdges(ms1);
+		int count = 0;
+/*		for(int i = 0; i < 10; i++)
 		{
-			_physics_world->eraseCustomDraw(path[i]);
-			path[i] = INVALID_RID;
+			if(path[i] != INVALID_RID)
+			{
+				_physics_world->eraseCustomDraw(path[i]);
+				path[i] = INVALID_RID;
+			}
+		}*/
+		for(std::vector<const MDPEdge*>::iterator eit = outgoing.begin(); eit != outgoing.end(); eit++)
+		{
+			const OpSpaceMilestone* ms2 = (const OpSpaceMilestone*)(*eit)->getChild();
+			rxBody* XR     = _robot->findBody(_T("Body"));
+			Displacement pos1 = XR->T().r;
+			Displacement pos2 = ms2->getHandlePoint(0);
+			pos1[2] += 0.5;
+			pos2[2] += 0.5;
+			//color_order = 1.0 - (((*eit)->getExpectedEdgeLength() - lmin) / norm);
+			if(ms2 != _activeMotionBehavior->getChild()) // dont draw return path (overlapping)
+			{
+				drawLine(pos1,pos2,eRAYS,rColor(0.0,0.0,0.0));
+			}
+			else
+			{
+				drawLine(pos1,pos2,eRAYS,rColor(1.0,1.0,1.0));
+				break;
+			}
+			count++;
+			if(count == 10)
+				break;
 		}
-		curr_path_rid_producer.clearUnused();
+		setRequestDraw(eRAYS,true);
+		//drawDebug.clearUnused(drawGroups::PATH);
+/*	
+		const OpSpaceMilestone* ms1 = (const OpSpaceMilestone*)_activeMotionBehavior->getParent();		
+		std::vector<const MDPEdge*> outgoing = _hybrid_automaton->getSortedOutgoingEdges(ms1);
+		int count = 0;
+		int i = 0;
+		double minTEL = outgoing.front()->getTotalExpectedLength();
+		double maxTEL = outgoing.back()->getTotalExpectedLength();
+		double norm = maxTEL - minTEL;
+		double color_order = 0.0;
+		for(std::vector<const MDPEdge*>::iterator eit = outgoing.begin(); eit != outgoing.end() && i < 20; eit++)
+		{
+			const OpSpaceMilestone* ms = (const OpSpaceMilestone*)(*eit)->getChild();
+			HTransform ht;
+			ht.Reset();
+			ht.r = ms->getHandlePoint(0);
+			color_order = (((*eit)->getTotalExpectedLength() - minTEL) / norm);
+			rColor color;
+			color.b = 0.0;
+			color.a = 0.3;
+			if(color_order < (1.0/2.0))
+			{
+				color.r = 1.0;
+				color.g = color_order * 2.0;
+			}
+			else
+			{
+				color.r = 1.0 - ((color_order - 0.5)*2.0);
+				color.g = 1.0;
+			}
+			//config[i] = drawDebug.drawCylinder(config[i],ht,0.35,0.78,color);
+			HTransform ht2 = ht;
+			ht2.r[2] += 1.0;
+			config[i] = drawDebug.drawLine(ht.r,ht2.r,config[i],color,5);
+			i++;
+		}
+		for(; i < 20; i++)
+		{
+			_physics_world->eraseCustomDraw(config[i]);
+			config[i] = INVALID_RID;
+		}
+*/
 	}
 #endif
-	
 	//_torque.print(_T("_torquenew"));
 }
 
@@ -763,7 +887,7 @@ void HybridAutomatonManager::collect(vector<double>& data, int channel)
 		}
 		else {
 			for(int i = 0; i < 3; ++i)
-				data.push_back(1);
+				data.push_back(0);
 		}
 	}
 	else if (channel == PLOT_LINE_TASK_ERRROR)

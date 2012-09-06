@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="Windows-1252"?>
 <VisualStudioProject
 	ProjectType="Visual C++"
-	Version="9.00"
+	Version="9,00"
 	Name="HybridAutomatonManager"
 	ProjectGUID="{C48E2081-E337-4D79-BD9C-B798C18AEFEE}"
 	RootNamespace="HybridAutomatonManager"
@@ -180,6 +180,10 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
+				RelativePath="..\..\..\applications\elastic_roadmap\src\CustomDrawManager.cpp"
+				>
+			</File>
+			<File
 				RelativePath="..\..\src\hybrid_automaton_manager\HybridAutomatonManager.cpp"
 				>
 			</File>
@@ -193,6 +197,10 @@
 			Filter="h;hpp;hxx;hm;inl;inc;xsd"
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
+			<File
+				RelativePath="..\..\..\applications\elastic_roadmap\src\CustomDrawManager.h"
+				>
+			</File>
 			<File
 				RelativePath="..\..\include\hybrid_automaton_manager\HybridAutomatonManager.h"
 				>
@@ -226,6 +234,10 @@
 				</File>
 				<File
 					RelativePath="..\..\..\controllers\include\OpSpaceSingularityAvoidanceController.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\..\controllers\include\ReInterpolatedJointImpedanceController.h"
 					>
 				</File>
 				<File

@@ -14,6 +14,7 @@
 #include "SingularityAvoidanceController.h"
 #include "JointLimitAvoidanceControllerOnDemand.h"
 #include "OpSpaceSingularityAvoidanceController.h"
+#include "ReInterpolatedJointImpedanceController.h"
 
 std::map<std::string, ControllerType> XMLDeserializer::controller_map_ = XMLDeserializer::createControllerMapping();
 
@@ -700,8 +701,8 @@ rxController* XMLDeserializer::createJointController(int joint_subtype, double c
 		controller = new rxInterpolatedJointComplianceController(robot, controller_duration);
 		break;
 	case WITH_INTERPOLATION | WITH_IMPEDANCE:
-		controller = new rxInterpolatedJointImpedanceController(robot, controller_duration);
-		dynamic_cast<rxInterpolatedJointImpedanceController*>(controller)->setImpedance(0.5,3.0,2.0);
+		controller = new ReInterpolatedJointImpedanceController(robot, controller_duration);
+		dynamic_cast<ReInterpolatedJointImpedanceController*>(controller)->setImpedance(0.5,3.0,2.0);
 		break;
 	case BLACKBOARD_ACCESS:
 		controller = new JointBlackBoardController(robot, controller_duration);

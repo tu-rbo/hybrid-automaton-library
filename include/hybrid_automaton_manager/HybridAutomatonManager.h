@@ -13,6 +13,7 @@
 #include "RTBlackBoard.h"
 
 #include "CSpaceMilestone.h"
+#include "OpSpaceMilestone.h"
 #include "MotionBehaviour.h"
 #include "Milestone.h"
 #include "HybridAutomaton.h"
@@ -20,10 +21,8 @@
 #define _USE_RCONTROLALGORITHM_EX_
 
 //#define DRAW_HYBRID_AUTOMATON
-#ifdef DRAW_HYBRID_AUTOMATON
+//#define DRAW_LOCAL_DECISION
 #include "rCustomDraw.h"
-#include "applications/elastic_roadmap/src/rIdProducer.h"
-#endif
 
 typedef struct DeserializingThreadArguments {
 	std::string _string;
@@ -32,6 +31,22 @@ typedef struct DeserializingThreadArguments {
 	std::deque<HybridAutomaton*>* _deserialized_hybrid_automatons;
 	HANDLE* _deserialize_mutex;
 };
+
+enum drawLists
+{
+	eRAYS,
+	ePATH,
+	eCYLINDERS,
+	eCUSTOM1,
+	eCUSTOM2
+};
+
+enum drawListsM
+{
+	eLD_MILESTONES,
+	ePATH_MILESTONES	
+};
+
 
 class REXPORT HybridAutomatonManager : public rControlAlgorithm
 {
@@ -53,9 +68,33 @@ public:
 	virtual void setHybridAutomaton(std::string  _new_hybrid_automaton_str, CollisionInterface* collision_interface);
 	virtual void setCollisionInterface(CollisionInterface* collision_interface);
 	virtual void setLocalDecisionCriterion(LocalDecisionCriterion* criterion); // TODO: in future this could be defined in the milestones and serialised!
-	virtual void setPhysicsWorld(rxWorld* physics_world); // for debug draw...
+	//virtual void setPhysicsWorld(rxWorld* physics_world); // for debug draw...
 	virtual bool isBlackboardActive() const;
 	RTBlackBoard* getBlackboard(){return this->_blackboard;};
+
+	std::vector<rCustomDrawInfo> getDrawObjects(drawLists index){
+		std::vector<rCustomDrawInfo> copy;
+		for(int i = 0; i < _draw_objects[index].size(); i++)
+		{
+			copy.push_back(_draw_objects[index][i]);
+		}
+		_draw_objects[index].clear();
+		return copy;
+	};
+	bool getRequestDraw(drawLists index) {return _request_draw[index];};
+	void setRequestDraw(drawLists index, bool draw) {_request_draw[index] = draw;};
+
+	std::vector<dVector> getDrawMilestones(drawListsM index){
+		std::vector<dVector> copy;
+		for(int i = 0; i < _draw_objects_m[index].size(); i++)
+		{
+			copy.push_back(_draw_objects_m[index][i]);
+		}
+		_draw_objects_m[index].clear();
+		return copy;
+	};
+	bool getRequestDrawM(drawListsM index) {return _request_draw_m[index];};
+	void setRequestDrawM(drawListsM index, bool draw) {_request_draw_m[index] = draw;};
 
 	rxSystem*			_robot;
 
@@ -65,10 +104,8 @@ private:
 	virtual void _writeDevices();
 	virtual void _reflect();
 	virtual void _compute(const rTime& t);
-
-#ifdef DRAW_HYBRID_AUTOMATON
-	rID drawLine(const rMath::Displacement &start, const rMath::Displacement &end, const rID &drawID, const rColor &color);
-#endif
+	void drawLine(const rMath::Displacement &start, const rMath::Displacement &end, drawLists index, const rColor &color = RED, const char lineWidth = 1);
+	void drawMilestones(const OpSpaceMilestone* ms, drawListsM index);
 
 	/**
 	* Check if a new HA was written on the Blackboard and creates a new thread to deserialize it.
@@ -106,8 +143,14 @@ private:
 	std::deque<HybridAutomaton*> _deserialized_hybrid_automatons;
 	HANDLE				_deserialize_mutex;
 
-	rxWorld*			_physics_world;
+	//rxWorld*			_physics_world;
 	LocalDecisionCriterion*	_criterion;
 	double				_t_old;
+
+	std::vector<rCustomDrawInfo>	_draw_objects[5];
+	bool							_request_draw[5];
+
+	std::vector<dVector>			_draw_objects_m[2];
+	bool							_request_draw_m[2];
 };
 #endif

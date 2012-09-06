@@ -206,7 +206,7 @@ void MotionBehaviour::activate()
 								}
 							}
 
-							std::cout << "[MotionBehaviour::activate] INFO: Time of trajectory: " << time << std::endl;
+							//std::cout << "[MotionBehaviour::activate] INFO: Time of trajectory: " << time << std::endl;
 							time_to_converge_=time;
 							dynamic_cast<rxJointController*>(*it)->addPoint(desired_q, time, false, eInterpolatorType_Cubic);
 							break;
@@ -242,7 +242,7 @@ void MotionBehaviour::activate()
 								}
 							}
 
-							std::cout << "[MotionBehaviour::activate] INFO: Time of trajectory: " << time << std::endl;
+							//std::cout << "[MotionBehaviour::activate] INFO: Time of trajectory: " << time << std::endl;
 							time_to_converge_=time;
 							FeatureAttractorController* fac = dynamic_cast<FeatureAttractorController*>(*it);
 							if(fac)
@@ -880,6 +880,21 @@ void MotionBehaviour::print()
 			//		}
 
 	}
+}
+
+dVector MotionBehaviour::getGoalConfiguration()
+{
+	std::list<rxController*> controllers = control_set_->getControllers();
+	string_type controllers_to_string;
+	for(std::list< rxController* >::const_iterator controllers_it = controllers.begin();
+		controllers_it != controllers.end() ; controllers_it ++){
+			ReInterpolatedJointImpedanceController* jcontrol = dynamic_cast<ReInterpolatedJointImpedanceController*>(*controllers_it);
+			if(jcontrol)
+			{
+				return jcontrol->getViaPointConfiguration();
+			}
+	}
+	return dVector();
 }
 
 void MotionBehaviour::setMaxVelocityForInterpolation(double max_velocity) {
