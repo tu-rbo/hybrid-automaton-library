@@ -366,7 +366,6 @@ CSpaceMilestone* XMLDeserializer::createCSpaceMilestone(TiXmlElement* milestone_
 		throw std::string("[XMLDeserializer::createCSpaceMilestone] ERROR: The milestone configuration or region of convergence (\"value\" or \"epsilon\") is not defined in the XML string.");
 	}
 
-    double expLength = deserializeElement<double>(milestone_xml, "expectedLength", -1.0);
 
 	TiXmlElement* handle_point_set_element = milestone_xml->FirstChildElement("HandlePoints");
 	std::vector<Point> mst_handle_points;
@@ -382,8 +381,6 @@ CSpaceMilestone* XMLDeserializer::createCSpaceMilestone(TiXmlElement* milestone_
 		}
 	}
 
-	
-
 	CSpaceMilestone* mst = new CSpaceMilestone(mst_name, mst_configuration, NULL, mst_epsilon, mst_status, mst_handle_points);
 
 	TiXmlElement* mb_element = milestone_xml->FirstChildElement("MotionBehaviour");
@@ -394,6 +391,7 @@ CSpaceMilestone* XMLDeserializer::createCSpaceMilestone(TiXmlElement* milestone_
 		mst->setMotionBehaviour(mst_mb);
 	}
     
+    double expLength = deserializeElement<double>(milestone_xml, "expectedLength", -1.0);
     mst->setExpectedLength(expLength);
 
 	return mst;
@@ -446,8 +444,6 @@ OpSpaceMilestone* XMLDeserializer::createOpSpaceMilestone(TiXmlElement* mileston
 		throw std::string("[XMLDeserializer::createOpSpaceMilestone] ERROR: The milestone configuration or region of convergence (\"value\" or \"epsilon\") is not defined in the XML string.");
 	}
 
-    double expLength = deserializeElement<double>(milestone_xml, "expectedLength");
-
 	TiXmlElement* handle_point_set_element = milestone_xml->FirstChildElement("HandlePoints");
 	std::vector<Point> mst_handle_points;
 	if(handle_point_set_element != NULL)
@@ -472,6 +468,7 @@ OpSpaceMilestone* XMLDeserializer::createOpSpaceMilestone(TiXmlElement* mileston
 		mst->setMotionBehaviour(mst_mb);
 	}
 
+    double expLength = deserializeElement<double>(milestone_xml, "expectedLength", -1.0);
     mst->setExpectedLength(expLength);
 
 	return mst;
@@ -522,8 +519,8 @@ MotionBehaviour* XMLDeserializer::createMotionBehaviour(TiXmlElement* motion_beh
 		mb_controller_counter++;
 	}
 
-    double length = deserializeElement<double>(motion_behaviour_xml, "length");
-    double prob   = deserializeElement<double>(motion_behaviour_xml, "probability");
+    double length = deserializeElement<double>(motion_behaviour_xml, "length", -1.0);
+    double prob   = deserializeElement<double>(motion_behaviour_xml, "probability", -1.0);
     mb->setLength(length);
     mb->setProbability(prob);
 
