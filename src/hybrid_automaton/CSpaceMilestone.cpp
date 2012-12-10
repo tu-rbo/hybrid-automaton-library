@@ -137,68 +137,6 @@ void CSpaceMilestone::update()
 	}
 }
 
-std::string CSpaceMilestone::toStringXML() const
-{
-	TiXmlDocument document_xml;
-	TiXmlElement * ms_element = this->toElementXML();
-	document_xml.LinkEndChild(ms_element);
-
-	// Declare a printer
-	TiXmlPrinter printer_xml;
-	// attach it to the document you want to convert in to a std::string
-	document_xml.Accept(&printer_xml);
-	// Create a std::string and copy your document data in to the string
-	std::string return_value = printer_xml.CStr();
-
-	//TODO: Memory leaks?????????
-	delete ms_element;
-	return return_value;
-}
-
-TiXmlElement* CSpaceMilestone::toElementXML() const 
-{
-	TiXmlElement* cspace_ms_xml = new TiXmlElement("Milestone");
-	cspace_ms_xml->SetAttribute("type", "CSpace");
-	cspace_ms_xml->SetAttribute("status", this->status_);
-	cspace_ms_xml->SetAttribute("name", this->name_.c_str());
-
-	std::stringstream value_ss;
-	for(unsigned int i=0; i<this->configuration_.size()-1; i++)
-	{
-		value_ss << configuration_.at(i) << " ";
-	}
-	value_ss << configuration_.at(configuration_.size()-1);
-	cspace_ms_xml->SetAttribute("value", value_ss.str().c_str());
-
-	std::stringstream epsilon_ss;
-	for(unsigned int i=0; i<this->region_convergence_radius_.size()-1; i++)
-	{
-		epsilon_ss << region_convergence_radius_.at(i) << " ";
-	}
-	epsilon_ss << region_convergence_radius_.at(region_convergence_radius_.size()-1);
-	cspace_ms_xml->SetAttribute("epsilon", epsilon_ss.str().c_str());
-
-    cspace_ms_xml->SetDoubleAttribute("expectedLength", this->getExpectedLength());
-
-	TiXmlElement * handlePoints_txe = new TiXmlElement("HandlePoints");
-	cspace_ms_xml->LinkEndChild(handlePoints_txe);
-	std::vector<Point>::const_iterator handlePoints_it = handle_points_.begin();
-	for (; handlePoints_it
-		!= handle_points_.end(); handlePoints_it++) {
-			TiXmlElement * handlePoint_txe;
-			handlePoint_txe = new TiXmlElement("HandlePoint");
-			handlePoints_txe->LinkEndChild(handlePoint_txe);
-			handlePoint_txe->SetDoubleAttribute("x", handlePoints_it->x);
-			handlePoint_txe->SetDoubleAttribute("y", handlePoints_it->y);
-			handlePoint_txe->SetDoubleAttribute("z", handlePoints_it->z);
-	}
-
-	if(motion_behaviour_){
-		cspace_ms_xml->LinkEndChild(this->motion_behaviour_->toElementXML());
-	}
-	return cspace_ms_xml;
-}
-
 CSpaceMilestone* CSpaceMilestone::clone() const
 {
 	CSpaceMilestone* new_c_space_milestone = new CSpaceMilestone(*this);

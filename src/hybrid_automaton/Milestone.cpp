@@ -49,16 +49,6 @@ void Milestone::update()
 {
 }
 
-std::string Milestone::toStringXML() const 
-{
-	throw std::string("WARNING: [Milestone::toStringXML()] Empty method. Derived class' method should have been called instead.");
-}
-
-TiXmlElement* Milestone::toElementXML() const 
-{
-	throw std::string("WARNING: [Milestone::toElementXML(TiXmlElement* root)] Empty method. Derived class' method should have been called instead.");
-}
-
 Milestone* Milestone::clone() const
 {
 	Milestone* new_milestone = new Milestone(*this);

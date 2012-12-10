@@ -300,69 +300,6 @@ void OpSpaceMilestone::update()
 	}
 }
 
-std::string OpSpaceMilestone::toStringXML() const
-{
-	TiXmlDocument document_xml;
-	TiXmlElement * node_element = this->toElementXML();
-	document_xml.LinkEndChild(node_element);
-
-	// Declare a printer
-	TiXmlPrinter printer_xml;
-	// attach it to the document you want to convert in to a std::string
-	document_xml.Accept(&printer_xml);
-	// Create a std::string and copy your document data in to the string
-	std::string return_value = printer_xml.CStr();
-
-	//TODO: Memory leaks?????????
-	delete node_element;
-	return return_value;
-}
-
-TiXmlElement* OpSpaceMilestone::toElementXML() const 
-{
-	TiXmlElement* op_space_ms_xml = new TiXmlElement("Milestone");
-	op_space_ms_xml->SetAttribute("type", "OpSpace");
-	op_space_ms_xml->SetAttribute("status", this->getStatus());
-	op_space_ms_xml->SetAttribute("name", this->name_.c_str());
-	op_space_ms_xml->SetAttribute("PosiOriSelector", posi_ori_selection_);
-
-	std::stringstream value_ss;
-	for(unsigned int i=0; i<this->configuration_.size()-1; i++)
-	{
-		value_ss << configuration_.at(i) << " ";
-	}
-	value_ss << configuration_.at(configuration_.size()-1);
-	op_space_ms_xml->SetAttribute("value", value_ss.str().c_str());
-
-	std::stringstream epsilon_ss;
-	for(unsigned int i=0; i<this->region_convergence_radius_.size()-1; i++)
-	{
-		epsilon_ss << region_convergence_radius_.at(i) << " ";
-	}
-	epsilon_ss << region_convergence_radius_.at(region_convergence_radius_.size()-1);
-	op_space_ms_xml->SetAttribute("epsilon", epsilon_ss.str().c_str());
-
-    op_space_ms_xml->SetDoubleAttribute("expectedLength", this->getExpectedLength());
-
-	TiXmlElement * handlePoints_txe = new TiXmlElement("HandlePoints");
-	op_space_ms_xml->LinkEndChild(handlePoints_txe);
-	std::vector<Point>::const_iterator handlePoints_it = handle_points_.begin();
-	for (; handlePoints_it
-		!= handle_points_.end(); handlePoints_it++) {
-			TiXmlElement * handlePoint_txe;
-			handlePoint_txe = new TiXmlElement("HandlePoint");
-			handlePoints_txe->LinkEndChild(handlePoint_txe);
-			handlePoint_txe->SetDoubleAttribute("x", handlePoints_it->x);
-			handlePoint_txe->SetDoubleAttribute("y", handlePoints_it->y);
-			handlePoint_txe->SetDoubleAttribute("z", handlePoints_it->z);
-	}
-
-	if(motion_behaviour_){
-		op_space_ms_xml->LinkEndChild(this->motion_behaviour_->toElementXML());
-	}
-	return op_space_ms_xml;
-}
-
 OpSpaceMilestone* OpSpaceMilestone::clone() const
 {
 	OpSpaceMilestone* new_op_space_milestone = new OpSpaceMilestone(*this);
