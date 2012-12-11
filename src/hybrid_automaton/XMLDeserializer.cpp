@@ -510,6 +510,9 @@ MotionBehaviour* XMLDeserializer::createMotionBehaviour(TiXmlElement* motion_beh
 
 	MotionBehaviour* mb = new MotionBehaviour(dad, son , mb_control_set);
 
+	mb->setMinTimeForInterpolation(deserializeElement<double>(motion_behaviour_xml, "minTime",-1.));
+	mb->setMaxVelocityForInterpolation(deserializeElement<double>(motion_behaviour_xml, "maxVelocity",-1.));
+
 	int mb_controller_counter = 0;
 	for(TiXmlElement* rxController_xml = control_set_element->FirstChildElement("Controller"); rxController_xml; rxController_xml = rxController_xml->NextSiblingElement())
 	{	
