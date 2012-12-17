@@ -15,6 +15,8 @@
 #include "JointLimitAvoidanceControllerOnDemand.h"
 #include "OpSpaceSingularityAvoidanceController.h"
 #include "ReInterpolatedJointImpedanceController.h"
+#include "NakamuraControlSet.h"
+
 
 std::map<std::string, ControllerType> XMLDeserializer::controller_map_ = XMLDeserializer::createControllerMapping();
 
@@ -180,17 +182,11 @@ ViaPointBase * deserializeViaPoint(TiXmlElement * xml_element, ControllerType ty
 
 std::string XMLDeserializer::wstring2string(const std::wstring& wstr)
 {
-	/*std::string str(wstr.length(),' ');
-	copy(wstr.begin(),wstr.end(),str.begin());
-	return str;*/
 	return std::string(wstr.begin(), wstr.end());
 }
 
 std::wstring XMLDeserializer::string2wstring(const std::string& str)
 {
-	/*std::wstring wstr(str.length(),L' ');
-	copy(str.begin(),str.end(),wstr.begin());
-	return wstr;*/
 	return std::wstring(str.begin(), str.end());
 }
 
@@ -486,20 +482,24 @@ MotionBehaviour* XMLDeserializer::createMotionBehaviour(TiXmlElement* motion_beh
 	rxControlSetBase* mb_control_set = NULL;
 	if(robot)
 	{
-		if(control_set_type==std::string("rxControlSet"))
+		if(control_set_type == std::string("rxControlSet"))
 		{		
 			mb_control_set = new rxControlSet(robot, dT);
 			mb_control_set->setGravity(0,0,-GRAV_ACC);
 			mb_control_set->setInverseDynamicsAlgorithm(new rxAMBSGravCompensation(robot));
 			mb_control_set->nullMotionController()->setGain(0.02,0.0,0.01);
 		}
-		else if(control_set_type==std::string("rxTPOperationalSpaceControlSet"))
+		else if(control_set_type == std::string("rxTPOperationalSpaceControlSet"))
 		{		
 			mb_control_set = new rxTPOperationalSpaceControlSet(robot, dT);
 			mb_control_set->setGravity(0,0,-GRAV_ACC);
 			//mb_control_set->setInverseDynamicsAlgorithm(new rxAMBSGravCompensation(robot));
 			//mb_control_set->nullMotionController()->setGain(0.02,0.0,0.01);
 			mb_control_set->nullMotionController()->setGain(10.0,1.0); // taken from ERM values...
+		}
+		else if(control_set_type == "NakamuraControlSet")
+		{
+			mb_control_set = new NakamuraControlSet(robot, dT);
 		}
 		else
 		{
