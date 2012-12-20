@@ -12,6 +12,7 @@
 #include "CSpaceBlackBoardMilestone.h"
 #include "OpSpaceMilestone.h"
 
+
 template<class T>
 T deserializeElement(TiXmlElement * xml_element, const char * field_name);
 
@@ -22,7 +23,12 @@ bool deserializeBoolean(TiXmlElement * xml_element, const char * field_name, boo
 
 std::string deserializeString(TiXmlElement * xml_element, const char * field_name, bool error_if_not_found=true);
 
-std::vector<double> deserializeVectorDouble(TiXmlElement * xml_element, const char * field_name);
+dVector deserializeDVector(TiXmlElement * xml_element, const char * field_name);
+
+Rotation deserializeRotation(TiXmlElement * xml_element, const char * field_name);
+
+template<class T>
+std::vector<T> deserializeStdVector(TiXmlElement * xml_element, const char * field_name);
 
 ViaPointBase * deserializeViaPoint(TiXmlElement * xml_element, ControllerType type_of_controller, int controller_dimension);
 
@@ -32,6 +38,41 @@ ViaPointBase * deserializeViaPoint(TiXmlElement * xml_element, ControllerType ty
 */
 std::string colon2space(std::string text);
 
+struct ControllerParameters {
+	std::string type;
+	bool ik;
+	dVector kp;
+	dVector kv;
+	dVector invL2sqr;
+	dVector stiffness_b;
+	dVector stiffness_k;
+	rxBody* alpha;
+	rxBody* beta;
+	Displacement alpha_displacement;
+	Displacement beta_displacement;
+	Rotation alpha_rotation_matrix;
+	Rotation beta_rotation_matrix;
+	std::string blackboard_variable_name;
+	double maxVel;
+	int priority;
+	double timeGoal;
+	bool reuseGoal;
+	int typeGoal;
+	dVector dVectorGoal;
+	Vector3D Vector3DGoal;
+	Rotation RGoal;
+	Displacement rGoal;
+	double desired_distance;
+	double max_force;
+	double max_vel;
+	std::string limit_body;
+	double distance_limit;
+	double distance_threshold;
+	double deactivation_threshold;
+	std::vector<long> index;
+	double safetyThresh;
+	std::vector<double> tc;
+};
 
 class XMLDeserializer
 {
@@ -63,8 +104,8 @@ public:
 
 	static MotionBehaviour* createMotionBehaviour(TiXmlElement* motion_behaviour_xml , Milestone *dad, Milestone *son , rxSystem* robot, double dT );
 
-	static rxController* createController(TiXmlElement* rxController_xml , const Milestone *dad, const Milestone *son , rxSystem* robot, double dT, 
-		bool goal_controller, int controller_counter);
+	static rxController* createController(TiXmlElement* rxController_xml , const Milestone *dad, const Milestone *son , rxSystem* robot, double dT, bool goal_controller, int controller_counter);
+	static rxController* createController2(TiXmlElement* rxController_xml , const Milestone *dad, const Milestone *son , rxSystem* robot, double dT, bool goal_controller, int controller_counter);
 
 	/**
 	* Recreate a Joint controller

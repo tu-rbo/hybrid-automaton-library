@@ -20,6 +20,16 @@
 
 std::map<std::string, ControllerType> XMLDeserializer::controller_map_ = XMLDeserializer::createControllerMapping();
 
+std::string XMLDeserializer::wstring2string(const std::wstring& wstr)
+{
+	return std::string(wstr.begin(), wstr.end());
+}
+
+std::wstring XMLDeserializer::string2wstring(const std::string& str)
+{
+	return std::wstring(str.begin(), str.end());
+}
+
 /**
 * Deserializing Functions
 */
@@ -28,11 +38,13 @@ template<class T>
 T deserializeElement(TiXmlElement * xml_element, const char * field_name)
 {
 	T return_value;
+	/*
 	if(!xml_element->Attribute(field_name, &return_value))
 	{
 		std::string exception_str = std::string("[deserializeElement] ERROR: Attribute ") + std::string(field_name) + std::string(" was not found in XML element.");
 		throw exception_str;
 	}
+	*/
 	return return_value;
 }
 
@@ -79,11 +91,30 @@ std::string deserializeString(TiXmlElement * xml_element, const char * field_nam
 	return std::string();
 }
 
-std::vector<double> deserializeVectorDouble(TiXmlElement * xml_element, const char * field_name)
+dVector deserializeDVector(TiXmlElement * xml_element, const char * field_name)
 {
-	std::stringstream vector_ss = std::stringstream(xml_element->Attribute(field_name));
+	std::stringstream ss(deserializeString(xml_element, field_name, false));
+	dVector v;
+	v.all(-1.0);
+	double value = -1.0;
+	while(ss >> value)
+	{	
+		v.expand(1, value);
+	}
+	return v;
+}
+
+Rotation deserializeRotation(TiXmlElement * xml_element, const char * field_name)
+{
+	return XMLDeserializer::string2rotation(deserializeString(xml_element, field_name, false));
+}
+
+template<class T>
+std::vector<T> deserializeStdVector(TiXmlElement * xml_element, const char * field_name)
+{
+	std::vector<T> ret_vector;
+	std::stringstream vector_ss = std::stringstream(deserializeString(xml_element, field_name, false));
 	double vector_value = -1.0;
-	std::vector<double> ret_vector;
 	while ((vector_ss >> vector_value))
 	{
 		ret_vector.push_back(vector_value);
@@ -178,16 +209,6 @@ ViaPointBase * deserializeViaPoint(TiXmlElement * xml_element, ControllerType ty
 		break;
 	}
 	return return_value;
-}
-
-std::string XMLDeserializer::wstring2string(const std::wstring& wstr)
-{
-	return std::string(wstr.begin(), wstr.end());
-}
-
-std::wstring XMLDeserializer::string2wstring(const std::string& str)
-{
-	return std::wstring(str.begin(), str.end());
 }
 
 Rotation XMLDeserializer::string2rotation(const std::string& str)
@@ -355,8 +376,8 @@ CSpaceMilestone* XMLDeserializer::createCSpaceMilestone(TiXmlElement* milestone_
 {
 	Milestone::Status mst_status = (Milestone::Status)deserializeElement<int>(milestone_xml, "status");
 	std::string mst_name = deserializeString(milestone_xml, "name");
-	std::vector<double> mst_configuration = deserializeVectorDouble(milestone_xml, "value");
-	std::vector<double> mst_epsilon = deserializeVectorDouble(milestone_xml, "epsilon");
+	std::vector<double> mst_configuration = deserializeStdVector<double>(milestone_xml, "value");
+	std::vector<double> mst_epsilon = deserializeStdVector<double>(milestone_xml, "epsilon");
 	if(mst_configuration.size()==0 || mst_epsilon.size()==0)
 	{
 		throw std::string("[XMLDeserializer::createCSpaceMilestone] ERROR: The milestone configuration or region of convergence (\"value\" or \"epsilon\") is not defined in the XML string.");
@@ -397,8 +418,8 @@ CSpaceBlackBoardMilestone* XMLDeserializer::createCSpaceBlackBoardMilestone(TiXm
 {
 	Milestone::Status mst_status = (Milestone::Status)deserializeElement<int>(milestone_xml, "status");
 	std::string mst_name = deserializeString(milestone_xml, "name");
-	std::vector<double> mst_configuration = deserializeVectorDouble(milestone_xml, "value");
-	std::vector<double> mst_epsilon = deserializeVectorDouble(milestone_xml, "epsilon");
+	std::vector<double> mst_configuration = deserializeStdVector<double>(milestone_xml, "value");
+	std::vector<double> mst_epsilon = deserializeStdVector<double>(milestone_xml, "epsilon");
 	if(mst_configuration.size()==0 || mst_epsilon.size()==0)
 	{
 		throw std::string("[XMLDeserializer::createCSpaceMilestone] ERROR: The milestone configuration or region of convergence (\"value\" or \"epsilon\") is not defined in the XML string.");
@@ -433,8 +454,8 @@ OpSpaceMilestone* XMLDeserializer::createOpSpaceMilestone(TiXmlElement* mileston
 	Milestone::Status mst_status = (Milestone::Status)deserializeElement<int>(milestone_xml, "status");
 	std::string mst_name = deserializeString(milestone_xml, "name");
 	PosiOriSelector mst_pos = (PosiOriSelector)deserializeElement<int>(milestone_xml, "PosiOriSelector");
-	std::vector<double> mst_configuration = deserializeVectorDouble(milestone_xml, "value");
-	std::vector<double> mst_epsilon = deserializeVectorDouble(milestone_xml, "epsilon");
+	std::vector<double> mst_configuration = deserializeStdVector<double>(milestone_xml, "value");
+	std::vector<double> mst_epsilon = deserializeStdVector<double>(milestone_xml, "epsilon");
 	if(mst_configuration.size()==0 || mst_epsilon.size()==0)
 	{
 		throw std::string("[XMLDeserializer::createOpSpaceMilestone] ERROR: The milestone configuration or region of convergence (\"value\" or \"epsilon\") is not defined in the XML string.");
@@ -500,6 +521,8 @@ MotionBehaviour* XMLDeserializer::createMotionBehaviour(TiXmlElement* motion_beh
 		else if(control_set_type == "NakamuraControlSet")
 		{
 			mb_control_set = new NakamuraControlSet(robot, dT);
+			mb_control_set->setGravity(0,0,-GRAV_ACC);
+			mb_control_set->nullMotionController()->setGain(0.0, 0.0, 0.0);
 		}
 		else
 		{
@@ -530,8 +553,277 @@ MotionBehaviour* XMLDeserializer::createMotionBehaviour(TiXmlElement* motion_beh
 	return mb;
 }
 
+rxController* XMLDeserializer::createController(TiXmlElement *rxController_xml, const Milestone *dad, const Milestone *son, rxSystem *robot, double dT, bool goal_controller, int controller_counter)
+{
+	// iterate through all attributes (vs. iterate through parameter set)
+	// and fill parameter set (check for default values)
+	ControllerParameters params;
+	params.type = deserializeString(rxController_xml, "type");
+	params.ik = deserializeBoolean(rxController_xml, "ik");
+	params.kp = deserializeDVector(rxController_xml, "kp");
+	params.kv = deserializeDVector(rxController_xml, "kv");
+	params.stiffness_b = deserializeDVector(rxController_xml, "stiffness_b");
+	params.stiffness_k = deserializeDVector(rxController_xml, "stiffness_k");
+	params.invL2sqr = deserializeDVector(rxController_xml, "invL2sqr");
+	params.priority = deserializeElement<int>(rxController_xml, "priority", 1);
+	params.timeGoal = deserializeElement<double>(rxController_xml, "timeGoal");
+	params.reuseGoal = deserializeBoolean(rxController_xml, "reuseGoal");
+	params.typeGoal = deserializeElement<int>(rxController_xml, "typeGoal");
+	params.dVectorGoal = deserializeDVector(rxController_xml, "dVectorGoal");
+	params.Vector3DGoal = deserializeDVector(rxController_xml, "Vector3DGoal");
+	params.RGoal = deserializeRotation(rxController_xml, "RGoal");
+	params.rGoal = deserializeDVector(rxController_xml, "rGoal");
+	params.desired_distance = deserializeElement<double>(rxController_xml, "desiredDistance", 1.);
+	params.max_force = deserializeElement<double>(rxController_xml, "maxForce", 1.);
+    params.max_vel = deserializeElement<double>(rxController_xml, "maxVel", 1.);
+	params.limit_body = deserializeString(rxController_xml, "limitBody", false);
+	params.distance_limit = deserializeElement<double>(rxController_xml, "distanceLimit", 0.);
+	params.distance_threshold = deserializeElement<double>(rxController_xml, "distanceThreshold", 1.);
+	params.deactivation_threshold = deserializeElement<double>(rxController_xml, "deactivationThreshold", 1.);
+	params.index = deserializeStdVector<long>(rxController_xml, "index");
+	params.safetyThresh = deserializeElement<double>(rxController_xml, "safetyThresh", 1.0);
+	params.tc = deserializeStdVector<double>(rxController_xml, "taskConstraints");
+	params.alpha = robot->findBody(XMLDeserializer::string2wstring(deserializeString(rxController_xml, "alpha", false)));
+	params.alpha_displacement = deserializeDVector(rxController_xml, "alphaDisplacement");
+	params.alpha_rotation_matrix = deserializeRotation(rxController_xml, "alphaRotation");
+	params.beta = robot->findBody(XMLDeserializer::string2wstring(deserializeString(rxController_xml, "beta", false)));
+	params.beta_displacement = deserializeDVector(rxController_xml, "betaDisplacement");
+	params.beta_rotation_matrix = deserializeRotation(rxController_xml, "betaRotation");
+	// viapoints ?
 
-rxController* XMLDeserializer::createController(TiXmlElement *rxController_xml, const Milestone *dad, const Milestone *son, 
+	// call the appropriate factory method which takes the parameter set as input
+	rxController* controller = NULL;
+	if (params.type == "rxJointController")
+	{
+		rxJointController* special_controller = new rxJointController(robot, dT);
+		special_controller->addPoint(params.dVectorGoal, params.timeGoal, params.reuseGoal, eInterpolatorType_Cubic);
+		controller = special_controller;
+	}
+	else if (params.type == "rxJointComplianceController")
+	{
+		rxJointComplianceController* special_controller = new rxJointComplianceController(robot, dT);
+		special_controller->addPoint(params.dVectorGoal, params.timeGoal, params.reuseGoal, eInterpolatorType_Cubic);
+		special_controller->setStiffness(params.stiffness_b, params.stiffness_k);
+		controller = special_controller;
+	}
+	else if (params.type == "rxJointImpedanceController")
+	{
+		rxJointImpedanceController* special_controller = new rxJointImpedanceController(robot, dT);
+		special_controller->addPoint(params.dVectorGoal, params.timeGoal, params.reuseGoal, eInterpolatorType_Cubic);
+		controller = special_controller;
+	}
+	else if (params.type == "rxInterpolatedJointController")
+	{
+		rxInterpolatedJointController* special_controller = new rxInterpolatedJointController(robot, dT);
+		special_controller->addPoint(params.dVectorGoal, params.timeGoal, params.reuseGoal, eInterpolatorType_Cubic);
+		controller = special_controller;
+	}
+	else if (params.type == "rxInterpolatedJointComplianceController")
+	{
+		rxInterpolatedJointComplianceController* special_controller = new rxInterpolatedJointComplianceController(robot, dT);
+		special_controller->addPoint(params.dVectorGoal, params.timeGoal, params.reuseGoal, eInterpolatorType_Cubic);
+		special_controller->setStiffness(params.stiffness_b, params.stiffness_k);
+		controller = special_controller;
+	}
+	else if (params.type == "ReInterpolatedJointImpedanceController")
+	{
+		ReInterpolatedJointImpedanceController* special_controller = new ReInterpolatedJointImpedanceController(robot, dT);
+		special_controller->addPoint(params.dVectorGoal, params.timeGoal, params.reuseGoal, eInterpolatorType_Cubic);
+		special_controller->setImpedance(0.5,3.0,2.0);
+		controller = special_controller;
+	}
+	else if (params.type == "JointBlackBoardController")
+	{
+		JointBlackBoardController* special_controller = new JointBlackBoardController(robot, dT);
+		special_controller->setBlackBoardVariableName(params.blackboard_variable_name);
+		controller = special_controller;
+	}
+    else if (params.type == "SingularityAvoidanceController")
+	{
+        HTransform ht;
+        rxBody* EE = robot->getUCSBody(_T("EE"), ht);
+        controller = new SingularityAvoidanceController(robot, EE, dT, params.maxVel);
+    }
+    else if (params.type == "rxDisplacementController")
+	{
+		rxDisplacementController* special_controller = new rxDisplacementController(robot, params.beta, Displacement(params.beta_displacement), params.alpha, Displacement(params.alpha_displacement), dT);
+		special_controller->addPoint(params.dVectorGoal, params.timeGoal, params.reuseGoal, eInterpolatorType_Cubic);
+		controller = special_controller;
+	}
+    else if (params.type == "rxDisplacementComplianceController")
+	{
+		rxDisplacementComplianceController* special_controller = new rxDisplacementComplianceController(robot, params.beta, Displacement(params.beta_displacement), params.alpha, Displacement(params.alpha_displacement), dT);
+		special_controller->setStiffness(params.stiffness_b, params.stiffness_k);
+		special_controller->addPoint(params.dVectorGoal, params.timeGoal, params.reuseGoal, eInterpolatorType_Cubic);
+		controller = special_controller;
+	}
+    else if (params.type == "rxDisplacementImpedanceController")
+	{
+		rxDisplacementImpedanceController* special_controller = new rxDisplacementImpedanceController(robot, params.beta, Displacement(params.beta_displacement), params.alpha, Displacement(params.alpha_displacement), dT);
+		special_controller->addPoint(params.dVectorGoal, params.timeGoal, params.reuseGoal, eInterpolatorType_Cubic);
+		controller = special_controller;
+	}
+	else if (params.type == "rxInterpolatedDisplacementController")
+	{
+		rxInterpolatedDisplacementController* special_controller = new rxInterpolatedDisplacementController(robot, params.beta, Displacement(params.beta_displacement), params.alpha, Displacement(params.alpha_displacement), dT);
+		special_controller->addPoint(params.dVectorGoal, params.timeGoal, params.reuseGoal, eInterpolatorType_Cubic);
+		controller = special_controller;
+	}
+	else if (params.type == "rxInterpolatedDisplacementComplianceController")
+	{
+		rxInterpolatedDisplacementComplianceController* special_controller = new rxInterpolatedDisplacementComplianceController(robot, params.beta, Displacement(params.beta_displacement), params.alpha, Displacement(params.alpha_displacement), dT);
+		special_controller->addPoint(params.dVectorGoal, params.timeGoal, params.reuseGoal, eInterpolatorType_Cubic);
+		special_controller->setStiffness(params.stiffness_b, params.stiffness_k);
+		controller = special_controller;
+	}
+	else if (params.type == "rxInterpolatedDisplacementImpedanceController")
+	{
+		rxInterpolatedDisplacementImpedanceController* special_controller = new rxInterpolatedDisplacementImpedanceController(robot, params.beta, Displacement(params.beta_displacement), params.alpha, Displacement(params.alpha_displacement), dT);
+		special_controller->addPoint(params.dVectorGoal, params.timeGoal, params.reuseGoal, eInterpolatorType_Cubic);
+		controller = special_controller;
+	}
+	else if (params.type == "FeatureAttractorController")
+	{
+		FeatureAttractorController* special_controller = new FeatureAttractorController(robot, params.beta, Displacement(params.beta_displacement), dT, params.desired_distance, params.max_force);
+		special_controller->setImpedance(0.2, 8.0, 20.0);
+		controller = special_controller;
+	}
+	else if (params.type == "OpSpaceSingularityAvoidanceController")
+    {
+        controller = new OpSpaceSingularityAvoidanceController(robot, params.beta, params.alpha, dT, params.max_vel);
+	}
+	else if (params.type == "rxOrientationController")
+    {
+		rxOrientationController* special_controller = new rxOrientationController(robot, params.beta, params.beta_rotation_matrix, params.alpha, params.alpha_rotation_matrix, dT);
+		special_controller->addPoint(params.RGoal, params.timeGoal, params.reuseGoal);
+		controller = special_controller;
+	}
+	else if (params.type == "rxOrientationComplianceController")
+    {
+		rxOrientationComplianceController* special_controller = new rxOrientationComplianceController(robot, params.beta, params.beta_rotation_matrix, params.alpha, params.alpha_rotation_matrix, dT);
+		special_controller->setStiffness(params.stiffness_b, params.stiffness_k);
+		special_controller->addPoint(params.RGoal, params.timeGoal, params.reuseGoal);
+		controller = special_controller;
+	}
+	else if (params.type == "rxOrientationImpedanceController")
+    {
+		rxOrientationImpedanceController* special_controller = new rxOrientationImpedanceController(robot, params.beta, params.beta_rotation_matrix, params.alpha, params.alpha_rotation_matrix, dT);
+		special_controller->addPoint(params.RGoal, params.timeGoal, params.reuseGoal);
+		controller = special_controller;
+	}
+	else if (params.type == "rxInterpolatedOrientationController")
+    {
+		rxInterpolatedOrientationController* special_controller = new rxInterpolatedOrientationController(robot, params.beta, params.beta_rotation_matrix, params.alpha, params.alpha_rotation_matrix, dT);
+		special_controller->addPoint(params.RGoal, params.timeGoal, params.reuseGoal);
+		controller = special_controller;
+	}
+	else if (params.type == "rxInterpolatedOrientationComplianceController")
+    {
+		rxInterpolatedOrientationComplianceController* special_controller = new rxInterpolatedOrientationComplianceController(robot, params.beta, params.beta_rotation_matrix, params.alpha, params.alpha_rotation_matrix, dT);
+		special_controller->setStiffness(params.stiffness_b, params.stiffness_k);
+		special_controller->addPoint(params.RGoal, params.timeGoal, params.reuseGoal);
+		controller = special_controller;
+	}
+	else if (params.type == "rxInterpolatedOrientationImpedanceController")
+    {
+		rxInterpolatedOrientationImpedanceController* special_controller = new rxInterpolatedOrientationImpedanceController(robot, params.beta, params.beta_rotation_matrix, params.alpha, params.alpha_rotation_matrix, dT);
+		special_controller->addPoint(params.RGoal, params.timeGoal, params.reuseGoal);
+		controller = special_controller;
+	}
+	else if (params.type == "rxHTransformController")
+    {
+		rxHTransformController* special_controller = new rxHTransformController(robot, params.beta, HTransform(params.beta_rotation_matrix, params.beta_displacement), params.alpha, HTransform(params.alpha_rotation_matrix, params.alpha_displacement), dT);
+		HTransform goal_HTransform(params.RGoal, params.rGoal);
+		special_controller->addPoint(goal_HTransform, params.timeGoal, params.reuseGoal);
+		controller = special_controller;
+	}
+	else if (params.type == "rxHTransformComplianceController")
+    {
+		rxHTransformComplianceController* special_controller = new rxHTransformComplianceController(robot, params.beta, HTransform(params.beta_rotation_matrix, params.beta_displacement), params.alpha, HTransform(params.alpha_rotation_matrix, params.alpha_displacement), dT);
+		special_controller->setStiffness(params.stiffness_b, params.stiffness_k);
+		HTransform goal_HTransform(params.RGoal, params.rGoal);
+		special_controller->addPoint(goal_HTransform, params.timeGoal, params.reuseGoal);
+		controller = special_controller;
+	}
+	else if (params.type == "rxHTransformImpedanceController")
+    {
+		rxHTransformImpedanceController* special_controller = new rxHTransformImpedanceController(robot, params.beta, HTransform(params.beta_rotation_matrix, params.beta_displacement), params.alpha, HTransform(params.alpha_rotation_matrix, params.alpha_displacement), dT);
+		HTransform goal_HTransform(params.RGoal, params.rGoal);
+		special_controller->addPoint(goal_HTransform, params.timeGoal, params.reuseGoal);
+		controller = special_controller;
+	}
+	else if (params.type == "rxInterpolatedHTransformController")
+    {
+		rxInterpolatedHTransformController* special_controller = new rxInterpolatedHTransformController(robot, params.beta, HTransform(params.beta_rotation_matrix, params.beta_displacement), params.alpha, HTransform(params.alpha_rotation_matrix, params.alpha_displacement), dT);
+		HTransform goal_HTransform(params.RGoal, params.rGoal);
+		special_controller->addPoint(goal_HTransform, params.timeGoal, params.reuseGoal);
+		controller = special_controller;
+	}
+	else if (params.type == "rxInterpolatedHTransformComplianceController")
+    {
+		rxInterpolatedHTransformComplianceController* special_controller = new rxInterpolatedHTransformComplianceController(robot, params.beta, HTransform(params.beta_rotation_matrix, params.beta_displacement), params.alpha, HTransform(params.alpha_rotation_matrix, params.alpha_displacement), dT);
+		special_controller->setStiffness(params.stiffness_b, params.stiffness_k);
+		HTransform goal_HTransform(params.RGoal, params.rGoal);
+		special_controller->addPoint(goal_HTransform, params.timeGoal, params.reuseGoal);
+		controller = special_controller;
+	}
+	else if (params.type == "rxInterpolatedHTransformImpedanceController")
+    {
+		rxInterpolatedHTransformImpedanceController* special_controller = new rxInterpolatedHTransformImpedanceController(robot, params.beta, HTransform(params.beta_rotation_matrix, params.beta_displacement), params.alpha, HTransform(params.alpha_rotation_matrix, params.alpha_displacement), dT);
+		HTransform goal_HTransform(params.RGoal, params.rGoal);
+		special_controller->addPoint(goal_HTransform, params.timeGoal, params.reuseGoal);
+		controller = special_controller;
+	}
+	else if (params.type == "rxNullMotionController")
+    {
+		controller = new rxNullMotionController(robot, dT);
+	}
+	else if (params.type == "rxNullMotionComplianceController")
+    {
+		controller = new rxNullMotionComplianceController(robot,  dT);
+	}
+	else if (params.type == "SubdisplacementController")
+    {
+		SubdisplacementController* special_controller = new SubdisplacementController(robot, params.beta, params.beta_displacement, params.alpha, params.alpha_displacement, dT, params.index, params.max_force, robot->findBody(string_type(string2wstring(params.limit_body))), params.distance_limit );
+		if(params.index.size() == 1)
+		{
+			special_controller->setTaskConstraints(params.tc[0]);
+		}
+		else if (params.index.size() == 2)
+		{
+			special_controller->setTaskConstraints(params.tc[0], params.tc[1]);
+		}
+		special_controller->setImpedance(0.2, 8.0, 20.0);
+		controller = special_controller;
+	}
+	else if (params.type == "ObstacleAvoidanceController")
+    {
+		if(CollisionInterface::instance)
+		{
+			controller = new ObstacleAvoidanceController(robot, params.alpha, params.alpha_displacement, params.distance_threshold, CollisionInterface::instance, dT, params.deactivation_threshold);
+		}
+	}
+	else if (params.type == "ObstacleAvoidanceController")
+    {
+		controller = new JointLimitAvoidanceControllerOnDemand(robot, params.index[0], params.safetyThresh, dT); 
+	}
+
+	// quasicoord <-- missing
+	// functional <-- missing (and more!)
+
+	// we need unique names for all controllers in a single control set, otherwise RLAB will complain
+	std::wstringstream wss;
+	wss << "controller_" << controller_counter;
+	controller->setName(wss.str());
+
+	controller->setPriority(params.priority);
+	controller->setIKMode(params.ik);
+	controller->setGain(params.kv, params.kp, params.invL2sqr);
+
+	return controller;
+}
+
+rxController* XMLDeserializer::createController2(TiXmlElement *rxController_xml, const Milestone *dad, const Milestone *son, 
 												rxSystem *robot, double dT, bool goal_controller, int controller_counter)
 {
 	std::string controller_class_name = deserializeString(rxController_xml, "type");
@@ -556,7 +848,6 @@ rxController* XMLDeserializer::createController(TiXmlElement *rxController_xml, 
 		invL2sqr_vector.expand(1,invL2sqr_value);
 	}
 
-	double ctrl_total_time = 0.0;
 	std::vector<ViaPointBase*> via_points_ptr;
 
 	// Create the Controller
@@ -1254,6 +1545,9 @@ std::map<std::string, ControllerType> XMLDeserializer::createControllerMapping()
     mapping["SingularityAvoidanceController"]				= ControllerType(rxController::eControlType_Joint, SINGULARITY_AVOIDANCE);
     mapping["OpSpaceSingularityAvoidanceController"]    	= ControllerType(rxController::eControlType_Displacement, SINGULARITY_AVOIDANCE);
     mapping["JointLimitAvoidanceControllerOnDemand"]		= ControllerType(rxController::eControlType_Functional, JOINT_LIMIT_AVOIDANCE);
+
+	mapping["InterpolatedSetPointDisplacementController"]	= ControllerType(rxController::eControlType_Displacement, WITH_INTERPOLATION);
+	mapping["InterpolatedSetPointOrientationController"]	= ControllerType(rxController::eControlType_Orientation, WITH_INTERPOLATION);
 
 	return mapping;
 }
