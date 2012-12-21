@@ -21,11 +21,15 @@ T deserializeElement(TiXmlElement * xml_element, const char * field_name, T defa
 
 bool deserializeBoolean(TiXmlElement * xml_element, const char * field_name, bool default_value = false);
 
+std::string deserializeString(TiXmlElement * xml_element, const char * field_name, const std::string& default_value);
 std::string deserializeString(TiXmlElement * xml_element, const char * field_name, bool error_if_not_found=true);
 
 dVector deserializeDVector(TiXmlElement * xml_element, const char * field_name);
 
-Rotation deserializeRotation(TiXmlElement * xml_element, const char * field_name);
+Displacement deserializeDisplacement(TiXmlElement * xml_element, const char * field_name, const Displacement& default_value);
+Rotation deserializeRotation(TiXmlElement * xml_element, const char * field_name, const Rotation& default_value);
+
+rxBody* deserializeBody(rxSystem* robot, TiXmlElement * xml_element, const char * field_name, rxBody* default_value);
 
 template<class T>
 std::vector<T> deserializeStdVector(TiXmlElement * xml_element, const char * field_name);
@@ -89,8 +93,9 @@ public:
 	*/
 	static std::wstring string2wstring(const std::string& str);
 
-	static Rotation string2rotation(const std::string& str);
+	static Rotation string2rotation(const std::string& str, const Rotation& default_value);
 
+	static void addPoint(rxController* controller, TiXmlElement* xml);
 
 	XMLDeserializer();
 	virtual ~XMLDeserializer();

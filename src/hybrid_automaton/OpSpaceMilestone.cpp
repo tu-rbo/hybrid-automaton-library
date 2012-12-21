@@ -7,10 +7,6 @@
 #include "XMLDeserializer.h"
 #include "Quaternion.h"
 
-using namespace std;
-
-#define RADIUS 0.4
-
 OpSpaceMilestone::OpSpaceMilestone() :
 Milestone("Default"),
 motion_behaviour_(NULL),
@@ -23,6 +19,26 @@ Milestone(osm_name),
 motion_behaviour_(NULL),
 posi_ori_selection_(POSITION_SELECTION)	// Default value in the default constructor
 {
+}
+
+OpSpaceMilestone::OpSpaceMilestone(std::string osm_name, const Displacement& position, const Rotation& orientation, PosiOriSelector posi_ori_selection, MotionBehaviour * motion_behaviour, std::vector<double>& region_convergence_radius) :
+Milestone(osm_name),
+posi_ori_selection_(posi_ori_selection),
+position_(position),
+orientation_(orientation),
+region_convergence_radius_(region_convergence_radius)
+{
+	if(motion_behaviour)
+	{
+		this->motion_behaviour_ = motion_behaviour->clone();
+		// Force motion_behaviour to have this milestone as parent and child
+		this->motion_behaviour_->setChild(this);
+		this->motion_behaviour_->setParent(this);
+	}
+	else
+	{
+		this->motion_behaviour_ = NULL;
+	}
 }
 
 OpSpaceMilestone::OpSpaceMilestone(std::string osm_name, std::vector<double>& posi_ori_value, PosiOriSelector posi_ori_selection, MotionBehaviour * motion_behaviour, std::vector<double>& region_convergence_radius) :
@@ -135,7 +151,9 @@ Milestone(op_milestone_cpy),
 configuration_(op_milestone_cpy.configuration_),
 region_convergence_radius_(op_milestone_cpy.region_convergence_radius_),
 handle_points_(op_milestone_cpy.handle_points_),
-posi_ori_selection_(op_milestone_cpy.posi_ori_selection_)
+posi_ori_selection_(op_milestone_cpy.posi_ori_selection_),
+position_(op_milestone_cpy.position_),
+orientation_(op_milestone_cpy.orientation_)
 {
 	if(op_milestone_cpy.motion_behaviour_)
 	{
@@ -279,6 +297,16 @@ void OpSpaceMilestone::setConfiguration(dVector configuration_in, PosiOriSelecto
 	}
 }
 
+Displacement OpSpaceMilestone::getPosition() const
+{
+	return this->position_;
+}
+
+Rotation OpSpaceMilestone::getOrientation() const
+{
+	return this->orientation_;
+}
+
 dVector OpSpaceMilestone::getConfiguration() const
 {
 	// Using 6 values for the configuration: 3 position + 3 orientation
@@ -322,6 +350,8 @@ OpSpaceMilestone& OpSpaceMilestone::operator=(const OpSpaceMilestone & op_milest
 	//this->object_id_ = op_milestone_assignment.getObjectId();
 	this->handle_points_ = op_milestone_assignment.handle_points_;
 	this->posi_ori_selection_ = op_milestone_assignment.getPosiOriSelector();
+	this->position_ = op_milestone_assignment.position_;
+	this->orientation_ = op_milestone_assignment.orientation_;
 	return *this;
 }
 
@@ -342,15 +372,19 @@ PosiOriSelector OpSpaceMilestone::getPosiOriSelector() const
 
 bool OpSpaceMilestone::hasConverged(rxSystem* sys) 
 {
-	assert (sys != NULL);
-
+	assert(sys != NULL);
 	
 	HTransform ht;
 	rxBody* EE = sys->getUCSBody(_T("EE"),ht);
 	if (posi_ori_selection_ == POSITION_SELECTION
 		|| posi_ori_selection_ == POS_AND_ORI_SELECTION)
 	{
-		Displacement current_r = ht.r + EE->T().r; //parent->getConfiguration();
+		Displacement current_r = ht.r + EE->T().r - this->position_; //parent->getConfiguration();
+		if ( ::std::fabs(current_r[0]) > region_convergence_radius_[0] ||
+			 ::std::fabs(current_r[1]) > region_convergence_radius_[1] ||
+			 ::std::fabs(current_r[2]) > region_convergence_radius_[2] )
+			 return false;
+		/*
 		for (int i = 0; i < 3; i++) {;
 			double e = ::std::abs(current_r[i] - configuration_[i]);
 			if (e > region_convergence_radius_[i])
@@ -361,18 +395,17 @@ bool OpSpaceMilestone::hasConverged(rxSystem* sys)
 				return false;
 			}
 		}
+		*/
 	}
 
 	if (posi_ori_selection_ == ORIENTATION_SELECTION
 		|| posi_ori_selection_ == POS_AND_ORI_SELECTION)
 	{
 		// desired orientation
-		Rotation Rd(configuration_[3],
-			configuration_[4],
-			configuration_[5]);
+		//Rotation Rd(configuration_[3], configuration_[4], configuration_[5]);
 
 		dVector quatd;
-		Rd.GetQuaternion(quatd);
+		orientation_.GetQuaternion(quatd);
 		Quaternion qd(quatd);
 
 		// current orientation

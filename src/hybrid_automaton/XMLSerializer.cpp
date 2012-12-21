@@ -28,14 +28,11 @@ std::string HybridAutomaton::toStringXML() const
 
 	// Every new no-empty HybridAutomaton gets a new name
 	static int name_counter = 0;
-	std::string name_str;
 	std::stringstream name_ss;
-	name_ss << name_counter;
-	name_str = name_ss.str();
-	std::string name_complete = std::string("HS") + name_str;
+	name_ss << "HS" << name_counter;
 	name_counter++;
 
-	hyb->SetAttribute("Name", name_complete.c_str());
+	hyb->SetAttribute("Name", name_ss.str().c_str());
 
 	if(start_node_id_ < 0)
 		throw std::string("[HybridAutomaton::toStringXML] ERROR: Start node is non-valid.");

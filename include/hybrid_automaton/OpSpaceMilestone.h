@@ -2,6 +2,8 @@
 #ifndef OP_SPACE_MILESTONE_
 #define OP_SPACE_MILESTONE_
 
+#include "rMath/rMath.h"
+
 #include "Milestone.h"
 #include "MotionBehaviour.h"
 
@@ -20,54 +22,46 @@ class OpSpaceMilestone : public Milestone
 {
 
 public:
-
-	OpSpaceMilestone();  
-
-	OpSpaceMilestone(std::string osm_name);  
-
+	OpSpaceMilestone();
+	OpSpaceMilestone(std::string osm_name);
 	OpSpaceMilestone(std::string osm_name, std::vector<double>& posi_ori_value, PosiOriSelector posi_ori_selection, 
 		MotionBehaviour * motion_behaviour, std::vector<double>& region_convergence_radius);
-
 	OpSpaceMilestone(std::string osm_name, std::vector<double>& posi_ori_value, PosiOriSelector posi_ori_selection, 
 		MotionBehaviour * motion_behaviour, std::vector<double>& region_convergence_radius, Milestone::Status status, 
 		std::vector<Point> handle_points);
-
-	OpSpaceMilestone(const OpSpaceMilestone & op_milestone_cpy);
+	OpSpaceMilestone(std::string osm_name, const Displacement& position, const Rotation& orientation, PosiOriSelector posi_ori_selection, 
+		MotionBehaviour * motion_behaviour, std::vector<double>& region_convergence_radius);
 
 	virtual ~OpSpaceMilestone();
 
+	OpSpaceMilestone(const OpSpaceMilestone & op_milestone_cpy);
+	virtual OpSpaceMilestone& operator=(const OpSpaceMilestone & op_milestone_assignment);
+
 	void setMotionBehaviour(MotionBehaviour * motion_behaviour);
-
 	void setConfigurationSTDVector(std::vector<double> configuration_in, PosiOriSelector posi_ori_selector);
-
 	std::vector<double> getConfigurationSTDVector() const;
-
 	void setConfiguration(dVector configuration_in, PosiOriSelector posi_ori_selector);
-
 	virtual dVector getConfiguration() const;
+
+	Displacement getPosition() const;
+	Rotation getOrientation() const;
 
 	void update();
 
 	virtual std::string toStringXML() const;
-
 	virtual TiXmlElement* toElementXML() const ;
 
 	virtual OpSpaceMilestone* clone() const;
 
 	void addHandlePoint( const Point & point_to_add );
-
-	virtual OpSpaceMilestone& operator=(const OpSpaceMilestone & op_milestone_assignment);
+	virtual Displacement getHandlePoint(int i) const;
+	virtual int getHandlePointNumber() const;
 
 	virtual PosiOriSelector getPosiOriSelector() const;
 
 	virtual bool hasConverged(rxSystem* sys);
 
-	virtual Displacement getHandlePoint(int i) const;
-
-	virtual int getHandlePointNumber() const;
-
 protected:
-
 	std::vector<double>		configuration_;						// Position = 3 first values
 																// Orientation = 3 second values 
 																//		(Euler angles ZYX)
@@ -79,6 +73,8 @@ protected:
 	std::vector<Point>		handle_points_;
 	PosiOriSelector			posi_ori_selection_;				// Position/Orientation/Both values defined in this Milestone
 
+	Displacement			position_;							// redundant to configuration but more flexible and powerful
+	Rotation				orientation_;
 };
 
 #endif // OP_SPACE_MILESTONE_

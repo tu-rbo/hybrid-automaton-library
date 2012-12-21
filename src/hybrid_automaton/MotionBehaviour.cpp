@@ -224,7 +224,14 @@ void MotionBehaviour::activate()
 							//std::cout << robot_->getUCSBody(_T("EE"),ht) << std::endl;
 							rxBody* EE = robot_->getUCSBody(_T("EE"),ht);
 							dVector current_r = ht.r + EE->T().r; //parent->getConfiguration();
-							dVector desired_r = ((Milestone*)child)->getConfiguration();
+							dVector desired_r = ((OpSpaceMilestone*)child)->getPosition(); //->getConfiguration()
+							
+							Rotation current_S = ht.R * EE->T().R;
+							dVector current_R;
+							current_S.GetQuaternion(current_R);
+							std::cout << "current position: " << current_r[0] << " " << current_r[1] << " " << current_r[2] << std::endl;
+							std::cout << "current orientation: " << current_R[0] << " " << current_R[1] << " " << current_R[2] << " " << current_R[3] << std::endl;
+							std::cout << "desired position: " << desired_r[0] << " " << desired_r[1] << " " << desired_r[2] << std::endl;
 
 							// qd1 and qd2
 							dVector current_rd(current_r.size());
@@ -259,12 +266,17 @@ void MotionBehaviour::activate()
 					case rxController::eControlType_Orientation:
 						{
 							double time = (min_time_ > 0) ? min_time_ : 10.0;
-							dVector goal = ((Milestone*)child)->getConfiguration();
-							Rotation goal_rot(goal[3], goal[4], goal[5]);		
+							//dVector goal = ((Milestone*)child)->getConfiguration();
+							//Rotation goal_rot(goal[3], goal[4], goal[5]);		
 							//NOTE: Suposses that the orientation is defined with 
 							// goal[3] = roll
 							// goal[4] = pitch
-							// goal[5] = yaw
+							// goal[5] = 
+							Rotation goal_rot = ((OpSpaceMilestone*)child)->getOrientation();
+							dVector quat;
+							goal_rot.GetQuaternion(quat);
+							std::cout << "desired orientation: " << quat[0] << " " << quat[1] << " " << quat[2] << " " << quat[3] << std::endl;
+
 							dynamic_cast<rxOrientationController*>(*it)->addPoint(goal_rot, time, false);
 							break;
 						}
