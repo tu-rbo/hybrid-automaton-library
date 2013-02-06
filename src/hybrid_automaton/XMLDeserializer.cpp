@@ -1040,8 +1040,7 @@ rxController* XMLDeserializer::createJointController(int joint_subtype, double c
 		controller = new rxInterpolatedJointComplianceController(robot, controller_duration);
 		break;
 	case WITH_INTERPOLATION | WITH_IMPEDANCE:
-		controller = new ReInterpolatedJointImpedanceController(robot, controller_duration);
-		dynamic_cast<ReInterpolatedJointImpedanceController*>(controller)->setImpedance(0.5,3.0,2.0);
+		controller = new ReInterpolatedJointImpedanceController(robot, controller_duration);	dynamic_cast<ReInterpolatedJointImpedanceController*>(controller)->setImpedance(0.1,1.0,2.0);
 		break;
 	case BLACKBOARD_ACCESS:
 		controller = new JointBlackBoardController(robot, controller_duration);
@@ -1506,7 +1505,9 @@ rxController* XMLDeserializer::createFunctionalController(int functional_subtype
 			}
 
 			double distance_threshold = deserializeElement<double>(rxController_xml,"distanceThreshold", 1.);
-			double deactivation_threshold = deserializeElement<double>(rxController_xml,"deactivationThreshold", 1.);
+			//cout << "distance_threshold " << distance_threshold << endl;
+			double deactivation_threshold = deserializeElement<double>(rxController_xml,"deactivationThreshold", 0.);
+			//cout << "deactivation_threshold " << deactivation_threshold << endl;
 			if(CollisionInterface::instance)
 			{
 				controller = new ObstacleAvoidanceController(robot, alpha, alpha_displacement, distance_threshold, 

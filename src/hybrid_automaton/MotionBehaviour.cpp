@@ -390,6 +390,39 @@ dVector MotionBehaviour::getOriTaskError() const
 	return error;
 }
 
+pair<double,double> MotionBehaviour::getDistanceToNearestObst() const
+{
+	double distance_base = 999.0;
+	double distance_ee = 999.0;
+	std::list<rxController*> controllers = control_set_->getControllers();
+	for(std::list<rxController*>::const_iterator it = controllers.begin(); it != controllers.end(); ++it)
+	{
+		if (*it)
+		{
+			ObstacleAvoidanceController* oa = dynamic_cast<ObstacleAvoidanceController*>(*it);
+			if (oa)
+			{
+				if(oa->isBase())
+				{
+					if(oa->getDistanceToObst() < distance_base)
+					{
+						distance_base = oa->getDistanceToObst();
+					}
+				}
+				else
+				{				
+					if(oa->getDistanceToObst() < distance_ee)
+					{
+						distance_ee = oa->getDistanceToObst();
+					}
+				}
+			}
+		}
+	}
+	return pair<double,double>(distance_base,distance_ee);
+}
+
+
 dVector MotionBehaviour::getLineTaskError() const
 {
 	dVector error;
@@ -524,6 +557,32 @@ dVector MotionBehaviour::getGoalConfiguration()
 	}
 	return dVector();
 }
+
+
+
+void MotionBehaviour::waitMode()
+{
+	std::list<rxController*> controllers = control_set_->getControllers();
+	string_type controllers_to_string;
+	for(std::list< rxController* >::const_iterator controllers_it = controllers.begin();
+		controllers_it != controllers.end() ; controllers_it ++){
+			FeatureAttractorController* feature_control = dynamic_cast<FeatureAttractorController*>(*controllers_it);
+			if(feature_control)
+			{
+				feature_control->getFeaturePosition().print(_T("current_feature"));
+				HTransform ht;
+				rxBody* EE = robot_->getUCSBody(_T("EE"),ht);
+				dVector current_r = ht.r + EE->T().r;
+				current_r[0] += 0.2;
+				cout << "setting ee goal to " << endl;
+				current_r.print(_T("EE"));
+				feature_control->updateFeaturePosition(current_r[0],current_r[1],current_r[2]);
+				cout << "feature is: " << feature_control->activated() << endl;
+				feature_control->deactivate();
+			}
+	}
+}
+
 
 void MotionBehaviour::setMaxVelocityForInterpolation(double max_velocity) {
 	max_velocity_ = max_velocity;

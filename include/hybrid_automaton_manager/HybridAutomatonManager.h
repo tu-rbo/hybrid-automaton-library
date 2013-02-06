@@ -95,7 +95,10 @@ public:
 	};
 	bool getRequestDrawM(drawListsM index) {return _request_draw_m[index];};
 	void setRequestDrawM(drawListsM index, bool draw) {_request_draw_m[index] = draw;};
-
+	double							max_ori_error[3];
+	double							max_ori_error_norm;
+	double							minObstDistanceBase;
+	double							minObstDistanceEE;
 	rxSystem*			_robot;
 
 private:

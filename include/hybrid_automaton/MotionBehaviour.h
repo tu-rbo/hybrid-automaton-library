@@ -11,6 +11,7 @@
 #include "controllers\include\FeatureAttractorController.h"
 #include "controllers\include\SubdisplacementController.h"
 #include "controllers\include\ReInterpolatedJointImpedanceController.h"
+#include "controllers\include\ObstacleAvoidanceController.h"
 
 
 #include "tinyxml.h"
@@ -164,6 +165,7 @@ public:
 	dVector getCurrentDotDotReference() const;
 	dVector getOriTaskError() const;
 	dVector getLineTaskError() const;
+	pair<double,double> getDistanceToNearestObst() const;
 
 	/**
 	* Activate the controllers stored in the rxControlSet through the vector of rxController's (NOT WORKING!!!!)
@@ -198,7 +200,7 @@ public:
 	virtual void setControlSetByPointerOnly(rxControlSetBase* control_set){this->control_set_ = control_set;};
 
 	dVector getGoalConfiguration();
-
+	void waitMode();
 
 	void setMaxVelocityForInterpolation(double max_velocity);
 	void setMinTimeForInterpolation(double min_time);

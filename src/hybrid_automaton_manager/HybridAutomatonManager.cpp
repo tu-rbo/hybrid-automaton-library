@@ -16,8 +16,8 @@
 
 #define SENSOR_FREQUENCY 0.1 // seconds
 //#define SINGULARITY_HANDLING
+// #define OLD_PLANNER
 
-#ifdef DRAW_HYBRID_AUTOMATON
 //CustomDrawManager drawDebug;
 
 void HybridAutomatonManager::drawLine(const rMath::Displacement &start, const rMath::Displacement &end, drawLists index, const rColor &color, const char lineWidth)
@@ -105,7 +105,6 @@ void HybridAutomatonManager::drawMilestones(const OpSpaceMilestone* ms, drawList
 	}
 //	mb->con
 }
-#endif
 
 unsigned __stdcall deserializeHybridAutomaton(void *udata)
 {
@@ -155,7 +154,13 @@ HybridAutomatonManager::HybridAutomatonManager(rDC rdc)
 //, _physics_world(NULL)
 , _criterion(NULL)
 , _t_old(0.0)
+, max_ori_error_norm(0.0)
+,minObstDistanceBase(999.0)
+,minObstDistanceEE(999.0)
 {
+	max_ori_error[0] = 0.0;
+	max_ori_error[1] = 0.0;
+	max_ori_error[2] = 0.0;
 	_deserialize_mutex = CreateMutex(0, FALSE, 0);
 	if( !_deserialize_mutex ) {
 		throw(std::string("[HybridAutomatonManager::HybridAutomatonManager] ERROR: Mutex was not created (_deserialize_mutex)!"));
@@ -202,12 +207,19 @@ void HybridAutomatonManager::init(int mode)
 	RASSERT(_robotDevice != INVALID_RHANDLE);
 
 	_defaultMotionBehavior = new MotionBehaviour(new Milestone(), new Milestone(),_robot);
-	/*rxJointController* jc = new rxJointController(_robot,_dT);
+	rxJointController* jc = new rxJointController(_robot,_dT);
 	jc->addPoint(_robot->q(),5,true);
-	jc->setGain(50.0,200.0);
-	_defaultMotionBehavior->addController(jc,false);*/
+	jc->setGain(20.0,600.0);
+	jc->setGain((size_t) 0, 10.0, 900.0); 
+	jc->setGain((size_t) 1, 20.0, 2500.0); 
+	jc->setGain((size_t) 2, 5.0, 600.0); 
+	jc->setGain((size_t) 3, 2.0, 500.0); 
+	jc->setGain((size_t) 4, 0.5, 50.0); 
+	jc->setGain((size_t) 5, 0.5, 50.0); 
+	jc->setGain((size_t) 6, 0.05, 40.0);
+	_defaultMotionBehavior->addController(jc,false);
 	_activeMotionBehavior = _defaultMotionBehavior;
-	//_activeMotionBehavior->activate();
+	_activeMotionBehavior->activate();
 }
 
 void HybridAutomatonManager::activateBlackboard(std::string &rlab_host, int rlab_port, std::string &ros_host, int ros_port)
@@ -380,6 +392,7 @@ void HybridAutomatonManager::_reflect()
 	_robot->qdot(_qdot);
 }
 
+bool singularity_wait = false;
 vector<pair<std::string,std::string>> bad_edges;
 void HybridAutomatonManager::_compute(const double& t)
 {
@@ -388,14 +401,26 @@ void HybridAutomatonManager::_compute(const double& t)
 	{
 		if(abs(_qdot[i]) > 10.0)
 		{
-			std::cout << "** Current MB is bad!! Local Minimum! Kernel Panic! General Failure!!" << std::endl;
+			//std::cout << "** Current MB is bad!! Local Minimum! Kernel Panic! General Failure!!" << std::endl;
 			Milestone* parentMs=(Milestone*)(_activeMotionBehavior->getParent());
 			Milestone* childMs=(Milestone*)(_activeMotionBehavior->getChild());
-			std::cout << "** Blocking Edge: " << parentMs->getName() << " to " << childMs->getName() <<std::endl;
-			bad_edges.push_back(pair<std::string,std::string>(childMs->getName(), parentMs->getName()));
-			_activeMotionBehavior->deactivate();
-			_activeMotionBehavior = _hybrid_automaton->getNextMotionBehaviour(parentMs, _criterion, &bad_edges);
-			_activeMotionBehavior->activate();
+			//std::cout << "** Blocking Edge: " << parentMs->getName() << " to " << childMs->getName() <<std::endl;
+			//bad_edges.push_back(pair<std::string,std::string>(childMs->getName(), parentMs->getName()));
+			//_activeMotionBehavior->deactivate();
+			/*if(_hybrid_automaton->incomingEdges(parentMs).size() > 0)
+			{
+				_activeMotionBehavior = (MotionBehaviour*)_hybrid_automaton->incomingEdges(parentMs).front();
+			}
+			else
+			{
+				cout << "no staying option!" << endl;
+				_activeMotionBehavior = _hybrid_automaton->getNextMotionBehaviour(parentMs, _criterion, &bad_edges);
+			}*/
+			singularity_wait = true;
+			//cout << "entering wait mode..." << endl;
+			_activeMotionBehavior->waitMode(); /// makes active motion behaviour wait at current ee pos and config!
+			//_activeMotionBehavior->
+			//_activeMotionBehavior->activate();
 		}
 	}
 #endif
@@ -460,12 +485,22 @@ void HybridAutomatonManager::_compute(const double& t)
 				}
 			}
 			graph_rid_producer.clearUnused();*/
-
-			// draw current choice + next decision
-			drawPath = true;
-			_t_old = t;	
+#ifdef OLD_PLANNER
+			std::vector<const MDPNode*> milestones;
+			Milestone* ms = _hybrid_automaton->getStartNode();
+			milestones.push_back(ms);
+			MotionBehaviour* mb = _hybrid_automaton->getNextMotionBehaviour(ms,_criterion, &bad_edges);
+			while(mb && mb->getChild() != ms)
+			{
+				ms = (Milestone*)mb->getChild();
+				milestones.push_back(ms);
+				mb = _hybrid_automaton->getNextMotionBehaviour(ms,_criterion, &bad_edges);
+			}
+#else
 			MDPNode* hack_goal = (MDPNode*)_hybrid_automaton->getSortedOutgoingEdges(_hybrid_automaton->getStartNode()).front()->getChild();
 			std::vector<const MDPNode*> milestones = _hybrid_automaton->getShortestPath(_hybrid_automaton->getStartNode(),hack_goal,1.0);
+
+#endif
 			int count = 0;
 			int i = 0;
 			const OpSpaceMilestone* ms_old = NULL;
@@ -482,7 +517,11 @@ void HybridAutomatonManager::_compute(const double& t)
 				i++;
 				if(ms_old != NULL)
 				{
-					drawLine(ms_old->getHandlePoint(0),ms->getHandlePoint(0),ePATH);
+					Displacement pos1 = ms_old->getHandlePoint(0);
+					Displacement pos2 = ms->getHandlePoint(0);
+					pos1[2] += 0.5;
+					pos2[2] += 0.5;
+					drawLine(pos1,pos2,ePATH);
 				}
 				ms_old = ms;
 			}
@@ -494,10 +533,15 @@ void HybridAutomatonManager::_compute(const double& t)
 			setRequestDraw(ePATH,true);
 			setRequestDrawM(ePATH_MILESTONES,true);
 #endif
+			// draw current choice + next decision
+			singularity_wait = false;
+			drawPath = true;
+			_t_old = t;
 		}
 	}
-	else if(childMs->hasConverged(_robot) ){
-		if (_hybrid_automaton && _hybrid_automaton->getNextMotionBehaviour(childMs,_criterion, &bad_edges) != NULL && _hybrid_automaton->getNextMotionBehaviour(childMs,_criterion, &bad_edges) != _activeMotionBehavior) {
+	else if(childMs->hasConverged(_robot) && !singularity_wait){
+		if (_hybrid_automaton && _hybrid_automaton->getNextMotionBehaviour(childMs,_criterion, &bad_edges) != NULL 
+			&& _hybrid_automaton->getNextMotionBehaviour(childMs,_criterion, &bad_edges) != _activeMotionBehavior) {
 			//std::cout << "[HybridAutomatonManager::_compute] INFO: Switching controller" << std::endl;
 			//std::cout << _activeMotionBehavior->getParent() << " versus " << _hybrid_automaton->getNextMotionBehaviour(childMs,_criterion, &bad_edges)->getParent() << std::endl;
 			_activeMotionBehavior->deactivate();
@@ -519,7 +563,7 @@ void HybridAutomatonManager::_compute(const double& t)
 		MotionBehaviour* newChoice = _hybrid_automaton->getNextMotionBehaviour((Milestone*)_activeMotionBehavior->getParent(),_criterion, &bad_edges);
 		if(newChoice != _activeMotionBehavior)
 		{
-			//std::cout << "[HybridAutomatonManager::_compute] INFO: Switching controller due to local decision!" << std::endl;
+			std::cout << "[HybridAutomatonManager::_compute] INFO: Switching controller due to local decision!" << std::endl;
 			_activeMotionBehavior->deactivate();
 			_activeMotionBehavior = newChoice;
 			_activeMotionBehavior->activate();
@@ -549,54 +593,7 @@ void HybridAutomatonManager::_compute(const double& t)
 		}
 
 	}
-#ifdef DRAW_HYBRID_AUTOMATON
-	/*if(drawPath)
-	{
-		drawDebug.reset(drawGroups::PATH);
-		//curr_path_rid_producer.clearUnused();
-		// draw current choice + next decision
-		const OpSpaceMilestone* ms1 = (const OpSpaceMilestone*)_activeMotionBehavior->getParent();
-		const OpSpaceMilestone* ms2 = (const OpSpaceMilestone*)_activeMotionBehavior->getChild();
-		Displacement pos1 = ms1->getHandlePoint(0);
-		Displacement pos2 = ms2->getHandlePoint(0);
-		pos1[2] += 0.5;
-		pos2[2] += 0.5;
-		drawDebug.drawLine(pos1,pos2,drawGroups::PATH,rColor(0.0,0.0,1.0)); // current path -> blue
-		int count = 1;
-		std::vector<const MDPEdge*> outgoing = _hybrid_automaton->getSortedOutgoingEdges(ms2);
-		if(!outgoing.empty())
-		{
-			// draw outgoing next choice - color coded by expLength or Order
-			std::vector<const MDPEdge*>::iterator eit;
-			double color_order = 0.0;
-			int num = outgoing.size();
-			double lmin =  outgoing.front()->getTotalExpectedLength();
-			double lmax = outgoing.back()->getTotalExpectedLength();
-			double norm = lmax - lmin;
-			const OpSpaceMilestone* current_ms = ms1;
-			for(eit = outgoing.begin(); eit != outgoing.end(); eit++)
-			{
-				const OpSpaceMilestone* ms1 = (const OpSpaceMilestone*)(*eit)->getParent();
-				const OpSpaceMilestone* ms2 = (const OpSpaceMilestone*)(*eit)->getChild();
-				Displacement pos1 = ms1->getHandlePoint(0);
-				Displacement pos2 = ms2->getHandlePoint(0);
-				pos1[2] += 0.5;
-				pos2[2] += 0.5;
-				color_order = 1.0 - (((*eit)->getTotalExpectedLength() - lmin) / norm);
-				if(ms2 != current_ms) // dont draw return path (overlapping)
-				{
-					drawDebug.drawLine(pos1,pos2,drawGroups::PATH,rColor(1.0,color_order,0.0));
-				}
-				//color_order += 1.0/num; // Draw Order
-				//cout << "drawline: prob " << (*eit)->getProbability() << endl;
-				count++;
-				if(count == 10)
-					break;
-			}
-		}
-		drawDebug.clearUnused(drawGroups::PATH);
-	}*/
-
+#ifdef DRAW_LOCAL_DECISION
 	if(drawPath)
 	{
 		//drawDebug.reset(drawGroups::PATH);
@@ -762,7 +759,7 @@ void HybridAutomatonManager::datanames(vector<string_type>& names, int channel)
 
 dVector e_old_ori; // smoothing switches
 dVector e_old_line;
-#define TASK_SIZE 1
+#define TASK_SIZE 2
 void HybridAutomatonManager::collect(vector<double>& data, int channel)
 {
 	if (channel == PLOT_TORQUE)
@@ -881,7 +878,17 @@ void HybridAutomatonManager::collect(vector<double>& data, int channel)
 			else
 			{
 				for(int i = 0; i < e.size(); ++i)
+				{
 					data.push_back(e[i]);
+					if(e[i] > max_ori_error[i])
+					{
+						max_ori_error[i] = e[i];
+					}
+				}
+				if(e.norm() > max_ori_error_norm)
+				{
+					max_ori_error_norm = e.norm();
+				}
 				e_old_ori = e;
 			}
 		}
@@ -936,7 +943,15 @@ void HybridAutomatonManager::collect(vector<double>& data, int channel)
 		}
 	}
 
-	// TODO EE Trajectory, Base Trajectory
+	pair<double,double> temp = _activeMotionBehavior->getDistanceToNearestObst();
+	if(temp.first < minObstDistanceBase)
+	{
+		minObstDistanceBase = temp.first;
+	}
+	if(temp.second < minObstDistanceEE)
+	{
+		minObstDistanceEE = temp.second;
+	}
 }
 
 void HybridAutomatonManager::onSetInterestFrame(const TCHAR* name, const HTransform& T)
