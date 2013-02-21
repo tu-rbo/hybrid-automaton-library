@@ -18,6 +18,8 @@
 #include "NakamuraControlSet.h"
 #include "InterpolatedSetPointDisplacementController.h"
 #include "InterpolatedSetPointOrientationController.h"
+#include "PressureDisplacementController.h"
+#include "PressureOrientationController.h"
 
 std::map<std::string, ControllerType> XMLDeserializer::controller_map_ = XMLDeserializer::createControllerMapping();
 
@@ -546,14 +548,15 @@ MotionBehaviour* XMLDeserializer::createMotionBehaviour(TiXmlElement* motion_beh
 		if(control_set_type == std::string("rxControlSet"))
 		{		
 			mb_control_set = new rxControlSet(robot, dT);
-			mb_control_set->setGravity(0,0,-GRAV_ACC);
+			mb_control_set->setGravity(0, 0, -GRAV_ACC);
 			mb_control_set->setInverseDynamicsAlgorithm(new rxAMBSGravCompensation(robot));
-			mb_control_set->nullMotionController()->setGain(0.02,0.0,0.01);
+			//mb_control_set->nullMotionController()->setGain(0.02,0.0,0.01);
+			mb_control_set->nullMotionController()->setGain(0.0, 0.0, 0.0);
 		}
 		else if(control_set_type == std::string("rxTPOperationalSpaceControlSet"))
 		{		
 			mb_control_set = new rxTPOperationalSpaceControlSet(robot, dT);
-			mb_control_set->setGravity(0,0,-GRAV_ACC);
+			mb_control_set->setGravity(0, 0, -GRAV_ACC);
 			//mb_control_set->setInverseDynamicsAlgorithm(new rxAMBSGravCompensation(robot));
 			//mb_control_set->nullMotionController()->setGain(0.02,0.0,0.01);
 			mb_control_set->nullMotionController()->setGain(10.0,1.0); // taken from ERM values...
@@ -561,7 +564,7 @@ MotionBehaviour* XMLDeserializer::createMotionBehaviour(TiXmlElement* motion_beh
 		else if(control_set_type == "NakamuraControlSet")
 		{
 			mb_control_set = new NakamuraControlSet(robot, dT);
-			mb_control_set->setGravity(0,0,-GRAV_ACC);
+			mb_control_set->setGravity(0, 0, -GRAV_ACC);
 			mb_control_set->nullMotionController()->setGain(0.0, 0.0, 0.0);
 		}
 		else
@@ -626,9 +629,12 @@ rxController* XMLDeserializer::createController(TiXmlElement *rxController_xml, 
 	params.alpha = deserializeBody(robot, rxController_xml, "alpha", NULL);
 	params.alpha_displacement = deserializeDisplacement(rxController_xml, "alphaDisplacement", Displacement());
 	params.alpha_rotation_matrix = deserializeRotation(rxController_xml, "alphaRotation", Rotation());
-	params.beta = robot->getUCSBody(XMLDeserializer::string2wstring(deserializeString(rxController_xml, "beta", std::string("EE"))), HTransform());
-	params.beta_displacement = deserializeDisplacement(rxController_xml, "betaDisplacement", Displacement());
-	params.beta_rotation_matrix = deserializeRotation(rxController_xml, "betaRotation", Rotation());
+	HTransform transform;
+	params.beta = robot->getUCSBody(XMLDeserializer::string2wstring(deserializeString(rxController_xml, "beta", std::string("EE"))), transform);
+	params.beta_displacement = transform.r;
+	params.beta_rotation_matrix = transform.R;
+	//params.beta_displacement = deserializeDisplacement(rxController_xml, "betaDisplacement", Displacement());
+	//params.beta_rotation_matrix = deserializeRotation(rxController_xml, "betaRotation", Rotation());
 	// viapoints ?
 
 	// call the appropriate factory method which takes the parameter set as input
@@ -854,6 +860,19 @@ rxController* XMLDeserializer::createController(TiXmlElement *rxController_xml, 
 	else if (params.type == "InterpolatedSetPointOrientationController")
 	{
 		controller = new InterpolatedSetPointOrientationController(robot, params.beta, params.beta_rotation_matrix, params.alpha, params.alpha_rotation_matrix, dT);
+	}
+	else if (params.type == "PressureDisplacementController")
+	{
+		controller = new PressureDisplacementController(robot, params.beta, params.beta_displacement, params.beta_rotation_matrix, params.alpha, params.alpha_displacement, dT);
+	}
+	else if (params.type == "PressureOrientationController")
+	{
+		controller = new PressureOrientationController(robot, params.beta, params.beta_rotation_matrix, params.alpha, params.alpha_rotation_matrix, dT);
+	}
+	else
+	{
+		// unknown type
+		throw std::string("[XMLDeserializer::createController] ERROR: Unknown Controller type.");
 	}
 
 	// quasicoord <-- missing

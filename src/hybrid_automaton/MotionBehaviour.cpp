@@ -158,6 +158,34 @@ void MotionBehaviour::addController(rxController* ctrl, bool is_goal_controller)
 	}
 }
 
+double MotionBehaviour::calculateTimeToConverge(double default_min_time, double default_max_velocity, const dVector& error_x, const dVector& xd, const dVector& xd_desired)
+{
+	/**
+	 The user can specify a minimum time to converge or a maximum velocity.
+	 
+	 If none is given, default values will be used.
+	 If only time constraint is given, use this.
+	 If only velocity constraint is given, use this.
+	 If both are given, comply with both constraints.
+	**/
+	double time_to_converge = min_time_;
+	
+	if (max_velocity_ > 0 || min_time_ <= 0 ) {
+		double velocity = max_velocity_;
+		if (max_velocity_ <= 0) {
+			velocity = default_max_velocity;
+			time_to_converge = default_min_time;
+		}
+		for (int i = 0; i < error_x.size(); i++) {
+			// the cubic case
+			// TODO: Check for quintic, linear, etc.
+			time_to_converge = max( fabs((6.0 * error_x[i]) / (xd[i] + xd_desired[i] + 4.0 * velocity)), time_to_converge);
+		}
+	}
+	
+	return time_to_converge;
+}
+
 void MotionBehaviour::activate() 
 {
 	if (control_set_)
@@ -182,10 +210,6 @@ void MotionBehaviour::activate()
 					switch((*it)->type()) {
 					case rxController::eControlType_Joint:
 						{
-							double default_max_velocity = 0.30;// in rad/s
-							double default_min_time = 5.;
-							double time = min_time_;
-
 							// q1 and q2 to interpolate between
 							dVector current_q = robot_->q();//parent->getConfiguration();
                             dVector desired_q = ((Milestone*)child)->getConfiguration();
@@ -195,30 +219,17 @@ void MotionBehaviour::activate()
 							current_qd = robot_->qdot();
 							dVector desired_qd(current_q.size());
 							desired_qd.zero();
-
-							if (max_velocity_ > 0 || min_time_ <= 0 ) {
-								double velocity = max_velocity_;
-								if (max_velocity_ <= 0) {
-									velocity = default_max_velocity;
-									time = default_min_time;
-								}
-								for (int i = 0; i < current_q.size(); i++) {
-									time = max( fabs((6 * desired_q[i] - 6 * current_q[i]) / (current_qd[i] + desired_qd[i] + 4 * velocity)), time);
-								}
-							}
-
-							//std::cout << "[MotionBehaviour::activate] INFO: Time of trajectory: " << time << std::endl;
-							time_to_converge_=time;
-							dynamic_cast<rxJointController*>(*it)->addPoint(desired_q, time, false, eInterpolatorType_Cubic);
+							
+							// at least 5.0 seconds or maximally 0.3 rad/s if nothing is given
+							time_to_converge_ = calculateTimeToConverge(5.0, 0.30, desired_q - current_q, current_qd, desired_qd);
+							std::cout << "[MotionBehaviour::activate] INFO: Time of joint trajectory: " << time_to_converge_ << std::endl;
+							
+							dynamic_cast<rxJointController*>(*it)->addPoint(desired_q, time_to_converge_, false, eInterpolatorType_Cubic);
 							break;
 						}
 					case rxController::eControlType_Displacement:
 						{
-							double default_max_velocity = 0.20;// in m/s
-							double default_min_time = 5.;
-							double time = min_time_;
-
-							// q1 and q2 to interpolate between
+							// r1 and r2 to interpolate between
 							HTransform ht;
 							//std::cout << robot_ << std::endl;
 							//std::cout << robot_->getUCSBody(_T("EE"),ht) << std::endl;
@@ -229,43 +240,35 @@ void MotionBehaviour::activate()
 							Rotation current_S = ht.R * EE->T().R;
 							dVector current_R;
 							current_S.GetQuaternion(current_R);
+							/*
 							std::cout << "current position: " << current_r[0] << " " << current_r[1] << " " << current_r[2] << std::endl;
 							std::cout << "current orientation: " << current_R[0] << " " << current_R[1] << " " << current_R[2] << " " << current_R[3] << std::endl;
 							std::cout << "desired position: " << desired_r[0] << " " << desired_r[1] << " " << desired_r[2] << std::endl;
+							*/
 
-							// qd1 and qd2
+							// rd1 and rd2
 							dVector current_rd(current_r.size());
 							current_rd.zero();
 							dVector desired_rd(current_r.size());
 							desired_rd.zero();
 
-							if (max_velocity_ > 0 || min_time_ <= 0 ) {
-								double velocity = max_velocity_;
-								if (max_velocity_ <= 0) {
-									velocity = default_max_velocity;
-									time = default_min_time;
-								}
-								for (int i = 0; i < current_r.size(); i++) {
-									time = max( fabs((6 * desired_r[i] - 6 * current_r[i]) / (current_rd[i] + desired_rd[i] + 4 * velocity)), time);
-								}
-							}
+							// at least 5.0 seconds or maximally 0.2 m/s if nothing is given
+							time_to_converge_ = calculateTimeToConverge(5.0, 0.2, desired_r - current_r, current_rd, desired_rd);
+							std::cout << "[MotionBehaviour::activate] INFO: Time of displacement trajectory: " << time_to_converge_ << std::endl;
 
-							//std::cout << "[MotionBehaviour::activate] INFO: Time of trajectory: " << time << std::endl;
-							time_to_converge_=time;
 							FeatureAttractorController* fac = dynamic_cast<FeatureAttractorController*>(*it);
 							if(fac)
 							{
-								fac->updateFeaturePosition(desired_r[0],desired_r[1],desired_r[2]);
+								fac->updateFeaturePosition(desired_r[0], desired_r[1], desired_r[2]);
 							}
 							else
 							{
-								dynamic_cast<rxDisplacementController*>(*it)->addPoint(desired_r, time, false, eInterpolatorType_Cubic);
+								dynamic_cast<rxDisplacementController*>(*it)->addPoint(desired_r, time_to_converge_, false, eInterpolatorType_Cubic);
 							}
 							break;
 						}
 					case rxController::eControlType_Orientation:
 						{
-							double time = (min_time_ > 0) ? min_time_ : 10.0;
 							//dVector goal = ((Milestone*)child)->getConfiguration();
 							//Rotation goal_rot(goal[3], goal[4], goal[5]);		
 							//NOTE: Suposses that the orientation is defined with 
@@ -273,11 +276,33 @@ void MotionBehaviour::activate()
 							// goal[4] = pitch
 							// goal[5] = 
 							Rotation goal_rot = ((OpSpaceMilestone*)child)->getOrientation();
-							dVector quat;
-							goal_rot.GetQuaternion(quat);
-							std::cout << "desired orientation: " << quat[0] << " " << quat[1] << " " << quat[2] << " " << quat[3] << std::endl;
+							dVector desired_quat;
+							goal_rot.GetQuaternion(desired_quat);
 
-							dynamic_cast<rxOrientationController*>(*it)->addPoint(goal_rot, time, false);
+							// get current orientation
+							HTransform ht;
+							rxBody* EE = robot_->getUCSBody(_T("EE"), ht);
+							Rotation current_rot = ht.R * EE->T().R;
+							dVector current_quat;
+							current_rot.GetQuaternion(current_quat);
+
+							// get angular error
+							double theta = acos(current_quat.inner(desired_quat));
+							if (theta > M_PI/2.0)
+								theta -= M_PI/2.0;
+
+							dVector error_theta(1, theta);
+							dVector current_thetad(1, 0.0);
+							dVector desired_thetad(1, 0.0);
+							/*
+							std::cout << "desired orientation: " << quat[0] << " " << quat[1] << " " << quat[2] << " " << quat[3] << std::endl;
+							*/
+							
+							// at least 10.0 seconds or maximally 0.1 rad/s if nothing is given
+							time_to_converge_ = calculateTimeToConverge(10.0, 0.1, error_theta, current_thetad, desired_thetad);
+							std::cout << "[MotionBehaviour::activate] INFO: Time of orientation trajectory: " << time_to_converge_ << std::endl;
+
+							dynamic_cast<rxOrientationController*>(*it)->addPoint(goal_rot, time_to_converge_, false);
 							break;
 						}
 					case rxController::eControlType_HTransform:
@@ -442,6 +467,20 @@ dVector MotionBehaviour::getLineTaskError() const
 	return error;
 }
 
+dVector MotionBehaviour::getOuterJointPositionError() const
+{
+	dVector error;
+
+	NakamuraControlSet* ctrl_set = dynamic_cast<NakamuraControlSet*>(control_set_);
+	if (ctrl_set)
+	{
+		error = ctrl_set->position_error();
+	}
+
+	return error;
+}
+
+
 dVector MotionBehaviour::getCurrentDotReference() const
 {
 	dVector current_dot_ref;
@@ -488,6 +527,7 @@ dVector MotionBehaviour::update(double t)
 	}
 
 	//dVector torque(robot_->jointDOF()); // This does not work for XR4000+WAM
+	/*
 	int dof = 0;
 	list<rxJoint*>::iterator it;
 	for(it = robot_->joints().begin(); it !=  robot_->joints().end(); it++)
@@ -497,6 +537,9 @@ dVector MotionBehaviour::update(double t)
 		dof += ll.size();
 	}
 	dVector torque(dof);
+	*/
+	// TODO: This might? not work with XR+WAM ?
+	dVector torque(robot_->jointDOF() + robot_->earthDOF() + robot_->constraintDOF());
 	control_set_->compute(t,torque);
 	time_ += dT_;
 	return torque;
