@@ -233,11 +233,12 @@ void MotionBehaviour::activate()
 							HTransform ht;
 							//std::cout << robot_ << std::endl;
 							//std::cout << robot_->getUCSBody(_T("EE"),ht) << std::endl;
-							rxBody* EE = robot_->getUCSBody(_T("EE"),ht);
-							dVector current_r = ht.r + EE->T().r; //parent->getConfiguration();
+							rxBody* EE = robot_->getUCSBody(_T("EE"), ht);
+							HTransform absolute_ht = EE->T() * ht;
+							dVector current_r = absolute_ht.r; //parent->getConfiguration();
 							dVector desired_r = ((OpSpaceMilestone*)child)->getPosition(); //->getConfiguration()
 							
-							Rotation current_S = ht.R * EE->T().R;
+							Rotation current_S = absolute_ht.R;
 							dVector current_R;
 							current_S.GetQuaternion(current_R);
 							/*
