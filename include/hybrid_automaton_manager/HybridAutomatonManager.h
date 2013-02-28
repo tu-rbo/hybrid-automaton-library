@@ -74,7 +74,7 @@ public:
 
 	std::vector<rCustomDrawInfo> getDrawObjects(drawLists index){
 		std::vector<rCustomDrawInfo> copy;
-		for(int i = 0; i < _draw_objects[index].size(); i++)
+		for(unsigned int i = 0; i < _draw_objects[index].size(); i++)
 		{
 			copy.push_back(_draw_objects[index][i]);
 		}
@@ -86,7 +86,7 @@ public:
 
 	std::vector<dVector> getDrawMilestones(drawListsM index){
 		std::vector<dVector> copy;
-		for(int i = 0; i < _draw_objects_m[index].size(); i++)
+		for(unsigned int i = 0; i < _draw_objects_m[index].size(); i++)
 		{
 			copy.push_back(_draw_objects_m[index][i]);
 		}

@@ -468,20 +468,6 @@ dVector MotionBehaviour::getLineTaskError() const
 	return error;
 }
 
-dVector MotionBehaviour::getOuterJointPositionError() const
-{
-	dVector error;
-
-	NakamuraControlSet* ctrl_set = dynamic_cast<NakamuraControlSet*>(control_set_);
-	if (ctrl_set)
-	{
-		error = ctrl_set->position_error();
-	}
-
-	return error;
-}
-
-
 dVector MotionBehaviour::getCurrentDotReference() const
 {
 	dVector current_dot_ref;
