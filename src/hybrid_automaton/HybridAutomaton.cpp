@@ -59,7 +59,7 @@ MotionBehaviour* HybridAutomaton::getNextMotionBehaviour(const Milestone* curren
 				{
 					if(bad_edges)
 					{
-						for(int j = 0; j < bad_edges->size(); j++)
+						for(size_t j = 0; j < bad_edges->size(); j++)
 						{
 							// problem: very often the edges are from current_ms!!!
 							if((*bad_edges)[j].first == currentMs->getName() && (*bad_edges)[j].second == ((Milestone*)edges[i]->getChild())->getName())

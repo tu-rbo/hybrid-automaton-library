@@ -141,8 +141,23 @@ rxBody* deserializeBody(rxSystem* robot, TiXmlElement * xml_element, const char 
 	std::string name = deserializeString(xml_element, field_name, std::string(""));
 	if (name.empty())
 		return default_value;
-	
-	return robot->getUCSBody(XMLDeserializer::string2wstring(name), HTransform());
+
+	//First we query for user defined bodies
+	rxBody* body = robot->getUCSBody(XMLDeserializer::string2wstring(name), HTransform());
+	if (body != NULL)
+		return body;
+
+	//Now query for bodies in the model
+	body = robot->findBody(XMLDeserializer::string2wstring(name));
+	if(body != NULL)
+		return body;
+
+	std::string exception_str = std::string("[deserializeBody] ERROR: Body ") 
+		+ name + std::string(" was not found in aml");
+	throw exception_str;
+	return NULL;
+
+
 }
 
 template<class T>
@@ -153,7 +168,7 @@ std::vector<T> deserializeStdVector(TiXmlElement * xml_element, const char * fie
 	double vector_value = -1.0;
 	while ((vector_ss >> vector_value))
 	{
-		ret_vector.push_back(vector_value);
+		ret_vector.push_back((T)vector_value);
 	}
 	return ret_vector;
 }
@@ -492,7 +507,7 @@ OpSpaceMilestone* XMLDeserializer::createOpSpaceMilestone(TiXmlElement* mileston
 {
 	Milestone::Status mst_status = (Milestone::Status)deserializeElement<int>(milestone_xml, "status");
 	std::string mst_name = deserializeString(milestone_xml, "name");
-	PosiOriSelector mst_pos = (PosiOriSelector)deserializeElement<int>(milestone_xml, "PosiOriSelector", PosiOriSelector::POS_AND_ORI_SELECTION);
+	PosiOriSelector mst_pos = (PosiOriSelector)deserializeElement<int>(milestone_xml, "PosiOriSelector", POS_AND_ORI_SELECTION);
 	//std::vector<double> mst_configuration = deserializeStdVector<double>(milestone_xml, "value");
 	Displacement position = deserializeDisplacement(milestone_xml, "position", Displacement());
 	Rotation orientation = deserializeRotation(milestone_xml, "orientation", Rotation());
@@ -628,11 +643,23 @@ rxController* XMLDeserializer::createController(TiXmlElement *rxController_xml, 
 	params.tc = deserializeStdVector<double>(rxController_xml, "taskConstraints");
 	params.alpha = deserializeBody(robot, rxController_xml, "alpha", NULL);
 	params.alpha_displacement = deserializeDisplacement(rxController_xml, "alphaDisplacement", Displacement());
-	params.alpha_rotation_matrix = deserializeRotation(rxController_xml, "alphaRotation", Rotation());
-	HTransform transform;
-	params.beta = robot->getUCSBody(XMLDeserializer::string2wstring(deserializeString(rxController_xml, "beta", std::string("EE"))), transform);
-	params.beta_displacement = transform.r;
-	params.beta_rotation_matrix = transform.R;
+	params.alpha_rotation_matrix = deserializeRotation(rxController_xml, "alphaRotation", Rotation());	
+	params.beta = deserializeBody(robot, rxController_xml, "beta", NULL);
+	if(params.beta != NULL)
+	{
+		//Use values from xml
+		params.beta_displacement = deserializeDisplacement(rxController_xml, "betaDisplacement", Displacement());
+		params.beta_rotation_matrix = deserializeRotation(rxController_xml, "betaRotation", Rotation());
+	}
+	else
+	{
+		//Set EE as default body
+		HTransform transform;
+		params.beta = robot->getUCSBody(XMLDeserializer::string2wstring(deserializeString(rxController_xml, "beta", std::string("EE"))), transform);
+		params.beta_displacement = transform.r;
+		params.beta_rotation_matrix = transform.R;
+	}
+
 	//params.beta_displacement = deserializeDisplacement(rxController_xml, "betaDisplacement", Displacement());
 	//params.beta_rotation_matrix = deserializeRotation(rxController_xml, "betaRotation", Rotation());
 	// viapoints ?
@@ -849,7 +876,7 @@ rxController* XMLDeserializer::createController(TiXmlElement *rxController_xml, 
 			controller = new ObstacleAvoidanceController(robot, params.alpha, params.alpha_displacement, params.distance_threshold, CollisionInterface::instance, dT, params.deactivation_threshold);
 		}
 	}
-	else if (params.type == "ObstacleAvoidanceController")
+	else if (params.type == "JointLimitAvoidanceControllerOnDemand")
     {
 		controller = new JointLimitAvoidanceControllerOnDemand(robot, params.index[0], params.safetyThresh, dT); 
 	}
