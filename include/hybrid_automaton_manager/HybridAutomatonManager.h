@@ -72,29 +72,18 @@ public:
 	virtual bool isBlackboardActive() const;
 	RTBlackBoard* getBlackboard(){return this->_blackboard;};
 
-	std::vector<rCustomDrawInfo> getDrawObjects(drawLists index){
-		std::vector<rCustomDrawInfo> copy;
-		for(unsigned int i = 0; i < _draw_objects[index].size(); i++)
-		{
-			copy.push_back(_draw_objects[index][i]);
-		}
-		_draw_objects[index].clear();
-		return copy;
-	};
+
+	//Drawing//////////////////////////////////////////////////////////
+	std::vector<rCustomDrawInfo> getDrawObjects(drawLists index);
+	std::vector<dVector> getDrawMilestones(drawListsM index);
+
 	bool getRequestDraw(drawLists index) {return _request_draw[index];};
 	void setRequestDraw(drawLists index, bool draw) {_request_draw[index] = draw;};
 
-	std::vector<dVector> getDrawMilestones(drawListsM index){
-		std::vector<dVector> copy;
-		for(unsigned int i = 0; i < _draw_objects_m[index].size(); i++)
-		{
-			copy.push_back(_draw_objects_m[index][i]);
-		}
-		_draw_objects_m[index].clear();
-		return copy;
-	};
 	bool getRequestDrawM(drawListsM index) {return _request_draw_m[index];};
 	void setRequestDrawM(drawListsM index, bool draw) {_request_draw_m[index] = draw;};
+
+	//TODO: WTF?
 	double							max_ori_error[3];
 	double							max_ori_error_norm;
 	double							minObstDistanceBase;

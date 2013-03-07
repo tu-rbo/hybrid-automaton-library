@@ -83,19 +83,6 @@ posi_ori_selection_(posi_ori_selection)
 	{
 		this->motion_behaviour_ = NULL;
 	}
-
-	// TODO (Roberto): This is old code from Lefteris. It sets the handle points of a Milestone (for ray-tracing) to be 4 points:
-	// Two adding to the center point + or -RADIUS in x direction and two adding + or -RADIUS in y direction.
-	/*Point tmp(configuration_[0],configuration_[1],0.0);
-	tmp.x += RADIUS;
-	handle_points_.push_back(tmp);
-	tmp.x -= 2 * RADIUS;
-	handle_points_.push_back(tmp);
-	tmp.x += RADIUS;
-	tmp.y += RADIUS;
-	handle_points_.push_back(tmp);
-	tmp.y -= 2 * RADIUS;
-	handle_points_.push_back(tmp);*/
 }
 
 OpSpaceMilestone::OpSpaceMilestone(std::string osm_name, std::vector<double>& posi_ori_value, PosiOriSelector posi_ori_selection, 

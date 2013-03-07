@@ -962,3 +962,25 @@ rControlAlgorithm* CreateControlAlgorithm(rDC& rdc)
 {
 	return new HybridAutomatonManager(rdc);
 }
+
+std::vector<rCustomDrawInfo> HybridAutomatonManager::getDrawObjects(drawLists index)
+{
+	std::vector<rCustomDrawInfo> copy;
+	for(unsigned int i = 0; i < _draw_objects[index].size(); i++)
+	{
+		copy.push_back(_draw_objects[index][i]);
+	}
+	_draw_objects[index].clear();
+	return copy;
+}
+
+std::vector<dVector> HybridAutomatonManager::getDrawMilestones(drawListsM index)
+{
+	std::vector<dVector> copy;
+	for(unsigned int i = 0; i < _draw_objects_m[index].size(); i++)
+	{
+		copy.push_back(_draw_objects_m[index][i]);
+	}
+	_draw_objects_m[index].clear();
+	return copy;
+}

@@ -316,6 +316,10 @@ XMLDeserializer::~XMLDeserializer()
 
 HybridAutomaton* XMLDeserializer::createHybridAutomaton(const std::string& xml_string, rxSystem* robot, double dT)
 {
+	/*ofstream file;
+	file.open("hybrid_automaton.txt");
+	file << xml_string;
+	file.close();*/
 	HybridAutomaton* automaton = new HybridAutomaton();
 
 	// Create the DOM-model
@@ -531,8 +535,8 @@ OpSpaceMilestone* XMLDeserializer::createOpSpaceMilestone(TiXmlElement* mileston
 		}
 	}
 
-	//OpSpaceMilestone* mst = new OpSpaceMilestone(mst_name, mst_configuration, mst_pos, NULL, mst_epsilon, mst_status, mst_handle_points);
-	OpSpaceMilestone* mst = new OpSpaceMilestone(mst_name, position, orientation, mst_pos, NULL, mst_epsilon);
+	  OpSpaceMilestone* mst = new OpSpaceMilestone(mst_name, mst_configuration, mst_pos, NULL, mst_epsilon, mst_status, mst_handle_points);
+	//OpSpaceMilestone* mst = new OpSpaceMilestone(mst_name, position, orientation, mst_pos, NULL, mst_epsilon);
 
 	TiXmlElement* mb_element = milestone_xml->FirstChildElement("MotionBehaviour");
 	MotionBehaviour* mst_mb = NULL;
@@ -701,6 +705,13 @@ rxController* XMLDeserializer::createController(TiXmlElement *rxController_xml, 
 	else if (params.type == "ReInterpolatedJointImpedanceController")
 	{
 		ReInterpolatedJointImpedanceController* special_controller = new ReInterpolatedJointImpedanceController(robot, dT);
+		special_controller->addPoint(params.dVectorGoal, params.timeGoal, params.reuseGoal, eInterpolatorType_Cubic);
+		special_controller->setImpedance(0.5,3.0,2.0);
+		controller = special_controller;
+	}
+	else if (params.type == "rxInterpolatedJointImpedanceController")
+	{
+		rxInterpolatedJointImpedanceController* special_controller = new rxInterpolatedJointImpedanceController(robot, dT);
 		special_controller->addPoint(params.dVectorGoal, params.timeGoal, params.reuseGoal, eInterpolatorType_Cubic);
 		special_controller->setImpedance(0.5,3.0,2.0);
 		controller = special_controller;
