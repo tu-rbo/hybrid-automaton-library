@@ -23,12 +23,13 @@ class OpSpaceMilestone : public Milestone
 
 public:
 	OpSpaceMilestone();
+	
 	OpSpaceMilestone(std::string osm_name);
-	OpSpaceMilestone(std::string osm_name, std::vector<double>& posi_ori_value, PosiOriSelector posi_ori_selection, 
-		MotionBehaviour * motion_behaviour, std::vector<double>& region_convergence_radius);
-	OpSpaceMilestone(std::string osm_name, std::vector<double>& posi_ori_value, PosiOriSelector posi_ori_selection, 
+
+	OpSpaceMilestone(std::string osm_name, const Displacement& position, const Rotation& orientation, PosiOriSelector posi_ori_selection, 
 		MotionBehaviour * motion_behaviour, std::vector<double>& region_convergence_radius, Milestone::Status status, 
 		std::vector<Point> handle_points);
+
 	OpSpaceMilestone(std::string osm_name, const Displacement& position, const Rotation& orientation, PosiOriSelector posi_ori_selection, 
 		MotionBehaviour * motion_behaviour, std::vector<double>& region_convergence_radius);
 
@@ -38,13 +39,15 @@ public:
 	virtual OpSpaceMilestone& operator=(const OpSpaceMilestone & op_milestone_assignment);
 
 	void setMotionBehaviour(MotionBehaviour * motion_behaviour);
-	void setConfigurationSTDVector(std::vector<double> configuration_in, PosiOriSelector posi_ori_selector);
-	std::vector<double> getConfigurationSTDVector() const;
-	void setConfiguration(dVector configuration_in, PosiOriSelector posi_ori_selector);
-	virtual dVector getConfiguration() const;
 
 	Displacement getPosition() const;
 	Rotation getOrientation() const;
+
+	void setPosition(const Displacement pos){position_=pos;};
+	void serOrientation(const Rotation ori){orientation_=ori;};
+
+	virtual PosiOriSelector getPosiOriSelector() const;
+	void setPosiOriSelector(const PosiOriSelector sel){posi_ori_selection_=sel;};
 
 	void update();
 
@@ -57,15 +60,10 @@ public:
 	virtual Displacement getHandlePoint(int i) const;
 	virtual int getHandlePointNumber() const;
 
-	virtual PosiOriSelector getPosiOriSelector() const;
-
 	virtual bool hasConverged(rxSystem* sys);
 
 protected:
-	std::vector<double>		configuration_;						// Position = 3 first values
-																// Orientation = 3 second values 
-																//		(Euler angles ZYX)
-																// Total size = 6
+
 	MotionBehaviour*		motion_behaviour_;
 	std::vector<double>		region_convergence_radius_;			// Position = 3 first values
 																// Orientation = 1 second value
@@ -73,8 +71,8 @@ protected:
 	std::vector<Point>		handle_points_;
 	PosiOriSelector			posi_ori_selection_;				// Position/Orientation/Both values defined in this Milestone
 
-	Displacement			position_;							// redundant to configuration but more flexible and powerful
-	Rotation				orientation_;
+	Displacement			position_;							// Milestone goal position
+	Rotation				orientation_;						// Milestone goal orientation
 };
 
 #endif // OP_SPACE_MILESTONE_
