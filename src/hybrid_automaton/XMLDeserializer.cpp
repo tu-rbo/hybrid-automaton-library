@@ -535,8 +535,8 @@ OpSpaceMilestone* XMLDeserializer::createOpSpaceMilestone(TiXmlElement* mileston
 		}
 	}
 
-	  OpSpaceMilestone* mst = new OpSpaceMilestone(mst_name, mst_configuration, mst_pos, NULL, mst_epsilon, mst_status, mst_handle_points);
-	//OpSpaceMilestone* mst = new OpSpaceMilestone(mst_name, position, orientation, mst_pos, NULL, mst_epsilon);
+	//OpSpaceMilestone* mst = new OpSpaceMilestone(mst_name, mst_configuration, mst_pos, NULL, mst_epsilon, mst_status, mst_handle_points);
+	OpSpaceMilestone* mst = new OpSpaceMilestone(mst_name, position, orientation, mst_pos, NULL, mst_epsilon);
 
 	TiXmlElement* mb_element = milestone_xml->FirstChildElement("MotionBehaviour");
 	MotionBehaviour* mst_mb = NULL;
