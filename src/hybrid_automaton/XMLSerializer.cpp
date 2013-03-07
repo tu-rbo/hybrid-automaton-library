@@ -243,9 +243,10 @@ TiXmlElement* OpSpaceMilestone::toElementXML() const
 	op_space_ms_xml->SetAttribute("position", pos_ss.str().c_str());
 
 	std::stringstream ori_ss;
-	for(unsigned int i=0; i<9; i++)
+	for(unsigned int i=0; i<3; i++)
 	{
-		ori_ss << orientation_.darray[i] << " ";
+		for(unsigned int j=0; j<3; j++)
+			ori_ss << orientation_(i,j) << " ";
 	}
 	op_space_ms_xml->SetAttribute("orientation", ori_ss.str().c_str());
 
