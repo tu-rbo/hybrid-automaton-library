@@ -584,7 +584,7 @@ PostureMilestone* XMLDeserializer::createPostureMilestone(TiXmlElement* mileston
 		}
 	}
 
-	PostureMilestone* mst = new PostureMilestone(mst_name, configuration, mst_pos, NULL, mst_epsilon, mst_status, mst_handle_points, robot);
+	PostureMilestone* mst = new PostureMilestone(mst_name, position, orientation, configuration,mst_pos, NULL, mst_epsilon, mst_status, mst_handle_points, robot);
 
 	TiXmlElement* mb_element = milestone_xml->FirstChildElement("MotionBehaviour");
 	MotionBehaviour* mst_mb = NULL;
@@ -754,7 +754,7 @@ rxController* XMLDeserializer::createController(TiXmlElement *rxController_xml, 
 	{
 		rxInterpolatedJointImpedanceController* special_controller = new rxInterpolatedJointImpedanceController(robot, dT);
 		special_controller->addPoint(params.dVectorGoal, params.timeGoal, params.reuseGoal, eInterpolatorType_Cubic);
-		special_controller->setImpedance(0.5,3.0,2.0);
+		special_controller->setImpedance(0.5,3.0,2.0); //TODO: dehack!
 		controller = special_controller;
 	}
 	else if (params.type == "JointBlackBoardController")

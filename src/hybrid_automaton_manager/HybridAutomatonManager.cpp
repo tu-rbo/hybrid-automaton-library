@@ -6,6 +6,8 @@
 #include "HybridAutomatonManager.h"
 #include "HybridAutomatonManagerCmd.h"
 
+#include "..\..\..\applications\elastic_roadmap\src\ERMDemoDefines.h"
+
 #include "XMLDeserializer.h"
 
 #include "msgs\String.h"
@@ -450,28 +452,6 @@ void HybridAutomatonManager::_compute(const double& t)
 			_path_ids.clear();
 			_curr_path_ids.clear();*/
 
-		/*	graph_rid_producer.reset();
-			
-			std::vector<const Node*> milestones = _hybrid_automaton->getNodes();
-			std::vector<const Node*>::iterator mit;
-			for(mit = milestones.begin(); mit != milestones.end(); mit++)
-			{
-				std::vector<const MDPEdge*> outgoing = _hybrid_automaton->getSortedOutgoingEdges((const MDPNode*)(*mit));
-				std::vector<const MDPEdge*>::iterator eit;
-				double color_order = 0.0;
-				for(eit = outgoing.begin(); eit != outgoing.end(); eit++)
-				{
-					const OpSpaceMilestone* ms1 = (const OpSpaceMilestone*)(*eit)->getParent();
-					const OpSpaceMilestone* ms2 = (const OpSpaceMilestone*)(*eit)->getChild();
-					Displacement pos1 = ms1->getHandlePoint(0);
-					Displacement pos2 = ms2->getHandlePoint(0);
-					pos1[2] += 0.1;
-					pos2[2] += 0.1;
-					rID* id = graph_rid_producer.getRID();
-					*id = drawLine(pos1,pos2,*id,rColor(1.0,(*eit)->getProbability(),0.0));
-				}
-			}
-			graph_rid_producer.clearUnused();*/
 #ifdef OLD_PLANNER
 			std::vector<const MDPNode*> milestones;
 			Milestone* ms = _hybrid_automaton->getStartNode();
@@ -504,11 +484,23 @@ void HybridAutomatonManager::_compute(const double& t)
 				i++;
 				if(ms_old != NULL)
 				{
-					Displacement pos1 = ms_old->getHandlePoint(0);
-					Displacement pos2 = ms->getHandlePoint(0);
-					pos1[2] += 0.5;
-					pos2[2] += 0.5;
+					Displacement pos1, pos2;
+					if(demo::baseActuated)
+					{
+						pos1 = ms_old->getHandlePoint(3);
+						pos2 = ms->getHandlePoint(3);
+						pos1[2] += 0.5;
+						pos2[2] += 0.5;
+						
+					}
+					else
+					{
+						pos1 = ms_old->getHandlePoint(2);
+						pos2 = ms->getHandlePoint(2);
+					}
 					drawLine(pos1,pos2,ePATH);
+
+					
 				}
 				ms_old = ms;
 			}
@@ -526,22 +518,27 @@ void HybridAutomatonManager::_compute(const double& t)
 			_t_old = t;
 		}
 	}
-	else if(childMs->hasConverged(_robot) && !singularity_wait){
-		if (_hybrid_automaton && _hybrid_automaton->getNextMotionBehaviour(childMs,_criterion, &bad_edges) != NULL 
-			&& _hybrid_automaton->getNextMotionBehaviour(childMs,_criterion, &bad_edges) != _activeMotionBehavior) {
-			//std::cout << "[HybridAutomatonManager::_compute] INFO: Switching controller" << std::endl;
-			//std::cout << _activeMotionBehavior->getParent() << " versus " << _hybrid_automaton->getNextMotionBehaviour(childMs,_criterion, &bad_edges)->getParent() << std::endl;
-			_activeMotionBehavior->deactivate();
-			_activeMotionBehavior = _hybrid_automaton->getNextMotionBehaviour(childMs,_criterion, &bad_edges); // if criterion is not set the old behaviour remains
-			_activeMotionBehavior->activate();
-			drawPath = true;
-			_t_old = t;
+	else if(childMs->hasConverged(_robot) && !singularity_wait)
+	{
+		if(_hybrid_automaton)
+		{
+			MotionBehaviour* nextMotion = _hybrid_automaton->getNextMotionBehaviour(childMs,_criterion, &bad_edges);
+			if (nextMotion != NULL && nextMotion != _activeMotionBehavior) 
+			{
+				std::cout << "[HybridAutomatonManager::_compute] INFO: Switching controller" << std::endl;
+				std::cout << _activeMotionBehavior->getParent() << " versus " << nextMotion->getParent() << std::endl;
+				_activeMotionBehavior->deactivate();
+				_activeMotionBehavior = nextMotion; // if criterion is not set the old behaviour remains
+				_activeMotionBehavior->activate();
+				drawPath = true;
+				_t_old = t;
 
-#ifdef NOT_IN_RT 
-			std::cout << _activeMotionBehavior->toStringXML() << ::std::endl;
-			_activeMotionBehavior->print();
-			_hybrid_automaton->__printMatrix();
-#endif
+	#ifdef NOT_IN_RT 
+				std::cout << _activeMotionBehavior->toStringXML() << ::std::endl;
+				_activeMotionBehavior->print();
+				_hybrid_automaton->__printMatrix();
+	#endif
+			}
 		}
 	}
 	else if(_criterion && (t - _t_old > SENSOR_FREQUENCY)){
@@ -558,7 +555,7 @@ void HybridAutomatonManager::_compute(const double& t)
 #ifdef DRAW_LOCAL_DECISION
 			HTransform ht;
 			ht.Reset();
-			OpSpaceMilestone* ms = ((OpSpaceMilestone*) _activeMotionBehavior->getChild());
+			PostureMilestone* ms = ((PostureMilestone*) _activeMotionBehavior->getChild());
 			/*ht.r = ms->getHandlePoint(0);
 			//cout << "local decision: " << ms->getName() << endl;
 			ht.Print();
@@ -599,11 +596,22 @@ void HybridAutomatonManager::_compute(const double& t)
 		for(std::vector<const MDPEdge*>::iterator eit = outgoing.begin(); eit != outgoing.end(); eit++)
 		{
 			const OpSpaceMilestone* ms2 = (const OpSpaceMilestone*)(*eit)->getChild();
-			rxBody* XR     = _robot->findBody(_T("Body"));
-			Displacement pos1 = XR->T().r;
-			Displacement pos2 = ms2->getHandlePoint(0);
-			pos1[2] += 0.5;
-			pos2[2] += 0.5;
+			Displacement pos1,pos2;
+			if(demo::baseActuated)
+			{
+				rxBody* XR     = _robot->findBody(_T("Body"));
+				pos1 = XR->T().r;
+				pos2 = ms2->getHandlePoint(3);
+				pos1[2] += 0.5;
+				pos2[2] += 0.5;
+			}
+			else
+			{
+				rxBody* ee     = _robot->findBody(_T("Body7"));
+				pos1 = ee->T().r;
+				pos2 = ms2->getHandlePoint(2);
+			}
+
 			//color_order = 1.0 - (((*eit)->getExpectedEdgeLength() - lmin) / norm);
 			if(ms2 != _activeMotionBehavior->getChild()) // dont draw return path (overlapping)
 			{

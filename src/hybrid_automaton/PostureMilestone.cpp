@@ -19,6 +19,16 @@ _sys(sys)
 	this->setCConfiguration(configuration);
 }
 
+PostureMilestone::PostureMilestone(std::string osm_name,  Displacement position, Rotation orientation, const dVector configuration, PosiOriSelector posi_ori_selection, 
+								   MotionBehaviour * motion_behaviour, std::vector<double>& region_convergence_radius, Milestone::Status status, 
+								   std::vector<Point> handle_points, rxSystem* sys):
+OpSpaceMilestone(osm_name, position, orientation, posi_ori_selection, motion_behaviour, region_convergence_radius, status, handle_points),
+_sys(sys),
+_configuration(configuration)
+{
+
+}
+
 PostureMilestone::PostureMilestone(const PostureMilestone& op_milestone_cpy):
 OpSpaceMilestone(op_milestone_cpy),
 _configuration(op_milestone_cpy._configuration),

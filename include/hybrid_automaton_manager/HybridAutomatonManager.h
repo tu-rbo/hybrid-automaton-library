@@ -22,7 +22,7 @@
 #define _USE_RCONTROLALGORITHM_EX_
 
 #define DRAW_HYBRID_AUTOMATON
-//#define DRAW_LOCAL_DECISION
+#define DRAW_LOCAL_DECISION
 #include "rCustomDraw.h"
 
 typedef struct DeserializingThreadArguments {

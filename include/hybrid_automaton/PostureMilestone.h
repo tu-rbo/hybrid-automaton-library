@@ -25,6 +25,10 @@ public:
 		MotionBehaviour * motion_behaviour, std::vector<double>& region_convergence_radius, Milestone::Status status, 
 		std::vector<Point> handle_points, rxSystem* _sys);
 
+	PostureMilestone(std::string osm_name,  Displacement position, Rotation orientation, const dVector configuration, PosiOriSelector posi_ori_selection, 
+								   MotionBehaviour * motion_behaviour, std::vector<double>& region_convergence_radius, Milestone::Status status, 
+								   std::vector<Point> handle_points, rxSystem* sys);
+
 	virtual ~PostureMilestone();
 
 	PostureMilestone(const PostureMilestone&  op_milestone_cpy);
