@@ -222,10 +222,6 @@
 					>
 				</File>
 				<File
-					RelativePath="..\..\..\controllers\src\ReInterpolatedJointImpedanceController.cpp"
-					>
-				</File>
-				<File
 					RelativePath="..\..\..\controllers\src\SingularityAvoidanceController.cpp"
 					>
 				</File>
