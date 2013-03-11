@@ -69,7 +69,7 @@ MotionBehaviour* HybridAutomaton::getNextMotionBehaviour(const Milestone* curren
 							}
 						}
 					}
-					else if(edges[i]->getLength() < 0.5)
+					else if(edges[i]->getLength() < 0.1)
 					{
 						cout << "** IGNORING SHORT EDGE: " << currentMs->getName() << " to " << ((Milestone*)edges[i]->getChild())->getName() <<std::endl;
 						continue;

@@ -14,13 +14,14 @@
 
 #include "CSpaceMilestone.h"
 #include "OpSpaceMilestone.h"
+#include "PostureMilestone.h"
 #include "MotionBehaviour.h"
 #include "Milestone.h"
 #include "HybridAutomaton.h"
 
 #define _USE_RCONTROLALGORITHM_EX_
 
-//#define DRAW_HYBRID_AUTOMATON
+#define DRAW_HYBRID_AUTOMATON
 //#define DRAW_LOCAL_DECISION
 #include "rCustomDraw.h"
 
@@ -97,7 +98,7 @@ private:
 	virtual void _reflect();
 	virtual void _compute(const rTime& t);
 	void drawLine(const rMath::Displacement &start, const rMath::Displacement &end, drawLists index, const rColor &color = RED, const char lineWidth = 1);
-	void drawMilestones(const OpSpaceMilestone* ms, drawListsM index);
+	void drawMilestones(const PostureMilestone* ms, drawListsM index);
 
 	/**
 	* Check if a new HA was written on the Blackboard and creates a new thread to deserialize it.

@@ -2,6 +2,7 @@
 
 #include "CSpaceMilestone.h"
 #include "OpSpaceMilestone.h"
+#include "PostureMilestone.h"
 
 #include "rControlalgorithm\rControlalgorithm.h"
 #include "rxControlSDK\rxControlSDK.h"
@@ -13,7 +14,6 @@
 #include "SingularityAvoidanceController.h"
 #include "JointLimitAvoidanceControllerOnDemand.h"
 #include "OpSpaceSingularityAvoidanceController.h"
-#include "ReInterpolatedJointImpedanceController.h"
 
 #include "NakamuraControlSet.h"
 #include "InterpolatedSetPointDisplacementController.h"
@@ -316,10 +316,12 @@ XMLDeserializer::~XMLDeserializer()
 
 HybridAutomaton* XMLDeserializer::createHybridAutomaton(const std::string& xml_string, rxSystem* robot, double dT)
 {
-	/*ofstream file;
+
+	ofstream file;
 	file.open("hybrid_automaton.txt");
 	file << xml_string;
-	file.close();*/
+	file.close();
+
 	HybridAutomaton* automaton = new HybridAutomaton();
 
 	// Create the DOM-model
@@ -369,6 +371,10 @@ HybridAutomaton* XMLDeserializer::createHybridAutomaton(const std::string& xml_s
 		else if(mst_type == "CSpaceBlackBoard")
 		{
 			mst = XMLDeserializer::createCSpaceBlackBoardMilestone(mst_element, robot, dT);
+		}
+		else if(mst_type == "Posture")
+		{
+			mst = XMLDeserializer::createPostureMilestone(mst_element, robot, dT);
 		}
 		else
 		{
@@ -550,6 +556,50 @@ OpSpaceMilestone* XMLDeserializer::createOpSpaceMilestone(TiXmlElement* mileston
 	return mst;
 }
 
+PostureMilestone* XMLDeserializer::createPostureMilestone(TiXmlElement* milestone_xml, rxSystem* robot, double dT)
+{
+	Milestone::Status mst_status = (Milestone::Status)deserializeElement<int>(milestone_xml, "status");
+	std::string mst_name = deserializeString(milestone_xml, "name");
+	PosiOriSelector mst_pos = (PosiOriSelector)deserializeElement<int>(milestone_xml, "PosiOriSelector", POS_AND_ORI_SELECTION);
+	Displacement position = deserializeDisplacement(milestone_xml, "position", Displacement());
+	Rotation orientation = deserializeRotation(milestone_xml, "orientation", Rotation());
+	dVector configuration = deserializeDVector(milestone_xml, "configuration");
+	std::vector<double> mst_epsilon = deserializeStdVector<double>(milestone_xml, "epsilon");
+	if(configuration.size()==0 || mst_epsilon.size()==0)
+	{
+		throw std::string("[XMLDeserializer::createPostureMilestone] ERROR: The milestone configuration or region of convergence (\"value\" or \"epsilon\") is not defined in the XML string.");
+	}
+
+	TiXmlElement* handle_point_set_element = milestone_xml->FirstChildElement("HandlePoints");
+	std::vector<Point> mst_handle_points;
+	if(handle_point_set_element != NULL)
+	{
+		for(TiXmlElement* handle_point_element = handle_point_set_element->FirstChildElement("HandlePoint"); handle_point_element; handle_point_element = handle_point_element->NextSiblingElement())
+		{
+			Point handle_point_value(-1.f,-1.f,-1.f);
+			handle_point_value.x = deserializeElement<double>(handle_point_element, "x");
+			handle_point_value.y = deserializeElement<double>(handle_point_element, "y");
+			handle_point_value.z = deserializeElement<double>(handle_point_element, "z");
+			mst_handle_points.push_back(handle_point_value);
+		}
+	}
+
+	PostureMilestone* mst = new PostureMilestone(mst_name, configuration, mst_pos, NULL, mst_epsilon, mst_status, mst_handle_points, robot);
+
+	TiXmlElement* mb_element = milestone_xml->FirstChildElement("MotionBehaviour");
+	MotionBehaviour* mst_mb = NULL;
+	if(mb_element)
+	{
+		mst_mb = XMLDeserializer::createMotionBehaviour(mb_element, mst, mst, robot, dT);
+		mst->setMotionBehaviour(mst_mb);
+	}
+
+    double expLength = deserializeElement<double>(milestone_xml, "expectedLength", -1.0);
+    mst->setExpectedLength(expLength);
+
+	return mst;
+} 
+
 MotionBehaviour* XMLDeserializer::createMotionBehaviour(TiXmlElement* motion_behaviour_xml , Milestone *dad, Milestone *son , rxSystem* robot, double dT )
 {
 	TiXmlElement* control_set_element = motion_behaviour_xml->FirstChildElement("ControlSet");
@@ -698,13 +748,6 @@ rxController* XMLDeserializer::createController(TiXmlElement *rxController_xml, 
 		rxInterpolatedJointComplianceController* special_controller = new rxInterpolatedJointComplianceController(robot, dT);
 		special_controller->addPoint(params.dVectorGoal, params.timeGoal, params.reuseGoal, eInterpolatorType_Cubic);
 		special_controller->setStiffness(params.stiffness_b, params.stiffness_k);
-		controller = special_controller;
-	}
-	else if (params.type == "ReInterpolatedJointImpedanceController")
-	{
-		ReInterpolatedJointImpedanceController* special_controller = new ReInterpolatedJointImpedanceController(robot, dT);
-		special_controller->addPoint(params.dVectorGoal, params.timeGoal, params.reuseGoal, eInterpolatorType_Cubic);
-		special_controller->setImpedance(0.5,3.0,2.0);
 		controller = special_controller;
 	}
 	else if (params.type == "rxInterpolatedJointImpedanceController")
@@ -1095,7 +1138,7 @@ rxController* XMLDeserializer::createJointController(int joint_subtype, double c
 		controller = new rxInterpolatedJointComplianceController(robot, controller_duration);
 		break;
 	case WITH_INTERPOLATION | WITH_IMPEDANCE:
-		controller = new ReInterpolatedJointImpedanceController(robot, controller_duration);	dynamic_cast<ReInterpolatedJointImpedanceController*>(controller)->setImpedance(0.1,1.0,2.0);
+		controller = new rxInterpolatedJointImpedanceController(robot, controller_duration);	dynamic_cast<rxInterpolatedJointImpedanceController*>(controller)->setImpedance(0.1,1.0,2.0);
 		break;
 	case BLACKBOARD_ACCESS:
 		controller = new JointBlackBoardController(robot, controller_duration);

@@ -183,6 +183,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\src\hybrid_automaton\PostureMilestone.cpp"
+				>
+			</File>
+			<File
 				RelativePath="..\..\src\hybrid_automaton\XMLDeserializer.cpp"
 				>
 			</File>
@@ -262,6 +266,10 @@
 			</File>
 			<File
 				RelativePath="..\..\include\hybrid_automaton\OpSpaceMilestone.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\include\hybrid_automaton\PostureMilestone.h"
 				>
 			</File>
 			<File

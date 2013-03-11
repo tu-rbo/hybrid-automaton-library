@@ -573,20 +573,6 @@ MotionBehaviour& MotionBehaviour::operator=(const MotionBehaviour & motion_behav
 	return *this;
 }
 
-dVector MotionBehaviour::getGoalConfiguration()
-{
-	std::list<rxController*> controllers = control_set_->getControllers();
-	string_type controllers_to_string;
-	for(std::list< rxController* >::const_iterator controllers_it = controllers.begin();
-		controllers_it != controllers.end() ; controllers_it ++){
-			ReInterpolatedJointImpedanceController* jcontrol = dynamic_cast<ReInterpolatedJointImpedanceController*>(*controllers_it);
-			if(jcontrol)
-			{
-				return jcontrol->getViaPointConfiguration();
-			}
-	}
-	return dVector();
-}
 
 
 

@@ -86,24 +86,10 @@ void HybridAutomatonManager::drawLine(const rMath::Displacement &start, const rM
 	}
 }
 
-void HybridAutomatonManager::drawMilestones(const OpSpaceMilestone* ms, drawListsM index)
+void HybridAutomatonManager::drawMilestones(const PostureMilestone* ms, drawListsM index)
 {
-	if(this->_request_draw_m[index])
-	{
-		cout << "requested milestones not drawn!! " << index << endl;
-		return;
-	}
-	std::vector<const Edge*> edges = _hybrid_automaton->incomingEdges(ms);
-	for(std::vector<const Edge*>::iterator it = edges.begin(); it != edges.end(); it++)
-	{
-		if((*it)->getChild() == ms)
-		{
-			MotionBehaviour* mb = (MotionBehaviour*)(*it);
-			_draw_objects_m[index].push_back(mb->getGoalConfiguration());
-			return;
-		}
-	}
-//	mb->con
+	_draw_objects_m[index].push_back(ms->getCConfiguration());
+	return;
 }
 
 unsigned __stdcall deserializeHybridAutomaton(void *udata)
@@ -436,6 +422,7 @@ void HybridAutomatonManager::_compute(const double& t)
 		{
 			delete _hybrid_automaton;
 			_hybrid_automaton = _deserialized_hybrid_automatons.front();
+
 			_deserialized_hybrid_automatons.pop_front();
 			
 			//std::cout << "[HybridAutomatonManager::_compute] INFO: New Hybrid Automaton" << std::endl;
@@ -506,7 +493,7 @@ void HybridAutomatonManager::_compute(const double& t)
 			const OpSpaceMilestone* ms_old = NULL;
 			for(std::vector<const MDPNode*>::iterator mit = milestones.begin(); mit != milestones.end() && i < 20; mit++)
 			{
-				const OpSpaceMilestone* ms = (const OpSpaceMilestone*)(*mit);
+				const PostureMilestone* ms = (const PostureMilestone*)(*mit);
 				/*HTransform ht;
 				ht.Reset();
 				ht.r = ms->getHandlePoint(0);
