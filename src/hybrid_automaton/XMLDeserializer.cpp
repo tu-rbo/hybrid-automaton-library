@@ -674,9 +674,9 @@ rxController* XMLDeserializer::createController(TiXmlElement *rxController_xml, 
 	params.kv = deserializeDVector(rxController_xml, "kv");
 	params.stiffness_b = deserializeDVector(rxController_xml, "stiffness_b");
 	params.stiffness_k = deserializeDVector(rxController_xml, "stiffness_k");
-	params.impedance_m = deserializeElement<double>(rxController_xml, "impedance_m");
-	params.impedance_b = deserializeElement<double>(rxController_xml, "impedance_b");
-	params.impedance_k = deserializeElement<double> (rxController_xml, "impedance_k");
+	//params.impedance_m = deserializeElement<double>(rxController_xml, "impedance_m");
+	//params.impedance_b = deserializeElement<double>(rxController_xml, "impedance_b");
+	//params.impedance_k = deserializeElement<double> (rxController_xml, "impedance_k");
 	params.invL2sqr = deserializeDVector(rxController_xml, "invL2sqr");
 	params.priority = deserializeElement<int>(rxController_xml, "priority", 1);
 	params.timeGoal = deserializeElement<double>(rxController_xml, "timeGoal", -1.0);
