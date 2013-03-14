@@ -51,6 +51,9 @@ struct ControllerParameters {
 	dVector invL2sqr;
 	dVector stiffness_b;
 	dVector stiffness_k;
+	double impedance_m;
+	double impedance_b;
+	double impedance_k;
 	rxBody* alpha;
 	rxBody* beta;
 	Displacement alpha_displacement;

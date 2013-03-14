@@ -440,17 +440,6 @@ void HybridAutomatonManager::_compute(const double& t)
 #endif
 			ReleaseMutex(_deserialize_mutex);
 #ifdef DRAW_HYBRID_AUTOMATON
-			// delete drawn path
-	/*		for(int i = 0; i < _path_ids.size(); i++)
-			{
-				_physics_world->eraseCustomDraw(_path_ids[i]);
-			}
-			for(int i = 0; i < _curr_path_ids.size(); i++)
-			{
-				_physics_world->eraseCustomDraw(_curr_path_ids[i]);
-			}
-			_path_ids.clear();
-			_curr_path_ids.clear();*/
 
 #ifdef OLD_PLANNER
 			std::vector<const MDPNode*> milestones;
@@ -464,6 +453,7 @@ void HybridAutomatonManager::_compute(const double& t)
 				mb = _hybrid_automaton->getNextMotionBehaviour(ms,_criterion, &bad_edges);
 			}
 #else
+			//TODO : implement ha->getCurrentGoal()
 			MDPNode* hack_goal = (MDPNode*)_hybrid_automaton->getSortedOutgoingEdges(_hybrid_automaton->getStartNode()).front()->getChild();
 			std::vector<const MDPNode*> milestones = _hybrid_automaton->getShortestPath(_hybrid_automaton->getStartNode(),hack_goal,1.0);
 
@@ -504,11 +494,7 @@ void HybridAutomatonManager::_compute(const double& t)
 				}
 				ms_old = ms;
 			}
-			/*for(; i < 19; i++)
-			{
-				_physics_world->eraseCustomDraw(config[i]);
-				config[i] = INVALID_RID;
-			}*/
+	
 			setRequestDraw(ePATH,true);
 			setRequestDrawM(ePATH_MILESTONES,true);
 #endif
@@ -556,15 +542,6 @@ void HybridAutomatonManager::_compute(const double& t)
 			HTransform ht;
 			ht.Reset();
 			PostureMilestone* ms = ((PostureMilestone*) _activeMotionBehavior->getChild());
-			/*ht.r = ms->getHandlePoint(0);
-			//cout << "local decision: " << ms->getName() << endl;
-			ht.Print();
-			if(ld != INVALID_RID)
-			{
-				_physics_world->eraseCustomDraw(ld);
-				ld = INVALID_RID;
-			}
-			ld = drawDebug.drawCylinder(ld,ht,0.35,0.78,rColor(0.0,1.0,0.0,0.3));*/
 			drawMilestones(ms,eLD_MILESTONES);
 			setRequestDrawM(eLD_MILESTONES,true);
 			cout << "Request LD!" << endl;
@@ -585,14 +562,6 @@ void HybridAutomatonManager::_compute(const double& t)
 		const OpSpaceMilestone* ms1 = (const OpSpaceMilestone*)_activeMotionBehavior->getParent();		
 		std::vector<const MDPEdge*> outgoing = _hybrid_automaton->getSortedOutgoingEdges(ms1);
 		int count = 0;
-/*		for(int i = 0; i < 10; i++)
-		{
-			if(path[i] != INVALID_RID)
-			{
-				_physics_world->eraseCustomDraw(path[i]);
-				path[i] = INVALID_RID;
-			}
-		}*/
 		for(std::vector<const MDPEdge*>::iterator eit = outgoing.begin(); eit != outgoing.end(); eit++)
 		{
 			const OpSpaceMilestone* ms2 = (const OpSpaceMilestone*)(*eit)->getChild();
@@ -612,7 +581,6 @@ void HybridAutomatonManager::_compute(const double& t)
 				pos2 = ms2->getHandlePoint(2);
 			}
 
-			//color_order = 1.0 - (((*eit)->getExpectedEdgeLength() - lmin) / norm);
 			if(ms2 != _activeMotionBehavior->getChild()) // dont draw return path (overlapping)
 			{
 				drawLine(pos1,pos2,eRAYS,rColor(0.0,0.0,0.0));
@@ -627,51 +595,8 @@ void HybridAutomatonManager::_compute(const double& t)
 				break;
 		}
 		setRequestDraw(eRAYS,true);
-		//drawDebug.clearUnused(drawGroups::PATH);
-/*	
-		const OpSpaceMilestone* ms1 = (const OpSpaceMilestone*)_activeMotionBehavior->getParent();		
-		std::vector<const MDPEdge*> outgoing = _hybrid_automaton->getSortedOutgoingEdges(ms1);
-		int count = 0;
-		int i = 0;
-		double minTEL = outgoing.front()->getTotalExpectedLength();
-		double maxTEL = outgoing.back()->getTotalExpectedLength();
-		double norm = maxTEL - minTEL;
-		double color_order = 0.0;
-		for(std::vector<const MDPEdge*>::iterator eit = outgoing.begin(); eit != outgoing.end() && i < 20; eit++)
-		{
-			const OpSpaceMilestone* ms = (const OpSpaceMilestone*)(*eit)->getChild();
-			HTransform ht;
-			ht.Reset();
-			ht.r = ms->getHandlePoint(0);
-			color_order = (((*eit)->getTotalExpectedLength() - minTEL) / norm);
-			rColor color;
-			color.b = 0.0;
-			color.a = 0.3;
-			if(color_order < (1.0/2.0))
-			{
-				color.r = 1.0;
-				color.g = color_order * 2.0;
-			}
-			else
-			{
-				color.r = 1.0 - ((color_order - 0.5)*2.0);
-				color.g = 1.0;
-			}
-			//config[i] = drawDebug.drawCylinder(config[i],ht,0.35,0.78,color);
-			HTransform ht2 = ht;
-			ht2.r[2] += 1.0;
-			config[i] = drawDebug.drawLine(ht.r,ht2.r,config[i],color,5);
-			i++;
-		}
-		for(; i < 20; i++)
-		{
-			_physics_world->eraseCustomDraw(config[i]);
-			config[i] = INVALID_RID;
-		}
-*/
 	}
 #endif
-	//_torque.print(_T("_torquenew"));
 }
 
 
