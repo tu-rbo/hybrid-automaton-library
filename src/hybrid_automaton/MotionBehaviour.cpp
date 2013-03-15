@@ -18,8 +18,6 @@ MDPEdge(NULL, NULL, -1)
 , max_velocity_(-1)
 , min_time_(-1)
 , time_to_converge_(0.0)
-, _connectivityQueueSize(10)
-, _connectivityQueueMean(0.0)	
 {
 }
 
@@ -32,8 +30,6 @@ MDPEdge(dad, son, weight)
 , max_velocity_(-1)
 , min_time_(-1)
 , time_to_converge_(0.0)
-, _connectivityQueueSize(10)
-, _connectivityQueueMean(0.0)
 {
 	if(robot_)
 	{
@@ -58,8 +54,6 @@ MDPEdge(dad, son, weight)
 , max_velocity_(-1)
 , min_time_(-1)
 , time_to_converge_(0.0)
-, _connectivityQueueSize(10)
-, _connectivityQueueMean(0.0)
 {
 	if(control_set_)
 	{
@@ -86,10 +80,7 @@ min_time_(motion_behaviour_copy.min_time_),
 max_velocity_(motion_behaviour_copy.max_velocity_),
 goal_controllers_(motion_behaviour_copy.goal_controllers_),
 time_to_converge_(motion_behaviour_copy.time_to_converge_),
-_onDemand_controllers(motion_behaviour_copy._onDemand_controllers),
-_connectivityQueueSize(motion_behaviour_copy._connectivityQueueSize),
-_connectivityQueueMean(motion_behaviour_copy._connectivityQueueMean),
-_connectivityMeasurements(motion_behaviour_copy._connectivityMeasurements)
+_onDemand_controllers(motion_behaviour_copy._onDemand_controllers)
 {
 	// NOTE (Roberto): Should we avoid copying the value of time_? We are creating a new MB, maybe time_ should be 0
 	if(motion_behaviour_copy.control_set_)
@@ -615,30 +606,4 @@ void MotionBehaviour::setMaxVelocityForInterpolation(double max_velocity) {
 
 void MotionBehaviour::setMinTimeForInterpolation(double min_time) {
 	min_time_ = min_time;
-}
-
-void MotionBehaviour::addConnectivityMeasurement(double newMeasurement)
-{
-	_connectivityMeasurements.push(newMeasurement);
-	if(_connectivityMeasurements.size()>=_connectivityQueueSize)
-	{
-		//queue is full
-		double oldVal=_connectivityMeasurements.back();
-		_connectivityMeasurements.pop();
-
-		_connectivityQueueMean-=oldVal/((double)_connectivityQueueSize);
-		_connectivityQueueMean+=newMeasurement/((double)_connectivityQueueSize);
-	}
-	else
-	{
-		//iterative mean
-		double dist=newMeasurement-_connectivityQueueMean;
-		_connectivityQueueMean=1.0/(1.0+_connectivityMeasurements.size())*dist;
-	}
-}
-
-double MotionBehaviour::getAvgMeasurement()
-{
-	return _connectivityQueueMean;
-
 }
