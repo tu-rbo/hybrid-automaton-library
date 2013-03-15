@@ -16,6 +16,7 @@
 #include "tinyxml.h"
 
 #include <map>
+#include <queue>
 #include <math.h>
 
 typedef enum {
@@ -203,6 +204,9 @@ public:
 	void setMaxVelocityForInterpolation(double max_velocity);
 	void setMinTimeForInterpolation(double min_time);
 
+	void addConnectivityMeasurement(double newMeasurement);
+	double getAvgMeasurement();
+
 
 private:
 
@@ -230,6 +234,10 @@ private:
 	std::vector<OnDemandController*>				_onDemand_controllers;
 
 	double calculateTimeToConverge(double default_min_time, double default_max_velocity, const dVector& error_x, const dVector& xd, const dVector& xd_desired);
+
+	std::queue<double>								_connectivityMeasurements;
+	int												_connectivityQueueSize;
+	double											_connectivityQueueMean;		
 };
 
 #endif
