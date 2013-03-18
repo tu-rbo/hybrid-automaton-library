@@ -18,7 +18,6 @@
 
 #define SENSOR_FREQUENCY 0.1 // seconds
 //#define SINGULARITY_HANDLING
-// #define OLD_PLANNER
 
 //CustomDrawManager drawDebug;
 
@@ -441,23 +440,26 @@ void HybridAutomatonManager::_compute(const double& t)
 			ReleaseMutex(_deserialize_mutex);
 #ifdef DRAW_HYBRID_AUTOMATON
 
-#ifdef OLD_PLANNER
-			std::vector<const MDPNode*> milestones;
-			Milestone* ms = _hybrid_automaton->getStartNode();
-			milestones.push_back(ms);
-			MotionBehaviour* mb = _hybrid_automaton->getNextMotionBehaviour(ms,_criterion, &bad_edges);
-			while(mb && mb->getChild() != ms)
+			if(demo::useESP)
 			{
-				ms = (Milestone*)mb->getChild();
-				milestones.push_back(ms);
-				mb = _hybrid_automaton->getNextMotionBehaviour(ms,_criterion, &bad_edges);
+				//TODO : implement ha->getCurrentGoal()
+				MDPNode* hack_goal = (MDPNode*)_hybrid_automaton->getSortedOutgoingEdges(_hybrid_automaton->getStartNode()).front()->getChild();
+				std::vector<const MDPNode*> milestones = _hybrid_automaton->getShortestPath(_hybrid_automaton->getStartNode(),hack_goal,1.0);
 			}
-#else
-			//TODO : implement ha->getCurrentGoal()
-			MDPNode* hack_goal = (MDPNode*)_hybrid_automaton->getSortedOutgoingEdges(_hybrid_automaton->getStartNode()).front()->getChild();
-			std::vector<const MDPNode*> milestones = _hybrid_automaton->getShortestPath(_hybrid_automaton->getStartNode(),hack_goal,1.0);
+			else
+			{
+				std::vector<const MDPNode*> milestones;
+				Milestone* ms = _hybrid_automaton->getStartNode();
+				milestones.push_back(ms);
+				MotionBehaviour* mb = _hybrid_automaton->getNextMotionBehaviour(ms,_criterion, &bad_edges);
+				while(mb && mb->getChild() != ms)
+				{
+					ms = (Milestone*)mb->getChild();
+					milestones.push_back(ms);
+					mb = _hybrid_automaton->getNextMotionBehaviour(ms,_criterion, &bad_edges);
+				}
+			}
 
-#endif
 			int count = 0;
 			int i = 0;
 			const OpSpaceMilestone* ms_old = NULL;
