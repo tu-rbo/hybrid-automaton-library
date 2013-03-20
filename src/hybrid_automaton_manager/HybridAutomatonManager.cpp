@@ -431,6 +431,13 @@ void HybridAutomatonManager::_compute(const double& t)
 			_activeMotionBehavior->deactivate();
 			_activeMotionBehavior = _hybrid_automaton->getNextMotionBehaviour(tmpMilestone, _criterion, &bad_edges);
 			_activeMotionBehavior->activate();
+
+//#ifdef OLD_PLANNER
+//			MDPNode* hack_goal = (MDPNode*)_hybrid_automaton->getSortedOutgoingEdges(_hybrid_automaton->getStartNode()).front()->getChild();
+//			std::vector<const MDPNode*> milestones = _hybrid_automaton->getShortestPath(_hybrid_automaton->getStartNode(),hack_goal,1.0);
+//			_activeMotionBehavior = (MotionBehaviour*)milestones[0];
+//#endif
+
 #ifdef NOT_IN_RT
 			std::cout << _activeMotionBehavior->toStringXML() << ::std::endl;
 			_activeMotionBehavior->print();
@@ -439,16 +446,15 @@ void HybridAutomatonManager::_compute(const double& t)
 #endif
 			ReleaseMutex(_deserialize_mutex);
 #ifdef DRAW_HYBRID_AUTOMATON
-
+			std::vector<const MDPNode*> milestones;
 			if(demo::useESP)
 			{
 				//TODO : implement ha->getCurrentGoal()
 				MDPNode* hack_goal = (MDPNode*)_hybrid_automaton->getSortedOutgoingEdges(_hybrid_automaton->getStartNode()).front()->getChild();
-				std::vector<const MDPNode*> milestones = _hybrid_automaton->getShortestPath(_hybrid_automaton->getStartNode(),hack_goal,1.0);
+				milestones = _hybrid_automaton->getShortestPath(_hybrid_automaton->getStartNode(),hack_goal,1.0);
 			}
 			else
 			{
-				std::vector<const MDPNode*> milestones;
 				Milestone* ms = _hybrid_automaton->getStartNode();
 				milestones.push_back(ms);
 				MotionBehaviour* mb = _hybrid_automaton->getNextMotionBehaviour(ms,_criterion, &bad_edges);
@@ -529,7 +535,7 @@ void HybridAutomatonManager::_compute(const double& t)
 			}
 		}
 	}
-	else if(_criterion && (t - _t_old > SENSOR_FREQUENCY)){
+	else if(_criterion && (t - _t_old > SENSOR_FREQUENCY) && demo::useESP){
 		_t_old = t;
 		// make new local decision:
 		MotionBehaviour* newChoice = _hybrid_automaton->getNextMotionBehaviour((Milestone*)_activeMotionBehavior->getParent(),_criterion, &bad_edges);
