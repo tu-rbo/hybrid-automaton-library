@@ -1,12 +1,11 @@
 #ifndef HYBRID_AUTOMATON_
 #define HYBRID_AUTOMATON_
 
-#include "MDP.h"
-#include "MDPNode.h"
-#include "MDPEdge.h"
+#include "graph/include/MDP.h"
+#include "graph/include/MDPNode.h"
+#include "graph/include/MDPEdge.h"
 #include "Milestone.h"
 #include "MotionBehaviour.h"
-#include "LocalDecisionCriterion.h"
 
 /**
 * HybridAutomaton class. 
@@ -58,12 +57,6 @@ public:
 	* Note: It uses tinyXML library to read the string with XML format.
 	*/
 	//virtual void fromStringXML(const std::string& xml_string, rxSystem* robot, double dT);
-
-    /**
-    * Returns the next motion behavior to execute when at currentMs.
-    * Currently the first motion in the list of childs is executed.
-    */
-    MotionBehaviour* getNextMotionBehaviour(const Milestone* currentMs, LocalDecisionCriterion* criterion = NULL, vector<pair<std::string,std::string>>* bad_edges = NULL);
 
 private:
 	Milestone* start_node_id_;	// Pointer to the first Milestone (if exists). 

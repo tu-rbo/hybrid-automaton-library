@@ -10,10 +10,10 @@
 #ifndef MILESTONE_
 #define MILESTONE_
 
-#include "MDPNode.h"
 #include <iostream>
-#include "tinyxml.h"
-#include "rxControlSDK\rxControlSDK.h"
+#include "graph/include/MDPNode.h"
+#include "hybrid_automaton/thirdparty/tinyxml/include/tinyxml.h"
+#include "rxControlSDK/rxControlSDK.h"
 
 
 typedef struct Point

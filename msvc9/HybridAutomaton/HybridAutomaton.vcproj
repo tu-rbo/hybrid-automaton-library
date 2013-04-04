@@ -171,6 +171,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\src\hybrid_automaton\LocalDecisionCriterion.cpp"
+				>
+			</File>
+			<File
 				RelativePath="..\..\src\hybrid_automaton\Milestone.cpp"
 				>
 			</File>
@@ -266,10 +270,6 @@
 			</File>
 			<File
 				RelativePath="..\..\include\hybrid_automaton\PostureMilestone.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\include\hybrid_automaton\Quaternion.h"
 				>
 			</File>
 			<File

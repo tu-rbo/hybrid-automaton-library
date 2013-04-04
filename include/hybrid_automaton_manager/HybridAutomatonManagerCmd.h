@@ -9,9 +9,6 @@
 #include "rCommand/rCmdDefine.h"
 
 #define DEFAULT_CMD		(RCMD_USER + 1)
-#define EXECUTE_PLAN	(RCMD_USER + 2)
-#define PAUSE			(RCMD_USER + 3)
-#define RESUME			(RCMD_USER + 4)
 #define SERVO_ON		(RCMD_USER + 5)
 #define BLACKBOARD_ON	(RCMD_USER + 6)
 
@@ -33,11 +30,5 @@
 #define PLOT_TORQUE					1
 #define PLOT_Q						2
 #define PLOT_VELOCITY				3
-#define PLOT_ERROR					4
-#define PLOT_DESIRED_Q				5
-#define PLOT_ERROR_VELOCITY			6
-#define PLOT_DESIRED_VELOCITY		9
-#define PLOT_ORI_TASK_ERROR			10
-#define PLOT_LINE_TASK_ERRROR		11
 
 #endif

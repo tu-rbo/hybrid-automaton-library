@@ -1,7 +1,7 @@
 #ifndef MOTION_BEHAVIOUR
 #define MOTION_BEHAVIOUR
 
-#include "MDPEdge.h"
+#include "graph\include\MDPEdge.h"
 #include "Milestone.h"
 #include "rControlalgorithm\rControlalgorithm.h"
 #include "rxControlSDK\rxControlSDK.h"
@@ -13,7 +13,7 @@
 #include "controllers\include\ObstacleAvoidanceController.h"
 
 
-#include "tinyxml.h"
+#include "hybrid_automaton\thirdparty\tinyxml\include\tinyxml.h"
 
 #include <map>
 #include <queue>

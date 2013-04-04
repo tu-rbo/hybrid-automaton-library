@@ -525,7 +525,7 @@ dVector MotionBehaviour::update(double t)
 	}
 	dVector torque(dof);
 	*/
-	// TODO: This might? not work with XR+WAM ?
+
 	dVector torque(robot_->jointDOF() + robot_->earthDOF() + robot_->constraintDOF());
 	control_set_->compute(t,torque);
 	time_ += dT_;
