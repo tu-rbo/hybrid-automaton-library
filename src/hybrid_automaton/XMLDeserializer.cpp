@@ -724,42 +724,48 @@ rxController* XMLDeserializer::createController(TiXmlElement *rxController_xml, 
 	if (params.type == "rxJointController")
 	{
 		rxJointController* special_controller = new rxJointController(robot, dT);
-		special_controller->addPoint(params.dVectorGoal, params.timeGoal, params.reuseGoal, eInterpolatorType_Cubic);
+		if(!goal_controller)
+			special_controller->addPoint(params.dVectorGoal, params.timeGoal, params.reuseGoal, eInterpolatorType_Cubic);
 		special_controller->setGain(params.kv, params.kp, params.invL2sqr);	
 		controller = special_controller;		
 	}
 	else if (params.type == "rxJointComplianceController")
 	{
 		rxJointComplianceController* special_controller = new rxJointComplianceController(robot, dT);
-		special_controller->addPoint(params.dVectorGoal, params.timeGoal, params.reuseGoal, eInterpolatorType_Cubic);
+		if(!goal_controller)
+			special_controller->addPoint(params.dVectorGoal, params.timeGoal, params.reuseGoal, eInterpolatorType_Cubic);
 		special_controller->setStiffness(params.stiffness_b, params.stiffness_k);
 		controller = special_controller;
 	}
 	else if (params.type == "rxJointImpedanceController")
 	{
 		rxJointImpedanceController* special_controller = new rxJointImpedanceController(robot, dT);
-		special_controller->addPoint(params.dVectorGoal, params.timeGoal, params.reuseGoal, eInterpolatorType_Cubic);
+		if(!goal_controller)
+			special_controller->addPoint(params.dVectorGoal, params.timeGoal, params.reuseGoal, eInterpolatorType_Cubic);
 		special_controller->setImpedance(params.impedance_m, params.impedance_b, params.impedance_k);
 		controller = special_controller;
 	}
 	else if (params.type == "rxInterpolatedJointController")
 	{
 		rxInterpolatedJointController* special_controller = new rxInterpolatedJointController(robot, dT);
-		special_controller->addPoint(params.dVectorGoal, params.timeGoal, params.reuseGoal, eInterpolatorType_Cubic);
+		if(!goal_controller)
+			special_controller->addPoint(params.dVectorGoal, params.timeGoal, params.reuseGoal, eInterpolatorType_Cubic);
 		special_controller->setGain(params.kv, params.kp, params.invL2sqr);	
 		controller = special_controller;
 	}
 	else if (params.type == "rxInterpolatedJointComplianceController")
 	{
 		rxInterpolatedJointComplianceController* special_controller = new rxInterpolatedJointComplianceController(robot, dT);
-		special_controller->addPoint(params.dVectorGoal, params.timeGoal, params.reuseGoal, eInterpolatorType_Cubic);
+		if(!goal_controller)		
+			special_controller->addPoint(params.dVectorGoal, params.timeGoal, params.reuseGoal, eInterpolatorType_Cubic);
 		special_controller->setStiffness(params.stiffness_b, params.stiffness_k);
 		controller = special_controller;
 	}
 	else if (params.type == "rxInterpolatedJointImpedanceController")
 	{
 		rxInterpolatedJointImpedanceController* special_controller = new rxInterpolatedJointImpedanceController(robot, dT);
-		special_controller->addPoint(params.dVectorGoal, params.timeGoal, params.reuseGoal, eInterpolatorType_Linear);
+		if(!goal_controller)		
+			special_controller->addPoint(params.dVectorGoal, params.timeGoal, params.reuseGoal, eInterpolatorType_Linear);
 		special_controller->setImpedance(0.1,1.0,2.0);
 		//special_controller->setImpedance(params.impedance_m, params.impedance_b, params.impedance_k);
 		controller = special_controller;
@@ -781,21 +787,24 @@ rxController* XMLDeserializer::createController(TiXmlElement *rxController_xml, 
     else if (params.type == "rxDisplacementController")
 	{
 		rxDisplacementController* special_controller = new rxDisplacementController(robot, params.beta, Displacement(params.beta_displacement), params.alpha, Displacement(params.alpha_displacement), dT);
-		special_controller->addPoint(params.dVectorGoal, params.timeGoal, params.reuseGoal, eInterpolatorType_Cubic);
+		if(!goal_controller)
+			special_controller->addPoint(params.dVectorGoal, params.timeGoal, params.reuseGoal, eInterpolatorType_Cubic);
 		special_controller->setGain(params.kv, params.kp, params.invL2sqr);	
 		controller = special_controller;
 	}
     else if (params.type == "rxDisplacementComplianceController")
 	{
 		rxDisplacementComplianceController* special_controller = new rxDisplacementComplianceController(robot, params.beta, Displacement(params.beta_displacement), params.alpha, Displacement(params.alpha_displacement), dT);
-		special_controller->setStiffness(params.stiffness_b, params.stiffness_k);
+		if(!goal_controller)
+			special_controller->setStiffness(params.stiffness_b, params.stiffness_k);
 		special_controller->addPoint(params.dVectorGoal, params.timeGoal, params.reuseGoal, eInterpolatorType_Cubic);
 		controller = special_controller;
 	}
     else if (params.type == "rxDisplacementImpedanceController")
 	{
 		rxDisplacementImpedanceController* special_controller = new rxDisplacementImpedanceController(robot, params.beta, Displacement(params.beta_displacement), params.alpha, Displacement(params.alpha_displacement), dT);
-		special_controller->addPoint(params.dVectorGoal, params.timeGoal, params.reuseGoal, eInterpolatorType_Cubic);
+		if(!goal_controller)
+			special_controller->addPoint(params.dVectorGoal, params.timeGoal, params.reuseGoal, eInterpolatorType_Cubic);
 		special_controller->setImpedance(0.2, 8.0, 20.0);
 		//special_controller->setImpedance(params.impedance_m, params.impedance_b, params.impedance_k);
 		controller = special_controller;
@@ -803,21 +812,24 @@ rxController* XMLDeserializer::createController(TiXmlElement *rxController_xml, 
 	else if (params.type == "rxInterpolatedDisplacementController")
 	{
 		rxInterpolatedDisplacementController* special_controller = new rxInterpolatedDisplacementController(robot, params.beta, Displacement(params.beta_displacement), params.alpha, Displacement(params.alpha_displacement), dT);
-		special_controller->addPoint(params.dVectorGoal, params.timeGoal, params.reuseGoal, eInterpolatorType_Cubic);
+		if(!goal_controller)
+			special_controller->addPoint(params.dVectorGoal, params.timeGoal, params.reuseGoal, eInterpolatorType_Cubic);
 		special_controller->setGain(params.kv, params.kp, params.invL2sqr);	
 		controller = special_controller;
 	}
 	else if (params.type == "rxInterpolatedDisplacementComplianceController")
 	{
 		rxInterpolatedDisplacementComplianceController* special_controller = new rxInterpolatedDisplacementComplianceController(robot, params.beta, Displacement(params.beta_displacement), params.alpha, Displacement(params.alpha_displacement), dT);
-		special_controller->addPoint(params.dVectorGoal, params.timeGoal, params.reuseGoal, eInterpolatorType_Cubic);
+		if(!goal_controller)
+			special_controller->addPoint(params.dVectorGoal, params.timeGoal, params.reuseGoal, eInterpolatorType_Cubic);
 		special_controller->setStiffness(params.stiffness_b, params.stiffness_k);
 		controller = special_controller;
 	}
 	else if (params.type == "rxInterpolatedDisplacementImpedanceController")
 	{
 		rxInterpolatedDisplacementImpedanceController* special_controller = new rxInterpolatedDisplacementImpedanceController(robot, params.beta, Displacement(params.beta_displacement), params.alpha, Displacement(params.alpha_displacement), dT);
-		special_controller->addPoint(params.dVectorGoal, params.timeGoal, params.reuseGoal, eInterpolatorType_Cubic);
+		if(!goal_controller)
+			special_controller->addPoint(params.dVectorGoal, params.timeGoal, params.reuseGoal, eInterpolatorType_Cubic);
 		special_controller->setImpedance(0.2, 8.0, 20.0);
 		//special_controller->setImpedance(params.impedance_m, params.impedance_b, params.impedance_k);
 		controller = special_controller;
@@ -836,7 +848,8 @@ rxController* XMLDeserializer::createController(TiXmlElement *rxController_xml, 
 	else if (params.type == "rxOrientationController")
     {
 		rxOrientationController* special_controller = new rxOrientationController(robot, params.beta, params.beta_rotation_matrix, params.alpha, params.alpha_rotation_matrix, dT);
-		special_controller->addPoint(params.RGoal, params.timeGoal, params.reuseGoal);
+		if(!goal_controller)
+			special_controller->addPoint(params.RGoal, params.timeGoal, params.reuseGoal);
 		special_controller->setGain(params.kv, params.kp, params.invL2sqr);	
 		controller = special_controller;
 	}
@@ -844,13 +857,15 @@ rxController* XMLDeserializer::createController(TiXmlElement *rxController_xml, 
     {
 		rxOrientationComplianceController* special_controller = new rxOrientationComplianceController(robot, params.beta, params.beta_rotation_matrix, params.alpha, params.alpha_rotation_matrix, dT);
 		special_controller->setStiffness(params.stiffness_b, params.stiffness_k);
-		special_controller->addPoint(params.RGoal, params.timeGoal, params.reuseGoal);
+		if(!goal_controller)
+			special_controller->addPoint(params.RGoal, params.timeGoal, params.reuseGoal);
 		controller = special_controller;
 	}
 	else if (params.type == "rxOrientationImpedanceController")
     {
 		rxOrientationImpedanceController* special_controller = new rxOrientationImpedanceController(robot, params.beta, params.beta_rotation_matrix, params.alpha, params.alpha_rotation_matrix, dT);
-		special_controller->addPoint(params.RGoal, params.timeGoal, params.reuseGoal);
+		if(!goal_controller)
+			special_controller->addPoint(params.RGoal, params.timeGoal, params.reuseGoal);
 		special_controller->setImpedance(0.2, 8.0, 20.0);
 		//special_controller->setImpedance(params.impedance_m, params.impedance_b, params.impedance_k);
 		controller = special_controller;
@@ -858,7 +873,8 @@ rxController* XMLDeserializer::createController(TiXmlElement *rxController_xml, 
 	else if (params.type == "rxInterpolatedOrientationController")
     {
 		rxInterpolatedOrientationController* special_controller = new rxInterpolatedOrientationController(robot, params.beta, params.beta_rotation_matrix, params.alpha, params.alpha_rotation_matrix, dT);
-		special_controller->addPoint(params.RGoal, params.timeGoal, params.reuseGoal);
+		if(!goal_controller)
+			special_controller->addPoint(params.RGoal, params.timeGoal, params.reuseGoal);
 		special_controller->setGain(params.kv, params.kp, params.invL2sqr);	
 		controller = special_controller;
 	}
@@ -866,13 +882,15 @@ rxController* XMLDeserializer::createController(TiXmlElement *rxController_xml, 
     {
 		rxInterpolatedOrientationComplianceController* special_controller = new rxInterpolatedOrientationComplianceController(robot, params.beta, params.beta_rotation_matrix, params.alpha, params.alpha_rotation_matrix, dT);
 		special_controller->setStiffness(params.stiffness_b, params.stiffness_k);
-		special_controller->addPoint(params.RGoal, params.timeGoal, params.reuseGoal);
+		if(!goal_controller)
+			special_controller->addPoint(params.RGoal, params.timeGoal, params.reuseGoal);
 		controller = special_controller;
 	}
 	else if (params.type == "rxInterpolatedOrientationImpedanceController")
     {
 		rxInterpolatedOrientationImpedanceController* special_controller = new rxInterpolatedOrientationImpedanceController(robot, params.beta, params.beta_rotation_matrix, params.alpha, params.alpha_rotation_matrix, dT);
-		special_controller->addPoint(params.RGoal, params.timeGoal, params.reuseGoal);
+		if(!goal_controller)
+			special_controller->addPoint(params.RGoal, params.timeGoal, params.reuseGoal);
 		special_controller->setImpedance(0.2, 8.0, 20.0);
 		//special_controller->setImpedance(params.impedance_m, params.impedance_b, params.impedance_k);
 		controller = special_controller;
@@ -881,7 +899,8 @@ rxController* XMLDeserializer::createController(TiXmlElement *rxController_xml, 
     {
 		rxHTransformController* special_controller = new rxHTransformController(robot, params.beta, HTransform(params.beta_rotation_matrix, params.beta_displacement), params.alpha, HTransform(params.alpha_rotation_matrix, params.alpha_displacement), dT);
 		HTransform goal_HTransform(params.RGoal, params.rGoal);
-		special_controller->addPoint(goal_HTransform, params.timeGoal, params.reuseGoal);
+		if(!goal_controller)
+			special_controller->addPoint(goal_HTransform, params.timeGoal, params.reuseGoal);
 		special_controller->setGain(params.kv, params.kp, params.invL2sqr);	
 		controller = special_controller;
 	}
@@ -890,14 +909,16 @@ rxController* XMLDeserializer::createController(TiXmlElement *rxController_xml, 
 		rxHTransformComplianceController* special_controller = new rxHTransformComplianceController(robot, params.beta, HTransform(params.beta_rotation_matrix, params.beta_displacement), params.alpha, HTransform(params.alpha_rotation_matrix, params.alpha_displacement), dT);
 		special_controller->setStiffness(params.stiffness_b, params.stiffness_k);
 		HTransform goal_HTransform(params.RGoal, params.rGoal);
-		special_controller->addPoint(goal_HTransform, params.timeGoal, params.reuseGoal);
+		if(!goal_controller)
+			special_controller->addPoint(goal_HTransform, params.timeGoal, params.reuseGoal);
 		controller = special_controller;
 	}
 	else if (params.type == "rxHTransformImpedanceController")
     {
 		rxHTransformImpedanceController* special_controller = new rxHTransformImpedanceController(robot, params.beta, HTransform(params.beta_rotation_matrix, params.beta_displacement), params.alpha, HTransform(params.alpha_rotation_matrix, params.alpha_displacement), dT);
 		HTransform goal_HTransform(params.RGoal, params.rGoal);
-		special_controller->addPoint(goal_HTransform, params.timeGoal, params.reuseGoal);
+		if(!goal_controller)
+			special_controller->addPoint(goal_HTransform, params.timeGoal, params.reuseGoal);
 		special_controller->setImpedance(0.2, 8.0, 20.0);
 		//special_controller->setImpedance(params.impedance_m, params.impedance_b, params.impedance_k);
 		controller = special_controller;
@@ -906,7 +927,8 @@ rxController* XMLDeserializer::createController(TiXmlElement *rxController_xml, 
     {
 		rxInterpolatedHTransformController* special_controller = new rxInterpolatedHTransformController(robot, params.beta, HTransform(params.beta_rotation_matrix, params.beta_displacement), params.alpha, HTransform(params.alpha_rotation_matrix, params.alpha_displacement), dT);
 		HTransform goal_HTransform(params.RGoal, params.rGoal);
-		special_controller->addPoint(goal_HTransform, params.timeGoal, params.reuseGoal);
+		if(!goal_controller)
+			special_controller->addPoint(goal_HTransform, params.timeGoal, params.reuseGoal);
 		special_controller->setGain(params.kv, params.kp, params.invL2sqr);	
 		controller = special_controller;
 	}
@@ -915,14 +937,16 @@ rxController* XMLDeserializer::createController(TiXmlElement *rxController_xml, 
 		rxInterpolatedHTransformComplianceController* special_controller = new rxInterpolatedHTransformComplianceController(robot, params.beta, HTransform(params.beta_rotation_matrix, params.beta_displacement), params.alpha, HTransform(params.alpha_rotation_matrix, params.alpha_displacement), dT);
 		special_controller->setStiffness(params.stiffness_b, params.stiffness_k);
 		HTransform goal_HTransform(params.RGoal, params.rGoal);
-		special_controller->addPoint(goal_HTransform, params.timeGoal, params.reuseGoal);
+		if(!goal_controller)
+			special_controller->addPoint(goal_HTransform, params.timeGoal, params.reuseGoal);
 		controller = special_controller;
 	}
 	else if (params.type == "rxInterpolatedHTransformImpedanceController")
     {
 		rxInterpolatedHTransformImpedanceController* special_controller = new rxInterpolatedHTransformImpedanceController(robot, params.beta, HTransform(params.beta_rotation_matrix, params.beta_displacement), params.alpha, HTransform(params.alpha_rotation_matrix, params.alpha_displacement), dT);
 		HTransform goal_HTransform(params.RGoal, params.rGoal);
-		special_controller->addPoint(goal_HTransform, params.timeGoal, params.reuseGoal);
+		if(!goal_controller)
+			special_controller->addPoint(goal_HTransform, params.timeGoal, params.reuseGoal);
 		special_controller->setImpedance(0.2, 8.0, 20.0);
 		//special_controller->setImpedance(params.impedance_m, params.impedance_b, params.impedance_k);
 		controller = special_controller;
