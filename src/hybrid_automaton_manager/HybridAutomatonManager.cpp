@@ -72,7 +72,7 @@ HybridAutomatonManager::~HybridAutomatonManager()
 	if(_blackboard)
 		delete _blackboard;
 
-``  if(_criterion)
+    if(_criterion)
 		delete _criterion;
 
 	//delete _defaultMotionBehavior;
