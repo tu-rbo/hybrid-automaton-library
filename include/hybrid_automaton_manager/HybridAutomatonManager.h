@@ -59,34 +59,82 @@ protected:
 	void updateHybridAutomaton();
 	void updateBlackboard();
 
+	/**
+	* The latest hybrid automaton
+	*/
 	HybridAutomaton*	_hybrid_automaton;
 	
+	/**
+	* The rxSystem under control
+	*/
 	rxSystem*			_sys;
+
+	/**
+	* The ROBOT device
+	*/
 	rHANDLE				_robot;
 
+	/**
+	* The currently activeted motion behaviour
+	*/
 	MotionBehaviour*	_activeMotionBehaviour;
+
+	/**
+	* The motion behaviour that is used when no hybrid automaton is present
+	* Consists of a joint controller that holds the current position.
+	*/
 	MotionBehaviour*	_defaultMotionBehavior;
 
+	/**
+	* The path to the AML file
+	*/
 	string_type			_path;
+
+	/**
+	* The AML file of the current robot
+	*/
 	string_type			_aml;
 
+	/**
+	* Start Transformation and Configuration
+	*/
 	HTransform			_T0;
-
 	dVector				_q0;
+
+	/**
+	* The control rate
+	*/
 	double				_dT;
+
+	/**
+	* Parameters for plotting
+	*/
 	dVector				_q;
 	dVector				_qOld;
 	dVector				_qdot;
 	dVector				_torque;
 
+	/**
+	* An RTBlackBoard instance. The manager receives Hybrid automata from this blackboard.
+	*/
 	RTBlackBoard*		_blackboard;
 
 	int					_dof;
 	bool				_servo_on;
 
+	/**
+	* The queue of reserialized hybird automata. Is executed one by one
+	*/
 	std::deque<HybridAutomaton*> _deserialized_hybrid_automatons;
+
+	/**
+	* A mutex to synchronize the deserializing threads
+	*/
 	HANDLE				_deserialize_mutex;
 
+	/**
+	* A criterion that tells which motionBehaviour to choose if there are multiple options.
+	*/
 	LocalDecisionCriterion*	_criterion;
 };
 #endif

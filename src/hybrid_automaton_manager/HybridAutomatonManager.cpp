@@ -105,6 +105,9 @@ void HybridAutomatonManager::init(int mode)
 	_robot = findDevice(_T("ROBOT"));
 	RASSERT(_robot != INVALID_RHANDLE);
 
+	//The default motion controller holds the initial position when no hybrid automaton 
+	//was sent. 
+	//TODO: frind a platform independent solution
 	_defaultMotionBehavior = new MotionBehaviour(new Milestone(), new Milestone(),_sys);
 	rxJointController* jc = new rxJointController(_sys,_dT);
 	jc->addPoint(_sys->q(),5,true);
