@@ -126,6 +126,11 @@ void HybridAutomatonManager::activateBlackboard(std::string &rlab_host, int rlab
 	_blackboard = RTBlackBoard::getInstance(rlab_host, rlab_port, ros_host, ros_port);
 }
 
+void HybridAutomatonManager::setCollisionInterface(CollisionInterface* collision_interface)
+{
+	CollisionInterface::instance = collision_interface;
+}
+
 void HybridAutomatonManager::setLocalDecisionCriterion(LocalDecisionCriterion* criterion)
 {
 	delete _criterion;
@@ -175,11 +180,6 @@ void HybridAutomatonManager::updateBlackboard()
 	HTransform absolute_transform = end_effector->T() * relative_transform;
 	_blackboard->setTransform("ee", absolute_transform, "base_link");
 	
-	if (_activeMotionBehavior && _activeMotionBehavior->getChild())
-		_blackboard->setBool("idle", ((Milestone*)_activeMotionBehavior->getChild())->hasConverged(_sys));
-	else
-		_blackboard->setBool("idle", false);
-
 	_blackboard->step();
 }
 

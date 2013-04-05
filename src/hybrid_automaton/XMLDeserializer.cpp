@@ -981,6 +981,9 @@ rxController* XMLDeserializer::createController(TiXmlElement *rxController_xml, 
 			controller = new ObstacleAvoidanceController(robot, params.alpha, params.alpha_displacement, params.distance_threshold, CollisionInterface::instance, dT, params.deactivation_threshold);
 			controller->setGain(params.kv, params.kp, params.invL2sqr);
 		}
+		else
+			throw std::string("[XMLDeserializer::createController] ERROR: No collision interface used for obstacleAvoidanceController.");
+
 	}
 	else if (params.type == "JointLimitAvoidanceControllerOnDemand")
     {
