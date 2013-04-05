@@ -64,7 +64,7 @@ protected:
 	rxSystem*			_sys;
 	rHANDLE				_robot;
 
-	MotionBehaviour*	_activeMotionBehavior;
+	MotionBehaviour*	_activeMotionBehaviour;
 	MotionBehaviour*	_defaultMotionBehavior;
 
 	string_type			_path;

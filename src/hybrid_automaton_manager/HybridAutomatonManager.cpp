@@ -51,7 +51,7 @@ HybridAutomatonManager::HybridAutomatonManager(rDC rdc)
 :rControlAlgorithm(rdc)
 , _sys(NULL)
 , _blackboard(NULL)
-, _activeMotionBehavior(NULL)
+, _activeMotionBehaviour(NULL)
 , _defaultMotionBehavior(NULL)
 , _dof(0)
 , _servo_on(false)
@@ -66,8 +66,8 @@ HybridAutomatonManager::HybridAutomatonManager(rDC rdc)
 
 HybridAutomatonManager::~HybridAutomatonManager()
 {
-	if(_activeMotionBehavior)
-		delete _activeMotionBehavior;
+	if(_activeMotionBehaviour)
+		delete _activeMotionBehaviour;
 
 	if(_blackboard)
 		delete _blackboard;
@@ -117,8 +117,8 @@ void HybridAutomatonManager::init(int mode)
 	jc->setGain((size_t) 5, 0.5, 50.0); 
 	jc->setGain((size_t) 6, 0.05, 40.0);
 	_defaultMotionBehavior->addController(jc,false);
-	_activeMotionBehavior = _defaultMotionBehavior;
-	_activeMotionBehavior->activate();
+	_activeMotionBehaviour = _defaultMotionBehavior;
+	_activeMotionBehaviour->activate();
 }
 
 void HybridAutomatonManager::activateBlackboard(std::string &rlab_host, int rlab_port, std::string &ros_host, int ros_port)
@@ -251,7 +251,7 @@ void HybridAutomatonManager::_compute(const double& t)
 {
 	if (_servo_on)
 	{
-		_torque = _activeMotionBehavior->update(t);
+		_torque = _activeMotionBehaviour->update(t);
 	}
 	else 
 	{
@@ -259,7 +259,7 @@ void HybridAutomatonManager::_compute(const double& t)
 	}
 
 	//Now switch the active motion behaviour if possible
-    Milestone* childMs=(Milestone*)(_activeMotionBehavior->getChild());
+    Milestone* childMs=(Milestone*)(_activeMotionBehaviour->getChild());
 	Milestone* queryMs; //The milestone we choose oour next motion from
 
 	
@@ -287,7 +287,7 @@ void HybridAutomatonManager::_compute(const double& t)
 	}
 	else	
 	{
-		queryMs = (Milestone*)_activeMotionBehavior->getParent(); //Switch before reaching the milestone.
+		queryMs = (Milestone*)_activeMotionBehaviour->getParent(); //Switch before reaching the milestone.
 		behaviourChange = false;		
 	}
 
@@ -299,12 +299,12 @@ void HybridAutomatonManager::_compute(const double& t)
 
 		
 		//Switch motion behaviour
-		if(nextMotion && nextMotion != _activeMotionBehavior)
+		if(nextMotion && nextMotion != _activeMotionBehaviour)
 		{
 			std::cout << "[HybridAutomatonManager::_compute] INFO: Switching controller" << std::endl;
-			_activeMotionBehavior->deactivate();
-			_activeMotionBehavior = nextMotion;
-			_activeMotionBehavior->activate();
+			_activeMotionBehaviour->deactivate();
+			_activeMotionBehaviour = nextMotion;
+			_activeMotionBehaviour->activate();
 		}
 	}
 
