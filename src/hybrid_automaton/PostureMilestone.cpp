@@ -16,7 +16,7 @@ PostureMilestone::PostureMilestone(std::string osm_name, const dVector configura
 OpSpaceMilestone(osm_name, Displacement(), Rotation(), posi_ori_selection, motion_behaviour, region_convergence_radius, status, handle_points),
 _sys(sys)
 {
-	this->setCConfiguration(configuration);
+	this->setConfiguration(configuration);
 }
 
 PostureMilestone::PostureMilestone(std::string osm_name,  Displacement position, Rotation orientation, const dVector configuration, PosiOriSelector posi_ori_selection, 
@@ -82,12 +82,12 @@ PostureMilestone& PostureMilestone::operator=(const PostureMilestone & pos_miles
 }
 
 
-dVector PostureMilestone::getCConfiguration() const
+dVector PostureMilestone::getConfiguration() const
 {
 	return _configuration;
 }
 
-void PostureMilestone::setCConfiguration(dVector configuration)
+void PostureMilestone::setConfiguration(dVector configuration)
 {
 	_configuration = configuration;
 	HTransform ht;

@@ -36,10 +36,10 @@ public:
 	PostureMilestone* PostureMilestone::clone() const;
 
 	// gets the c-space configuration
-	dVector getCConfiguration() const;
+	dVector getConfiguration() const;
 
 	// Sets the c-space configuration (and the corresponding opspace configuration)
-	void setCConfiguration(dVector configuration);
+	void setConfiguration(dVector configuration);
 	
 	virtual std::string toStringXML() const;
 	virtual TiXmlElement* toElementXML() const ;
