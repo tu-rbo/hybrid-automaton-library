@@ -61,9 +61,9 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="rxSDK_9d.lib rMath_9d.lib rxControlSDK_9d.lib HybridAutomatond.lib libgraphd.lib tinyxmld.lib"
+				AdditionalDependencies="rMath_9d.lib rxControlSDK_9d.lib"
 				LinkIncremental="2"
-				AdditionalLibraryDirectories="&quot;$(RLAB_LIB_PATH)&quot;;&quot;$(ProjectDir)..\..\bin&quot;;&quot;$(ProjectDir)..\..\thirdparty\tinyxml\bin&quot;;&quot;$(ProjectDir)..\..\..\graph\bin&quot;"
+				AdditionalLibraryDirectories="&quot;$(RLAB_LIB_PATH)&quot;"
 				GenerateDebugInformation="true"
 				SubSystem="1"
 				TargetMachine="1"
@@ -125,7 +125,7 @@
 				EnableFunctionLevelLinking="true"
 				UsePrecompiledHeader="0"
 				WarningLevel="3"
-				DebugInformationFormat="3"
+				DebugInformationFormat="0"
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"
@@ -138,9 +138,9 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="rxSDK_9.lib rMath_9.lib rxControlSDK_9.lib HybridAutomaton.lib libgraph.lib tinyxml.lib"
+				AdditionalDependencies="rMath_9.lib rxControlSDK_9.lib"
 				LinkIncremental="1"
-				AdditionalLibraryDirectories="&quot;$(RLAB_LIB_PATH)&quot;;&quot;$(ProjectDir)..\..\bin&quot;;&quot;$(ProjectDir)..\..\thirdparty\tinyxml\bin&quot;;&quot;$(ProjectDir)..\..\..\graph\bin&quot;"
+				AdditionalLibraryDirectories="&quot;$(RLAB_LIB_PATH)&quot;"
 				GenerateDebugInformation="true"
 				SubSystem="1"
 				OptimizeReferences="2"
@@ -180,15 +180,7 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
-				RelativePath="..\..\..\applications\elastic_roadmap\src\CustomDrawManager.cpp"
-				>
-			</File>
-			<File
 				RelativePath="..\..\src\hybrid_automaton_manager\HybridAutomatonManager.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\..\applications\elastic_roadmap\src\rIdProducer.cpp"
 				>
 			</File>
 		</Filter>
@@ -207,10 +199,6 @@
 			</File>
 			<File
 				RelativePath="..\..\include\hybrid_automaton_manager\HybridAutomatonManagerCmd.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\..\applications\elastic_roadmap\src\rIdProducer.h"
 				>
 			</File>
 			<Filter
