@@ -323,7 +323,7 @@ TiXmlElement* PostureMilestone::toElementXML() const
 	op_space_ms_xml->SetAttribute("orientation", ori_ss.str().c_str());
 
 	std::stringstream posture_ss;
-	for(unsigned int i=0; i<_sys->jdof(); i++)
+	for(int i=0; i<_sys->jdof(); i++)
 	{
 		posture_ss << _configuration(i) << " ";
 	}
