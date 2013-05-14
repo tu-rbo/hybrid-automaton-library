@@ -263,7 +263,7 @@ void HybridAutomatonManager::_compute(const double& t)
 
 	//Now switch the active motion behaviour if possible
     Milestone* childMs=(Milestone*)(_activeMotionBehaviour->getChild());
-	Milestone* queryMs; //The milestone we choose oour next motion from
+	Milestone* queryMs; //The milestone we choose our next motion from
 
 	
 	//Flag tells if the graph structure changed.	

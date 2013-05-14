@@ -44,7 +44,7 @@ public:
 	Rotation getOrientation() const;
 
 	void setPosition(const Displacement pos){position_=pos;};
-	void serOrientation(const Rotation ori){orientation_=ori;};
+	void setOrientation(const Rotation ori){orientation_=ori;};
 
 	virtual PosiOriSelector getPosiOriSelector() const;
 	void setPosiOriSelector(const PosiOriSelector sel){posi_ori_selection_=sel;};
