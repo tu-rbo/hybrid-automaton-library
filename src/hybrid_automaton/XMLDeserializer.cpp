@@ -21,6 +21,8 @@
 #include "PressureDisplacementController.h"
 #include "PressureOrientationController.h"
 
+#include "TPImpedanceControlSet.h"
+
 std::map<std::string, ControllerType> XMLDeserializer::controller_map_ = XMLDeserializer::createControllerMapping();
 
 std::string XMLDeserializer::wstring2string(const std::wstring& wstr)
@@ -624,14 +626,20 @@ MotionBehaviour* XMLDeserializer::createMotionBehaviour(TiXmlElement* motion_beh
 		{		
 			mb_control_set = new rxTPOperationalSpaceControlSet(robot, dT);
 			mb_control_set->setGravity(0, 0, -GRAV_ACC);
-			//mb_control_set->setInverseDynamicsAlgorithm(new rxAMBSGravCompensation(robot));
-			//mb_control_set->nullMotionController()->setGain(0.02,0.0,0.01);
 			mb_control_set->nullMotionController()->setGain(10.0,1.0); // taken from ERM values...
 		}
 		else if(control_set_type == "NakamuraControlSet")
 		{
 			mb_control_set = new NakamuraControlSet(robot, dT);
 			mb_control_set->setGravity(0, 0, -GRAV_ACC);
+			mb_control_set->nullMotionController()->setGain(0.0, 0.0, 0.0);
+		}
+		else if(control_set_type == "TPImpedanceControlSet")
+		{
+			mb_control_set = new TPImpedanceControlSet(robot, dT);
+			mb_control_set->setGravity(0, 0, -GRAV_ACC);
+			// TPImpedanceControlSet does not implement extra nullmotion behaviour - 
+			// This has to be done at lowest priority!
 			mb_control_set->nullMotionController()->setGain(0.0, 0.0, 0.0);
 		}
 		else
@@ -744,7 +752,7 @@ rxController* XMLDeserializer::createController(TiXmlElement *rxController_xml, 
 	{
 		rxJointImpedanceController* special_controller = new rxJointImpedanceController(robot, dT);
 		if(!goal_controller)
-			special_controller->addPoint(params.dVectorGoal, params.timeGoal, params.reuseGoal, eInterpolatorType_Cubic);
+			special_controller->addPoint(params.dVectorGoal, params.timeGoal, params.reuseGoal, eInterpolatorType_Linear);
 		//special_controller->setImpedance(params.impedance_m, params.impedance_b, params.impedance_k);
 		//values for 7DOF demo!!!
 		special_controller->setImpedance(1.0,2.0/sqrt(2.0), 0.5);

@@ -8,6 +8,8 @@
 
 #include "HybridAutomaton.h"
 
+#include "TPImpedanceControlSet.h"
+
 #include "XMLDeserializer.h"
 
 #include "tinyxml.h"
@@ -389,6 +391,10 @@ TiXmlElement* MotionBehaviour::toElementXML() const
 	else if(dynamic_cast<rxControlSet*>(control_set_))
 	{
 		control_set_element->SetAttribute("type", "rxControlSet");
+	}
+	else if(dynamic_cast<TPImpedanceControlSet*>(control_set_))
+	{
+		control_set_element->SetAttribute("type", "TPImpedanceControlSet");
 	}
 
 	std::list<rxController*> controllers = control_set_->getControllers();
