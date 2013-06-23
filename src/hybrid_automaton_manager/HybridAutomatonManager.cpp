@@ -118,7 +118,7 @@ void HybridAutomatonManager::init(int mode)
 	jc->setGain((size_t) 3, 2.0, 500.0); 
 	jc->setGain((size_t) 4, 0.5, 50.0); 
 	jc->setGain((size_t) 5, 0.5, 50.0); 
-	jc->setGain((size_t) 6, 0.05, 40.0);
+	jc->setGain((size_t) 6, 0.05, 5.0);
 	_defaultMotionBehavior->addController(jc,false);
 	_activeMotionBehaviour = _defaultMotionBehavior;
 	_activeMotionBehaviour->activate();
