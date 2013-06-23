@@ -3,6 +3,7 @@
 #include <string>
 
 #include "XMLDeserializer.h"
+#include "TPImpedanceControlSet.h"
 
 
 //#define NOT_IN_RT
@@ -117,6 +118,10 @@ _onDemand_controllers(motion_behaviour_copy._onDemand_controllers)
 		else if(dynamic_cast<rxControlSet*>(motion_behaviour_copy.control_set_))
 		{
 			this->control_set_ = new rxControlSet((*dynamic_cast<rxControlSet*>(motion_behaviour_copy.control_set_)));
+		}
+		else if(dynamic_cast<TPImpedanceControlSet*>(motion_behaviour_copy.control_set_))
+		{
+			this->control_set_ = new TPImpedanceControlSet((*dynamic_cast<TPImpedanceControlSet*>(motion_behaviour_copy.control_set_)));
 		}
 	}
 	else
@@ -241,21 +246,12 @@ void MotionBehaviour::activate()
 							Rotation current_S = absolute_ht.R;
 							dVector current_R;
 							current_S.GetQuaternion(current_R);
+							
 							/*
 							std::cout << "current position: " << current_r[0] << " " << current_r[1] << " " << current_r[2] << std::endl;
 							std::cout << "current orientation: " << current_R[0] << " " << current_R[1] << " " << current_R[2] << " " << current_R[3] << std::endl;
 							std::cout << "desired position: " << desired_r[0] << " " << desired_r[1] << " " << desired_r[2] << std::endl;
 							*/
-
-							// rd1 and rd2
-							dVector current_rd(current_r.size());
-							current_rd.zero();
-							dVector desired_rd(current_r.size());
-							desired_rd.zero();
-
-							// at least 5.0 seconds or maximally 0.2 m/s if nothing is given
-							time_to_converge_ = calculateTimeToConverge(5.0, 0.2, desired_r - current_r, current_rd, desired_rd);
-							std::cout << "[MotionBehaviour::activate] INFO: Time of displacement trajectory: " << time_to_converge_ << std::endl;
 
 							FeatureAttractorController* fac = dynamic_cast<FeatureAttractorController*>(*it);
 							if(fac)
@@ -264,6 +260,15 @@ void MotionBehaviour::activate()
 							}
 							else
 							{
+								// rd1 and rd2
+								dVector current_rd(current_r.size());
+								current_rd.zero();
+								dVector desired_rd(current_r.size());
+								desired_rd.zero();
+
+								// at least 5.0 seconds or maximally 0.2 m/s if nothing is given
+								time_to_converge_ = calculateTimeToConverge(5.0, 0.2, desired_r - current_r, current_rd, desired_rd);
+								std::cout << "[MotionBehaviour::activate] INFO: Time of displacement trajectory: " << time_to_converge_ << std::endl;
 								dynamic_cast<rxDisplacementController*>(*it)->addPoint(desired_r, time_to_converge_, false, eInterpolatorType_Cubic);
 							}
 							break;
@@ -512,19 +517,6 @@ dVector MotionBehaviour::update(double t)
 		// depending on the measurements they make.
 		_onDemand_controllers[i]->updateMeasurement();
 	}
-
-	//dVector torque(robot_->jointDOF()); // This does not work for XR4000+WAM
-	/*
-	int dof = 0;
-	list<rxJoint*>::iterator it;
-	for(it = robot_->joints().begin(); it !=  robot_->joints().end(); it++)
-	{
-		dVector ll, ul;
-		(*it)->getLimits(ll,ul);
-		dof += ll.size();
-	}
-	dVector torque(dof);
-	*/
 
 	dVector torque(robot_->jointDOF() + robot_->earthDOF() + robot_->constraintDOF());
 	control_set_->compute(t,torque);
