@@ -23,7 +23,7 @@
 
 #include "TPImpedanceControlSet.h"
 
-std::map<std::string, ControllerType> XMLDeserializer::/*controller_map_*/ = XMLDeserializer::createControllerMapping();
+std::map<std::string, ControllerType> XMLDeserializer::controller_map_ = XMLDeserializer::createControllerMapping();
 
 std::string XMLDeserializer::wstring2string(const std::wstring& wstr)
 {
