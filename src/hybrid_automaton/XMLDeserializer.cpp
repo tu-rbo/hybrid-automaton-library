@@ -23,7 +23,7 @@
 
 #include "TPImpedanceControlSet.h"
 
-std::map<std::string, ControllerType> XMLDeserializer::controller_map_ = XMLDeserializer::createControllerMapping();
+std::map<std::string, ControllerType> XMLDeserializer::/*controller_map_*/ = XMLDeserializer::createControllerMapping();
 
 std::string XMLDeserializer::wstring2string(const std::wstring& wstr)
 {
@@ -49,7 +49,7 @@ T deserializeElement(TiXmlElement * xml_element, const char * field_name)
 		std::string exception_str = std::string("[deserializeElement] ERROR: Attribute ") + std::string(field_name) + std::string(" was not found in XML element.");
 		throw exception_str;
 	}
-	
+
 	return return_value;
 }
 
@@ -85,7 +85,7 @@ std::string deserializeString(TiXmlElement * xml_element, const char * field_nam
 
 	if(ret_char_ptr)
 		return std::string(ret_char_ptr);
-	
+
 	return default_value;
 }
 
@@ -281,8 +281,8 @@ Rotation XMLDeserializer::string2rotation(const std::string& str, const Rotation
 	case 3: return Rotation(values[0], values[1], values[2]);
 	case 4: return Rotation(values[0], values[1], values[2], values[3]); // attention: w, x, y, z
 	case 9: return Rotation(values[0], values[1], values[2],
-							values[3], values[4], values[5],
-							values[6], values[7], values[8]);
+				values[3], values[4], values[5],
+				values[6], values[7], values[8]);
 	}
 
 	return default_value;
@@ -473,9 +473,9 @@ CSpaceMilestone* XMLDeserializer::createCSpaceMilestone(TiXmlElement* milestone_
 		mst_mb = XMLDeserializer::createMotionBehaviour(mb_element, mst, mst, robot, dT);
 		mst->setMotionBehaviour(mst_mb);
 	}
-    
-    double expLength = deserializeElement<double>(milestone_xml, "expectedLength", -1.0);
-    mst->setExpectedLength(expLength);
+
+	double expLength = deserializeElement<double>(milestone_xml, "expectedLength", -1.0);
+	mst->setExpectedLength(expLength);
 
 	return mst;
 }
@@ -509,9 +509,9 @@ CSpaceBlackBoardMilestone* XMLDeserializer::createCSpaceBlackBoardMilestone(TiXm
 
 	mst->setBlackBoardVariableName(mst->getBlackBoardVariableName());
 
-    double expLength = deserializeElement<double>(milestone_xml, "expectedLength", -1.0);
-    mst->setExpectedLength(expLength);
-	
+	double expLength = deserializeElement<double>(milestone_xml, "expectedLength", -1.0);
+	mst->setExpectedLength(expLength);
+
 	return mst;
 }
 
@@ -552,8 +552,8 @@ OpSpaceMilestone* XMLDeserializer::createOpSpaceMilestone(TiXmlElement* mileston
 		mst->setMotionBehaviour(mst_mb);
 	}
 
-    double expLength = deserializeElement<double>(milestone_xml, "expectedLength", -1.0);
-    mst->setExpectedLength(expLength);
+	double expLength = deserializeElement<double>(milestone_xml, "expectedLength", -1.0);
+	mst->setExpectedLength(expLength);
 
 	return mst;
 }
@@ -596,8 +596,8 @@ PostureMilestone* XMLDeserializer::createPostureMilestone(TiXmlElement* mileston
 		mst->setMotionBehaviour(mst_mb);
 	}
 
-    double expLength = deserializeElement<double>(milestone_xml, "expectedLength", -1.0);
-    mst->setExpectedLength(expLength);
+	double expLength = deserializeElement<double>(milestone_xml, "expectedLength", -1.0);
+	mst->setExpectedLength(expLength);
 
 	return mst;
 } 
@@ -663,10 +663,10 @@ MotionBehaviour* XMLDeserializer::createMotionBehaviour(TiXmlElement* motion_beh
 		mb_controller_counter++;
 	}
 
-    double length = deserializeElement<double>(motion_behaviour_xml, "length", -1.0);
-    double prob   = deserializeElement<double>(motion_behaviour_xml, "probability", -1.0);
-    mb->setLength(length);
-    mb->setProbability(prob);
+	double length = deserializeElement<double>(motion_behaviour_xml, "length", -1.0);
+	double prob   = deserializeElement<double>(motion_behaviour_xml, "probability", -1.0);
+	mb->setLength(length);
+	mb->setProbability(prob);
 
 	return mb;
 }
@@ -699,7 +699,7 @@ rxController* XMLDeserializer::createController(TiXmlElement *rxController_xml, 
 	params.rGoal = deserializeDVector(rxController_xml, "rGoal");
 	params.desired_distance = deserializeElement<double>(rxController_xml, "desiredDistance", 1.);
 	params.max_force = deserializeElement<double>(rxController_xml, "maxForce", 1.);
-    params.max_vel = deserializeElement<double>(rxController_xml, "maxVel", 1.);
+	params.max_vel = deserializeElement<double>(rxController_xml, "maxVel", 1.);
 	params.limit_body = deserializeString(rxController_xml, "limitBody", false);
 	params.distance_limit = deserializeElement<double>(rxController_xml, "distanceLimit", 0.);
 	params.distance_threshold = deserializeElement<double>(rxController_xml, "distanceThreshold", 1.);
@@ -790,14 +790,14 @@ rxController* XMLDeserializer::createController(TiXmlElement *rxController_xml, 
 		special_controller->setGain(params.kv, params.kp, params.invL2sqr);	
 		controller = special_controller;
 	}
-    else if (params.type == "SingularityAvoidanceController")
+	else if (params.type == "SingularityAvoidanceController")
 	{
-        HTransform ht;
-        rxBody* EE = robot->getUCSBody(_T("EE"), ht);
-        controller = new SingularityAvoidanceController(robot, EE, dT, params.maxVel);
+		HTransform ht;
+		rxBody* EE = robot->getUCSBody(_T("EE"), ht);
+		controller = new SingularityAvoidanceController(robot, EE, dT, params.maxVel);
 		controller->setGain(params.kv, params.kp, params.invL2sqr);	
-    }
-    else if (params.type == "rxDisplacementController")
+	}
+	else if (params.type == "rxDisplacementController")
 	{
 		rxDisplacementController* special_controller = new rxDisplacementController(robot, params.beta, Displacement(params.beta_displacement), params.alpha, Displacement(params.alpha_displacement), dT);
 		if(!goal_controller)
@@ -805,15 +805,15 @@ rxController* XMLDeserializer::createController(TiXmlElement *rxController_xml, 
 		special_controller->setGain(params.kv, params.kp, params.invL2sqr);	
 		controller = special_controller;
 	}
-    else if (params.type == "rxDisplacementComplianceController")
+	else if (params.type == "rxDisplacementComplianceController")
 	{
 		rxDisplacementComplianceController* special_controller = new rxDisplacementComplianceController(robot, params.beta, Displacement(params.beta_displacement), params.alpha, Displacement(params.alpha_displacement), dT);
 		if(!goal_controller)
-			special_controller->setStiffness(params.stiffness_b, params.stiffness_k);
-		special_controller->addPoint(params.dVectorGoal, params.timeGoal, params.reuseGoal, eInterpolatorType_Cubic);
+			special_controller->addPoint(params.dVectorGoal, params.timeGoal, params.reuseGoal, eInterpolatorType_Cubic);		
+		special_controller->setStiffness(params.stiffness_b, params.stiffness_k);
 		controller = special_controller;
 	}
-    else if (params.type == "rxDisplacementImpedanceController")
+	else if (params.type == "rxDisplacementImpedanceController")
 	{
 		rxDisplacementImpedanceController* special_controller = new rxDisplacementImpedanceController(robot, params.beta, Displacement(params.beta_displacement), params.alpha, Displacement(params.alpha_displacement), dT);
 		if(!goal_controller)
@@ -854,12 +854,12 @@ rxController* XMLDeserializer::createController(TiXmlElement *rxController_xml, 
 		controller = special_controller;
 	}
 	else if (params.type == "OpSpaceSingularityAvoidanceController")
-    {
-        controller = new OpSpaceSingularityAvoidanceController(robot, params.beta, params.alpha, dT, params.max_vel);
+	{
+		controller = new OpSpaceSingularityAvoidanceController(robot, params.beta, params.alpha, dT, params.max_vel);
 		controller->setGain(params.kv, params.kp, params.invL2sqr);	
 	}
 	else if (params.type == "rxOrientationController")
-    {
+	{
 		rxOrientationController* special_controller = new rxOrientationController(robot, params.beta, params.beta_rotation_matrix, params.alpha, params.alpha_rotation_matrix, dT);
 		if(!goal_controller)
 			special_controller->addPoint(params.RGoal, params.timeGoal, params.reuseGoal);
@@ -867,7 +867,7 @@ rxController* XMLDeserializer::createController(TiXmlElement *rxController_xml, 
 		controller = special_controller;
 	}
 	else if (params.type == "rxOrientationComplianceController")
-    {
+	{
 		rxOrientationComplianceController* special_controller = new rxOrientationComplianceController(robot, params.beta, params.beta_rotation_matrix, params.alpha, params.alpha_rotation_matrix, dT);
 		special_controller->setStiffness(params.stiffness_b, params.stiffness_k);
 		if(!goal_controller)
@@ -875,7 +875,7 @@ rxController* XMLDeserializer::createController(TiXmlElement *rxController_xml, 
 		controller = special_controller;
 	}
 	else if (params.type == "rxOrientationImpedanceController")
-    {
+	{
 		rxOrientationImpedanceController* special_controller = new rxOrientationImpedanceController(robot, params.beta, params.beta_rotation_matrix, params.alpha, params.alpha_rotation_matrix, dT);
 		if(!goal_controller)
 			special_controller->addPoint(params.RGoal, params.timeGoal, params.reuseGoal);
@@ -884,7 +884,7 @@ rxController* XMLDeserializer::createController(TiXmlElement *rxController_xml, 
 		controller = special_controller;
 	}
 	else if (params.type == "rxInterpolatedOrientationController")
-    {
+	{
 		rxInterpolatedOrientationController* special_controller = new rxInterpolatedOrientationController(robot, params.beta, params.beta_rotation_matrix, params.alpha, params.alpha_rotation_matrix, dT);
 		if(!goal_controller)
 			special_controller->addPoint(params.RGoal, params.timeGoal, params.reuseGoal);
@@ -892,7 +892,7 @@ rxController* XMLDeserializer::createController(TiXmlElement *rxController_xml, 
 		controller = special_controller;
 	}
 	else if (params.type == "rxInterpolatedOrientationComplianceController")
-    {
+	{
 		rxInterpolatedOrientationComplianceController* special_controller = new rxInterpolatedOrientationComplianceController(robot, params.beta, params.beta_rotation_matrix, params.alpha, params.alpha_rotation_matrix, dT);
 		special_controller->setStiffness(params.stiffness_b, params.stiffness_k);
 		if(!goal_controller)
@@ -900,7 +900,7 @@ rxController* XMLDeserializer::createController(TiXmlElement *rxController_xml, 
 		controller = special_controller;
 	}
 	else if (params.type == "rxInterpolatedOrientationImpedanceController")
-    {
+	{
 		rxInterpolatedOrientationImpedanceController* special_controller = new rxInterpolatedOrientationImpedanceController(robot, params.beta, params.beta_rotation_matrix, params.alpha, params.alpha_rotation_matrix, dT);
 		if(!goal_controller)
 			special_controller->addPoint(params.RGoal, params.timeGoal, params.reuseGoal);
@@ -909,7 +909,7 @@ rxController* XMLDeserializer::createController(TiXmlElement *rxController_xml, 
 		controller = special_controller;
 	}
 	else if (params.type == "rxHTransformController")
-    {
+	{
 		rxHTransformController* special_controller = new rxHTransformController(robot, params.beta, HTransform(params.beta_rotation_matrix, params.beta_displacement), params.alpha, HTransform(params.alpha_rotation_matrix, params.alpha_displacement), dT);
 		HTransform goal_HTransform(params.RGoal, params.rGoal);
 		if(!goal_controller)
@@ -918,7 +918,7 @@ rxController* XMLDeserializer::createController(TiXmlElement *rxController_xml, 
 		controller = special_controller;
 	}
 	else if (params.type == "rxHTransformComplianceController")
-    {
+	{
 		rxHTransformComplianceController* special_controller = new rxHTransformComplianceController(robot, params.beta, HTransform(params.beta_rotation_matrix, params.beta_displacement), params.alpha, HTransform(params.alpha_rotation_matrix, params.alpha_displacement), dT);
 		special_controller->setStiffness(params.stiffness_b, params.stiffness_k);
 		HTransform goal_HTransform(params.RGoal, params.rGoal);
@@ -927,7 +927,7 @@ rxController* XMLDeserializer::createController(TiXmlElement *rxController_xml, 
 		controller = special_controller;
 	}
 	else if (params.type == "rxHTransformImpedanceController")
-    {
+	{
 		rxHTransformImpedanceController* special_controller = new rxHTransformImpedanceController(robot, params.beta, HTransform(params.beta_rotation_matrix, params.beta_displacement), params.alpha, HTransform(params.alpha_rotation_matrix, params.alpha_displacement), dT);
 		HTransform goal_HTransform(params.RGoal, params.rGoal);
 		if(!goal_controller)
@@ -937,7 +937,7 @@ rxController* XMLDeserializer::createController(TiXmlElement *rxController_xml, 
 		controller = special_controller;
 	}
 	else if (params.type == "rxInterpolatedHTransformController")
-    {
+	{
 		rxInterpolatedHTransformController* special_controller = new rxInterpolatedHTransformController(robot, params.beta, HTransform(params.beta_rotation_matrix, params.beta_displacement), params.alpha, HTransform(params.alpha_rotation_matrix, params.alpha_displacement), dT);
 		HTransform goal_HTransform(params.RGoal, params.rGoal);
 		if(!goal_controller)
@@ -946,7 +946,7 @@ rxController* XMLDeserializer::createController(TiXmlElement *rxController_xml, 
 		controller = special_controller;
 	}
 	else if (params.type == "rxInterpolatedHTransformComplianceController")
-    {
+	{
 		rxInterpolatedHTransformComplianceController* special_controller = new rxInterpolatedHTransformComplianceController(robot, params.beta, HTransform(params.beta_rotation_matrix, params.beta_displacement), params.alpha, HTransform(params.alpha_rotation_matrix, params.alpha_displacement), dT);
 		special_controller->setStiffness(params.stiffness_b, params.stiffness_k);
 		HTransform goal_HTransform(params.RGoal, params.rGoal);
@@ -955,7 +955,7 @@ rxController* XMLDeserializer::createController(TiXmlElement *rxController_xml, 
 		controller = special_controller;
 	}
 	else if (params.type == "rxInterpolatedHTransformImpedanceController")
-    {
+	{
 		rxInterpolatedHTransformImpedanceController* special_controller = new rxInterpolatedHTransformImpedanceController(robot, params.beta, HTransform(params.beta_rotation_matrix, params.beta_displacement), params.alpha, HTransform(params.alpha_rotation_matrix, params.alpha_displacement), dT);
 		HTransform goal_HTransform(params.RGoal, params.rGoal);
 		if(!goal_controller)
@@ -965,15 +965,15 @@ rxController* XMLDeserializer::createController(TiXmlElement *rxController_xml, 
 		controller = special_controller;
 	}
 	else if (params.type == "rxNullMotionController")
-    {
+	{
 		controller = new rxNullMotionController(robot, dT);
 	}
 	else if (params.type == "rxNullMotionComplianceController")
-    {
+	{
 		controller = new rxNullMotionComplianceController(robot,  dT);
 	}
 	else if (params.type == "SubdisplacementController")
-    {
+	{
 		SubdisplacementController* special_controller = new SubdisplacementController(robot, params.beta, params.beta_displacement, params.alpha, params.alpha_displacement, dT, params.index, params.max_force, robot->findBody(string_type(string2wstring(params.limit_body))), params.distance_limit );
 		if(params.index.size() == 1)
 		{
@@ -988,7 +988,7 @@ rxController* XMLDeserializer::createController(TiXmlElement *rxController_xml, 
 		controller = special_controller;
 	}
 	else if (params.type == "ObstacleAvoidanceController")
-    {
+	{
 		if(CollisionInterface::instance)
 		{
 			controller = new ObstacleAvoidanceController(robot, params.alpha, params.alpha_displacement, params.distance_threshold, CollisionInterface::instance, dT, params.deactivation_threshold);
@@ -999,7 +999,7 @@ rxController* XMLDeserializer::createController(TiXmlElement *rxController_xml, 
 
 	}
 	else if (params.type == "JointLimitAvoidanceControllerOnDemand")
-    {
+	{
 		controller = new JointLimitAvoidanceControllerOnDemand(robot, params.index[0], params.safetyThresh, dT); 
 		controller->setGain(params.kv, params.kp, params.invL2sqr);	
 	}
@@ -1105,9 +1105,9 @@ std::map<std::string, ControllerType> XMLDeserializer::createControllerMapping()
 	mapping["ObstacleAvoidanceController"]					= ControllerType(rxController::eControlType_Functional, OBSTACLE_AVOIDANCE);
 	mapping["JointBlackBoardController"]					= ControllerType(rxController::eControlType_Joint, BLACKBOARD_ACCESS);
 
-    mapping["SingularityAvoidanceController"]				= ControllerType(rxController::eControlType_Joint, SINGULARITY_AVOIDANCE);
-    mapping["OpSpaceSingularityAvoidanceController"]    	= ControllerType(rxController::eControlType_Displacement, SINGULARITY_AVOIDANCE);
-    mapping["JointLimitAvoidanceControllerOnDemand"]		= ControllerType(rxController::eControlType_Functional, JOINT_LIMIT_AVOIDANCE);
+	mapping["SingularityAvoidanceController"]				= ControllerType(rxController::eControlType_Joint, SINGULARITY_AVOIDANCE);
+	mapping["OpSpaceSingularityAvoidanceController"]    	= ControllerType(rxController::eControlType_Displacement, SINGULARITY_AVOIDANCE);
+	mapping["JointLimitAvoidanceControllerOnDemand"]		= ControllerType(rxController::eControlType_Functional, JOINT_LIMIT_AVOIDANCE);
 
 	mapping["InterpolatedSetPointDisplacementController"]	= ControllerType(rxController::eControlType_Displacement, WITH_INTERPOLATION);
 	mapping["InterpolatedSetPointOrientationController"]	= ControllerType(rxController::eControlType_Orientation, WITH_INTERPOLATION);
