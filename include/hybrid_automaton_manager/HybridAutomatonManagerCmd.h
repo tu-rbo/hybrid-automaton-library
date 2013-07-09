@@ -24,6 +24,7 @@
 #define URI_LEIBNIZ			11
 #define URI_POSEIDON		12
 #define URI_FIRSTMM			13
+#define URI_SHOEFER			14
 
 // this is for plotting from the rxApplication
 // (so you don't have to remember which channel to plot)

@@ -9,6 +9,7 @@
 
 #include "FeatureAttractorController.h"
 #include "SubdisplacementController.h"
+#include "SubdisplacementSimpleController.h"
 #include "ObstacleAvoidanceController.h"
 #include "JointBlackBoardController.h"
 #include "SingularityAvoidanceController.h"
@@ -985,6 +986,20 @@ rxController* XMLDeserializer::createController(TiXmlElement *rxController_xml, 
 		}
 		special_controller->setImpedance(0.2, 8.0, 20.0);
 		//special_controller->setImpedance(params.impedance_m, params.impedance_b, params.impedance_k);
+		controller = special_controller;
+	}
+	else if (params.type == "SubdisplacementSimpleController")
+    {
+		SubdisplacementSimpleController* special_controller = new SubdisplacementSimpleController(robot, params.beta, params.beta_displacement, params.alpha, params.alpha_displacement, dT, params.index, params.max_force, robot->findBody(string_type(string2wstring(params.limit_body))), params.distance_limit );
+		if(params.index.size() == 1)
+		{
+			special_controller->setTaskConstraints(params.tc[0]);
+		}
+		else if (params.index.size() == 2)
+		{
+			special_controller->setTaskConstraints(params.tc[0], params.tc[1]);
+		}
+		special_controller->setGain(params.kv, params.kp, params.invL2sqr);
 		controller = special_controller;
 	}
 	else if (params.type == "ObstacleAvoidanceController")

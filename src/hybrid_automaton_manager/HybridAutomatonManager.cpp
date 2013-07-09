@@ -345,6 +345,7 @@ int HybridAutomatonManager::command(const short& cmd, const int& arg)
 			domain_names[URI_LEIBNIZ] = "130.149.238.185";
             domain_names[URI_POSEIDON] = "130.149.238.193";
 			domain_names[URI_FIRSTMM] = "130.149.238.220";
+			domain_names[URI_SHOEFER] = "130.149.238.182";
 
 			int bit_code = arg;
 			
