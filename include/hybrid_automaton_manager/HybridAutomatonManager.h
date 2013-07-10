@@ -59,6 +59,8 @@ protected:
 	void updateHybridAutomaton();
 	void updateBlackboard();
 
+	void gravityCompensation();
+
 	/**
 	* The latest hybrid automaton
 	*/
@@ -78,12 +80,6 @@ protected:
 	* The currently activeted motion behaviour
 	*/
 	MotionBehaviour*	_activeMotionBehaviour;
-
-	/**
-	* The motion behaviour that is used when no hybrid automaton is present
-	* Consists of a joint controller that holds the current position.
-	*/
-	MotionBehaviour*	_defaultMotionBehavior;
 
 	/**
 	* The path to the AML file

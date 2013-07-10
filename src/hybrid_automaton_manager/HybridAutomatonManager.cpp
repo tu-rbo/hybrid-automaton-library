@@ -9,6 +9,8 @@
 #include "XMLDeserializer.h"
 #include "msgs\String.h"
 
+#include "controllers\include\TPOperationalSpaceControlSet.h"
+
 #include <process.h>
 
 unsigned __stdcall deserializeHybridAutomaton(void *udata)
@@ -52,7 +54,6 @@ HybridAutomatonManager::HybridAutomatonManager(rDC rdc)
 , _sys(NULL)
 , _blackboard(NULL)
 , _activeMotionBehaviour(NULL)
-, _defaultMotionBehavior(NULL)
 , _dof(0)
 , _servo_on(false)
 , _hybrid_automaton(NULL)
@@ -105,22 +106,15 @@ void HybridAutomatonManager::init(int mode)
 	_robot = findDevice(_T("ROBOT"));
 	RASSERT(_robot != INVALID_RHANDLE);
 
-	//The default motion controller holds the initial position when no hybrid automaton 
-	//was sent. 
-	//TODO: frind a platform independent solution
-	_defaultMotionBehavior = new MotionBehaviour(new Milestone(), new Milestone(),_sys);
-	rxJointController* jc = new rxJointController(_sys,_dT);
-	jc->addPoint(_sys->q(),5,true);
-	jc->setGain(20.0,600.0);
-	jc->setGain((size_t) 0, 10.0, 900.0); 
-	jc->setGain((size_t) 1, 20.0, 2500.0); 
-	jc->setGain((size_t) 2, 5.0, 600.0); 
-	jc->setGain((size_t) 3, 2.0, 500.0); 
-	jc->setGain((size_t) 4, 0.5, 50.0); 
-	jc->setGain((size_t) 5, 0.5, 50.0); 
-	jc->setGain((size_t) 6, 0.05, 5.0);
-	_defaultMotionBehavior->addController(jc,false);
-	_activeMotionBehaviour = _defaultMotionBehavior;
+	gravityCompensation();
+}
+
+void HybridAutomatonManager::gravityCompensation()
+{
+	TPOperationalSpaceControlSet* nullControl = new TPOperationalSpaceControlSet(this->_sys, this->_dT);
+	nullControl->setGravity(0, 0, -GRAV_ACC);
+	
+	_activeMotionBehaviour = new MotionBehaviour(new Milestone(), new Milestone(),nullControl, 0.0);
 	_activeMotionBehaviour->activate();
 }
 
