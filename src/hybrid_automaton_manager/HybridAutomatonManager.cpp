@@ -9,7 +9,7 @@
 #include "XMLDeserializer.h"
 #include "msgs\String.h"
 
-#include "controllers\include\TPOperationalSpaceControlSet.h"
+#include "controllers\include\TPImpedanceControlSet.h"
 
 #include <process.h>
 
@@ -111,7 +111,7 @@ void HybridAutomatonManager::init(int mode)
 
 void HybridAutomatonManager::gravityCompensation()
 {
-	TPOperationalSpaceControlSet* nullControl = new TPOperationalSpaceControlSet(this->_sys, this->_dT);
+	TPImpedanceControlSet* nullControl = new TPImpedanceControlSet(this->_sys, this->_dT);
 	nullControl->setGravity(0, 0, -GRAV_ACC);
 	
 	_activeMotionBehaviour = new MotionBehaviour(new Milestone(), new Milestone(),nullControl, 0.0);
