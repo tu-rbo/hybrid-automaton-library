@@ -31,5 +31,6 @@
 #define PLOT_TORQUE					1
 #define PLOT_Q						2
 #define PLOT_VELOCITY				3
+#define PLOT_EEFRAME				4
 
 #endif

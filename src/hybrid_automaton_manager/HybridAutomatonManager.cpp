@@ -396,6 +396,14 @@ void HybridAutomatonManager::collect(vector<double>& data, int channel)
 		for(int i = 0; i < _dof; ++i)
 			data.push_back(_qdot[i]);
 	}	
+	else if (channel == PLOT_EEFRAME)
+	{
+		HTransform relative_transform;
+		rxBody* end_effector = _sys->getUCSBody(_T("EE"), relative_transform);
+		HTransform absolute_transform = end_effector->T() * relative_transform;
+		for(int i = 0; i < 3; ++i)
+			data.push_back(absolute_transform.r(i));
+	}	
 }
 
 void HybridAutomatonManager::onSetInterestFrame(const TCHAR* name, const HTransform& T)
