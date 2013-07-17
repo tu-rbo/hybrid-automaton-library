@@ -18,6 +18,7 @@
 
 #include "NakamuraControlSet.h"
 #include "InterpolatedSetPointDisplacementController.h"
+#include "InterpolatedSetPointJointController.h"
 #include "InterpolatedSetPointOrientationController.h"
 #include "PressureDisplacementController.h"
 #include "PressureOrientationController.h"
@@ -1023,6 +1024,11 @@ rxController* XMLDeserializer::createController(TiXmlElement *rxController_xml, 
 		controller = new InterpolatedSetPointDisplacementController(robot, params.beta, params.beta_displacement, params.alpha, params.alpha_displacement, dT);
 		controller->setGain(params.kv, params.kp, params.invL2sqr);
 	}
+	else if (params.type == "InterpolatedSetPointJointController")
+	{
+		controller = new InterpolatedSetPointJointController(robot, dT);
+		controller->setGain(params.kv, params.kp, params.invL2sqr);
+	}
 	else if (params.type == "InterpolatedSetPointOrientationController")
 	{
 		controller = new InterpolatedSetPointOrientationController(robot, params.beta, params.beta_rotation_matrix, params.alpha, params.alpha_rotation_matrix, dT);
@@ -1125,6 +1131,7 @@ std::map<std::string, ControllerType> XMLDeserializer::createControllerMapping()
 	mapping["JointLimitAvoidanceControllerOnDemand"]		= ControllerType(rxController::eControlType_Functional, JOINT_LIMIT_AVOIDANCE);
 
 	mapping["InterpolatedSetPointDisplacementController"]	= ControllerType(rxController::eControlType_Displacement, WITH_INTERPOLATION);
+	mapping["InterpolatedSetPointJointController"]			= ControllerType(rxController::eControlType_Joint, WITH_INTERPOLATION);
 	mapping["InterpolatedSetPointOrientationController"]	= ControllerType(rxController::eControlType_Orientation, WITH_INTERPOLATION);
 
 	return mapping;
