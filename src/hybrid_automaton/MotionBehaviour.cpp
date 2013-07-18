@@ -193,141 +193,186 @@ double MotionBehaviour::calculateTimeToConverge(double default_min_time, double 
 
 void MotionBehaviour::activate() 
 {
-	if (control_set_)
+	if (!control_set_)
 	{
-		std::list<rxController*> controllers = control_set_->getControllers();
-		for(std::list<rxController*>::const_iterator it = controllers.begin(); it != controllers.end(); ++it)
+		return;
+	}
+
+	std::list<rxController*> controllers = control_set_->getControllers();
+
+	time_to_converge_ = min_time_;
+
+	//First we iterate over all controllers and compute the maximal needed interpolation time
+	for(std::list<rxController*>::const_iterator it = controllers.begin(); it != controllers.end(); ++it)
+	{
+		if (*it == NULL)
 		{
-			if (*it)
-			{
-				if ((*it)->activated())
+			std::cout<<"MotionBehaviour::activate(): undefined controller"<<std::endl;
+			continue;
+		}
+
+		// We only add the goal defined by the child milestone to the controller if it is a goal controller
+		if(this->goal_controllers_.find((*it)->name())->second)
+		{
+			// add the goal of the child milestone
+			switch((*it)->type()) {
+			case rxController::eControlType_Joint:
 				{
-					(*it)->deactivate();
+					// q1 and q2 to interpolate between
+					dVector current_q = robot_->q();//parent->getConfiguration();
+                    dVector desired_q = ((Milestone*)child)->getConfiguration();
+
+					// qd1 and qd2
+					dVector current_qd(current_q.size());
+					current_qd = robot_->qdot();
+					dVector desired_qd(current_q.size());
+					desired_qd.zero();
+					
+					// at least 5.0 seconds or maximally 0.3 rad/s if nothing is given
+					time_to_converge_ = 
+						min(time_to_converge_, calculateTimeToConverge(5.0, 0.30, desired_q - current_q, current_qd, desired_qd));
+					std::cout << "[MotionBehaviour::activate] INFO: Time of joint trajectory: " << time_to_converge_ << std::endl;
+
+					break;
 				}
-
-				(*it)->activate();
-
-				// We only add the goal defined by the child milestone to the controller if it is a goal controller
-				// If it is not a goal controller, it contains already its special goal
-				if(this->goal_controllers_.find((*it)->name())->second)
+			case rxController::eControlType_Displacement:
 				{
-					// add the goal of the child milestone
-					switch((*it)->type()) {
-					case rxController::eControlType_Joint:
-						{
-							// q1 and q2 to interpolate between
-							dVector current_q = robot_->q();//parent->getConfiguration();
-                            dVector desired_q = ((Milestone*)child)->getConfiguration();
+					// r1 and r2 to interpolate between
+					HTransform ht;
+					rxBody* EE = robot_->getUCSBody(_T("EE"), ht);
+					HTransform absolute_ht = EE->T() * ht;
+					dVector current_r = absolute_ht.r; //parent->getConfiguration();
+					dVector desired_r = ((OpSpaceMilestone*)child)->getPosition(); //->getConfiguration()
+					
+					/*
+					std::cout << "current position: " << current_r[0] << " " << current_r[1] << " " << current_r[2] << std::endl;
+					std::cout << "current orientation: " << current_R[0] << " " << current_R[1] << " " << current_R[2] << " " << current_R[3] << std::endl;
+					std::cout << "desired position: " << desired_r[0] << " " << desired_r[1] << " " << desired_r[2] << std::endl;
+					*/
 
-							// qd1 and qd2
-							dVector current_qd(current_q.size());
-							current_qd = robot_->qdot();
-							dVector desired_qd(current_q.size());
-							desired_qd.zero();
-							
-							// at least 5.0 seconds or maximally 0.3 rad/s if nothing is given
-							time_to_converge_ = calculateTimeToConverge(5.0, 0.30, desired_q - current_q, current_qd, desired_qd);
-							std::cout << "[MotionBehaviour::activate] INFO: Time of joint trajectory: " << time_to_converge_ << std::endl;
-							
-							dynamic_cast<rxJointController*>(*it)->addPoint(desired_q, time_to_converge_, false, eInterpolatorType_Cubic);
-							break;
-						}
-					case rxController::eControlType_Displacement:
-						{
-							// r1 and r2 to interpolate between
-							HTransform ht;
-							//std::cout << robot_ << std::endl;
-							//std::cout << robot_->getUCSBody(_T("EE"),ht) << std::endl;
-							rxBody* EE = robot_->getUCSBody(_T("EE"), ht);
-							HTransform absolute_ht = EE->T() * ht;
-							dVector current_r = absolute_ht.r; //parent->getConfiguration();
-							dVector desired_r = ((OpSpaceMilestone*)child)->getPosition(); //->getConfiguration()
-							
-							Rotation current_S = absolute_ht.R;
-							dVector current_R;
-							current_S.GetQuaternion(current_R);
-							
-							/*
-							std::cout << "current position: " << current_r[0] << " " << current_r[1] << " " << current_r[2] << std::endl;
-							std::cout << "current orientation: " << current_R[0] << " " << current_R[1] << " " << current_R[2] << " " << current_R[3] << std::endl;
-							std::cout << "desired position: " << desired_r[0] << " " << desired_r[1] << " " << desired_r[2] << std::endl;
-							*/
+					FeatureAttractorController* fac = dynamic_cast<FeatureAttractorController*>(*it);
+					if(!fac)
+					{
+						// rd1 and rd2
+						dVector current_rd(current_r.size());
+						current_rd.zero();
+						dVector desired_rd(current_r.size());
+						desired_rd.zero();
 
-							FeatureAttractorController* fac = dynamic_cast<FeatureAttractorController*>(*it);
-							if(fac)
-							{
-								fac->updateFeaturePosition(desired_r[0], desired_r[1], desired_r[2]);
-							}
-							else
-							{
-								// rd1 and rd2
-								dVector current_rd(current_r.size());
-								current_rd.zero();
-								dVector desired_rd(current_r.size());
-								desired_rd.zero();
-
-								// at least 5.0 seconds or maximally 0.2 m/s if nothing is given
-								time_to_converge_ = calculateTimeToConverge(5.0, 0.2, desired_r - current_r, current_rd, desired_rd);
-								std::cout << "[MotionBehaviour::activate] INFO: Time of displacement trajectory: " << time_to_converge_ << std::endl;
-								dynamic_cast<rxDisplacementController*>(*it)->addPoint(desired_r, time_to_converge_, false, eInterpolatorType_Cubic);
-							}
-							break;
-						}
-					case rxController::eControlType_Orientation:
-						{
-							//dVector goal = ((Milestone*)child)->getConfiguration();
-							//Rotation goal_rot(goal[3], goal[4], goal[5]);		
-							//NOTE: Suposses that the orientation is defined with 
-							// goal[3] = roll
-							// goal[4] = pitch
-							// goal[5] = 
-							Rotation goal_rot = ((OpSpaceMilestone*)child)->getOrientation();
-							dVector desired_quat;
-							goal_rot.GetQuaternion(desired_quat);
-
-							// get current orientation
-							HTransform ht;
-							rxBody* EE = robot_->getUCSBody(_T("EE"), ht);
-							Rotation current_rot = ht.R * EE->T().R;
-							dVector current_quat;
-							current_rot.GetQuaternion(current_quat);
-
-							// get angular error
-							double theta = acos(current_quat.inner(desired_quat));
-							if (theta > M_PI/2.0)
-								theta -= M_PI/2.0;
-
-							dVector error_theta(1, theta);
-							dVector current_thetad(1, 0.0);
-							dVector desired_thetad(1, 0.0);
-							/*
-							std::cout << "desired orientation: " << quat[0] << " " << quat[1] << " " << quat[2] << " " << quat[3] << std::endl;
-							*/
-							
-							// at least 10.0 seconds or maximally 0.1 rad/s if nothing is given
-							time_to_converge_ = calculateTimeToConverge(10.0, 0.1, error_theta, current_thetad, desired_thetad);
-							std::cout << "[MotionBehaviour::activate] INFO: Time of orientation trajectory: " << time_to_converge_ << std::endl;
-
-							dynamic_cast<rxOrientationController*>(*it)->addPoint(goal_rot, time_to_converge_, false);
-							break;
-						}
-					case rxController::eControlType_HTransform:
-						{
-							double time = (min_time_ > 0) ? min_time_ : 10.0;
-							dVector goal = ((Milestone*)child)->getConfiguration();
-							Vector3D goal_3D(goal[0],goal[1],goal[2]);
-							Rotation goal_rot(goal[3], goal[4], goal[5]);		//NOTE: Suposses that the orientation is defined with 
-							// goal[3] = roll
-							// goal[4] = pitch
-							// goal[5] = yaw
-							dynamic_cast<rxHTransformController*>(*it)->addPoint(HTransform(goal_rot, goal_3D), time, false);
-							break;
-						}
+						// at least 5.0 seconds or maximally 0.2 m/s if nothing is given
+						time_to_converge_ = 
+							min(time_to_converge_, calculateTimeToConverge(5.0, 0.2, desired_r - current_r, current_rd, desired_rd));
+						std::cout << "[MotionBehaviour::activate] INFO: Time of displacement trajectory: " << time_to_converge_ << std::endl;
 					}
+					break;
+				}
+			case rxController::eControlType_Orientation:
+				{
+					//dVector goal = ((Milestone*)child)->getConfiguration();
+					//Rotation goal_rot(goal[3], goal[4], goal[5]);		
+					//NOTE: Suposses that the orientation is defined with 
+					// goal[3] = roll
+					// goal[4] = pitch
+					// goal[5] = 
+					Rotation goal_rot = ((OpSpaceMilestone*)child)->getOrientation();
+					dVector desired_quat;
+					goal_rot.GetQuaternion(desired_quat);
+
+					// get current orientation
+					HTransform ht;
+					rxBody* EE = robot_->getUCSBody(_T("EE"), ht);
+					Rotation current_rot = ht.R * EE->T().R;
+					dVector current_quat;
+					current_rot.GetQuaternion(current_quat);
+
+					// get angular error
+					double theta = acos(current_quat.inner(desired_quat));
+					if (theta > M_PI/2.0)
+						theta -= M_PI/2.0;
+
+					dVector error_theta(1, theta);
+					dVector current_thetad(1, 0.0);
+					dVector desired_thetad(1, 0.0);
+					
+					/*
+					std::cout << "desired orientation: " << quat[0] << " " << quat[1] << " " << quat[2] << " " << quat[3] << std::endl;
+					*/
+					
+					// at least 10.0 seconds or maximally 0.1 rad/s if nothing is given
+					time_to_converge_ = 
+						min(time_to_converge_, calculateTimeToConverge(10.0, 0.1, error_theta, current_thetad, desired_thetad));
+					std::cout << "[MotionBehaviour::activate] INFO: Time of orientation trajectory: " << time_to_converge_ << std::endl;
+
+					break;
+				}
+			case rxController::eControlType_HTransform:
+				{
+					//TODO
+					break;
 				}
 			}
 		}
 	}
+
+	//Now activate controllers and set desired goals for goal controllers
+	for(std::list<rxController*>::const_iterator it = controllers.begin(); it != controllers.end(); ++it)
+	{
+
+		//Activate controllers
+		if ((*it)->activated())
+		{
+			(*it)->deactivate();
+		}
+
+		(*it)->activate();
+
+		// We only add the goal defined by the child milestone to the controller if it is a goal controller
+		if(this->goal_controllers_.find((*it)->name())->second)
+		{
+			// add the goal of the child milestone
+			switch((*it)->type()) {
+
+			case rxController::eControlType_Joint:
+				{
+                    dVector desired_q = ((Milestone*)child)->getConfiguration();
+
+					dynamic_cast<rxJointController*>(*it)->addPoint(desired_q, time_to_converge_, false, eInterpolatorType_Cubic);
+					break;
+				}
+			case rxController::eControlType_Displacement:
+				{
+					dVector desired_r = ((OpSpaceMilestone*)child)->getPosition();
+
+					FeatureAttractorController* fac = dynamic_cast<FeatureAttractorController*>(*it);
+					if(fac)
+					{
+						fac->updateFeaturePosition(desired_r[0], desired_r[1], desired_r[2]);
+					}
+					else
+					{
+						dynamic_cast<rxDisplacementController*>(*it)->addPoint(desired_r, time_to_converge_, false, eInterpolatorType_Cubic);
+					}
+					break;
+				}
+			case rxController::eControlType_Orientation:
+				{
+					Rotation goal_rot = ((OpSpaceMilestone*)child)->getOrientation();
+
+					dynamic_cast<rxOrientationController*>(*it)->addPoint(goal_rot, time_to_converge_, false);
+					break;
+				}
+			case rxController::eControlType_HTransform:
+				{
+					dVector goal = ((Milestone*)child)->getConfiguration();
+					Vector3D goal_3D(goal[0],goal[1],goal[2]);
+					Rotation goal_rot(goal[3], goal[4], goal[5]);		//NOTE: Suposses that the orientation is defined with 
+
+					dynamic_cast<rxHTransformController*>(*it)->addPoint(HTransform(goal_rot, goal_3D), time_to_converge_, false);
+					break;
+				}
+			}
+		}
+	}		
 }
 
 void MotionBehaviour::deactivate()

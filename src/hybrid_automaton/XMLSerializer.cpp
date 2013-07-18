@@ -649,7 +649,7 @@ void MotionBehaviour::RLabInfoString2ElementXML_(string_type string_data, TiXmlE
 
         }
         break;
-	case(SUBDISPLACEMENT | WITH_IMPEDANCE):
+	case(SUBDISPLACEMENT):
 		{
 			if(temp_st.compare(0, 5, alpha_string)==0)
 			{

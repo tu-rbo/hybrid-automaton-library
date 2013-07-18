@@ -1123,6 +1123,7 @@ std::map<std::string, ControllerType> XMLDeserializer::createControllerMapping()
 
 	mapping["FeatureAttractorController"]					= ControllerType(rxController::eControlType_Displacement, WITH_IMPEDANCE | ATTRACTOR);
 	mapping["SubdisplacementController"]					= ControllerType(rxController::eControlType_Functional, WITH_IMPEDANCE | SUBDISPLACEMENT);
+	mapping["SubdisplacementSimpleController"]				= ControllerType(rxController::eControlType_Displacement, SUBDISPLACEMENT);
 	mapping["ObstacleAvoidanceController"]					= ControllerType(rxController::eControlType_Functional, OBSTACLE_AVOIDANCE);
 	mapping["JointBlackBoardController"]					= ControllerType(rxController::eControlType_Joint, BLACKBOARD_ACCESS);
 
