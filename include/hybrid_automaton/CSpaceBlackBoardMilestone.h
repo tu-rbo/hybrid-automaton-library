@@ -4,8 +4,8 @@
 #include "Milestone.h"
 #include "MotionBehaviour.h"
 
-#include "RTBlackBoard.h"
 
+#include "ros_bridge/include/RTBlackBoard.h"
 #include <vector>
 
 /**

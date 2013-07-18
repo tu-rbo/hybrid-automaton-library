@@ -30,7 +30,7 @@ MDPEdge(dad, son, weight)
 , dT_(dt)
 , max_velocity_(-1)
 , min_time_(-1)
-, time_to_converge_(0.0)
+, time_to_converge_(3.0)
 {
 	if(robot_)
 	{
@@ -219,8 +219,20 @@ void MotionBehaviour::activate()
 			case rxController::eControlType_Joint:
 				{
 					// q1 and q2 to interpolate between
-					dVector current_q = robot_->q();//parent->getConfiguration();
+					dVector current_q = robot_->q();
                     dVector desired_q = ((Milestone*)child)->getConfiguration();
+
+					if(robot_->jdof() == 10)
+					{	
+						while (current_q[9] - desired_q[9] > M_PI)
+						{
+							desired_q[9] += 2*M_PI;
+						}
+						while (current_q[9] - desired_q[9] < -M_PI)
+						{
+							desired_q[9] -= 2*M_PI;
+						}
+					}
 
 					// qd1 and qd2
 					dVector current_qd(current_q.size());
@@ -230,7 +242,7 @@ void MotionBehaviour::activate()
 					
 					// at least 5.0 seconds or maximally 0.3 rad/s if nothing is given
 					time_to_converge_ = 
-						min(time_to_converge_, calculateTimeToConverge(5.0, 0.30, desired_q - current_q, current_qd, desired_qd));
+						max(time_to_converge_, calculateTimeToConverge(5.0, 0.30, desired_q - current_q, current_qd, desired_qd));
 					std::cout << "[MotionBehaviour::activate] INFO: Time of joint trajectory: " << time_to_converge_ << std::endl;
 
 					break;
@@ -261,7 +273,7 @@ void MotionBehaviour::activate()
 
 						// at least 5.0 seconds or maximally 0.2 m/s if nothing is given
 						time_to_converge_ = 
-							min(time_to_converge_, calculateTimeToConverge(5.0, 0.2, desired_r - current_r, current_rd, desired_rd));
+							max(time_to_converge_, calculateTimeToConverge(5.0, 0.2, desired_r - current_r, current_rd, desired_rd));
 						std::cout << "[MotionBehaviour::activate] INFO: Time of displacement trajectory: " << time_to_converge_ << std::endl;
 					}
 					break;
@@ -300,7 +312,7 @@ void MotionBehaviour::activate()
 					
 					// at least 10.0 seconds or maximally 0.1 rad/s if nothing is given
 					time_to_converge_ = 
-						min(time_to_converge_, calculateTimeToConverge(10.0, 0.1, error_theta, current_thetad, desired_thetad));
+						max(time_to_converge_, calculateTimeToConverge(10.0, 0.1, error_theta, current_thetad, desired_thetad));
 					std::cout << "[MotionBehaviour::activate] INFO: Time of orientation trajectory: " << time_to_converge_ << std::endl;
 
 					break;
@@ -334,7 +346,20 @@ void MotionBehaviour::activate()
 
 			case rxController::eControlType_Joint:
 				{
+					dVector current_q = robot_->q();
                     dVector desired_q = ((Milestone*)child)->getConfiguration();
+
+					if(robot_->jdof() == 10)
+					{	
+						while (current_q[9] - desired_q[9] > M_PI)
+						{
+							desired_q[9] += 2*M_PI;
+						}
+						while (current_q[9] - desired_q[9] < -M_PI)
+						{
+							desired_q[9] -= 2*M_PI;
+						}
+					}
 
 					dynamic_cast<rxJointController*>(*it)->addPoint(desired_q, time_to_converge_, false, eInterpolatorType_Cubic);
 					break;

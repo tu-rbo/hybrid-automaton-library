@@ -226,5 +226,6 @@ bool OpSpaceMilestone::hasConverged(rxSystem* sys)
 		}
 	}
 
+	std::cout<<"Milestone "<<this->name_<<" converged"<<std::endl;
 	return true;
 }
