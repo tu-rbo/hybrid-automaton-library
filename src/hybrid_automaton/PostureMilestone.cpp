@@ -90,9 +90,12 @@ dVector PostureMilestone::getConfiguration() const
 void PostureMilestone::setConfiguration(dVector configuration)
 {
 	_configuration = configuration;
+
+	//Forward kinematics
 	HTransform ht;
+
 	rxBody* EE = _sys->getUCSBody(_T("EE"),ht);
-	dVector current_r = ht.r + EE->T().r;
+	dVector current_r = (EE->T()*ht).r;
 	this->setPosition(current_r);
 	this->setPosiOriSelector(POSITION_SELECTION);
 
