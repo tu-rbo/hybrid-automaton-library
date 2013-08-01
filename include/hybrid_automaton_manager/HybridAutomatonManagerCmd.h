@@ -11,6 +11,7 @@
 #define DEFAULT_CMD		(RCMD_USER + 1)
 #define SERVO_ON		(RCMD_USER + 5)
 #define BLACKBOARD_ON	(RCMD_USER + 6)
+#define ACTIVATE	(RCMD_USER + 7)
 
 // use this scheme as follows:
 // control->command(BLACKBOARD_ON, (1999 << 16) | (URI_BOTTOM_2 << 8) | (URI_HASMA << 0));
@@ -25,6 +26,7 @@
 #define URI_POSEIDON		12
 #define URI_FIRSTMM			13
 #define URI_SHOEFER			14
+#define URI_RBO_EXTRA		15
 
 // this is for plotting from the rxApplication
 // (so you don't have to remember which channel to plot)

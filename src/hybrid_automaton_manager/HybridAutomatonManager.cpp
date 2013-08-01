@@ -8,6 +8,7 @@
 
 #include "XMLDeserializer.h"
 #include "msgs\String.h"
+#include "msgs\Transform.h"
 
 #include "controllers\include\TPImpedanceControlSet.h"
 
@@ -58,11 +59,16 @@ HybridAutomatonManager::HybridAutomatonManager(rDC rdc)
 , _servo_on(false)
 , _hybrid_automaton(NULL)
 , _criterion(new LocalDecisionCriterion())
+, _active(false)
 {
 	_deserialize_mutex = CreateMutex(0, FALSE, 0);
 	if( !_deserialize_mutex ) {
 		throw(std::string("[HybridAutomatonManager::HybridAutomatonManager] ERROR: Mutex was not created (_deserialize_mutex)!"));
 	}
+
+#ifdef USE_LOCALIZATION
+	_qLoc.resize(10);
+#endif
 }
 
 HybridAutomatonManager::~HybridAutomatonManager()
@@ -121,6 +127,19 @@ void HybridAutomatonManager::gravityCompensation()
 void HybridAutomatonManager::activateBlackboard(std::string &rlab_host, int rlab_port, std::string &ros_host, int ros_port)
 {
 	_blackboard = RTBlackBoard::getInstance(rlab_host, rlab_port, ros_host, ros_port);
+	
+#ifdef USE_LOCALIZATION
+
+	//Wait until localization messages are updated
+	while(!_blackboard->exists("/odom"))
+	{
+		std::cout<<"waiting for blackboard"<<std::endl;
+		_blackboard->subscribeToROSMessage("/tf/odom");
+		updateBlackboard();
+		Sleep(500);
+	}
+#endif
+
 }
 
 void HybridAutomatonManager::setCollisionInterface(CollisionInterface* collision_interface)
@@ -170,20 +189,50 @@ void HybridAutomatonManager::updateBlackboard()
 	if(!_blackboard)
 		return;
 
-	_blackboard->setJointState("joint_state", _q, _qdot, _torque);
+	_blackboard->setJointState("/joint_state", _q, _qdot, _torque);
 
 	HTransform relative_transform;
 	rxBody* end_effector = _sys->getUCSBody(_T("EE"), relative_transform);
 	HTransform absolute_transform = end_effector->T() * relative_transform;
 	_blackboard->setTransform("ee", absolute_transform, "base_link");
+
+#ifdef USE_LOCALIZATION
+	std::vector<double> b_position;
+	std::vector<double> b_velocity;
+	std::vector<double> b_effort;
+	for(int i=7; i<10; i++)
+	{
+		b_position.push_back(_q[i]);
+		b_velocity.push_back(_qdot[i]);
+		b_effort.push_back(0.0);
+	}
+	_blackboard->setJointState("/xr4000_jointstate", b_position, b_velocity, b_effort);
+
+	if(_blackboard->isUpdated("/odom"))
+	{
+		// to odom
+
+		rlab::Transform* localT = dynamic_cast<rlab::Transform*>(_blackboard->getData("/odom"));
+		
+		HTransform locFrame;
+		locFrame.r = Displacement(localT->getPosition()[0],localT->getPosition()[1],localT->getPosition()[2]);
+		locFrame.R = Rotation(localT->getOrientation()[0],localT->getOrientation()[1],localT->getOrientation()[2],localT->getOrientation()[3]);		
+
+		_localizedFrame = locFrame;
+
+	}
+	
+#endif
 	
 	_blackboard->step();
+	
 }
 
 void HybridAutomatonManager::updateHybridAutomaton()
 {
 	if (_blackboard && _blackboard->isUpdated("update_hybrid_automaton"))
 	{
+		std::cout<<"New HA arrived!"<<std::endl;
 		rlab::String* ha_xml = dynamic_cast<rlab::String*>(_blackboard->getData("update_hybrid_automaton"));
 		try
 		{
@@ -227,6 +276,7 @@ void HybridAutomatonManager::_readDevices()
 
 	int r = readDeviceValue(_robot, &_q[0], sizeof(double) * _q.size(), 0);
 	assert (r == sizeof(double) * _q.size());
+
 }
 
 
@@ -239,8 +289,34 @@ void HybridAutomatonManager::_writeDevices()
 
 void HybridAutomatonManager::_reflect()
 {
-	_sys->q(_q);
+	
+#ifdef USE_LOCALIZATION
+	HTransform odoT;
+	odoT.r = Displacement(_q[7], _q[8], 0.0);
+	odoT.R = Rotation(_q[9],0.0,0.0);
+	HTransform newT = _localizedFrame*odoT;
+	
+	_qLoc = _q;
+	_qLoc[7]=newT.r(0);
+	_qLoc[8]=newT.r(1);
+	double angLoc;
+	Vector3D dir;
+	newT.R.GetEquivalentAngleAxis(dir,angLoc);
+	
+	if(dir[2]<0)
+	{
+		//can this happen?
+		std::cout<<"axis switched"<<std::endl;
+		angLoc *= -1.0;
+	}
 
+	_qLoc[9]=angLoc;
+	
+	_sys->q(_qLoc);
+
+#else	
+	_sys->q(_q);
+#endif
 	_sys->qdot(_qdot);
 }
 
@@ -254,6 +330,9 @@ void HybridAutomatonManager::_compute(const double& t)
 	{
 		_torque.zero();
 	}
+
+	if(!_active)
+		return;
 
 	//Now switch the active motion behaviour if possible
     Milestone* childMs=(Milestone*)(_activeMotionBehaviour->getChild());
@@ -326,6 +405,12 @@ int HybridAutomatonManager::command(const short& cmd, const int& arg)
 			std::cout << "[HybridAutomatonManager::command] Servo ON: " << _servo_on << std::endl;
 		}
 		break;
+
+	case ACTIVATE:
+		{
+			_active = !_active;
+		}
+		break;
 		
 	case BLACKBOARD_ON:
 		{
@@ -340,6 +425,7 @@ int HybridAutomatonManager::command(const short& cmd, const int& arg)
             domain_names[URI_POSEIDON] = "130.149.238.193";
 			domain_names[URI_FIRSTMM] = "130.149.238.220";
 			domain_names[URI_SHOEFER] = "130.149.238.182";
+			domain_names[URI_RBO_EXTRA] = "130.149.238.188";
 
 			int bit_code = arg;
 			

@@ -6,6 +6,9 @@
 #ifndef __HYBRIDAUTOMATONMANAGER_H__
 #define __HYBRIDAUTOMATONMANAGER_H__
 
+//If switched to 1, AMCL localization is used via blackboard
+#define USE_LOCALIZATION 0
+
 #include "rControlAlgorithm/rControlAlgorithm.h"
 #include "rxControlSDK/rxControlSDK.h"
 
@@ -119,6 +122,11 @@ protected:
 	bool				_servo_on;
 
 	/**
+	* true if the HAM should execute hybrid automata
+	*/
+	bool				_active;
+
+	/**
 	* The queue of reserialized hybird automata. Is executed one by one
 	*/
 	std::deque<HybridAutomaton*> _deserialized_hybrid_automatons;
@@ -132,5 +140,10 @@ protected:
 	* A criterion that tells which motionBehaviour to choose if there are multiple options.
 	*/
 	LocalDecisionCriterion*	_criterion;
+
+#ifdef USE_LOCALIZATION
+	HTransform _localizedFrame;
+	dVector _qLoc;
+#endif
 };
 #endif
