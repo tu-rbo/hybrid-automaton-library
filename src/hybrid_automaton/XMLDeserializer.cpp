@@ -670,6 +670,9 @@ MotionBehaviour* XMLDeserializer::createMotionBehaviour(TiXmlElement* motion_beh
 	mb->setLength(length);
 	mb->setProbability(prob);
 
+	bool update   = deserializeBoolean(motion_behaviour_xml, "updateAllowed", false);
+	mb->setUpdateAllowed(update);
+
 	return mb;
 }
 

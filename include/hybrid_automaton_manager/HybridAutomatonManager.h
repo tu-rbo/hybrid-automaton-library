@@ -22,6 +22,7 @@ typedef struct DeserializingThreadArguments {
 	std::string _string;
 	rxSystem* _sys;
 	double _dT;
+	bool _noQueue;
 	std::deque<HybridAutomaton*>* _deserialized_hybrid_automatons;
 	HANDLE* _deserialize_mutex;
 };
@@ -48,6 +49,7 @@ public:
 	virtual void setLocalDecisionCriterion(LocalDecisionCriterion* criterion); 
 
 	RTBlackBoard* getBlackboard(){return this->_blackboard;};
+	void setNoQueue(bool noQueue){_noQueue = noQueue;};
 
 protected:
 	virtual void _estimate();
@@ -125,6 +127,12 @@ protected:
 	* true if the HAM should execute hybrid automata
 	*/
 	bool				_active;
+
+	/**
+	* If this is set to true, hybrid automata are not buffered -
+	* Only the latest received automaton is executed.
+	*/
+	bool				_noQueue;
 
 	/**
 	* The queue of reserialized hybird automata. Is executed one by one

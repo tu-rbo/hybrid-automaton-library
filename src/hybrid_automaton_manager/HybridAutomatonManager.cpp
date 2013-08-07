@@ -34,6 +34,15 @@ unsigned __stdcall deserializeHybridAutomaton(void *udata)
 	}
 
 	WaitForSingleObject(*(thread_args->_deserialize_mutex), INFINITE);
+	if(thread_args->_noQueue)
+	{
+		for(size_t i=0;i<thread_args->_deserialized_hybrid_automatons->size();i++)
+		{
+			delete thread_args->_deserialized_hybrid_automatons->at(i);
+		}
+		thread_args->_deserialized_hybrid_automatons->clear();	
+	}
+
 	thread_args->_deserialized_hybrid_automatons->push_back(ha);
 	ReleaseMutex(*(thread_args->_deserialize_mutex));
 	
@@ -60,6 +69,7 @@ HybridAutomatonManager::HybridAutomatonManager(rDC rdc)
 , _hybrid_automaton(NULL)
 , _criterion(new LocalDecisionCriterion())
 , _active(false)
+, _noQueue(false)
 {
 	_deserialize_mutex = CreateMutex(0, FALSE, 0);
 	if( !_deserialize_mutex ) {
@@ -159,6 +169,7 @@ void HybridAutomatonManager::setHybridAutomaton(std::string _new_hybrid_automato
 	thread_args->_sys = this->_sys;
 	thread_args->_string = _new_hybrid_automaton_str;
 	thread_args->_dT = this->_dT;
+	thread_args->_noQueue = this->_noQueue;
 	thread_args->_deserialize_mutex = &(this->_deserialize_mutex);
 	thread_args->_deserialized_hybrid_automatons = &(this->_deserialized_hybrid_automatons);
 
@@ -217,11 +228,18 @@ void HybridAutomatonManager::updateBlackboard()
 		HTransform locFrame;
 		locFrame.r = Displacement(localT->getPosition()[0],localT->getPosition()[1],localT->getPosition()[2]);
 		locFrame.R = Rotation(localT->getOrientation()[0],localT->getOrientation()[1],localT->getOrientation()[2],localT->getOrientation()[3]);		
-
-		_localizedFrame = locFrame;
-
+			
+		if( fabs(localT->getPosition()[0]-_localizedFrame.r(0)) < 0.2 
+		 && fabs(localT->getPosition()[1]-_localizedFrame.r(1)) < 0.2  
+		 && fabs(acos(locFrame.R(0,0)) - acos(_localizedFrame.R(0,0))) < 0.2 )
+		{
+			_localizedFrame = locFrame;
+		}
+		else
+		{
+			std::cout<<"Localization error exceeded 20cm! - update IGNORED!!!"<<std::endl;
+		}
 	}
-	
 #endif
 	
 	_blackboard->step();
@@ -240,6 +258,7 @@ void HybridAutomatonManager::updateHybridAutomaton()
 			thread_args->_sys = this->_sys;
 			thread_args->_string = ha_xml->get();
 			thread_args->_dT = this->_dT;
+			thread_args->_noQueue= this->_noQueue;
 			thread_args->_deserialize_mutex = &(this->_deserialize_mutex);
 			thread_args->_deserialized_hybrid_automatons = &(this->_deserialized_hybrid_automatons);
 
@@ -311,7 +330,7 @@ void HybridAutomatonManager::_reflect()
 	}
 
 	_qLoc[9]=angLoc;
-	
+
 	_sys->q(_qLoc);
 
 #else	
@@ -320,6 +339,7 @@ void HybridAutomatonManager::_reflect()
 	_sys->qdot(_qdot);
 }
 
+bool updated = false;
 void HybridAutomatonManager::_compute(const double& t)
 {
 	if (_servo_on)
@@ -342,8 +362,9 @@ void HybridAutomatonManager::_compute(const double& t)
 	//Flag tells if the graph structure changed.	
 	bool behaviourChange = true;
 
-	if (!_deserialized_hybrid_automatons.empty() && WaitForSingleObject(_deserialize_mutex, 0) != WAIT_FAILED)
+	if (/*!updated && */!_deserialized_hybrid_automatons.empty() && WaitForSingleObject(_deserialize_mutex, 0) != WAIT_FAILED)
 	{
+		updated = true;
 		delete _hybrid_automaton;
 		_hybrid_automaton = _deserialized_hybrid_automatons.front();
 
@@ -378,9 +399,15 @@ void HybridAutomatonManager::_compute(const double& t)
 		if(nextMotion && nextMotion != _activeMotionBehaviour)
 		{
 			std::cout << "[HybridAutomatonManager::_compute] INFO: Switching controller" << std::endl;
-			_activeMotionBehaviour->deactivate();
-			_activeMotionBehaviour = nextMotion;
-			_activeMotionBehaviour->activate();
+
+			//Try to update currently running behaviour
+			if(!_activeMotionBehaviour->updateControllers(nextMotion))
+			{
+				//update not possible (controller types changed) - exchange motion behaviour
+				_activeMotionBehaviour->deactivate();
+				_activeMotionBehaviour = nextMotion;
+				_activeMotionBehaviour->activate();
+			}
 		}
 	}
 
@@ -475,12 +502,12 @@ void HybridAutomatonManager::collect(vector<double>& data, int channel)
 	else if (channel == PLOT_Q)
 	{
 		for(int i = 0; i < _dof; ++i)
-			data.push_back(_q[i]);
+			data.push_back(_sys->q()[i]);
 	}
 	else if (channel == PLOT_VELOCITY)
 	{
 		for(int i = 0; i < _dof; ++i)
-			data.push_back(_qdot[i]);
+			data.push_back(_sys->qdot()[i]);
 	}	
 	else if (channel == PLOT_EEFRAME)
 	{

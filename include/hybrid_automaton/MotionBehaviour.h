@@ -173,6 +173,12 @@ public:
 	dVector update(double t);
 
 	/**
+	* Update the controllers of thisbehaviour with the goals of @other. The method changes no additional parameters (gains etc.) of the controllers.
+	* This function only executes if the _updateAllowed flag is set to true
+	*/
+	bool updateControllers(MotionBehaviour* other);
+
+	/**
 	* Create a string containing all the information necessary to construct a copy of this MotionBehaviour
 	*/
 	virtual std::string toStringXML() const;
@@ -204,6 +210,9 @@ public:
 	void setMaxVelocityForInterpolation(double max_velocity);
 	void setMinTimeForInterpolation(double min_time);
 
+	void setUpdateAllowed(bool updateAllowed);
+	bool isUpdateAllowed();
+
 private:
 
 	/**
@@ -220,6 +229,8 @@ private:
 																		// (for convergence check including time)
 	double											time_to_converge_;	// duration of the interpolation
 	double											dT_;				// Control interval
+
+	bool											updateAllowed_;     // Explicitly allow controller updates without replacing the current control set.
 
 	double											max_velocity_;		// maximum desired velocity at joint or tip (depending on controller); used for calculating the interpolation time
 	double											min_time_;			// minimum time that is used for interpolation (if max_velocity constraint is not set)

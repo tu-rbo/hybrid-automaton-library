@@ -417,6 +417,8 @@ TiXmlElement* MotionBehaviour::toElementXML() const
     mb_element->SetDoubleAttribute("probability",  this->getProbability());
     mb_element->SetDoubleAttribute("length",this->getLength());
 
+	mb_element->SetAttribute("updateAllowed", (updateAllowed_? "true" : "false"));
+
 	return mb_element;
 }
 

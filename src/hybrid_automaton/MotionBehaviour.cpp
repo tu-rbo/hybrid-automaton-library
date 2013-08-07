@@ -19,6 +19,7 @@ MDPEdge(NULL, NULL, -1)
 , max_velocity_(-1)
 , min_time_(-1)
 , time_to_converge_(0.0)
+, updateAllowed_(false)
 {
 }
 
@@ -31,6 +32,7 @@ MDPEdge(dad, son, weight)
 , max_velocity_(-1)
 , min_time_(-1)
 , time_to_converge_(3.0)
+, updateAllowed_(false)
 {
 	if(robot_)
 	{
@@ -55,6 +57,7 @@ MDPEdge(dad, son, weight)
 , max_velocity_(-1)
 , min_time_(-1)
 , time_to_converge_(0.0)
+, updateAllowed_(false)
 {
 	if(control_set_)
 	{
@@ -81,7 +84,8 @@ min_time_(motion_behaviour_copy.min_time_),
 max_velocity_(motion_behaviour_copy.max_velocity_),
 goal_controllers_(motion_behaviour_copy.goal_controllers_),
 time_to_converge_(motion_behaviour_copy.time_to_converge_),
-_onDemand_controllers(motion_behaviour_copy._onDemand_controllers)
+_onDemand_controllers(motion_behaviour_copy._onDemand_controllers), 
+updateAllowed_(motion_behaviour_copy.updateAllowed_)
 {
 	// NOTE (Roberto): Should we avoid copying the value of time_? We are creating a new MB, maybe time_ should be 0
 	if(motion_behaviour_copy.control_set_)
@@ -242,7 +246,7 @@ void MotionBehaviour::activate()
 					
 					// at least 5.0 seconds or maximally 0.3 rad/s if nothing is given
 					time_to_converge_ = 
-						max(time_to_converge_, calculateTimeToConverge(5.0, 0.30, desired_q - current_q, current_qd, desired_qd));
+						max(time_to_converge_, calculateTimeToConverge(0.0, 0.20, desired_q - current_q, current_qd, desired_qd));
 					std::cout << "[MotionBehaviour::activate] INFO: Time of joint trajectory: " << time_to_converge_ << std::endl;
 
 					break;
@@ -273,7 +277,7 @@ void MotionBehaviour::activate()
 
 						// at least 5.0 seconds or maximally 0.2 m/s if nothing is given
 						time_to_converge_ = 
-							max(time_to_converge_, calculateTimeToConverge(5.0, 0.2, desired_r - current_r, current_rd, desired_rd));
+							max(time_to_converge_, calculateTimeToConverge(0.0, 0.15, desired_r - current_r, current_rd, desired_rd));
 						std::cout << "[MotionBehaviour::activate] INFO: Time of displacement trajectory: " << time_to_converge_ << std::endl;
 					}
 					break;
@@ -312,7 +316,7 @@ void MotionBehaviour::activate()
 					
 					// at least 10.0 seconds or maximally 0.1 rad/s if nothing is given
 					time_to_converge_ = 
-						max(time_to_converge_, calculateTimeToConverge(10.0, 0.1, error_theta, current_thetad, desired_thetad));
+						max(time_to_converge_, calculateTimeToConverge(0.0, 0.1, error_theta, current_thetad, desired_thetad));
 					std::cout << "[MotionBehaviour::activate] INFO: Time of orientation trajectory: " << time_to_converge_ << std::endl;
 
 					break;
@@ -361,7 +365,7 @@ void MotionBehaviour::activate()
 						}
 					}
 
-					dynamic_cast<rxJointController*>(*it)->addPoint(desired_q, time_to_converge_, false, eInterpolatorType_Cubic);
+					dynamic_cast<rxJointController*>(*it)->addPoint(desired_q, time_to_converge_, false);
 					break;
 				}
 			case rxController::eControlType_Displacement:
@@ -375,7 +379,7 @@ void MotionBehaviour::activate()
 					}
 					else
 					{
-						dynamic_cast<rxDisplacementController*>(*it)->addPoint(desired_r, time_to_converge_, false, eInterpolatorType_Cubic);
+						dynamic_cast<rxDisplacementController*>(*it)->addPoint(desired_r, time_to_converge_, false);
 					}
 					break;
 				}
@@ -594,6 +598,89 @@ dVector MotionBehaviour::update(double t)
 	return torque;
 }
 
+bool MotionBehaviour::updateControllers(MotionBehaviour* other)
+{
+	if(!updateAllowed_)
+		return false;
+
+	std::list<rxController*> controllers = control_set_->getControllers();
+	std::list<rxController*>::const_iterator it = controllers.begin();
+	
+	for( ; it != controllers.end(); ++it)
+	{
+		//Activate controllers
+		if ((*it)->activated())
+		{
+			(*it)->deactivate();
+		}
+		(*it)->activate();
+
+		// We only add the goal defined by the child milestone to the controller if it is a goal controller
+		if(this->goal_controllers_.find((*it)->name())->second)
+		{
+			// add the goal of the child milestone
+			switch((*it)->type()) {
+
+			case rxController::eControlType_Joint:
+				{
+					dVector current_q = robot_->q();
+					//Use the goal from the update
+                    dVector desired_q = ((Milestone*)(other->child))->getConfiguration();
+
+					if(robot_->jdof() == 10)
+					{	
+						while (current_q[9] - desired_q[9] > M_PI)
+						{
+							desired_q[9] += 2*M_PI;
+						}
+						while (current_q[9] - desired_q[9] < -M_PI)
+						{
+							desired_q[9] -= 2*M_PI;
+						}
+					}
+
+					//The new goal is appended. If you want to replace the old goal, use the SetPointControllers
+					dynamic_cast<rxJointController*>(*it)->addPoint(desired_q, time_to_converge_, false);
+					break;
+				}
+			case rxController::eControlType_Displacement:
+				{
+					dVector desired_r = ((OpSpaceMilestone*)(other->child))->getPosition();
+
+					FeatureAttractorController* fac = dynamic_cast<FeatureAttractorController*>(*it);
+					if(fac)
+					{
+						fac->updateFeaturePosition(desired_r[0], desired_r[1], desired_r[2]);
+					}
+					else
+					{
+						dynamic_cast<rxDisplacementController*>(*it)->addPoint(desired_r, time_to_converge_, false);
+					}
+					break;
+				}
+			case rxController::eControlType_Orientation:
+				{
+					Rotation goal_rot = ((OpSpaceMilestone*)(other->child))->getOrientation();
+
+					dynamic_cast<rxOrientationController*>(*it)->addPoint(goal_rot, time_to_converge_, false);
+					break;
+				}
+			case rxController::eControlType_HTransform:
+				{
+					dVector goal = ((Milestone*)(other->child))->getConfiguration();
+					Vector3D goal_3D(goal[0],goal[1],goal[2]);
+					Rotation goal_rot(goal[3], goal[4], goal[5]);
+
+					dynamic_cast<rxHTransformController*>(*it)->addPoint(HTransform(goal_rot, goal_3D), time_to_converge_, false);
+					break;
+				}
+			}
+		}
+	}
+
+	return true;
+}
+
 MotionBehaviour* MotionBehaviour::clone() const 
 {
 	MotionBehaviour* newMotionBehaviour = new MotionBehaviour(*this);
@@ -668,4 +755,14 @@ void MotionBehaviour::setMaxVelocityForInterpolation(double max_velocity) {
 
 void MotionBehaviour::setMinTimeForInterpolation(double min_time) {
 	min_time_ = min_time;
+}
+
+void MotionBehaviour::setUpdateAllowed(bool updateAllowed)
+{
+	updateAllowed_ = updateAllowed;
+}
+
+bool MotionBehaviour::isUpdateAllowed()
+{
+	return updateAllowed_;
 }
