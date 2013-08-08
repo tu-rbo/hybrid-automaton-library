@@ -240,6 +240,7 @@ private:
 		// obstacle avoidance, etc...
 	std::vector<OnDemandController*>				_onDemand_controllers;
 
+	void calculateInterpolationTime();
 	double calculateTimeToConverge(double default_min_time, double default_max_velocity, const dVector& error_x, const dVector& xd, const dVector& xd_desired);
 };
 

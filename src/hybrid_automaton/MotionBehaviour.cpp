@@ -195,13 +195,8 @@ double MotionBehaviour::calculateTimeToConverge(double default_min_time, double 
 	return time_to_converge;
 }
 
-void MotionBehaviour::activate() 
+void MotionBehaviour::calculateInterpolationTime()
 {
-	if (!control_set_)
-	{
-		return;
-	}
-
 	std::list<rxController*> controllers = control_set_->getControllers();
 
 	time_to_converge_ = min_time_;
@@ -329,6 +324,18 @@ void MotionBehaviour::activate()
 			}
 		}
 	}
+}
+
+void MotionBehaviour::activate() 
+{
+	if (!control_set_)
+	{
+		return;
+	}
+
+	calculateInterpolationTime();
+
+	std::list<rxController*> controllers = control_set_->getControllers();
 
 	//Now activate controllers and set desired goals for goal controllers
 	for(std::list<rxController*>::const_iterator it = controllers.begin(); it != controllers.end(); ++it)
