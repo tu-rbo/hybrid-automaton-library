@@ -610,6 +610,8 @@ bool MotionBehaviour::updateControllers(MotionBehaviour* other)
 	if(!updateAllowed_)
 		return false;
 
+	other->calculateInterpolationTime();
+
 	std::list<rxController*> controllers = control_set_->getControllers();
 	std::list<rxController*>::const_iterator it = controllers.begin();
 	
@@ -647,7 +649,7 @@ bool MotionBehaviour::updateControllers(MotionBehaviour* other)
 					}
 
 					//The new goal is appended. If you want to replace the old goal, use the SetPointControllers
-					dynamic_cast<rxJointController*>(*it)->addPoint(desired_q, time_to_converge_, false);
+					dynamic_cast<rxJointController*>(*it)->addPoint(desired_q, other->time_to_converge_, false);
 					break;
 				}
 			case rxController::eControlType_Displacement:
@@ -661,7 +663,7 @@ bool MotionBehaviour::updateControllers(MotionBehaviour* other)
 					}
 					else
 					{
-						dynamic_cast<rxDisplacementController*>(*it)->addPoint(desired_r, time_to_converge_, false);
+						dynamic_cast<rxDisplacementController*>(*it)->addPoint(desired_r, other->time_to_converge_, false);
 					}
 					break;
 				}
@@ -669,7 +671,7 @@ bool MotionBehaviour::updateControllers(MotionBehaviour* other)
 				{
 					Rotation goal_rot = ((OpSpaceMilestone*)(other->child))->getOrientation();
 
-					dynamic_cast<rxOrientationController*>(*it)->addPoint(goal_rot, time_to_converge_, false);
+					dynamic_cast<rxOrientationController*>(*it)->addPoint(goal_rot, other->time_to_converge_, false);
 					break;
 				}
 			case rxController::eControlType_HTransform:
@@ -678,7 +680,7 @@ bool MotionBehaviour::updateControllers(MotionBehaviour* other)
 					Vector3D goal_3D(goal[0],goal[1],goal[2]);
 					Rotation goal_rot(goal[3], goal[4], goal[5]);
 
-					dynamic_cast<rxHTransformController*>(*it)->addPoint(HTransform(goal_rot, goal_3D), time_to_converge_, false);
+					dynamic_cast<rxHTransformController*>(*it)->addPoint(HTransform(goal_rot, goal_3D), other->time_to_converge_, false);
 					break;
 				}
 			}
