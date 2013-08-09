@@ -100,3 +100,24 @@ void PostureMilestone::setConfiguration(dVector configuration)
 	this->setPosiOriSelector(POSITION_SELECTION);
 
 }
+
+bool PostureMilestone::hasConverged(rxSystem* sys) 
+{
+	if(!OpSpaceMilestone::hasConverged(sys))
+		return false;
+
+	//for 10 dof robor: also match base position
+	if(sys->jdof()==10)
+	{
+		for(int i=0;i<2;i++)
+		{
+			double e = ::std::abs(sys->q()[i+7] - _configuration[i+7]);
+			if (e > region_convergence_radius_[i])
+			{		
+				return false;
+			}
+		}
+	}
+
+	return true;
+}

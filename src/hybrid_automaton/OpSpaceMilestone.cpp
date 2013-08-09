@@ -181,18 +181,6 @@ bool OpSpaceMilestone::hasConverged(rxSystem* sys)
 			 ::std::fabs(current_r[1]) > region_convergence_radius_[1] ||
 			 ::std::fabs(current_r[2]) > region_convergence_radius_[2] )
 			 return false;
-		/*
-		for (int i = 0; i < 3; i++) {;
-			double e = ::std::abs(current_r[i] - configuration_[i]);
-			if (e > region_convergence_radius_[i])
-			{
-#ifdef NOT_IN_RT
-				std::cout << "Error in pos " << i << " is too large = " << e << std::endl;
-#endif
-				return false;
-			}
-		}
-		*/
 	}
 
 	if (posi_ori_selection_ == ORIENTATION_SELECTION
@@ -219,13 +207,9 @@ bool OpSpaceMilestone::hasConverged(rxSystem* sys)
 		double e = ::std::abs(angle);
 		if (e > region_convergence_radius_[3]) 
 		{
-#ifdef NOT_IN_RT
-			std::cout << "Error in orientation is too large = " << e << std::endl;
-#endif
 			return false;
 		}
 	}
 
-	std::cout<<"Milestone "<<this->name_<<" converged"<<std::endl;
 	return true;
 }

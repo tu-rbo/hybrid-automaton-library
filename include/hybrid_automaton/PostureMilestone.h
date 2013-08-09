@@ -35,6 +35,9 @@ public:
 	virtual PostureMilestone& operator=(const PostureMilestone & op_milestone_assignment);
 	PostureMilestone* PostureMilestone::clone() const;
 
+	//Like opSpaceMilestone::hasConverged but checks also for base position in 10 dof chain
+	bool hasConverged(rxSystem* sys); 
+
 	// gets the c-space configuration
 	dVector getConfiguration() const;
 

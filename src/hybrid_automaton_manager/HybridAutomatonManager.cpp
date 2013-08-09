@@ -339,7 +339,6 @@ void HybridAutomatonManager::_reflect()
 	_sys->qdot(_qdot);
 }
 
-bool updated = false;
 void HybridAutomatonManager::_compute(const double& t)
 {
 	if (_servo_on)
@@ -362,9 +361,8 @@ void HybridAutomatonManager::_compute(const double& t)
 	//Flag tells if the graph structure changed.	
 	bool behaviourChange = true;
 
-	if (/*!updated && */!_deserialized_hybrid_automatons.empty() && WaitForSingleObject(_deserialize_mutex, 0) != WAIT_FAILED)
+	if (!_deserialized_hybrid_automatons.empty() && WaitForSingleObject(_deserialize_mutex, 0) != WAIT_FAILED)
 	{
-		updated = true;
 		delete _hybrid_automaton;
 		_hybrid_automaton = _deserialized_hybrid_automatons.front();
 
@@ -379,6 +377,7 @@ void HybridAutomatonManager::_compute(const double& t)
 	}
 	else if(childMs->hasConverged(_sys)) //The current behaviour converged
 	{
+		std::cout<<"[HybridAutomatonManager::_compute] INFO: Milestone "<<childMs->getName()<<" converged."<<std::endl;
 		queryMs = childMs; //Converged, switch to next milestone
 		behaviourChange = true;
 	}
