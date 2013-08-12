@@ -240,9 +240,9 @@ void MotionBehaviour::calculateInterpolationTime()
 					desired_qd.zero();
 					
 					// at least 5.0 seconds or maximally 0.3 rad/s if nothing is given
-					time_to_converge_ = 
-						max(time_to_converge_, calculateTimeToConverge(0.0, 0.20, desired_q - current_q, current_qd, desired_qd));
-					std::cout << "[MotionBehaviour::activate] INFO: Time of joint trajectory: " << time_to_converge_ << std::endl;
+					double ttc = calculateTimeToConverge(0.0, 0.20, desired_q - current_q, current_qd, desired_qd);					
+					std::cout << "[MotionBehaviour::activate] INFO: Time of joint trajectory: " << ttc << std::endl;
+					time_to_converge_ =	max(time_to_converge_, ttc);
 
 					break;
 				}
@@ -271,9 +271,9 @@ void MotionBehaviour::calculateInterpolationTime()
 						desired_rd.zero();
 
 						// at least 5.0 seconds or maximally 0.2 m/s if nothing is given
-						time_to_converge_ = 
-							max(time_to_converge_, calculateTimeToConverge(0.0, 0.15, desired_r - current_r, current_rd, desired_rd));
-						std::cout << "[MotionBehaviour::activate] INFO: Time of displacement trajectory: " << time_to_converge_ << std::endl;
+						double ttc = calculateTimeToConverge(0.0, 0.15, desired_r - current_r, current_rd, desired_rd);
+						std::cout << "[MotionBehaviour::activate] INFO: Time of displacement trajectory: " << ttc << std::endl;
+						time_to_converge_ =	max(time_to_converge_, ttc);
 					}
 					break;
 				}
@@ -310,10 +310,9 @@ void MotionBehaviour::calculateInterpolationTime()
 					*/
 					
 					// at least 10.0 seconds or maximally 0.1 rad/s if nothing is given
-					time_to_converge_ = 
-						max(time_to_converge_, calculateTimeToConverge(0.0, 0.1, error_theta, current_thetad, desired_thetad));
-					std::cout << "[MotionBehaviour::activate] INFO: Time of orientation trajectory: " << time_to_converge_ << std::endl;
-
+					double ttc = calculateTimeToConverge(0.0, 0.1, error_theta, current_thetad, desired_thetad);
+					std::cout << "[MotionBehaviour::activate] INFO: Time of orientation trajectory: " << ttc << std::endl;
+					time_to_converge_ =	max(time_to_converge_, ttc);
 					break;
 				}
 			case rxController::eControlType_HTransform:
@@ -432,7 +431,8 @@ dVector MotionBehaviour::getError() const
 
 dVector MotionBehaviour::getDesired() const
 {
-	dVector desired;
+	dVector desired(robot_->jdof());
+	desired.zero();
 	std::list<rxController*> controllers = control_set_->getControllers();
 	for(std::list<rxController*>::const_iterator it = controllers.begin(); it != controllers.end(); ++it)
 	{
@@ -441,7 +441,7 @@ dVector MotionBehaviour::getDesired() const
 			if ((*it)->type() == rxController::eControlType_Joint)
 			{
 				dVector qd = dynamic_cast<rxJointController*>(*it)->qd();
-				desired.expand(qd.size(), qd);
+				desired.insert(0, qd.size(), qd);
 			}
 		}
 	}
@@ -450,7 +450,8 @@ dVector MotionBehaviour::getDesired() const
 
 dVector MotionBehaviour::getDesiredDot() const
 {
-	dVector desired_dot;
+	dVector desired_dot(robot_->jdof());
+	desired_dot.zero();
 	std::list<rxController*> controllers = control_set_->getControllers();
 	for(std::list<rxController*>::const_iterator it = controllers.begin(); it != controllers.end(); ++it)
 	{
@@ -459,7 +460,7 @@ dVector MotionBehaviour::getDesiredDot() const
 			if ((*it)->type() == rxController::eControlType_Joint)
 			{
 				dVector qdotd = dynamic_cast<rxJointController*>(*it)->qdotd();
-				desired_dot.expand(qdotd.size(), qdotd);
+				desired_dot.insert(0, qdotd.size(), qdotd);
 			}
 		}
 	}
@@ -556,7 +557,8 @@ dVector MotionBehaviour::getLineTaskError() const
 
 dVector MotionBehaviour::getCurrentDotReference() const
 {
-	dVector current_dot_ref;
+	dVector current_dot_ref(robot_->jdof());
+	current_dot_ref.zero();
 	std::list<rxController*> controllers = control_set_->getControllers();
 	for(std::list<rxController*>::const_iterator it = controllers.begin(); it != controllers.end(); ++it)
 	{
@@ -565,7 +567,7 @@ dVector MotionBehaviour::getCurrentDotReference() const
 			if ((*it)->type() == rxController::eControlType_Joint)
 			{
 				dVector qdot_ref = dynamic_cast<rxJointController*>(*it)->qdot_ref();
-				current_dot_ref.expand(qdot_ref.size(), qdot_ref);
+				current_dot_ref.insert(0, qdot_ref.size(), qdot_ref);
 			}
 		}
 	}
@@ -574,7 +576,8 @@ dVector MotionBehaviour::getCurrentDotReference() const
 
 dVector MotionBehaviour::getCurrentDotDotReference() const
 {
-	dVector current_dotdot_ref;
+	dVector current_dotdot_ref(robot_->jdof());
+	current_dotdot_ref.zero();
 	std::list<rxController*> controllers = control_set_->getControllers();
 	for(std::list<rxController*>::const_iterator it = controllers.begin(); it != controllers.end(); ++it)
 	{
@@ -583,7 +586,7 @@ dVector MotionBehaviour::getCurrentDotDotReference() const
 			if ((*it)->type() == rxController::eControlType_Joint)
 			{
 				dVector qddot_ref = dynamic_cast<rxJointController*>(*it)->qddot_ref();
-				current_dotdot_ref.expand(qddot_ref.size(), qddot_ref);
+				current_dotdot_ref.insert(0, qddot_ref.size(), qddot_ref);
 			}
 		}
 	}
@@ -607,23 +610,22 @@ dVector MotionBehaviour::update(double t)
 
 bool MotionBehaviour::updateControllers(MotionBehaviour* other)
 {
-	if(!updateAllowed_)
+	if(!updateAllowed_ || !other->updateAllowed_)
 		return false;
 
 	other->calculateInterpolationTime();
 
 	std::list<rxController*> controllers = control_set_->getControllers();
 	std::list<rxController*>::const_iterator it = controllers.begin();
+
+	//Change the edge parameters
+	this->setChild(other->child);
+	this->setParent(other->parent);
+	this->prob = other->prob;
+	this->length = other->length;
 	
 	for( ; it != controllers.end(); ++it)
 	{
-		//Activate controllers
-		if ((*it)->activated())
-		{
-			(*it)->deactivate();
-		}
-		(*it)->activate();
-
 		// We only add the goal defined by the child milestone to the controller if it is a goal controller
 		if(this->goal_controllers_.find((*it)->name())->second)
 		{

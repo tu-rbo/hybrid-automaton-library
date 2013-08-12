@@ -320,12 +320,6 @@ XMLDeserializer::~XMLDeserializer()
 
 HybridAutomaton* XMLDeserializer::createHybridAutomaton(const std::string& xml_string, rxSystem* robot, double dT)
 {
-
-	ofstream file;
-	file.open("hybrid_automaton.txt");
-	file << xml_string;
-	file.close();
-
 	HybridAutomaton* automaton = new HybridAutomaton();
 
 	// Create the DOM-model
@@ -357,8 +351,15 @@ HybridAutomaton* XMLDeserializer::createHybridAutomaton(const std::string& xml_s
 		return NULL;
 	}
 
+	std::string ha_name(ha_element->Attribute("Name"));
 	// Print out a message with the general properties of the new HybridAutomaton.
-	std::cout << "[XMLDeserializer::createHybridAutomaton] INFO: Creating hybrid system '" << ha_element->Attribute("Name") << "'. Initial Milestone: " << start_node << std::endl;
+	std::cout << "[XMLDeserializer::createHybridAutomaton] INFO: Creating hybrid system '" << ha_name << "'. Initial Milestone: " << start_node << std::endl;
+
+	ha_name.append(".txt");
+	ofstream file;
+	file.open(ha_name.c_str());
+	file << xml_string;
+	file.close();
 
 	// Read the data of the nodes-milestones and create them
 	for (TiXmlElement* mst_element = ha_element->FirstChildElement("Milestone"); mst_element != 0; mst_element = mst_element->NextSiblingElement("Milestone")) {

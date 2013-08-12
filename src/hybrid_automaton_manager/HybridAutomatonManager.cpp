@@ -200,7 +200,7 @@ void HybridAutomatonManager::updateBlackboard()
 	if(!_blackboard)
 		return;
 
-	_blackboard->setJointState("/joint_state", _q, _qdot, _torque);
+	_blackboard->setJointState("/joint_state", _sys->q(), _sys->qdot(), _torque);
 
 	HTransform relative_transform;
 	rxBody* end_effector = _sys->getUCSBody(_T("EE"), relative_transform);
@@ -380,6 +380,12 @@ void HybridAutomatonManager::_compute(const double& t)
 		std::cout<<"[HybridAutomatonManager::_compute] INFO: Milestone "<<childMs->getName()<<" converged."<<std::endl;
 		queryMs = childMs; //Converged, switch to next milestone
 		behaviourChange = true;
+
+		if(childMs->getName() == "goal")
+		{
+			_active = false;
+			return;
+		}
 	}
 	else	
 	{
@@ -397,9 +403,9 @@ void HybridAutomatonManager::_compute(const double& t)
 		//Switch motion behaviour
 		if(nextMotion && nextMotion != _activeMotionBehaviour)
 		{
-			std::cout << "[HybridAutomatonManager::_compute] INFO: Switching controller" << std::endl;
+			std::cout << "[HybridAutomatonManager::_compute] INFO: Switching controller towards "<< ((Milestone*)(nextMotion->getChild()))->getName() << std::endl;
 
-			//Try to update currently running behaviour
+			//Try to update currently running behaviour instead of replacing it
 			if(!_activeMotionBehaviour->updateControllers(nextMotion))
 			{
 				//update not possible (controller types changed) - exchange motion behaviour
