@@ -20,7 +20,7 @@ unsigned __stdcall deserializeHybridAutomaton(void *udata)
 	HybridAutomaton* ha = NULL;
 	try {
 		ha = XMLDeserializer::createHybridAutomaton(thread_args->_string, thread_args->_sys, thread_args->_dT);
-		std::cout << "--------------- recieving hybrid automaton ------------------" << std::endl;
+		//std::cout << "--------------- recieving hybrid automaton ------------------" << std::endl;
 		//std::cout << ha->toStringXML() << std::endl;
 	}
 	catch(std::string e)
@@ -250,7 +250,6 @@ void HybridAutomatonManager::updateHybridAutomaton()
 {
 	if (_blackboard && _blackboard->isUpdated("update_hybrid_automaton"))
 	{
-		std::cout<<"New HA arrived!"<<std::endl;
 		rlab::String* ha_xml = dynamic_cast<rlab::String*>(_blackboard->getData("update_hybrid_automaton"));
 		try
 		{
@@ -368,7 +367,7 @@ void HybridAutomatonManager::_compute(const double& t)
 
 		_deserialized_hybrid_automatons.pop_front();
 		
-		//std::cout << "[HybridAutomatonManager::_compute] INFO: New Hybrid Automaton" << std::endl;
+		std::cout << "[HybridAutomatonManager::_compute] INFO: Switching Hybrid Automaton" << std::endl;
 
 		ReleaseMutex(_deserialize_mutex);
 
@@ -403,19 +402,22 @@ void HybridAutomatonManager::_compute(const double& t)
 		//Switch motion behaviour
 		if(nextMotion && nextMotion != _activeMotionBehaviour)
 		{
-			std::cout << "[HybridAutomatonManager::_compute] INFO: Switching controller towards "<< ((Milestone*)(nextMotion->getChild()))->getName() << std::endl;
-
+			
 			//Try to update currently running behaviour instead of replacing it
-			if(!_activeMotionBehaviour->updateControllers(nextMotion))
+			if(_activeMotionBehaviour->updateControllers(nextMotion))
+			{
+				std::cout << "[HybridAutomatonManager::_compute] INFO: Updated goal towards "<< ((Milestone*)(nextMotion->getChild()))->getName() << std::endl;
+			}
+			else
 			{
 				//update not possible (controller types changed) - exchange motion behaviour
 				_activeMotionBehaviour->deactivate();
 				_activeMotionBehaviour = nextMotion;
 				_activeMotionBehaviour->activate();
+				std::cout << "[HybridAutomatonManager::_compute] INFO: Changed control set. Next goal: "<< ((Milestone*)(nextMotion->getChild()))->getName() << std::endl;			
 			}
 		}
 	}
-
 }
 
 
@@ -513,6 +515,7 @@ void HybridAutomatonManager::collect(vector<double>& data, int channel)
 	{
 		for(int i = 0; i < _dof; ++i)
 			data.push_back(_sys->qdot()[i]);
+			//data.push_back(_activeMotionBehaviour->getDesired()[i]);
 	}	
 	else if (channel == PLOT_EEFRAME)
 	{

@@ -133,8 +133,9 @@ public:
 	* Add an rxController to the control set. 
 	* @param ctrl Pointer to the rxController object to be added.
 	* @param is_goal_controller Flag to mark if this controller must be checked for convergence of the MB
+	* @param addToMB If true, the controller will be added to the underlying rxControlSet. If false only goal and onDemand controllers will be updated.
 	*/
-	void addController(rxController* ctrl, bool is_goal_controller);
+	void addController(rxController* ctrl, bool is_goal_controller, bool addToMB = true);
 
 	/**
 	* Activate the controllers stored in the rxControlSet through the vector of rxController's (NOT WORKING!!!!)
@@ -204,8 +205,6 @@ public:
 
 	// USE WITH CARE!!! - mainly for ERM internal speed-up!
 	virtual void setControlSetByPointerOnly(rxControlSetBase* control_set){this->control_set_ = control_set;};
-
-	void waitMode();
 
 	void setMaxVelocityForInterpolation(double max_velocity);
 	void setMinTimeForInterpolation(double min_time);

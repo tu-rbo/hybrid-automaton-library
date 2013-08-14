@@ -14,6 +14,8 @@
 #include "PostureMilestone.h"
 
 
+#include "controllers/include/TPImpedanceControlSet.h"
+
 template<class T>
 T deserializeElement(TiXmlElement * xml_element, const char * field_name);
 
@@ -120,6 +122,11 @@ public:
 	static std::map<std::string, ControllerType> createControllerMapping();
 
 	static std::map<std::string, ControllerType>	controller_map_;	// Translation between class name (string) of the controllers and their type
+
+	//We only want to create control sets once for performance reasons so we store every possible instance as a mmeber
+	static TPImpedanceControlSet*  _TPImpedanceControlSet_obj;
+
+	static bool createdControlSet;
 };
 
 #endif	//XML_DESERIALIZER

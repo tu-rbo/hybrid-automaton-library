@@ -16,16 +16,18 @@
 #include "JointLimitAvoidanceControllerOnDemand.h"
 #include "OpSpaceSingularityAvoidanceController.h"
 
-#include "NakamuraControlSet.h"
 #include "InterpolatedSetPointDisplacementController.h"
 #include "InterpolatedSetPointJointController.h"
 #include "InterpolatedSetPointOrientationController.h"
 #include "PressureDisplacementController.h"
 #include "PressureOrientationController.h"
 
-#include "TPImpedanceControlSet.h"
+#include "NakamuraControlSet.h"
+
 
 std::map<std::string, ControllerType> XMLDeserializer::controller_map_ = XMLDeserializer::createControllerMapping();
+
+TPImpedanceControlSet* XMLDeserializer::_TPImpedanceControlSet_obj = NULL;
 
 std::string XMLDeserializer::wstring2string(const std::wstring& wstr)
 {
@@ -312,6 +314,7 @@ std::string colon2space(std::string text)
 
 XMLDeserializer::XMLDeserializer()
 {
+	_TPImpedanceControlSet_obj = NULL;
 }
 
 XMLDeserializer::~XMLDeserializer()
@@ -353,14 +356,15 @@ HybridAutomaton* XMLDeserializer::createHybridAutomaton(const std::string& xml_s
 
 	std::string ha_name(ha_element->Attribute("Name"));
 	// Print out a message with the general properties of the new HybridAutomaton.
-	std::cout << "[XMLDeserializer::createHybridAutomaton] INFO: Creating hybrid system '" << ha_name << "'. Initial Milestone: " << start_node << std::endl;
+	std::cout << "[XMLDeserializer::createHybridAutomaton] INFO: Creating hybrid system '" << ha_name<<std::endl;// << "'. Initial Milestone: " << start_node << std::endl;
 
+	/*
 	ha_name.append(".txt");
 	ofstream file;
 	file.open(ha_name.c_str());
 	file << xml_string;
 	file.close();
-
+	*/
 	// Read the data of the nodes-milestones and create them
 	for (TiXmlElement* mst_element = ha_element->FirstChildElement("Milestone"); mst_element != 0; mst_element = mst_element->NextSiblingElement("Milestone")) {
 		Milestone* mst;
@@ -437,6 +441,8 @@ HybridAutomaton* XMLDeserializer::createHybridAutomaton(const std::string& xml_s
 		MotionBehaviour* mb = XMLDeserializer::createMotionBehaviour(mb_element, ms_parent_ptr, ms_child_ptr, robot, dT);
 		automaton->addEdge(mb);
 	}
+
+	//std::cout << "[XMLDeserializer::createHybridAutomaton] INFO: Finished! " << ha_name << std::endl;
 
 	return automaton;
 }
@@ -526,9 +532,9 @@ OpSpaceMilestone* XMLDeserializer::createOpSpaceMilestone(TiXmlElement* mileston
 	Displacement position = deserializeDisplacement(milestone_xml, "position", Displacement());
 	Rotation orientation = deserializeRotation(milestone_xml, "orientation", Rotation());
 	std::vector<double> mst_epsilon = deserializeStdVector<double>(milestone_xml, "epsilon");
-	if(/*mst_configuration.size()==0 ||*/ mst_epsilon.size()==0)
+	if(mst_epsilon.size()==0)
 	{
-		throw std::string("[XMLDeserializer::createOpSpaceMilestone] ERROR: The milestone configuration or region of convergence (\"value\" or \"epsilon\") is not defined in the XML string.");
+		throw std::string("[XMLDeserializer::createOpSpaceMilestone] ERROR: The milestone region of convergence (\"epsilon\") is not defined in the XML string.");
 	}
 
 	TiXmlElement* handle_point_set_element = milestone_xml->FirstChildElement("HandlePoints");
@@ -605,6 +611,7 @@ PostureMilestone* XMLDeserializer::createPostureMilestone(TiXmlElement* mileston
 	return mst;
 } 
 
+bool XMLDeserializer::createdControlSet = false;
 MotionBehaviour* XMLDeserializer::createMotionBehaviour(TiXmlElement* motion_behaviour_xml , Milestone *dad, Milestone *son , rxSystem* robot, double dT )
 {
 	TiXmlElement* control_set_element = motion_behaviour_xml->FirstChildElement("ControlSet");
@@ -639,11 +646,19 @@ MotionBehaviour* XMLDeserializer::createMotionBehaviour(TiXmlElement* motion_beh
 		}
 		else if(control_set_type == "TPImpedanceControlSet")
 		{
-			mb_control_set = new TPImpedanceControlSet(robot, dT);
-			mb_control_set->setGravity(0, 0, -GRAV_ACC);
-			// TPImpedanceControlSet does not implement extra nullmotion behaviour - 
-			// This has to be done at lowest priority!
-			mb_control_set->nullMotionController()->setGain(0.0, 0.0, 0.0);
+			
+			//CAUTION:: This is a hack and only works if we use controller updates!
+			if(!_TPImpedanceControlSet_obj )
+			{
+				_TPImpedanceControlSet_obj  = new TPImpedanceControlSet(robot, dT);
+				_TPImpedanceControlSet_obj->setGravity(0, 0, -GRAV_ACC);
+				// TPImpedanceControlSet does not implement extra nullmotion behaviour - 
+				// This has to be done at lowest priority!
+				_TPImpedanceControlSet_obj->nullMotionController()->setGain(0.0, 0.0, 0.0);
+			}
+			
+			mb_control_set = _TPImpedanceControlSet_obj;
+
 		}
 		else
 		{
@@ -654,6 +669,9 @@ MotionBehaviour* XMLDeserializer::createMotionBehaviour(TiXmlElement* motion_beh
 
 	MotionBehaviour* mb = new MotionBehaviour(dad, son , mb_control_set);
 
+	bool update  = deserializeBoolean(motion_behaviour_xml, "updateAllowed", false);
+	mb->setUpdateAllowed(update);
+
 	mb->setMinTimeForInterpolation(deserializeElement<double>(motion_behaviour_xml, "minTime",-1.));
 	mb->setMaxVelocityForInterpolation(deserializeElement<double>(motion_behaviour_xml, "maxVelocity",-1.));
 
@@ -662,17 +680,16 @@ MotionBehaviour* XMLDeserializer::createMotionBehaviour(TiXmlElement* motion_beh
 	{	
 		bool mb_goal_controller = deserializeBoolean(rxController_xml, "goalController", true);		
 		rxController* mb_controller = XMLDeserializer::createController(rxController_xml, dad, son, robot, dT, mb_goal_controller, mb_controller_counter);
-		mb->addController(mb_controller, mb_goal_controller);
+		mb->addController(mb_controller, mb_goal_controller, !createdControlSet);
 		mb_controller_counter++;
 	}
+
+	createdControlSet = update;
 
 	double length = deserializeElement<double>(motion_behaviour_xml, "length", -1.0);
 	double prob   = deserializeElement<double>(motion_behaviour_xml, "probability", -1.0);
 	mb->setLength(length);
 	mb->setProbability(prob);
-
-	bool update   = deserializeBoolean(motion_behaviour_xml, "updateAllowed", false);
-	mb->setUpdateAllowed(update);
 
 	return mb;
 }

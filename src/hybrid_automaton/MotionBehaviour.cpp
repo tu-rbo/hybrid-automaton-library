@@ -87,34 +87,8 @@ time_to_converge_(motion_behaviour_copy.time_to_converge_),
 _onDemand_controllers(motion_behaviour_copy._onDemand_controllers), 
 updateAllowed_(motion_behaviour_copy.updateAllowed_)
 {
-	// NOTE (Roberto): Should we avoid copying the value of time_? We are creating a new MB, maybe time_ should be 0
 	if(motion_behaviour_copy.control_set_)
 	{
-		// NOTE (Roberto): Two ugly options:
-		// Use typeid(control_set_).name() as we do when serializing
-		// Drawback: typeid has no standard behaviour
-		// Use dynamic_cast to different types and check if the resulting pointer is NULL (not possible to cast->
-		// it is not of this type) or not NULL (possible to cast -> of this type)
-		// Drawback: we can always cast to base classes, we should check only if we can to derived ones
-		// Implemented: mixture of both :(
-		// CHANGE: Use dynamic_cast tree, because now control_set_ is a rxControlSetBase*, and that is what we 
-		// get if we use typeid
-		//
-		//std::string control_set_name = std::string(typeid(motion_behaviour_copy.control_set_).name());
-		//std::string control_set_name2 = control_set_name.substr(6);		//Ignore the 'class ' part
-		//control_set_name2.resize(control_set_name2.size()-2);	//Ignore the ' *' part
-		//if(control_set_name2 == std::string("rxControlSet"))
-		//{
-		//	this->control_set_ = new rxControlSet((*dynamic_cast<rxControlSet*>(motion_behaviour_copy.control_set_)));
-		//}
-		//else if(control_set_name2==std::string("rxTPOperationalSpaceControlSet"))
-		//{
-		//	this->control_set_ = new rxTPOperationalSpaceControlSet((*dynamic_cast<rxTPOperationalSpaceControlSet*>(motion_behaviour_copy.control_set_)));
-		//}
-		//else // Use the base class if there is something wrong
-		//{
-		//	this->control_set_ = new rxControlSet((*dynamic_cast<rxControlSet*>(motion_behaviour_copy.control_set_)));
-		//}
 		if(dynamic_cast<rxTPOperationalSpaceControlSet*>(motion_behaviour_copy.control_set_))
 		{
 			this->control_set_ = new rxTPOperationalSpaceControlSet((*dynamic_cast<rxTPOperationalSpaceControlSet*>(motion_behaviour_copy.control_set_)));
@@ -145,7 +119,7 @@ MotionBehaviour::~MotionBehaviour()
 	}
 }
 
-void MotionBehaviour::addController(rxController* ctrl, bool is_goal_controller) 
+void MotionBehaviour::addController(rxController* ctrl, bool is_goal_controller, bool addToMB) 
 {
 	if(ctrl){
 		if(ctrl->dt() != this->dT_)
@@ -154,7 +128,8 @@ void MotionBehaviour::addController(rxController* ctrl, bool is_goal_controller)
 		}
 		ctrl->deactivate();
 		goal_controllers_[ctrl->name()] = is_goal_controller;
-		control_set_->addController(ctrl, ctrl->name(), ctrl->priority());
+		if(addToMB)
+			control_set_->addController(ctrl, ctrl->name(), ctrl->priority());
 	}
 	else
 	{
@@ -206,11 +181,10 @@ void MotionBehaviour::calculateInterpolationTime()
 	{
 		if (*it == NULL)
 		{
-			std::cout<<"MotionBehaviour::activate(): undefined controller"<<std::endl;
+			std::cout<<"MotionBehaviour::calculate(): undefined controller"<<std::endl;
 			continue;
 		}
 
-		// We only add the goal defined by the child milestone to the controller if it is a goal controller
 		if(this->goal_controllers_.find((*it)->name())->second)
 		{
 			// add the goal of the child milestone
@@ -241,7 +215,7 @@ void MotionBehaviour::calculateInterpolationTime()
 					
 					// at least 5.0 seconds or maximally 0.3 rad/s if nothing is given
 					double ttc = calculateTimeToConverge(0.0, 0.20, desired_q - current_q, current_qd, desired_qd);					
-					std::cout << "[MotionBehaviour::activate] INFO: Time of joint trajectory: " << ttc << std::endl;
+					std::cout << "[MotionBehaviour::calculate] INFO: Time of joint trajectory: " << ttc << std::endl;
 					time_to_converge_ =	max(time_to_converge_, ttc);
 
 					break;
@@ -271,8 +245,8 @@ void MotionBehaviour::calculateInterpolationTime()
 						desired_rd.zero();
 
 						// at least 5.0 seconds or maximally 0.2 m/s if nothing is given
-						double ttc = calculateTimeToConverge(0.0, 0.15, desired_r - current_r, current_rd, desired_rd);
-						std::cout << "[MotionBehaviour::activate] INFO: Time of displacement trajectory: " << ttc << std::endl;
+						double ttc = calculateTimeToConverge(0.0, 0.2, desired_r - current_r, current_rd, desired_rd);
+						std::cout << "[MotionBehaviour::calculate] INFO: Time of displacement trajectory: " << ttc << std::endl;
 						time_to_converge_ =	max(time_to_converge_, ttc);
 					}
 					break;
@@ -311,7 +285,7 @@ void MotionBehaviour::calculateInterpolationTime()
 					
 					// at least 10.0 seconds or maximally 0.1 rad/s if nothing is given
 					double ttc = calculateTimeToConverge(0.0, 0.1, error_theta, current_thetad, desired_thetad);
-					std::cout << "[MotionBehaviour::activate] INFO: Time of orientation trajectory: " << ttc << std::endl;
+					std::cout << "[MotionBehaviour::calculate] INFO: Time of orientation trajectory: " << ttc << std::endl;
 					time_to_converge_ =	max(time_to_converge_, ttc);
 					break;
 				}
@@ -613,16 +587,16 @@ bool MotionBehaviour::updateControllers(MotionBehaviour* other)
 	if(!updateAllowed_ || !other->updateAllowed_)
 		return false;
 
-	other->calculateInterpolationTime();
-
-	std::list<rxController*> controllers = control_set_->getControllers();
-	std::list<rxController*>::const_iterator it = controllers.begin();
-
 	//Change the edge parameters
 	this->setChild(other->child);
 	this->setParent(other->parent);
 	this->prob = other->prob;
 	this->length = other->length;
+
+	this->calculateInterpolationTime();
+
+	std::list<rxController*> controllers = control_set_->getControllers();
+	std::list<rxController*>::const_iterator it = controllers.begin();
 	
 	for( ; it != controllers.end(); ++it)
 	{
@@ -636,7 +610,7 @@ bool MotionBehaviour::updateControllers(MotionBehaviour* other)
 				{
 					dVector current_q = robot_->q();
 					//Use the goal from the update
-                    dVector desired_q = ((Milestone*)(other->child))->getConfiguration();
+                    dVector desired_q = ((Milestone*)child)->getConfiguration();
 
 					if(robot_->jdof() == 10)
 					{	
@@ -651,12 +625,12 @@ bool MotionBehaviour::updateControllers(MotionBehaviour* other)
 					}
 
 					//The new goal is appended. If you want to replace the old goal, use the SetPointControllers
-					dynamic_cast<rxJointController*>(*it)->addPoint(desired_q, other->time_to_converge_, false);
+					dynamic_cast<rxJointController*>(*it)->addPoint(desired_q, time_to_converge_, false);
 					break;
 				}
 			case rxController::eControlType_Displacement:
 				{
-					dVector desired_r = ((OpSpaceMilestone*)(other->child))->getPosition();
+					dVector desired_r = ((OpSpaceMilestone*)child)->getPosition();
 
 					FeatureAttractorController* fac = dynamic_cast<FeatureAttractorController*>(*it);
 					if(fac)
@@ -665,24 +639,24 @@ bool MotionBehaviour::updateControllers(MotionBehaviour* other)
 					}
 					else
 					{
-						dynamic_cast<rxDisplacementController*>(*it)->addPoint(desired_r, other->time_to_converge_, false);
+						dynamic_cast<rxDisplacementController*>(*it)->addPoint(desired_r, time_to_converge_, false);
 					}
 					break;
 				}
 			case rxController::eControlType_Orientation:
 				{
-					Rotation goal_rot = ((OpSpaceMilestone*)(other->child))->getOrientation();
+					Rotation goal_rot = ((OpSpaceMilestone*)child)->getOrientation();
 
-					dynamic_cast<rxOrientationController*>(*it)->addPoint(goal_rot, other->time_to_converge_, false);
+					dynamic_cast<rxOrientationController*>(*it)->addPoint(goal_rot, time_to_converge_, false);
 					break;
 				}
 			case rxController::eControlType_HTransform:
 				{
-					dVector goal = ((Milestone*)(other->child))->getConfiguration();
+					dVector goal = ((Milestone*)child)->getConfiguration();
 					Vector3D goal_3D(goal[0],goal[1],goal[2]);
 					Rotation goal_rot(goal[3], goal[4], goal[5]);
 
-					dynamic_cast<rxHTransformController*>(*it)->addPoint(HTransform(goal_rot, goal_3D), other->time_to_converge_, false);
+					dynamic_cast<rxHTransformController*>(*it)->addPoint(HTransform(goal_rot, goal_3D), time_to_converge_, false);
 					break;
 				}
 			}
@@ -717,7 +691,7 @@ MotionBehaviour& MotionBehaviour::operator=(const MotionBehaviour & motion_behav
 	// Copy the new control set
 	if(motion_behaviour_assignment.control_set_)
 	{
-		// Now are different types of control set allowed
+		// different types of control set are allowed
 		if(dynamic_cast<rxTPOperationalSpaceControlSet*>(motion_behaviour_assignment.control_set_))
 		{
 			this->control_set_ = new rxTPOperationalSpaceControlSet((*dynamic_cast<rxTPOperationalSpaceControlSet*>(motion_behaviour_assignment.control_set_)));
@@ -726,39 +700,14 @@ MotionBehaviour& MotionBehaviour::operator=(const MotionBehaviour & motion_behav
 		{
 			this->control_set_ = new rxControlSet((*dynamic_cast<rxControlSet*>(motion_behaviour_assignment.control_set_)));
 		}
-		//this->control_set_ = new rxControlSet(*(motion_behaviour_assignment.control_set_));
+		else if(dynamic_cast<TPImpedanceControlSet*>(motion_behaviour_assignment.control_set_))
+		{
+			this->control_set_ = new TPImpedanceControlSet((*dynamic_cast<TPImpedanceControlSet*>(motion_behaviour_assignment.control_set_)));
+		}
 		this->control_set_->setGravity(0,0,-GRAV_ACC);
-		//this->control_set_->setInverseDynamicsAlgorithm(new rxAMBSGravCompensation(this->robot_));
 	}
 	return *this;
 }
-
-
-
-
-void MotionBehaviour::waitMode()
-{
-	std::list<rxController*> controllers = control_set_->getControllers();
-	string_type controllers_to_string;
-	for(std::list< rxController* >::const_iterator controllers_it = controllers.begin();
-		controllers_it != controllers.end() ; controllers_it ++){
-			FeatureAttractorController* feature_control = dynamic_cast<FeatureAttractorController*>(*controllers_it);
-			if(feature_control)
-			{
-				feature_control->getFeaturePosition().print(_T("current_feature"));
-				HTransform ht;
-				rxBody* EE = robot_->getUCSBody(_T("EE"),ht);
-				dVector current_r = ht.r + EE->T().r;
-				current_r[0] += 0.2;
-				cout << "setting ee goal to " << endl;
-				current_r.print(_T("EE"));
-				feature_control->updateFeaturePosition(current_r[0],current_r[1],current_r[2]);
-				cout << "feature is: " << feature_control->activated() << endl;
-				feature_control->deactivate();
-			}
-	}
-}
-
 
 void MotionBehaviour::setMaxVelocityForInterpolation(double max_velocity) {
 	max_velocity_ = max_velocity;
