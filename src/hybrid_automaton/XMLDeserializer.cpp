@@ -720,6 +720,7 @@ rxController* XMLDeserializer::createController(TiXmlElement *rxController_xml, 
 	params.Vector3DGoal = deserializeDVector(rxController_xml, "Vector3DGoal");
 	params.RGoal = deserializeRotation(rxController_xml, "RGoal", Rotation());
 	params.rGoal = deserializeDVector(rxController_xml, "rGoal");
+	params.blackboard_variable_name = deserializeString(rxController_xml, "variable", "/position");
 	params.desired_distance = deserializeElement<double>(rxController_xml, "desiredDistance", 1.);
 	params.max_force = deserializeElement<double>(rxController_xml, "maxForce", 1.);
 	params.max_vel = deserializeElement<double>(rxController_xml, "maxVel", 1.);
