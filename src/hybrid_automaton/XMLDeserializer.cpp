@@ -13,6 +13,7 @@
 #include "ObstacleAvoidanceController.h"
 #include "JointBlackBoardController.h"
 #include "AuxiliaryForceBlackBoardController.h"
+#include "AuxiliaryForceController.h"
 #include "SingularityAvoidanceController.h"
 #include "JointLimitAvoidanceControllerOnDemand.h"
 #include "OpSpaceSingularityAvoidanceController.h"
@@ -721,7 +722,6 @@ rxController* XMLDeserializer::createController(TiXmlElement *rxController_xml, 
 	params.Vector3DGoal = deserializeDVector(rxController_xml, "Vector3DGoal");
 	params.RGoal = deserializeRotation(rxController_xml, "RGoal", Rotation());
 	params.rGoal = deserializeDVector(rxController_xml, "rGoal");
-	params.blackboard_variable_name = deserializeString(rxController_xml, "variable", "/force");
 	params.blackboard_variable_name = deserializeString(rxController_xml, "variable", "/position");
 	params.desired_distance = deserializeElement<double>(rxController_xml, "desiredDistance", 1.);
 	params.max_force = deserializeElement<double>(rxController_xml, "maxForce", 1.);
@@ -820,6 +820,14 @@ rxController* XMLDeserializer::createController(TiXmlElement *rxController_xml, 
 	{
 		AuxiliaryForceBlackBoardController* special_controller = new AuxiliaryForceBlackBoardController(robot, params.beta, Displacement(params.beta_displacement), params.alpha, Displacement(params.alpha_displacement), dT);
 		special_controller->setBlackBoardVariableName(params.blackboard_variable_name);
+		controller = special_controller;
+	}
+	else if (params.type == "AuxiliaryForceController")
+	{
+		AuxiliaryForceController* special_controller = new AuxiliaryForceController(robot, params.beta, Displacement(params.beta_displacement), params.alpha, Displacement(params.alpha_displacement), dT);
+		if(!goal_controller)
+			special_controller->addPoint(params.dVectorGoal, params.timeGoal, params.reuseGoal, eInterpolatorType_Cubic);
+		special_controller->setGain(params.kv, params.kp, params.invL2sqr);	
 		controller = special_controller;
 	}
 	else if (params.type == "SingularityAvoidanceController")
