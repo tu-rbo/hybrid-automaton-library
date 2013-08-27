@@ -16,28 +16,6 @@
 
 #include "controllers/include/TPImpedanceControlSet.h"
 
-template<class T>
-T deserializeElement(TiXmlElement * xml_element, const char * field_name);
-
-template<class T>
-T deserializeElement(TiXmlElement * xml_element, const char * field_name, T default_value);
-
-bool deserializeBoolean(TiXmlElement * xml_element, const char * field_name, bool default_value = false);
-
-std::string deserializeString(TiXmlElement * xml_element, const char * field_name, const std::string& default_value);
-std::string deserializeString(TiXmlElement * xml_element, const char * field_name, bool error_if_not_found=true);
-
-dVector deserializeDVector(TiXmlElement * xml_element, const char * field_name);
-
-Displacement deserializeDisplacement(TiXmlElement * xml_element, const char * field_name, const Displacement& default_value);
-Rotation deserializeRotation(TiXmlElement * xml_element, const char * field_name, const Rotation& default_value);
-
-rxBody* deserializeBody(rxSystem* robot, TiXmlElement * xml_element, const char * field_name, rxBody* default_value);
-
-template<class T>
-std::vector<T> deserializeStdVector(TiXmlElement * xml_element, const char * field_name);
-
-ViaPointBase * deserializeViaPoint(TiXmlElement * xml_element, ControllerType type_of_controller, int controller_dimension);
 
 /**
 * Replace the colons of a string with white spaces.
@@ -86,6 +64,56 @@ struct ControllerParameters {
 
 class XMLDeserializer
 {
+private:
+	
+	template<class T>
+	static T deserializeElement(TiXmlElement * xml_element, const char * field_name)
+	{
+		T return_value;
+
+		if(!xml_element->Attribute(field_name, &return_value))
+		{
+			std::string exception_str = std::string("[deserializeElement] ERROR: Attribute ") + std::string(field_name) + std::string(" was not found in XML element.");
+			throw exception_str;
+		}
+
+		return return_value;
+	}
+
+	template<class T>
+	static T deserializeElement(TiXmlElement * xml_element, const char * field_name, T default_value)
+	{
+		T return_value = default_value;
+		xml_element->Attribute(field_name, &return_value);
+		return return_value;
+	}
+	
+	template<class T>
+	static std::vector<T> deserializeStdVector(TiXmlElement * xml_element, const char * field_name)
+	{
+		std::vector<T> ret_vector;
+		std::stringstream vector_ss = std::stringstream(deserializeString(xml_element, field_name, false));
+		double vector_value = -1.0;
+		while ((vector_ss >> vector_value))
+		{
+			ret_vector.push_back((T)vector_value);
+		}
+		return ret_vector;
+	}
+
+	static bool deserializeBoolean(TiXmlElement * xml_element, const char * field_name, bool default_value = false);
+
+	static std::string deserializeString(TiXmlElement * xml_element, const char * field_name, const std::string& default_value);
+
+	static dVector deserializeDVector(TiXmlElement * xml_element, const char * field_name);
+
+	static Displacement deserializeDisplacement(TiXmlElement * xml_element, const char * field_name, const Displacement& default_value);
+	static Rotation deserializeRotation(TiXmlElement * xml_element, const char * field_name, const Rotation& default_value);
+
+	static rxBody* deserializeBody(rxSystem* robot, TiXmlElement * xml_element, const char * field_name, rxBody* default_value);
+
+	static ViaPointBase * deserializeViaPoint(TiXmlElement * xml_element, ControllerType type_of_controller, int controller_dimension);
+
 public:
 	/**
 	* Convert a wstring into a string.

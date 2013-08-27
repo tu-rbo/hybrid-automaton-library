@@ -45,29 +45,7 @@ std::wstring XMLDeserializer::string2wstring(const std::string& str)
 * Deserializing Functions
 */
 
-template<class T>
-T deserializeElement(TiXmlElement * xml_element, const char * field_name)
-{
-	T return_value;
-
-	if(!xml_element->Attribute(field_name, &return_value))
-	{
-		std::string exception_str = std::string("[deserializeElement] ERROR: Attribute ") + std::string(field_name) + std::string(" was not found in XML element.");
-		throw exception_str;
-	}
-
-	return return_value;
-}
-
-template<class T>
-T deserializeElement(TiXmlElement * xml_element, const char * field_name, T default_value)
-{
-	T return_value = default_value;
-	xml_element->Attribute(field_name, &return_value);
-	return return_value;
-}
-
-bool deserializeBoolean(TiXmlElement * xml_element, const char * field_name, bool default_value)
+bool XMLDeserializer::deserializeBoolean(TiXmlElement * xml_element, const char * field_name, bool default_value)
 {
 	const char* value = xml_element->Attribute(field_name);
 
@@ -85,7 +63,7 @@ bool deserializeBoolean(TiXmlElement * xml_element, const char * field_name, boo
 	return default_value;
 }
 
-std::string deserializeString(TiXmlElement * xml_element, const char * field_name, const std::string& default_value)
+std::string XMLDeserializer::deserializeString(TiXmlElement * xml_element, const char * field_name, const std::string& default_value)
 {
 	const char* ret_char_ptr = xml_element->Attribute(field_name);
 
@@ -95,24 +73,7 @@ std::string deserializeString(TiXmlElement * xml_element, const char * field_nam
 	return default_value;
 }
 
-std::string deserializeString(TiXmlElement * xml_element, const char * field_name, bool error_if_not_found)
-{
-	const char* ret_char_ptr = xml_element->Attribute(field_name);
-	if(ret_char_ptr)
-	{
-		return std::string(ret_char_ptr);
-	}else{
-		if(error_if_not_found)
-		{
-			std::string exception_str = std::string("[deserializeString] ERROR: Attribute ") 
-				+ std::string(field_name) + std::string(" was not found in XML element.");
-			throw exception_str;
-		}
-	}
-	return std::string();
-}
-
-dVector deserializeDVector(TiXmlElement * xml_element, const char * field_name)
+dVector XMLDeserializer::deserializeDVector(TiXmlElement * xml_element, const char * field_name)
 {
 	std::stringstream ss(deserializeString(xml_element, field_name, false));
 	dVector v;
@@ -125,7 +86,7 @@ dVector deserializeDVector(TiXmlElement * xml_element, const char * field_name)
 	return v;
 }
 
-Rotation deserializeRotation(TiXmlElement * xml_element, const char * field_name, const Rotation& default_value)
+Rotation XMLDeserializer::deserializeRotation(TiXmlElement * xml_element, const char * field_name, const Rotation& default_value)
 {
 	std::string rotation = deserializeString(xml_element, field_name, std::string(""));
 
@@ -135,7 +96,7 @@ Rotation deserializeRotation(TiXmlElement * xml_element, const char * field_name
 	return XMLDeserializer::string2rotation(rotation, default_value);
 }
 
-Displacement deserializeDisplacement(TiXmlElement * xml_element, const char * field_name, const Displacement& default_value)
+Displacement XMLDeserializer::deserializeDisplacement(TiXmlElement * xml_element, const char * field_name, const Displacement& default_value)
 {
 	dVector v = deserializeDVector(xml_element, field_name);
 	if (v.size() != 3)
@@ -144,7 +105,7 @@ Displacement deserializeDisplacement(TiXmlElement * xml_element, const char * fi
 	return v;
 }
 
-rxBody* deserializeBody(rxSystem* robot, TiXmlElement * xml_element, const char * field_name, rxBody* default_value)
+rxBody* XMLDeserializer::deserializeBody(rxSystem* robot, TiXmlElement * xml_element, const char * field_name, rxBody* default_value)
 {
 	std::string name = deserializeString(xml_element, field_name, std::string(""));
 	if (name.empty())
@@ -168,20 +129,7 @@ rxBody* deserializeBody(rxSystem* robot, TiXmlElement * xml_element, const char 
 
 }
 
-template<class T>
-std::vector<T> deserializeStdVector(TiXmlElement * xml_element, const char * field_name)
-{
-	std::vector<T> ret_vector;
-	std::stringstream vector_ss = std::stringstream(deserializeString(xml_element, field_name, false));
-	double vector_value = -1.0;
-	while ((vector_ss >> vector_value))
-	{
-		ret_vector.push_back((T)vector_value);
-	}
-	return ret_vector;
-}
-
-ViaPointBase * deserializeViaPoint(TiXmlElement * xml_element, ControllerType type_of_controller, int controller_dimension)
+ViaPointBase * XMLDeserializer::deserializeViaPoint(TiXmlElement * xml_element, ControllerType type_of_controller, int controller_dimension)
 {
 	ViaPointBase * return_value;
 	double via_point_time = deserializeElement<double>(xml_element, "time");
@@ -191,7 +139,7 @@ ViaPointBase * deserializeViaPoint(TiXmlElement * xml_element, ControllerType ty
 	{
 	case rxController::eControlType_Joint:	
 		{
-			std::stringstream via_point_ss = std::stringstream(deserializeString(xml_element, "dVector"));
+			std::stringstream via_point_ss = std::stringstream(deserializeString(xml_element, "dVector", ""));
 			double via_point_value = -1.0;
 			dVector via_point_dVector;
 			std::string value_str;
@@ -209,7 +157,7 @@ ViaPointBase * deserializeViaPoint(TiXmlElement * xml_element, ControllerType ty
 		}
 	case rxController::eControlType_Displacement:	
 		{
-			std::stringstream via_point_ss = std::stringstream(deserializeString(xml_element, "Vector3D"));
+			std::stringstream via_point_ss = std::stringstream(deserializeString(xml_element, "Vector3D", ""));
 			double via_point_value = -1.0;
 			Vector3D via_point_Vector3D;
 			for(int i=0; i<controller_dimension; i++)
@@ -222,7 +170,7 @@ ViaPointBase * deserializeViaPoint(TiXmlElement * xml_element, ControllerType ty
 		}
 	case rxController::eControlType_Orientation:	
 		{
-			std::stringstream via_point_ss = std::stringstream(deserializeString(xml_element, "R"));
+			std::stringstream via_point_ss = std::stringstream(deserializeString(xml_element, "R", ""));
 			double via_point_value = -1.0;
 			std::vector<double> via_point_values;
 			for(int i=0; i<9; i++)
@@ -237,7 +185,7 @@ ViaPointBase * deserializeViaPoint(TiXmlElement * xml_element, ControllerType ty
 		}
 	case rxController::eControlType_HTransform:	
 		{
-			std::stringstream via_point_ss = std::stringstream(deserializeString(xml_element, "R"));
+			std::stringstream via_point_ss = std::stringstream(deserializeString(xml_element, "R", ""));
 			double via_point_value = -1.0;
 			std::vector<double> via_point_values;
 			for(int i=0; i<9; i++)
@@ -248,7 +196,7 @@ ViaPointBase * deserializeViaPoint(TiXmlElement * xml_element, ControllerType ty
 			Rotation via_point_Rotation(via_point_values[0], via_point_values[1],via_point_values[2],via_point_values[3],
 				via_point_values[4],via_point_values[5],via_point_values[6],via_point_values[7],via_point_values[8]);
 
-			std::stringstream via_point_ss2 = std::stringstream(deserializeString(xml_element, "r"));
+			std::stringstream via_point_ss2 = std::stringstream(deserializeString(xml_element, "r", ""));
 			via_point_values.clear();
 			for(int i=0; i<9; i++)
 			{
@@ -452,7 +400,7 @@ HybridAutomaton* XMLDeserializer::createHybridAutomaton(const std::string& xml_s
 CSpaceMilestone* XMLDeserializer::createCSpaceMilestone(TiXmlElement* milestone_xml, rxSystem* robot, double dT)
 {
 	Milestone::Status mst_status = (Milestone::Status)deserializeElement<int>(milestone_xml, "status");
-	std::string mst_name = deserializeString(milestone_xml, "name");
+	std::string mst_name = deserializeString(milestone_xml, "name", "");
 	std::vector<double> mst_configuration = deserializeStdVector<double>(milestone_xml, "value");
 	std::vector<double> mst_epsilon = deserializeStdVector<double>(milestone_xml, "epsilon");
 	if(mst_configuration.size()==0 || mst_epsilon.size()==0)
@@ -494,7 +442,7 @@ CSpaceMilestone* XMLDeserializer::createCSpaceMilestone(TiXmlElement* milestone_
 CSpaceBlackBoardMilestone* XMLDeserializer::createCSpaceBlackBoardMilestone(TiXmlElement* milestone_xml, rxSystem* robot, double dT)
 {
 	Milestone::Status mst_status = (Milestone::Status)deserializeElement<int>(milestone_xml, "status");
-	std::string mst_name = deserializeString(milestone_xml, "name");
+	std::string mst_name = deserializeString(milestone_xml, "name", "");
 	std::vector<double> mst_configuration = deserializeStdVector<double>(milestone_xml, "value");
 	std::vector<double> mst_epsilon = deserializeStdVector<double>(milestone_xml, "epsilon");
 	if(mst_configuration.size()==0 || mst_epsilon.size()==0)
@@ -529,7 +477,7 @@ CSpaceBlackBoardMilestone* XMLDeserializer::createCSpaceBlackBoardMilestone(TiXm
 OpSpaceMilestone* XMLDeserializer::createOpSpaceMilestone(TiXmlElement* milestone_xml, rxSystem* robot, double dT)
 {
 	Milestone::Status mst_status = (Milestone::Status)deserializeElement<int>(milestone_xml, "status");
-	std::string mst_name = deserializeString(milestone_xml, "name");
+	std::string mst_name = deserializeString(milestone_xml, "name", "");
 	PosiOriSelector mst_pos = (PosiOriSelector)deserializeElement<int>(milestone_xml, "PosiOriSelector", POS_AND_ORI_SELECTION);
 	Displacement position = deserializeDisplacement(milestone_xml, "position", Displacement());
 	Rotation orientation = deserializeRotation(milestone_xml, "orientation", Rotation());
@@ -572,7 +520,7 @@ OpSpaceMilestone* XMLDeserializer::createOpSpaceMilestone(TiXmlElement* mileston
 PostureMilestone* XMLDeserializer::createPostureMilestone(TiXmlElement* milestone_xml, rxSystem* robot, double dT)
 {
 	Milestone::Status mst_status = (Milestone::Status)deserializeElement<int>(milestone_xml, "status");
-	std::string mst_name = deserializeString(milestone_xml, "name");
+	std::string mst_name = deserializeString(milestone_xml, "name", "");
 	PosiOriSelector mst_pos = (PosiOriSelector)deserializeElement<int>(milestone_xml, "PosiOriSelector", POS_AND_ORI_SELECTION);
 	Displacement position = deserializeDisplacement(milestone_xml, "position", Displacement());
 	Rotation orientation = deserializeRotation(milestone_xml, "orientation", Rotation());
@@ -704,7 +652,7 @@ rxController* XMLDeserializer::createController(TiXmlElement *rxController_xml, 
 	// iterate through all attributes (vs. iterate through parameter set)
 	// and fill parameter set (check for default values)
 	ControllerParameters params;
-	params.type = deserializeString(rxController_xml, "type");
+	params.type = deserializeString(rxController_xml, "type", "");
 	params.ik = deserializeBoolean(rxController_xml, "ik");
 	params.kp = deserializeDVector(rxController_xml, "kp");
 	params.kv = deserializeDVector(rxController_xml, "kv");
@@ -825,7 +773,7 @@ rxController* XMLDeserializer::createController(TiXmlElement *rxController_xml, 
 	else if (params.type == "AuxiliaryForceController")
 	{
 		AuxiliaryForceController* special_controller = new AuxiliaryForceController(robot, params.beta, Displacement(params.beta_displacement), params.alpha, Displacement(params.alpha_displacement), dT);
-		if(!goal_controller)
+		//if(!goal_controller)
 			special_controller->addPoint(params.dVectorGoal, params.timeGoal, params.reuseGoal, eInterpolatorType_Cubic);
 		special_controller->setGain(params.kv, params.kp, params.invL2sqr);	
 		controller = special_controller;
