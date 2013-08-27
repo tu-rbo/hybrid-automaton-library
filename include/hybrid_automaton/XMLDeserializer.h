@@ -92,7 +92,7 @@ private:
 	static std::vector<T> deserializeStdVector(TiXmlElement * xml_element, const char * field_name)
 	{
 		std::vector<T> ret_vector;
-		std::stringstream vector_ss = std::stringstream(deserializeString(xml_element, field_name, false));
+		std::stringstream vector_ss = std::stringstream(deserializeString(xml_element, field_name, ""));
 		double vector_value = -1.0;
 		while ((vector_ss >> vector_value))
 		{

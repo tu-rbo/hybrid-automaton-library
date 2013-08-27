@@ -75,7 +75,7 @@ std::string XMLDeserializer::deserializeString(TiXmlElement * xml_element, const
 
 dVector XMLDeserializer::deserializeDVector(TiXmlElement * xml_element, const char * field_name)
 {
-	std::stringstream ss(deserializeString(xml_element, field_name, false));
+	std::stringstream ss(deserializeString(xml_element, field_name, ""));
 	dVector v;
 	v.all(-1.0);
 	double value = -1.0;
@@ -88,7 +88,7 @@ dVector XMLDeserializer::deserializeDVector(TiXmlElement * xml_element, const ch
 
 Rotation XMLDeserializer::deserializeRotation(TiXmlElement * xml_element, const char * field_name, const Rotation& default_value)
 {
-	std::string rotation = deserializeString(xml_element, field_name, std::string(""));
+	std::string rotation = deserializeString(xml_element, field_name, "");
 
 	if (rotation.empty())
 		return default_value;
@@ -107,7 +107,7 @@ Displacement XMLDeserializer::deserializeDisplacement(TiXmlElement * xml_element
 
 rxBody* XMLDeserializer::deserializeBody(rxSystem* robot, TiXmlElement * xml_element, const char * field_name, rxBody* default_value)
 {
-	std::string name = deserializeString(xml_element, field_name, std::string(""));
+	std::string name = deserializeString(xml_element, field_name, "");
 	if (name.empty())
 		return default_value;
 
@@ -674,7 +674,7 @@ rxController* XMLDeserializer::createController(TiXmlElement *rxController_xml, 
 	params.desired_distance = deserializeElement<double>(rxController_xml, "desiredDistance", 1.);
 	params.max_force = deserializeElement<double>(rxController_xml, "maxForce", 1.);
 	params.max_vel = deserializeElement<double>(rxController_xml, "maxVel", 1.);
-	params.limit_body = deserializeString(rxController_xml, "limitBody", false);
+	params.limit_body = deserializeString(rxController_xml, "limitBody", "");
 	params.distance_limit = deserializeElement<double>(rxController_xml, "distanceLimit", 0.);
 	params.distance_threshold = deserializeElement<double>(rxController_xml, "distanceThreshold", 1.);
 	params.deactivation_threshold = deserializeElement<double>(rxController_xml, "deactivationThreshold", 1.);
@@ -695,7 +695,7 @@ rxController* XMLDeserializer::createController(TiXmlElement *rxController_xml, 
 	{
 		//Set EE as default body
 		HTransform transform;
-		params.beta = robot->getUCSBody(XMLDeserializer::string2wstring(deserializeString(rxController_xml, "beta", std::string("EE"))), transform);
+		params.beta = robot->getUCSBody(XMLDeserializer::string2wstring(deserializeString(rxController_xml, "beta", "EE")), transform);
 		params.beta_displacement = transform.r;
 		params.beta_rotation_matrix = transform.R;
 	}
@@ -774,7 +774,7 @@ rxController* XMLDeserializer::createController(TiXmlElement *rxController_xml, 
 	{
 		AuxiliaryForceController* special_controller = new AuxiliaryForceController(robot, params.beta, Displacement(params.beta_displacement), params.alpha, Displacement(params.alpha_displacement), dT);
 		//if(!goal_controller)
-			special_controller->addPoint(params.dVectorGoal, params.timeGoal, params.reuseGoal, eInterpolatorType_Cubic);
+		//	special_controller->addPoint(params.dVectorGoal, params.timeGoal, params.reuseGoal, eInterpolatorType_Cubic);
 		special_controller->setGain(params.kv, params.kp, params.invL2sqr);	
 		controller = special_controller;
 	}
