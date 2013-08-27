@@ -12,6 +12,7 @@
 #include "SubdisplacementSimpleController.h"
 #include "ObstacleAvoidanceController.h"
 #include "JointBlackBoardController.h"
+#include "AuxiliaryForceBlackBoardController.h"
 #include "SingularityAvoidanceController.h"
 #include "JointLimitAvoidanceControllerOnDemand.h"
 #include "OpSpaceSingularityAvoidanceController.h"
@@ -720,6 +721,7 @@ rxController* XMLDeserializer::createController(TiXmlElement *rxController_xml, 
 	params.Vector3DGoal = deserializeDVector(rxController_xml, "Vector3DGoal");
 	params.RGoal = deserializeRotation(rxController_xml, "RGoal", Rotation());
 	params.rGoal = deserializeDVector(rxController_xml, "rGoal");
+	params.blackboard_variable_name = deserializeString(rxController_xml, "variable", "/force");
 	params.blackboard_variable_name = deserializeString(rxController_xml, "variable", "/position");
 	params.desired_distance = deserializeElement<double>(rxController_xml, "desiredDistance", 1.);
 	params.max_force = deserializeElement<double>(rxController_xml, "maxForce", 1.);
@@ -733,7 +735,7 @@ rxController* XMLDeserializer::createController(TiXmlElement *rxController_xml, 
 	params.tc = deserializeStdVector<double>(rxController_xml, "taskConstraints");
 	params.alpha = deserializeBody(robot, rxController_xml, "alpha", NULL);
 	params.alpha_displacement = deserializeDisplacement(rxController_xml, "alphaDisplacement", Displacement());
-	params.alpha_rotation_matrix = deserializeRotation(rxController_xml, "alphaRotation", Rotation());	
+	params.alpha_rotation_matrix = deserializeRotation(rxController_xml, "alphaRotation", Rotation());
 	params.beta = deserializeBody(robot, rxController_xml, "beta", NULL);
 	if(params.beta != NULL)
 	{
@@ -812,6 +814,12 @@ rxController* XMLDeserializer::createController(TiXmlElement *rxController_xml, 
 		JointBlackBoardController* special_controller = new JointBlackBoardController(robot, dT);
 		special_controller->setBlackBoardVariableName(params.blackboard_variable_name);
 		special_controller->setGain(params.kv, params.kp, params.invL2sqr);	
+		controller = special_controller;
+	}
+	else if (params.type == "AuxiliaryForceBlackBoardController")
+	{
+		AuxiliaryForceBlackBoardController* special_controller = new AuxiliaryForceBlackBoardController(robot, params.beta, Displacement(params.beta_displacement), params.alpha, Displacement(params.alpha_displacement), dT);
+		special_controller->setBlackBoardVariableName(params.blackboard_variable_name);
 		controller = special_controller;
 	}
 	else if (params.type == "SingularityAvoidanceController")
@@ -1148,6 +1156,7 @@ std::map<std::string, ControllerType> XMLDeserializer::createControllerMapping()
 	mapping["SubdisplacementSimpleController"]				= ControllerType(rxController::eControlType_Displacement, SUBDISPLACEMENT);
 	mapping["ObstacleAvoidanceController"]					= ControllerType(rxController::eControlType_Functional, OBSTACLE_AVOIDANCE);
 	mapping["JointBlackBoardController"]					= ControllerType(rxController::eControlType_Joint, BLACKBOARD_ACCESS);
+	mapping["AuxiliaryForceBlackBoardController"]			= ControllerType(rxController::eControlType_Displacement, BLACKBOARD_ACCESS);
 
 	mapping["SingularityAvoidanceController"]				= ControllerType(rxController::eControlType_Joint, SINGULARITY_AVOIDANCE);
 	mapping["OpSpaceSingularityAvoidanceController"]    	= ControllerType(rxController::eControlType_Displacement, SINGULARITY_AVOIDANCE);
