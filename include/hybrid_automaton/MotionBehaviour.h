@@ -180,6 +180,12 @@ public:
 	bool updateControllers(MotionBehaviour* other);
 
 	/**
+	* Update the controllers of thisbehaviour with the current robot position. This will make the robot stop instantly.
+	* This function only executes if the _updateAllowed flag is set to true
+	*/
+	bool wait();
+
+	/**
 	* Create a string containing all the information necessary to construct a copy of this MotionBehaviour
 	*/
 	virtual std::string toStringXML() const;
@@ -212,6 +218,12 @@ public:
 	void setUpdateAllowed(bool updateAllowed);
 	bool isUpdateAllowed();
 
+	/**
+	* Calculates the expected motion time based on the controllers in this MotionBehaviours's control set.
+	* The interpolation time depends on the distance to the targets of all goal controllers
+	*/
+	double calculateInterpolationTime();
+
 private:
 
 	/**
@@ -236,10 +248,8 @@ private:
 	
 	std::map<string_type, bool>						goal_controllers_;	// tells us if a controller is goal controller or not (if its convergence must be checked or not) 
 
-		// obstacle avoidance, etc...
-	std::vector<OnDemandController*>				_onDemand_controllers;
+	std::vector<OnDemandController*>				_onDemand_controllers;  // All controllers that can deactivate if not needed (i.e. obstacle avoidance, joint limits)
 
-	void calculateInterpolationTime();
 	double calculateTimeToConverge(double default_min_time, double default_max_velocity, const dVector& error_x, const dVector& xd, const dVector& xd_desired);
 };
 

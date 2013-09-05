@@ -5,9 +5,6 @@
 #include "XMLDeserializer.h"
 #include "TPImpedanceControlSet.h"
 
-
-//#define NOT_IN_RT
-
 using namespace std;
 
 MotionBehaviour::MotionBehaviour() :
@@ -170,11 +167,11 @@ double MotionBehaviour::calculateTimeToConverge(double default_min_time, double 
 	return time_to_converge;
 }
 
-void MotionBehaviour::calculateInterpolationTime()
+double MotionBehaviour::calculateInterpolationTime()
 {
 	std::list<rxController*> controllers = control_set_->getControllers();
 
-	time_to_converge_ = min_time_;
+	double time = min_time_;
 
 	//First we iterate over all controllers and compute the maximal needed interpolation time
 	for(std::list<rxController*>::const_iterator it = controllers.begin(); it != controllers.end(); ++it)
@@ -216,7 +213,7 @@ void MotionBehaviour::calculateInterpolationTime()
 					// at least 5.0 seconds or maximally 0.3 rad/s if nothing is given
 					double ttc = calculateTimeToConverge(0.0, 0.20, desired_q - current_q, current_qd, desired_qd);					
 					std::cout << "[MotionBehaviour::calculate] INFO: Time of joint trajectory: " << ttc << std::endl;
-					time_to_converge_ =	max(time_to_converge_, ttc);
+					time =	max(time, ttc);
 
 					break;
 				}
@@ -247,7 +244,7 @@ void MotionBehaviour::calculateInterpolationTime()
 						// at least 5.0 seconds or maximally 0.2 m/s if nothing is given
 						double ttc = calculateTimeToConverge(0.0, 0.2, desired_r - current_r, current_rd, desired_rd);
 						std::cout << "[MotionBehaviour::calculate] INFO: Time of displacement trajectory: " << ttc << std::endl;
-						time_to_converge_ =	max(time_to_converge_, ttc);
+						time =	max(time, ttc);
 					}
 					break;
 				}
@@ -286,7 +283,7 @@ void MotionBehaviour::calculateInterpolationTime()
 					// at least 10.0 seconds or maximally 0.1 rad/s if nothing is given
 					double ttc = calculateTimeToConverge(0.0, 0.1, error_theta, current_thetad, desired_thetad);
 					std::cout << "[MotionBehaviour::calculate] INFO: Time of orientation trajectory: " << ttc << std::endl;
-					time_to_converge_ =	max(time_to_converge_, ttc);
+					time =	max(time, ttc);
 					break;
 				}
 			case rxController::eControlType_HTransform:
@@ -297,6 +294,8 @@ void MotionBehaviour::calculateInterpolationTime()
 			}
 		}
 	}
+
+	return time;
 }
 
 void MotionBehaviour::activate() 
@@ -306,7 +305,7 @@ void MotionBehaviour::activate()
 		return;
 	}
 
-	calculateInterpolationTime();
+	time_to_converge_ = calculateInterpolationTime();
 
 	std::list<rxController*> controllers = control_set_->getControllers();
 
@@ -582,6 +581,63 @@ dVector MotionBehaviour::update(double t)
 	return torque;
 }
 
+bool MotionBehaviour::wait()
+{
+	if(!updateAllowed_)
+		return false;
+
+	std::list<rxController*> controllers = control_set_->getControllers();
+	std::list<rxController*>::const_iterator it = controllers.begin();
+	
+	for( ; it != controllers.end(); ++it)
+	{
+		// We only add the goal defined by the child milestone to the controller if it is a goal controller
+		if(this->goal_controllers_.find((*it)->name())->second)
+		{
+			HTransform ht;
+			rxBody* EE = robot_->getUCSBody(_T("EE"), ht);
+			HTransform absolute_ht = EE->T() * ht;
+
+			// add the goal of the child milestone
+			switch((*it)->type()) {
+
+			case rxController::eControlType_Joint:
+				{
+					dynamic_cast<rxJointController*>(*it)->addPoint(robot_->q(), 0.0, false);
+					break;
+				}
+			case rxController::eControlType_Displacement:
+				{
+					dVector current_r = absolute_ht.r;
+
+					FeatureAttractorController* fac = dynamic_cast<FeatureAttractorController*>(*it);
+					if(fac)
+					{
+						fac->updateFeaturePosition(current_r[0], current_r[1], current_r[2]);
+					}
+					else
+					{
+						dynamic_cast<rxDisplacementController*>(*it)->addPoint(current_r, 0.0, false);
+					}
+					break;
+				}
+			case rxController::eControlType_Orientation:
+				{
+					dynamic_cast<rxOrientationController*>(*it)->addPoint(absolute_ht.R, 0.0, false);
+					break;
+				}
+			case rxController::eControlType_HTransform:
+				{
+					dynamic_cast<rxHTransformController*>(*it)->addPoint(absolute_ht, 0.0, false);
+					break;
+				}
+			}
+		}
+	}
+
+	return true;
+}
+
 bool MotionBehaviour::updateControllers(MotionBehaviour* other)
 {
 	if(!updateAllowed_ || !other->updateAllowed_)
@@ -593,7 +649,7 @@ bool MotionBehaviour::updateControllers(MotionBehaviour* other)
 	this->prob = other->prob;
 	this->length = other->length;
 
-	this->calculateInterpolationTime();
+	this->time_to_converge_ = this->calculateInterpolationTime();
 
 	std::list<rxController*> controllers = control_set_->getControllers();
 	std::list<rxController*>::const_iterator it = controllers.begin();
