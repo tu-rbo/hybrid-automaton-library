@@ -144,7 +144,7 @@ void HybridAutomatonManager::activateBlackboard(std::string &rlab_host, int rlab
 	while(!_blackboard->exists("/odom"))
 	{
 		std::cout<<"waiting for blackboard"<<std::endl;
-		_blackboard->subscribeToROSMessage("/tf/odom");
+		_blackboard->subscribeToTransform("/odom", "/map"); 
 		updateBlackboard();
 		Sleep(500);
 	}
@@ -398,10 +398,13 @@ void HybridAutomatonManager::_compute(const double& t)
 		MotionBehaviour* nextMotion; 
 		nextMotion = _criterion->getNextMotionBehaviour(queryMs,_hybrid_automaton, behaviourChange, t);
 
-		
-		//Switch motion behaviour
-		if(nextMotion && nextMotion != _activeMotionBehaviour)
+		if(!nextMotion)
 		{
+			_activeMotionBehaviour->wait();			
+		}
+		else if(nextMotion != _activeMotionBehaviour)
+		{	
+			//Switch motion behaviour
 			
 			//Try to update currently running behaviour instead of replacing it
 			if(_activeMotionBehaviour->updateControllers(nextMotion))
