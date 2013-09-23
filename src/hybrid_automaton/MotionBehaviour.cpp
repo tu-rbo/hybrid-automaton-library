@@ -170,6 +170,11 @@ double MotionBehaviour::calculateTimeToConverge(double default_min_time, double 
 double MotionBehaviour::calculateInterpolationTime()
 {
 	std::list<rxController*> controllers = control_set_->getControllers();
+	if(controllers.size()==0)
+	{
+		//std::cout<<"[MotionBehaviour::calculateInterpolationTime()] error: no controllers in control set"<<std::endl;
+		return -1.0;
+	}
 
 	double time = min_time_;
 
@@ -302,6 +307,7 @@ void MotionBehaviour::activate()
 {
 	if (!control_set_)
 	{
+		std::cout<<"[MotionBehaviour::activate()] Error: no control set found"<<std::endl;
 		return;
 	}
 
@@ -395,6 +401,52 @@ bool MotionBehaviour::hasConverged()
 {
 	std::cout << "[MotionBehaviour::hasConverged] ERROR: This function is deprecated and should not be called!" << std::endl;
 	return false;
+}
+
+dVector MotionBehaviour::getGoal() const
+{
+	dVector goal(0,0.0);
+	if (!control_set_)
+	{
+		return goal;
+	}
+
+	std::list<rxController*> controllers = control_set_->getControllers();
+
+	for(std::list<rxController*>::const_iterator it = controllers.begin(); it != controllers.end(); ++it)
+	{
+		if(this->goal_controllers_.find((*it)->name())->second)
+		{
+
+			// add the goal of the child milestone
+			switch((*it)->type()) {
+
+			case rxController::eControlType_Joint:
+				{
+                    dVector qGoal= ((Milestone*)child)->getConfiguration();
+					goal.expand(qGoal.size(),qGoal);
+					break;
+				}
+			case rxController::eControlType_Displacement:
+				{
+					dVector rGoal = ((OpSpaceMilestone*)child)->getPosition();
+					goal.expand(rGoal.size(),rGoal);
+					break;
+				}
+			case rxController::eControlType_Orientation:
+				{
+					// N/A
+					break;
+				}
+			case rxController::eControlType_HTransform:
+				{
+					// N/A
+					break;
+				}
+			}
+		}
+	}	
+	return goal;
 }
 
 dVector MotionBehaviour::getError() const
@@ -640,11 +692,10 @@ bool MotionBehaviour::wait()
 
 bool MotionBehaviour::updateControllers(MotionBehaviour* other)
 {
-	if(!updateAllowed_ || !other->updateAllowed_)
-		return false;
-
 	//Change the edge parameters
 	this->setChild(other->child);
+	dVector desired_q = ((Milestone*)child)->getConfiguration();
+
 	this->setParent(other->parent);
 	this->prob = other->prob;
 	this->length = other->length;
@@ -666,7 +717,6 @@ bool MotionBehaviour::updateControllers(MotionBehaviour* other)
 				{
 					dVector current_q = robot_->q();
 					//Use the goal from the update
-                    dVector desired_q = ((Milestone*)child)->getConfiguration();
 
 					if(robot_->jdof() == 10)
 					{	

@@ -154,6 +154,8 @@ public:
 	*/
 	bool hasConverged();
 
+	dVector getGoal() const;
+
 	/**
 	* Get the current error from the control set
 	*/
