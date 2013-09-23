@@ -4,7 +4,7 @@ LocalDecisionCriterion::LocalDecisionCriterion()
 {
 }
 
-MotionBehaviour* LocalDecisionCriterion::getNextMotionBehaviour(const Milestone* current, HybridAutomaton* ha, bool newBehaviour, double time)
+MotionBehaviour* LocalDecisionCriterion::getNextMotionBehaviour(const Milestone* current, HybridAutomaton* ha, bool newBehaviour, double time, dVector q)
 {
 	if(newBehaviour)
 	{

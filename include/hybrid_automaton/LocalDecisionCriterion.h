@@ -20,7 +20,7 @@ public:
 	* @ha The hybrid automaton
 	* @newBehaviour false if the controller switch is due to a sensor update and happens regularly. In this case @ha did not change from the last call.
 	*/
-	virtual MotionBehaviour* getNextMotionBehaviour(const Milestone* current, HybridAutomaton* ha, bool newBehaviour, double time=0.0);
+	virtual MotionBehaviour* getNextMotionBehaviour(const Milestone* current, HybridAutomaton* ha, bool newBehaviour, double time=0.0, dVector q=dVector());
 };
 
 #endif // LOCAL_DECISION_CRITERION_
