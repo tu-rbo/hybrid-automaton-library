@@ -144,7 +144,7 @@ void HybridAutomatonManager::activateBlackboard(std::string &rlab_host, int rlab
 	while(!_blackboard->exists("/odom"))
 	{
 		std::cout<<"waiting for blackboard"<<std::endl;
-		_blackboard->subscribeToTransform("/odom", "/map"); 
+		_blackboard->subscribeToTransform("/odom", "/map");
 		updateBlackboard();
 		Sleep(500);
 	}
@@ -367,7 +367,7 @@ void HybridAutomatonManager::_compute(const double& t)
 
 		_deserialized_hybrid_automatons.pop_front();
 		
-		std::cout << "[HybridAutomatonManager::_compute] INFO: Switching Hybrid Automaton" << std::endl;
+		//std::cout << "[HybridAutomatonManager::_compute] INFO: Switching Hybrid Automaton" << std::endl;
 
 		ReleaseMutex(_deserialize_mutex);
 
@@ -396,20 +396,22 @@ void HybridAutomatonManager::_compute(const double& t)
 	if(_hybrid_automaton)
 	{
 		MotionBehaviour* nextMotion; 
-		nextMotion = _criterion->getNextMotionBehaviour(queryMs,_hybrid_automaton, behaviourChange, t);
+		nextMotion = _criterion->getNextMotionBehaviour(queryMs,_hybrid_automaton, behaviourChange, t, _sys->q());
 
-		if(!nextMotion)
+		//Switch motion behaviour
+		if(nextMotion && nextMotion != _activeMotionBehaviour)
 		{
-			_activeMotionBehaviour->wait();			
-		}
-		else if(nextMotion != _activeMotionBehaviour)
-		{	
-			//Switch motion behaviour
-			
-			//Try to update currently running behaviour instead of replacing it
-			if(_activeMotionBehaviour->updateControllers(nextMotion))
+			if(nextMotion->isUpdateAllowed() && _activeMotionBehaviour->isUpdateAllowed())
 			{
-				std::cout << "[HybridAutomatonManager::_compute] INFO: Updated goal towards "<< ((Milestone*)(nextMotion->getChild()))->getName() << std::endl;
+				dVector delta = nextMotion->getGoal() - _activeMotionBehaviour->getGoal();
+
+				//Try to update currently running behaviour instead of replacing it
+				if(delta.norm() > 0.01)
+				{
+					_activeMotionBehaviour->updateControllers(nextMotion);
+					Milestone* next=(Milestone*)(nextMotion->getChild());
+					std::cout << "[HybridAutomatonManager::_compute] INFO: Updated goal towards "<< next->getName() << " ,x="<<next->getConfiguration()[7]<<", y="<<next->getConfiguration()[8]<<std::endl;
+				}
 			}
 			else
 			{
