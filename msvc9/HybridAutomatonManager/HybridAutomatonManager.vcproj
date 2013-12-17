@@ -190,10 +190,6 @@
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
 			<File
-				RelativePath="..\..\..\applications\elastic_roadmap\src\CustomDrawManager.h"
-				>
-			</File>
-			<File
 				RelativePath="..\..\include\hybrid_automaton_manager\HybridAutomatonManager.h"
 				>
 			</File>
@@ -201,42 +197,6 @@
 				RelativePath="..\..\include\hybrid_automaton_manager\HybridAutomatonManagerCmd.h"
 				>
 			</File>
-			<Filter
-				Name="controllers"
-				>
-				<File
-					RelativePath="..\..\..\collision_detection\collision_interface\include\CollisionInterface.h"
-					>
-				</File>
-				<File
-					RelativePath="..\..\..\controllers\include\FeatureAttractorController.h"
-					>
-				</File>
-				<File
-					RelativePath="..\..\..\controllers\include\JointLimitAvoidanceControllerOnDemand.h"
-					>
-				</File>
-				<File
-					RelativePath="..\..\..\controllers\include\ObstacleAvoidanceController.h"
-					>
-				</File>
-				<File
-					RelativePath="..\..\..\controllers\include\OpSpaceSingularityAvoidanceController.h"
-					>
-				</File>
-				<File
-					RelativePath="..\..\..\controllers\include\ReInterpolatedJointImpedanceController.h"
-					>
-				</File>
-				<File
-					RelativePath="..\..\..\controllers\include\SingularityAvoidanceController.h"
-					>
-				</File>
-				<File
-					RelativePath="..\..\..\controllers\include\SubdisplacementController.h"
-					>
-				</File>
-			</Filter>
 		</Filter>
 		<Filter
 			Name="Resource Files"
