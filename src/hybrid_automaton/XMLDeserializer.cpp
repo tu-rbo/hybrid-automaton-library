@@ -24,12 +24,13 @@
 #include "PressureDisplacementController.h"
 #include "PressureOrientationController.h"
 
-#include "NakamuraControlSet.h"
+#include "PreferredPostureController.h"
 
+#include "NakamuraControlSet.h"
+#include "TPImpedanceControlSet.h"
 
 std::map<std::string, ControllerType> XMLDeserializer::controller_map_ = XMLDeserializer::createControllerMapping();
-
-TPImpedanceControlSet* XMLDeserializer::_TPImpedanceControlSet_obj = NULL;
+std::map<std::string, rxControlSetBase*> XMLDeserializer::_controlSetMap;
 
 std::string XMLDeserializer::wstring2string(const std::wstring& wstr)
 {
@@ -264,7 +265,6 @@ std::string colon2space(std::string text)
 
 XMLDeserializer::XMLDeserializer()
 {
-	_TPImpedanceControlSet_obj = NULL;
 }
 
 XMLDeserializer::~XMLDeserializer()
@@ -297,24 +297,24 @@ HybridAutomaton* XMLDeserializer::createHybridAutomaton(const std::string& xml_s
 		return NULL;
 	}
 
-	std::string start_node = std::string(ha_element->Attribute("InitialMilestone"));
+	std::string ha_name(ha_element->Attribute("Name"));
+	// Print out a message with the general properties of the new HybridAutomaton.
+	std::cout << "[XMLDeserializer::createHybridAutomaton] INFO: Creating hybrid system '" << ha_name<<std::endl;// << "'. Initial Milestone: " << start_node << std::endl;
+
+	ha_name.append(".txt");
+	ofstream file;
+	file.open(ha_name.c_str());
+	file << xml_string;
+	file.close();	
+
+	std::string start_node = deserializeString(ha_element, "InitialMilestone", "");
 	if(start_node == std::string("")) {
 		std::cout << "[XMLDeserializer::createHybridAutomaton] ERROR: Attribute \"InitialMilestone\" not found in XML element hsElement." << std::endl;
 		delete automaton;
 		return NULL;
 	}
 
-	std::string ha_name(ha_element->Attribute("Name"));
-	// Print out a message with the general properties of the new HybridAutomaton.
-	std::cout << "[XMLDeserializer::createHybridAutomaton] INFO: Creating hybrid system '" << ha_name<<std::endl;// << "'. Initial Milestone: " << start_node << std::endl;
 
-	/*
-	ha_name.append(".txt");
-	ofstream file;
-	file.open(ha_name.c_str());
-	file << xml_string;
-	file.close();
-	*/
 	// Read the data of the nodes-milestones and create them
 	for (TiXmlElement* mst_element = ha_element->FirstChildElement("Milestone"); mst_element != 0; mst_element = mst_element->NextSiblingElement("Milestone")) {
 		Milestone* mst;
@@ -570,57 +570,71 @@ MotionBehaviour* XMLDeserializer::createMotionBehaviour(TiXmlElement* motion_beh
 		throw std::string("[XMLDeserializer::createMotionBehaviour] ERROR: ControlSet element was not found.");
 	}
 
-	std::string control_set_type = std::string(control_set_element->Attribute("type"));
 	rxControlSetBase* mb_control_set = NULL;
-	if(robot)
+	bool createdControlSet = true;
+
+	std::string control_set_name = deserializeString(control_set_element, "name", "");
+	std::map<std::string, rxControlSetBase*>::iterator it = _controlSetMap.find(control_set_name);
+	if(it != _controlSetMap.end())
 	{
-		if(control_set_type == std::string("rxControlSet"))
-		{		
-			mb_control_set = new rxControlSet(robot, dT);
-			mb_control_set->setGravity(0, 0, -GRAV_ACC);
-			mb_control_set->setInverseDynamicsAlgorithm(new rxAMBSGravCompensation(robot));
-			//mb_control_set->nullMotionController()->setGain(0.02,0.0,0.01);
-			mb_control_set->nullMotionController()->setGain(0.0, 0.0, 0.0);
-		}
-		else if(control_set_type == std::string("rxTPOperationalSpaceControlSet"))
-		{		
-			mb_control_set = new rxTPOperationalSpaceControlSet(robot, dT);
-			mb_control_set->setGravity(0, 0, -GRAV_ACC);
-			mb_control_set->nullMotionController()->setGain(10.0,1.0); // taken from ERM values...
-		}
-		else if(control_set_type == "NakamuraControlSet")
+		//We already created this set - just use it
+		mb_control_set = it->second;
+		createdControlSet = false;
+	}
+	else
+	{
+		//Control set is new - create it
+		std::string control_set_type = std::string(control_set_element->Attribute("type"));
+		
+		if(robot)
 		{
-			mb_control_set = new NakamuraControlSet(robot, dT);
-			mb_control_set->setGravity(0, 0, -GRAV_ACC);
-			mb_control_set->nullMotionController()->setGain(0.0, 0.0, 0.0);
-		}
-		else if(control_set_type == "TPImpedanceControlSet")
-		{
-			
-			//CAUTION:: This is a hack and only works if we use controller updates!
-			if(!_TPImpedanceControlSet_obj )
+			if(control_set_type == std::string("rxControlSet"))
+			{		
+				mb_control_set = new rxControlSet(robot, dT);
+				mb_control_set->setGravity(0, 0, -GRAV_ACC);
+				mb_control_set->setInverseDynamicsAlgorithm(new rxAMBSGravCompensation(robot));
+				//mb_control_set->nullMotionController()->setGain(0.02,0.0,0.01);
+				mb_control_set->nullMotionController()->setGain(0.0, 0.0, 0.0);
+			}
+			else if(control_set_type == std::string("rxTPOperationalSpaceControlSet"))
+			{		
+				mb_control_set = new rxTPOperationalSpaceControlSet(robot, dT);
+				mb_control_set->setGravity(0, 0, -GRAV_ACC);
+				mb_control_set->nullMotionController()->setGain(10.0,1.0); // taken from ERM values...
+			}
+			else if(control_set_type == "NakamuraControlSet")
 			{
-				_TPImpedanceControlSet_obj  = new TPImpedanceControlSet(robot, dT);
-				_TPImpedanceControlSet_obj->setGravity(0, 0, -GRAV_ACC);
+				mb_control_set = new NakamuraControlSet(robot, dT);
+				mb_control_set->setGravity(0, 0, -GRAV_ACC);
+				mb_control_set->nullMotionController()->setGain(0.0, 0.0, 0.0);
+			}
+			else if(control_set_type == "TPImpedanceControlSet")
+			{
+				mb_control_set = new TPImpedanceControlSet(robot, dT);
+				mb_control_set->setGravity(0, 0, -GRAV_ACC);
 				// TPImpedanceControlSet does not implement extra nullmotion behaviour - 
 				// This has to be done at lowest priority!
-				_TPImpedanceControlSet_obj->nullMotionController()->setGain(0.0, 0.0, 0.0);
+				mb_control_set->nullMotionController()->setGain(0.0, 0.0, 0.0);
 			}
-			
-			mb_control_set = _TPImpedanceControlSet_obj;
+			else
+			{
+				std::cout << control_set_type << std::endl;
+				throw std::string("[XMLDeserializer::createMotionBehaviour] ERROR: Unknown type of rxControlSet.");
+			}
 
+			if(control_set_name != "")
+			{
+				_controlSetMap.insert(std::pair<std::string, rxControlSetBase*>(control_set_name, mb_control_set));
+			}
+
+			createdControlSet = true;
 		}
-		else
-		{
-			std::cout << control_set_type << std::endl;
-			throw std::string("[XMLDeserializer::createMotionBehaviour] ERROR: Unknown type of rxControlSet.");
-		}	
 	}
 
 	MotionBehaviour* mb = new MotionBehaviour(dad, son , mb_control_set);
 
-	bool update  = deserializeBoolean(motion_behaviour_xml, "updateAllowed", false);
-	mb->setUpdateAllowed(update);
+	bool updateAllowed = deserializeBoolean(motion_behaviour_xml, "updateAllowed", false);
+	mb->setUpdateAllowed(updateAllowed);
 
 	mb->setMinTimeForInterpolation(deserializeElement<double>(motion_behaviour_xml, "minTime",-1.));
 	mb->setMaxVelocityForInterpolation(deserializeElement<double>(motion_behaviour_xml, "maxVelocity",-1.));
@@ -630,11 +644,9 @@ MotionBehaviour* XMLDeserializer::createMotionBehaviour(TiXmlElement* motion_beh
 	{	
 		bool mb_goal_controller = deserializeBoolean(rxController_xml, "goalController", true);		
 		rxController* mb_controller = XMLDeserializer::createController(rxController_xml, dad, son, robot, dT, mb_goal_controller, mb_controller_counter);
-		mb->addController(mb_controller, mb_goal_controller, !createdControlSet);
+		mb->addController(mb_controller, mb_goal_controller, createdControlSet);
 		mb_controller_counter++;
 	}
-
-	createdControlSet = update;
 
 	double length = deserializeElement<double>(motion_behaviour_xml, "length", -1.0);
 	double prob   = deserializeElement<double>(motion_behaviour_xml, "probability", -1.0);
@@ -1028,6 +1040,29 @@ rxController* XMLDeserializer::createController(TiXmlElement *rxController_xml, 
 	else if (params.type == "PressureOrientationController")
 	{
 		controller = new PressureOrientationController(robot, params.beta, params.beta_rotation_matrix, params.alpha, params.alpha_rotation_matrix, dT);
+		controller->setGain(params.kv, params.kp, params.invL2sqr);
+	}
+	else if (params.type == "PreferredPostureController")
+	{
+		dVector maxVel(robot->jdof());
+		maxVel.resize(robot->jdof(), 0.0);
+		maxVel[0]=0.5;
+		maxVel[1]=0.55;
+		maxVel[2]=0.74;
+		maxVel[3]=0.75;
+		maxVel[4]=2.5;			
+		maxVel[5]=2.0;			
+		maxVel[6]=20.0;
+		maxVel[7]=0.36;
+		maxVel[8]=0.36;
+		maxVel[9]=3.0;	
+
+		dVector kr;
+		kr.resize(robot->jdof(), 0.0);
+		kr[7]=250.0;
+		kr[8]=250.0;
+		kr[9]=1.0;
+		controller = new PreferredPostureController(robot, dT, maxVel, kr);
 		controller->setGain(params.kv, params.kp, params.invL2sqr);
 	}
 	else

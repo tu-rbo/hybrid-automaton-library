@@ -4,6 +4,7 @@
 
 #include "XMLDeserializer.h"
 #include "TPImpedanceControlSet.h"
+#include "PreferredPostureController.h" 
 
 using namespace std;
 
@@ -116,7 +117,7 @@ MotionBehaviour::~MotionBehaviour()
 	}
 }
 
-void MotionBehaviour::addController(rxController* ctrl, bool is_goal_controller, bool addToMB) 
+void MotionBehaviour::addController(rxController* ctrl, bool is_goal_controller, bool updateControlSet) 
 {
 	if(ctrl){
 		if(ctrl->dt() != this->dT_)
@@ -125,7 +126,7 @@ void MotionBehaviour::addController(rxController* ctrl, bool is_goal_controller,
 		}
 		ctrl->deactivate();
 		goal_controllers_[ctrl->name()] = is_goal_controller;
-		if(addToMB)
+		if(updateControlSet)
 			control_set_->addController(ctrl, ctrl->name(), ctrl->priority());
 	}
 	else
@@ -160,7 +161,10 @@ double MotionBehaviour::calculateTimeToConverge(double default_min_time, double 
 		for (int i = 0; i < error_x.size(); i++) {
 			// the cubic case
 			// TODO: Check for quintic, linear, etc.
-			time_to_converge = max( fabs((6.0 * error_x[i]) / (xd[i] + xd_desired[i] + 4.0 * velocity)), time_to_converge);
+			time_to_converge = max( fabs((6.0 * error_x[i]) / (4.0 * velocity)), time_to_converge);
+			
+			//Arne: This was the previous version - we believe its wrong. for xd and xd_desired !=0 ttc is not linear anymore.
+			//time_to_converge = max( fabs((6.0 * error_x[i]) / (xd[i] + xd_desired[i] + 4.0 * velocity)), time_to_converge);
 		}
 	}
 	
@@ -350,7 +354,16 @@ void MotionBehaviour::activate()
 						}
 					}
 
-					dynamic_cast<rxJointController*>(*it)->addPoint(desired_q, time_to_converge_, false);
+					PreferredPostureController* ppc = dynamic_cast<PreferredPostureController*>(*it);
+					if(ppc)
+					{
+						ppc->setPosture(desired_q);
+					}
+					else
+					{
+						//The new goal is appended. If you want to replace the old goal, use the SetPointControllers
+						dynamic_cast<rxJointController*>(*it)->addPoint(desired_q, time_to_converge_, false);
+					}
 					break;
 				}
 			case rxController::eControlType_Displacement:
@@ -408,6 +421,7 @@ dVector MotionBehaviour::getGoal() const
 	dVector goal(0,0.0);
 	if (!control_set_)
 	{
+		std::cout << "[MotionBehaviour::hasConverged] ERROR: No control set!" << std::endl;
 		return goal;
 	}
 
@@ -417,7 +431,6 @@ dVector MotionBehaviour::getGoal() const
 	{
 		if(this->goal_controllers_.find((*it)->name())->second)
 		{
-
 			// add the goal of the child milestone
 			switch((*it)->type()) {
 
@@ -730,8 +743,16 @@ bool MotionBehaviour::updateControllers(MotionBehaviour* other)
 						}
 					}
 
-					//The new goal is appended. If you want to replace the old goal, use the SetPointControllers
-					dynamic_cast<rxJointController*>(*it)->addPoint(desired_q, time_to_converge_, false);
+					PreferredPostureController* ppc = dynamic_cast<PreferredPostureController*>(*it);
+					if(ppc)
+					{
+						ppc->setPosture(desired_q);
+					}
+					else
+					{
+						//The new goal is appended. If you want to replace the old goal, use the SetPointControllers
+						dynamic_cast<rxJointController*>(*it)->addPoint(desired_q, time_to_converge_, false);
+					}
 					break;
 				}
 			case rxController::eControlType_Displacement:

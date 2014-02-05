@@ -13,8 +13,7 @@
 #include "OpSpaceMilestone.h"
 #include "PostureMilestone.h"
 
-
-#include "controllers/include/TPImpedanceControlSet.h"
+#include "rxControlSDK\rxControlSDK.h"
 
 
 /**
@@ -151,8 +150,9 @@ public:
 
 	static std::map<std::string, ControllerType>	controller_map_;	// Translation between class name (string) of the controllers and their type
 
-	//We only want to create control sets once for performance reasons so we store every possible instance as a mmeber
-	static TPImpedanceControlSet*  _TPImpedanceControlSet_obj;
+	//We only want to create control sets once for performance reasons.
+	//Here we store every created controlSet with a name field
+	static std::map<std::string, rxControlSetBase*> _controlSetMap;
 
 	static bool createdControlSet;
 };

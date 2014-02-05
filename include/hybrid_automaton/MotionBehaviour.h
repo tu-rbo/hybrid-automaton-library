@@ -133,9 +133,9 @@ public:
 	* Add an rxController to the control set. 
 	* @param ctrl Pointer to the rxController object to be added.
 	* @param is_goal_controller Flag to mark if this controller must be checked for convergence of the MB
-	* @param addToMB If true, the controller will be added to the underlying rxControlSet. If false only goal and onDemand controllers will be updated.
+	* @param updateControlSet If true, the controller will be added to the underlying rxControlSet. If false only goal and onDemand controllers will be updated.
 	*/
-	void addController(rxController* ctrl, bool is_goal_controller, bool addToMB = true);
+	void addController(rxController* ctrl, bool is_goal_controller, bool updateControlSet = true);
 
 	/**
 	* Activate the controllers stored in the rxControlSet through the vector of rxController's (NOT WORKING!!!!)
