@@ -229,14 +229,38 @@ void HybridAutomatonManager::updateBlackboard()
 		locFrame.r = Displacement(localT->getPosition()[0],localT->getPosition()[1],localT->getPosition()[2]);
 		locFrame.R = Rotation(localT->getOrientation()[0],localT->getOrientation()[1],localT->getOrientation()[2],localT->getOrientation()[3]);		
 			
-		if( fabs(localT->getPosition()[0]-_localizedFrame.r(0)) < 0.2 
-		 && fabs(localT->getPosition()[1]-_localizedFrame.r(1)) < 0.2  
-		 && fabs(acos(locFrame.R(0,0)) - acos(_localizedFrame.R(0,0))) < 0.2 )
+		double maxLocalizationUpdate = 0.01;
+		double maxLocalizationUpdateTheta = 0.01;
+
+		double updateX = localT->getPosition()[0]-_localizedFrame.r(0);
+		double updateY = localT->getPosition()[1]-_localizedFrame.r(1);
+		double updateTheta = acos(locFrame.R(0,0)) - acos(_localizedFrame.R(0,0));
+
+		if( fabs(updateX) < 0.2 && fabs(updateY) < 0.2 && fabs(updateTheta) < 0.2 )
 		{
-			_localizedFrame = locFrame;
+			if(updateX > 0.0)
+				updateX = std::max(updateX, maxLocalizationUpdate);
+			else
+				updateX = std::min(updateX, -maxLocalizationUpdate);
+
+			if(updateY > 0.0)
+				updateY = std::max(updateY, maxLocalizationUpdate);
+			else
+				updateY = std::min(updateY, -maxLocalizationUpdate);
+
+			if(updateTheta > 0.0)
+				updateTheta = std::max(updateTheta, maxLocalizationUpdateTheta);
+			else
+				updateTheta = std::min(updateTheta, -maxLocalizationUpdateTheta);
+
+			_localizedFrame.Reset();
+			_localizedFrame.r[0] = updateX;
+			_localizedFrame.r[1] = updateY;
+			_localizedFrame.R.Set(updateTheta, 0.0, 0.0, ZYX);
 		}
 		else
 		{
+			//We have a large localization update - something went wrong
 			std::cout<<"Localization error exceeded 20cm! - update IGNORED!!!"<<std::endl;
 		}
 	}
