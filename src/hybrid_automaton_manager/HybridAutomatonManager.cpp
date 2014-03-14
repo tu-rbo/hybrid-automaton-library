@@ -239,19 +239,19 @@ void HybridAutomatonManager::updateBlackboard()
 		if( fabs(updateX) < 0.2 && fabs(updateY) < 0.2 && fabs(updateTheta) < 0.2 )
 		{
 			if(updateX > 0.0)
-				updateX = std::max(updateX, maxLocalizationUpdate);
+				updateX = max(updateX, maxLocalizationUpdate);
 			else
-				updateX = std::min(updateX, -maxLocalizationUpdate);
+				updateX = min(updateX, -maxLocalizationUpdate);
 
 			if(updateY > 0.0)
-				updateY = std::max(updateY, maxLocalizationUpdate);
+				updateY = max(updateY, maxLocalizationUpdate);
 			else
-				updateY = std::min(updateY, -maxLocalizationUpdate);
+				updateY = min(updateY, -maxLocalizationUpdate);
 
 			if(updateTheta > 0.0)
-				updateTheta = std::max(updateTheta, maxLocalizationUpdateTheta);
+				updateTheta = max(updateTheta, maxLocalizationUpdateTheta);
 			else
-				updateTheta = std::min(updateTheta, -maxLocalizationUpdateTheta);
+				updateTheta = min(updateTheta, -maxLocalizationUpdateTheta);
 
 			_localizedFrame.Reset();
 			_localizedFrame.r[0] = updateX;

@@ -88,6 +88,9 @@ struct ViaPointHTransform : ViaPointBase{
 	};
 };
 
+// forward declaration
+class OpSpaceMilestone;
+
 
 class MotionBehaviour: public MDPEdge
 {
@@ -224,7 +227,7 @@ public:
 	* Calculates the expected motion time based on the controllers in this MotionBehaviours's control set.
 	* The interpolation time depends on the distance to the targets of all goal controllers
 	*/
-	double calculateInterpolationTime();
+	void calculateInterpolationTime();
 
 private:
 
@@ -252,6 +255,8 @@ private:
 
 	std::vector<OnDemandController*>				_onDemand_controllers;  // All controllers that can deactivate if not needed (i.e. obstacle avoidance, joint limits)
 
+	void calculateInterpolationTimeRotation(const OpSpaceMilestone* goal);
+	void calculateInterpolationTimeDisplacement(const OpSpaceMilestone* goal, bool fac);
 	double calculateTimeToConverge(double default_min_time, double default_max_velocity, const dVector& error_x, const dVector& xd, const dVector& xd_desired);
 };
 

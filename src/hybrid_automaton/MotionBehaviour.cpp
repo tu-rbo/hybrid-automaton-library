@@ -171,16 +171,74 @@ double MotionBehaviour::calculateTimeToConverge(double default_min_time, double 
 	return time_to_converge;
 }
 
-double MotionBehaviour::calculateInterpolationTime()
+
+void MotionBehaviour::calculateInterpolationTimeRotation(const OpSpaceMilestone* goal)
+{
+	//dVector goal = ((Milestone*)child)->getConfiguration();
+	//Rotation goal_rot(goal[3], goal[4], goal[5]);		
+	//NOTE: Suposses that the orientation is defined with 
+	// goal[3] = roll
+	// goal[4] = pitch
+	// goal[5] = 
+	Rotation goal_rot = goal->getOrientation();
+	dVector desired_quat;
+	goal_rot.GetQuaternion(desired_quat);
+
+	// get current orientation
+	HTransform ht;
+	rxBody* EE = robot_->getUCSBody(_T("EE"), ht);
+	Rotation current_rot = ht.R * EE->T().R;
+	dVector current_quat;
+	current_rot.GetQuaternion(current_quat);
+
+	// get angular error
+	double theta = acos(current_quat.inner(desired_quat));
+	if (theta > M_PI/2.0)
+		theta -= M_PI/2.0;
+
+	dVector error_theta(1, theta);
+	dVector current_thetad(1, 0.0);
+	dVector desired_thetad(1, 0.0);
+	
+	/*
+	std::cout << "desired orientation: " << quat[0] << " " << quat[1] << " " << quat[2] << " " << quat[3] << std::endl;
+	*/
+	
+	// at least 10.0 seconds or maximally 0.1 rad/s if nothing is given
+	double ttc = calculateTimeToConverge(0.0, 0.1, error_theta, current_thetad, desired_thetad);
+	std::cout << "[MotionBehaviour::calculate] INFO: Time of orientation trajectory: " << ttc << std::endl;
+	time_to_converge_ =	max(time_to_converge_, ttc);
+}
+
+void MotionBehaviour::calculateInterpolationTimeDisplacement(const OpSpaceMilestone* goal, bool fac)
+{
+	// r1 and r2 to interpolate between
+	HTransform ht;
+	rxBody* EE = robot_->getUCSBody(_T("EE"), ht);
+	HTransform absolute_ht = EE->T() * ht;
+	dVector current_r = absolute_ht.r; //parent->getConfiguration();
+	dVector desired_r = goal->getPosition(); //->getConfiguration()
+
+	if(!fac)
+	{
+		// rd1 and rd2
+		dVector current_rd(current_r.size());
+		current_rd.zero();
+		dVector desired_rd(current_r.size());
+		desired_rd.zero();
+
+		// at least 5.0 seconds or maximally 0.2 m/s if nothing is given
+		double ttc = calculateTimeToConverge(0.0, 0.2, desired_r - current_r, current_rd, desired_rd);
+		std::cout << "[MotionBehaviour::calculate] INFO: Time of displacement trajectory: " << ttc << std::endl;
+		time_to_converge_ =	max(time_to_converge_, ttc);
+	}
+}
+
+void MotionBehaviour::calculateInterpolationTime()
 {
 	std::list<rxController*> controllers = control_set_->getControllers();
-	if(controllers.size()==0)
-	{
-		//std::cout<<"[MotionBehaviour::calculateInterpolationTime()] error: no controllers in control set"<<std::endl;
-		return -1.0;
-	}
 
-	double time = min_time_;
+	time_to_converge_ = min_time_;
 
 	//First we iterate over all controllers and compute the maximal needed interpolation time
 	for(std::list<rxController*>::const_iterator it = controllers.begin(); it != controllers.end(); ++it)
@@ -222,89 +280,31 @@ double MotionBehaviour::calculateInterpolationTime()
 					// at least 5.0 seconds or maximally 0.3 rad/s if nothing is given
 					double ttc = calculateTimeToConverge(0.0, 0.20, desired_q - current_q, current_qd, desired_qd);					
 					std::cout << "[MotionBehaviour::calculate] INFO: Time of joint trajectory: " << ttc << std::endl;
-					time =	max(time, ttc);
+					time_to_converge_ =	max(time_to_converge_, ttc);
 
 					break;
 				}
 			case rxController::eControlType_Displacement:
 				{
-					// r1 and r2 to interpolate between
-					HTransform ht;
-					rxBody* EE = robot_->getUCSBody(_T("EE"), ht);
-					HTransform absolute_ht = EE->T() * ht;
-					dVector current_r = absolute_ht.r; //parent->getConfiguration();
-					dVector desired_r = ((OpSpaceMilestone*)child)->getPosition(); //->getConfiguration()
-					
-					/*
-					std::cout << "current position: " << current_r[0] << " " << current_r[1] << " " << current_r[2] << std::endl;
-					std::cout << "current orientation: " << current_R[0] << " " << current_R[1] << " " << current_R[2] << " " << current_R[3] << std::endl;
-					std::cout << "desired position: " << desired_r[0] << " " << desired_r[1] << " " << desired_r[2] << std::endl;
-					*/
-
 					FeatureAttractorController* fac = dynamic_cast<FeatureAttractorController*>(*it);
-					if(!fac)
-					{
-						// rd1 and rd2
-						dVector current_rd(current_r.size());
-						current_rd.zero();
-						dVector desired_rd(current_r.size());
-						desired_rd.zero();
-
-						// at least 5.0 seconds or maximally 0.2 m/s if nothing is given
-						double ttc = calculateTimeToConverge(0.0, 0.2, desired_r - current_r, current_rd, desired_rd);
-						std::cout << "[MotionBehaviour::calculate] INFO: Time of displacement trajectory: " << ttc << std::endl;
-						time =	max(time, ttc);
-					}
+					calculateInterpolationTimeDisplacement((OpSpaceMilestone*) child, !(!fac));
 					break;
 				}
 			case rxController::eControlType_Orientation:
 				{
-					//dVector goal = ((Milestone*)child)->getConfiguration();
-					//Rotation goal_rot(goal[3], goal[4], goal[5]);		
-					//NOTE: Suposses that the orientation is defined with 
-					// goal[3] = roll
-					// goal[4] = pitch
-					// goal[5] = 
-					Rotation goal_rot = ((OpSpaceMilestone*)child)->getOrientation();
-					dVector desired_quat;
-					goal_rot.GetQuaternion(desired_quat);
-
-					// get current orientation
-					HTransform ht;
-					rxBody* EE = robot_->getUCSBody(_T("EE"), ht);
-					Rotation current_rot = ht.R * EE->T().R;
-					dVector current_quat;
-					current_rot.GetQuaternion(current_quat);
-
-					// get angular error
-					double theta = acos(current_quat.inner(desired_quat));
-					if (theta > M_PI/2.0)
-						theta -= M_PI/2.0;
-
-					dVector error_theta(1, theta);
-					dVector current_thetad(1, 0.0);
-					dVector desired_thetad(1, 0.0);
-					
-					/*
-					std::cout << "desired orientation: " << quat[0] << " " << quat[1] << " " << quat[2] << " " << quat[3] << std::endl;
-					*/
-					
-					// at least 10.0 seconds or maximally 0.1 rad/s if nothing is given
-					double ttc = calculateTimeToConverge(0.0, 0.1, error_theta, current_thetad, desired_thetad);
-					std::cout << "[MotionBehaviour::calculate] INFO: Time of orientation trajectory: " << ttc << std::endl;
-					time =	max(time, ttc);
+					calculateInterpolationTimeRotation((OpSpaceMilestone*) child);
 					break;
 				}
 			case rxController::eControlType_HTransform:
 				{
-					//TODO
+					FeatureAttractorController* fac = dynamic_cast<FeatureAttractorController*>(*it);
+					calculateInterpolationTimeDisplacement((OpSpaceMilestone*) child, !(!fac));
+					calculateInterpolationTimeRotation((OpSpaceMilestone*) child);
 					break;
 				}
 			}
 		}
 	}
-
-	return time;
 }
 
 void MotionBehaviour::activate() 
@@ -315,7 +315,7 @@ void MotionBehaviour::activate()
 		return;
 	}
 
-	time_to_converge_ = calculateInterpolationTime();
+	calculateInterpolationTime();
 
 	std::list<rxController*> controllers = control_set_->getControllers();
 
@@ -390,9 +390,14 @@ void MotionBehaviour::activate()
 				}
 			case rxController::eControlType_HTransform:
 				{
+					/*
 					dVector goal = ((Milestone*)child)->getConfiguration();
 					Vector3D goal_3D(goal[0],goal[1],goal[2]);
 					Rotation goal_rot(goal[3], goal[4], goal[5]);		//NOTE: Suposses that the orientation is defined with 
+					*/
+					OpSpaceMilestone* goal = (OpSpaceMilestone*) child;
+					Displacement goal_3D = goal->getPosition();
+					Rotation goal_rot = goal->getOrientation();
 
 					dynamic_cast<rxHTransformController*>(*it)->addPoint(HTransform(goal_rot, goal_3D), time_to_converge_, false);
 					break;
@@ -713,7 +718,7 @@ bool MotionBehaviour::updateControllers(MotionBehaviour* other)
 	this->prob = other->prob;
 	this->length = other->length;
 
-	this->time_to_converge_ = this->calculateInterpolationTime();
+	this->calculateInterpolationTime();
 
 	std::list<rxController*> controllers = control_set_->getControllers();
 	std::list<rxController*>::const_iterator it = controllers.begin();

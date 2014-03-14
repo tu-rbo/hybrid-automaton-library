@@ -18,11 +18,18 @@
 #include "JointLimitAvoidanceControllerOnDemand.h"
 #include "OpSpaceSingularityAvoidanceController.h"
 
+#include "InterpolatedBlackBoardSetPointDisplacementController.h"
+#include "InterpolatedBlackBoardSetPointOrientationController.h"
+#include "InterpolatedBlackBoardSetPointHTransformController.h"
+#include "InterpolatedBlackBoardStrainGaugeHTransformController.h"
 #include "InterpolatedSetPointDisplacementController.h"
+#include "InterpolatedSetPointDisplacementImpedanceController.h"
+#include "InterpolatedSetPointDisplacementRelativeGainsController.h"
 #include "InterpolatedSetPointJointController.h"
 #include "InterpolatedSetPointOrientationController.h"
 #include "PressureDisplacementController.h"
 #include "PressureOrientationController.h"
+#include "ForceHTransformController.h"
 
 #include "PreferredPostureController.h"
 
@@ -109,6 +116,11 @@ Displacement XMLDeserializer::deserializeDisplacement(TiXmlElement * xml_element
 rxBody* XMLDeserializer::deserializeBody(rxSystem* robot, TiXmlElement * xml_element, const char * field_name, rxBody* default_value)
 {
 	std::string name = deserializeString(xml_element, field_name, "");
+	return deserializeBody(robot, xml_element, default_value, name);
+}
+
+rxBody* XMLDeserializer::deserializeBody(rxSystem* robot, TiXmlElement * xml_element, rxBody* default_value, const std::string& name)
+{
 	if (name.empty())
 		return default_value;
 
@@ -126,8 +138,6 @@ rxBody* XMLDeserializer::deserializeBody(rxSystem* robot, TiXmlElement * xml_ele
 		+ name + std::string(" was not found in aml");
 	throw exception_str;
 	return NULL;
-
-
 }
 
 ViaPointBase * XMLDeserializer::deserializeViaPoint(TiXmlElement * xml_element, ControllerType type_of_controller, int controller_dimension)
@@ -604,7 +614,9 @@ MotionBehaviour* XMLDeserializer::createMotionBehaviour(TiXmlElement* motion_beh
 			}
 			else if(control_set_type == "NakamuraControlSet")
 			{
-				mb_control_set = new NakamuraControlSet(robot, dT);
+				dVector kp = deserializeDVector(control_set_element, "kp");
+				dVector kv = deserializeDVector(control_set_element, "kv");
+				mb_control_set = new NakamuraControlSet(robot, dT, kp, kv);
 				mb_control_set->setGravity(0, 0, -GRAV_ACC);
 				mb_control_set->nullMotionController()->setGain(0.0, 0.0, 0.0);
 			}
@@ -670,9 +682,9 @@ rxController* XMLDeserializer::createController(TiXmlElement *rxController_xml, 
 	params.kv = deserializeDVector(rxController_xml, "kv");
 	params.stiffness_b = deserializeDVector(rxController_xml, "stiffness_b");
 	params.stiffness_k = deserializeDVector(rxController_xml, "stiffness_k");
-	//params.impedance_m = deserializeElement<double>(rxController_xml, "impedance_m");
-	//params.impedance_b = deserializeElement<double>(rxController_xml, "impedance_b");
-	//params.impedance_k = deserializeElement<double> (rxController_xml, "impedance_k");
+	params.impedance_m = deserializeElement<double>(rxController_xml, "impedance_m", 0.2);
+	params.impedance_b = deserializeElement<double>(rxController_xml, "impedance_b", 8.0);
+	params.impedance_k = deserializeElement<double> (rxController_xml, "impedance_k", 20.0);
 	params.invL2sqr = deserializeDVector(rxController_xml, "invL2sqr");
 	params.priority = deserializeElement<int>(rxController_xml, "priority", 1);
 	params.timeGoal = deserializeElement<double>(rxController_xml, "timeGoal", -1.0);
@@ -693,9 +705,30 @@ rxController* XMLDeserializer::createController(TiXmlElement *rxController_xml, 
 	params.index = deserializeStdVector<long>(rxController_xml, "index");
 	params.safetyThresh = deserializeElement<double>(rxController_xml, "safetyThresh", 1.0);
 	params.tc = deserializeStdVector<double>(rxController_xml, "taskConstraints");
-	params.alpha = deserializeBody(robot, rxController_xml, "alpha", NULL);
-	params.alpha_displacement = deserializeDisplacement(rxController_xml, "alphaDisplacement", Displacement());
-	params.alpha_rotation_matrix = deserializeRotation(rxController_xml, "alphaRotation", Rotation());
+	
+	std::string tmp_alpha = deserializeString(rxController_xml, "alpha", "");
+	if (tmp_alpha.empty())
+	{
+		params.alpha = NULL;
+		params.alpha_displacement = deserializeDisplacement(rxController_xml, "alphaDisplacement", Displacement());
+		params.alpha_rotation_matrix = deserializeRotation(rxController_xml, "alphaRotation", Rotation());
+	}
+	else if (tmp_alpha == "relative_to_EE")
+	{
+		HTransform transform;
+		rxBody* ee = robot->getUCSBody(_T("EE"), transform);
+		HTransform absolute_transform = ee->T() * transform;
+		params.alpha = NULL;
+		params.alpha_displacement = absolute_transform.r;
+		params.alpha_rotation_matrix = absolute_transform.R;
+	}
+	else
+	{
+		params.alpha = deserializeBody(robot, rxController_xml, NULL, tmp_alpha);
+		params.alpha_displacement = deserializeDisplacement(rxController_xml, "alphaDisplacement", Displacement());
+		params.alpha_rotation_matrix = deserializeRotation(rxController_xml, "alphaRotation", Rotation());
+	}
+
 	params.beta = deserializeBody(robot, rxController_xml, "beta", NULL);
 	if(params.beta != NULL)
 	{
@@ -785,8 +818,13 @@ rxController* XMLDeserializer::createController(TiXmlElement *rxController_xml, 
 	else if (params.type == "AuxiliaryForceController")
 	{
 		AuxiliaryForceController* special_controller = new AuxiliaryForceController(robot, params.beta, Displacement(params.beta_displacement), params.alpha, Displacement(params.alpha_displacement), dT);
-		//if(!goal_controller)
-		//	special_controller->addPoint(params.dVectorGoal, params.timeGoal, params.reuseGoal, eInterpolatorType_Cubic);
+		if(!goal_controller)
+		{
+			if (params.dVectorGoal.size() == 3)
+			{
+				special_controller->setDesiredForce(params.dVectorGoal);
+			}
+		}
 		special_controller->setGain(params.kv, params.kp, params.invL2sqr);	
 		controller = special_controller;
 	}
@@ -1022,10 +1060,99 @@ rxController* XMLDeserializer::createController(TiXmlElement *rxController_xml, 
 		controller = new InterpolatedSetPointDisplacementController(robot, params.beta, params.beta_displacement, params.alpha, params.alpha_displacement, dT);
 		controller->setGain(params.kv, params.kp, params.invL2sqr);
 	}
+	else if (params.type == "InterpolatedBlackBoardSetPointDisplacementController")
+	{
+		InterpolatedBlackBoardSetPointDisplacementController* special_controller = new InterpolatedBlackBoardSetPointDisplacementController(robot, params.beta, params.beta_displacement, params.alpha, params.alpha_displacement, dT);
+
+		std::string frame = deserializeString(rxController_xml, "frame", "");
+		std::string parent = deserializeString(rxController_xml, "parent", "");
+		special_controller->setBlackBoardTransform(frame, parent);
+
+		special_controller->setGain(params.kv, params.kp, params.invL2sqr);	
+		controller = special_controller;
+	}
+	else if (params.type == "InterpolatedBlackBoardSetPointHTransformController")
+	{
+		InterpolatedBlackBoardSetPointHTransformController* special_controller = new InterpolatedBlackBoardSetPointHTransformController(robot, params.beta, HTransform(params.beta_rotation_matrix, params.beta_displacement), params.alpha, HTransform(params.alpha_rotation_matrix, params.alpha_displacement), dT);
+
+		std::string frame = deserializeString(rxController_xml, "frame", "");
+		std::string parent = deserializeString(rxController_xml, "parent", "");
+		special_controller->setBlackBoardTransform(frame, parent);
+
+		special_controller->setGain(params.kv, params.kp, params.invL2sqr);	
+		controller = special_controller;
+	}
+	else if (params.type == "InterpolatedBlackBoardStrainGaugeHTransformController")
+	{
+		InterpolatedBlackBoardStrainGaugeHTransformController* special_controller = new InterpolatedBlackBoardStrainGaugeHTransformController(robot, params.beta, HTransform(params.beta_rotation_matrix, params.beta_displacement), params.alpha, HTransform(params.alpha_rotation_matrix, params.alpha_displacement), dT);
+
+		//std::string frame = deserializeString(rxController_xml, "frame", "");
+		special_controller->setBlackBoardStrainGauge("strain_gauge");
+		dVector disp = deserializeDVector(rxController_xml, "direction");
+		if (disp.size() == 3)
+			special_controller->setDesiredDisplacement(disp);
+		
+		special_controller->setDesiredDistance(deserializeElement<double>(rxController_xml, "distance", 0.0));
+
+		std::vector<double> minmax = deserializeStdVector<double>(rxController_xml, "desired_strain_gauge");
+		if (!minmax.empty())
+			if (minmax.size() == 1)
+				special_controller->setDesiredStrainGauge(minmax[0], minmax[0]);
+			else
+				special_controller->setDesiredStrainGauge(minmax[0], minmax[1]);
+
+		dVector grad = deserializeDVector(rxController_xml, "gradient");
+		if (grad.size() == 3)
+			special_controller->setStrainGaugeGradient(grad);
+		
+		special_controller->setGain(params.kv, params.kp, params.invL2sqr);
+
+		controller = special_controller;
+	}
+	else if (params.type == "ForceHTransformController")
+	{
+		ForceHTransformController* special_controller = new ForceHTransformController(robot, params.beta, HTransform(params.beta_rotation_matrix, params.beta_displacement), params.alpha, HTransform(params.alpha_rotation_matrix, params.alpha_displacement), dT);
+
+		dVector disp = deserializeDVector(rxController_xml, "direction");
+		if (disp.size() == 3)
+			special_controller->setDesiredDisplacement(disp);
+		
+		special_controller->setDesiredDistance(deserializeElement<double>(rxController_xml, "distance", 0.0));
+
+		std::vector<double> minmax = deserializeStdVector<double>(rxController_xml, "desired_force");
+		if (!minmax.empty())
+			if (minmax.size() == 1)
+				special_controller->setDesiredForce(minmax[0], minmax[0]);
+			else
+				special_controller->setDesiredForce(minmax[0], minmax[1]);
+
+		dVector grad = deserializeDVector(rxController_xml, "gradient");
+		if (grad.size() == 3)
+			special_controller->setForceGradient(grad);
+		
+		special_controller->setGain(params.kv, params.kp, params.invL2sqr);
+
+		controller = special_controller;
+	}
+	else if (params.type == "InterpolatedSetPointDisplacementImpedanceController")
+	{
+		InterpolatedSetPointDisplacementImpedanceController* special_controller = new InterpolatedSetPointDisplacementImpedanceController(robot, params.beta, Displacement(params.beta_displacement), params.alpha, Displacement(params.alpha_displacement), dT);
+		//special_controller->setImpedance(0.2, 8.0, 20.0);
+		special_controller->setImpedance(params.impedance_m, params.impedance_b, params.impedance_k);
+		controller = special_controller;
+	}
+	else if (params.type == "InterpolatedSetPointDisplacementRelativeGainsController")
+	{
+		controller = new InterpolatedSetPointDisplacementRelativeGainsController(robot, params.beta, params.beta_displacement, params.alpha, params.alpha_displacement, dT);
+		controller->setGain(params.kv, params.kp, params.invL2sqr);
+	}
 	else if (params.type == "InterpolatedSetPointJointController")
 	{
-		controller = new InterpolatedSetPointJointController(robot, dT);
-		controller->setGain(params.kv, params.kp, params.invL2sqr);
+		InterpolatedSetPointJointController* special_controller = new InterpolatedSetPointJointController(robot, dT);
+		if(!goal_controller)
+			special_controller->addPoint(params.dVectorGoal, params.timeGoal, params.reuseGoal, eInterpolatorType_Cubic);
+		special_controller->setGain(params.kv, params.kp, params.invL2sqr);
+		controller = special_controller;
 	}
 	else if (params.type == "InterpolatedSetPointOrientationController")
 	{

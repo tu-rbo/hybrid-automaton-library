@@ -110,6 +110,7 @@ private:
 	static Rotation deserializeRotation(TiXmlElement * xml_element, const char * field_name, const Rotation& default_value);
 
 	static rxBody* deserializeBody(rxSystem* robot, TiXmlElement * xml_element, const char * field_name, rxBody* default_value);
+	static rxBody* deserializeBody(rxSystem* robot, TiXmlElement * xml_element, rxBody* default_value, const std::string& name);
 
 	static ViaPointBase * deserializeViaPoint(TiXmlElement * xml_element, ControllerType type_of_controller, int controller_dimension);
 
