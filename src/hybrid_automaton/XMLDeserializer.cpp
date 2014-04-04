@@ -1171,25 +1171,7 @@ rxController* XMLDeserializer::createController(TiXmlElement *rxController_xml, 
 	}
 	else if (params.type == "PreferredPostureController")
 	{
-		dVector maxVel(robot->jdof());
-		maxVel.resize(robot->jdof(), 0.0);
-		maxVel[0]=0.5;
-		maxVel[1]=0.55;
-		maxVel[2]=0.74;
-		maxVel[3]=0.75;
-		maxVel[4]=2.5;			
-		maxVel[5]=2.0;			
-		maxVel[6]=20.0;
-		maxVel[7]=0.36;
-		maxVel[8]=0.36;
-		maxVel[9]=3.0;	
-
-		dVector kr;
-		kr.resize(robot->jdof(), 0.0);
-		kr[7]=250.0;
-		kr[8]=250.0;
-		kr[9]=1.0;
-		controller = new PreferredPostureController(robot, dT, maxVel, kr);
+		controller = new PreferredPostureController(robot, dT);
 		controller->setGain(params.kv, params.kp, params.invL2sqr);
 	}
 	else
