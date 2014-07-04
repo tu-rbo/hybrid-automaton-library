@@ -59,8 +59,8 @@ void SequentialHybridAutomatonManager::updateBlackboard()
 	if(!_blackboard)
 		return;
 
-	if (_currentMotionBehavior && _currentMotionBehavior->getChild())
-		_blackboard->setBool("idle", ((Milestone*)_currentMotionBehavior->getChild())->hasConverged(_sys));
+	if (_activeMotionBehaviour && _activeMotionBehaviour->getChild())
+		_blackboard->setBool("idle", ((Milestone*)_activeMotionBehaviour->getChild())->hasConverged(_sys));
 	else
 		_blackboard->setBool("idle", false);
 
