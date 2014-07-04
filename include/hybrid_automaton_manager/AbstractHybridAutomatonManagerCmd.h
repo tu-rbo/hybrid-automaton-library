@@ -3,16 +3,14 @@
  * This library is commercial and cannot be redistributed, and/or modified
  * WITHOUT ANY ALLOWANCE OR PERMISSION OF SimLab Co., LTD.
  */
-#ifndef __HYBRIDAUTOMATONMANAGER_CMD_H__
-#define __HYBRIDAUTOMATONMANAGER_CMD_H__
+#ifndef __ABSTRACTHYBRIDAUTOMATONMANAGER_CMD_H__
+#define __ABSTRACTHYBRIDAUTOMATONMANAGER_CMD_H__
 
 #include "rCommand/rCmdDefine.h"
 
 #define DEFAULT_CMD		(RCMD_USER + 1)
 #define SERVO_ON		(RCMD_USER + 5)
 #define BLACKBOARD_ON	(RCMD_USER + 6)
-#define BLACKBOARD_OFF	(RCMD_USER + 7)
-#define ACTIVATE	(RCMD_USER + 7)
 
 // use this scheme as follows:
 // control->command(BLACKBOARD_ON, (1999 << 16) | (URI_BOTTOM_2 << 8) | (URI_HASMA << 0));

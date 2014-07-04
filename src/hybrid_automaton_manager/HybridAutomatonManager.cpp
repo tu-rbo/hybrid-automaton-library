@@ -14,68 +14,11 @@
 
 #include <process.h>
 
-unsigned __stdcall deserializeHybridAutomaton(void *udata)
-{
-	DeserializingThreadArguments* thread_args = static_cast<DeserializingThreadArguments*>(udata);
-	HybridAutomaton* ha = NULL;
-	try {
-		ha = XMLDeserializer::createHybridAutomaton(thread_args->_string, thread_args->_sys, thread_args->_dT);
-		//std::cout << "--------------- recieving hybrid automaton ------------------" << std::endl;
-		//std::cout << ha->toStringXML() << std::endl;
-	}
-	catch(std::string e)
-	{
-		std::cerr << "[deserializeHybridAutomaton] ERROR while deserializing hybrid automaton!" << std::endl;
-		std::cerr << e << std::endl;
-
-		delete ha;
-		delete thread_args;
-		return 0;
-	}
-
-	WaitForSingleObject(*(thread_args->_deserialize_mutex), INFINITE);
-	if(thread_args->_noQueue)
-	{
-		for(size_t i=0;i<thread_args->_deserialized_hybrid_automatons->size();i++)
-		{
-			delete thread_args->_deserialized_hybrid_automatons->at(i);
-		}
-		thread_args->_deserialized_hybrid_automatons->clear();	
-	}
-
-	thread_args->_deserialized_hybrid_automatons->push_back(ha);
-	ReleaseMutex(*(thread_args->_deserialize_mutex));
-	
-	delete thread_args;
-
-	return 0;
-}
-
-std::vector<double> convert(const dVector& in)
-{
-	std::vector<double> out(in.size());
-	for(int i = 0; i < in.size(); ++i)
-		out[i] = in[i];
-	return out;
-}
-
 HybridAutomatonManager::HybridAutomatonManager(rDC rdc) 
-:rControlAlgorithm(rdc)
-, _sys(NULL)
-, _blackboard(NULL)
-, _activeMotionBehaviour(NULL)
-, _dof(0)
-, _servo_on(false)
-, _hybrid_automaton(NULL)
+:AbstractHybridAutomatonManager(rdc)
 , _criterion(new LocalDecisionCriterion())
 , _active(false)
-, _noQueue(false)
 {
-	_deserialize_mutex = CreateMutex(0, FALSE, 0);
-	if( !_deserialize_mutex ) {
-		throw(std::string("[HybridAutomatonManager::HybridAutomatonManager] ERROR: Mutex was not created (_deserialize_mutex)!"));
-	}
-
 #ifdef USE_LOCALIZATION
 	_qLoc.resize(10);
 #endif
@@ -83,46 +26,8 @@ HybridAutomatonManager::HybridAutomatonManager(rDC rdc)
 
 HybridAutomatonManager::~HybridAutomatonManager()
 {
-	if(_activeMotionBehaviour)
-		delete _activeMotionBehaviour;
-
-	if(_blackboard)
-		delete _blackboard;
-
     if(_criterion)
 		delete _criterion;
-
-	//delete _defaultMotionBehavior;
-
-	FREE_SYSTEMS();
-}
-
-void HybridAutomatonManager::init(int mode)
-{
-	_sys = LOAD_SYSTEM(_path, _aml, _T0, _q0);
-	assert(_sys);
-
-	//std::cerr << " ROBOT " << _sys << std::endl;
-
-	_dof = _sys->jointDOF() + _sys->earthDOF() + _sys->constraintDOF();
-
-	//Initialize variables
-	_q.resize(_dof);
-	_qOld.resize(_dof);
-	_qdot.resize(_dof);
-	_torque.resize(_dof);
-
-	_q.zero();
-	_qOld.zero();
-	_torque.zero();
-	_qdot.zero();
-
-	//Find the robot device. This devicce is used to read position and write torques
-	//to the robot
-	_robot = findDevice(_T("ROBOT"));
-	RASSERT(_robot != INVALID_RHANDLE);
-
-	gravityCompensation();
 }
 
 void HybridAutomatonManager::gravityCompensation()
@@ -163,50 +68,8 @@ void HybridAutomatonManager::setLocalDecisionCriterion(LocalDecisionCriterion* c
 	_criterion=criterion;
 }
 
-void HybridAutomatonManager::setHybridAutomaton(std::string _new_hybrid_automaton_str)
-{
-	DeserializingThreadArguments* thread_args = new DeserializingThreadArguments();
-	thread_args->_sys = this->_sys;
-	thread_args->_string = _new_hybrid_automaton_str;
-	thread_args->_dT = this->_dT;
-	thread_args->_noQueue = this->_noQueue;
-	thread_args->_deserialize_mutex = &(this->_deserialize_mutex);
-	thread_args->_deserialized_hybrid_automatons = &(this->_deserialized_hybrid_automatons);
-
-	if (_beginthreadex(NULL, 0, deserializeHybridAutomaton, (void*)thread_args, 0, NULL) == 0)
-	{
-		std::cerr << "[HybridAutomatonManager::updateHybridAutomaton] Error creating thread to deserialize xml string!" << std::endl;
-	}
-}
-
-void HybridAutomatonManager::setHybridAutomaton(HybridAutomaton* _new_hybrid_automaton)
-{
-	WaitForSingleObject(_deserialize_mutex, INFINITE);
-	this->_deserialized_hybrid_automatons.push_back(_new_hybrid_automaton);
-	ReleaseMutex(_deserialize_mutex);
-}
-
-void HybridAutomatonManager::update(const rTime& t)
-{
-	this->updateHybridAutomaton();
-
-	rControlAlgorithm::update(t);
-
-	this->updateBlackboard();
-}
-
 void HybridAutomatonManager::updateBlackboard()
 {
-	if(!_blackboard)
-		return;
-
-	_blackboard->setJointState("/joint_state", _sys->q(), _sys->qdot(), _torque);
-
-	HTransform relative_transform;
-	rxBody* end_effector = _sys->getUCSBody(_T("EE"), relative_transform);
-	HTransform absolute_transform = end_effector->T() * relative_transform;
-	_blackboard->setTransform("ee", absolute_transform, "base_link");
-
 #ifdef USE_LOCALIZATION
 	std::vector<double> b_position;
 	std::vector<double> b_velocity;
@@ -266,72 +129,11 @@ void HybridAutomatonManager::updateBlackboard()
 	}
 #endif
 	
-	_blackboard->step();
-	
+	AbstractHybridAutomatonManager::updateBlackboard();
 }
-
-void HybridAutomatonManager::updateHybridAutomaton()
-{
-	if (_blackboard && _blackboard->isUpdated("update_hybrid_automaton"))
-	{
-		rlab::String* ha_xml = dynamic_cast<rlab::String*>(_blackboard->getData("update_hybrid_automaton"));
-		try
-		{
-			DeserializingThreadArguments* thread_args = new DeserializingThreadArguments();
-			thread_args->_sys = this->_sys;
-			thread_args->_string = ha_xml->get();
-			thread_args->_dT = this->_dT;
-			thread_args->_noQueue= this->_noQueue;
-			thread_args->_deserialize_mutex = &(this->_deserialize_mutex);
-			thread_args->_deserialized_hybrid_automatons = &(this->_deserialized_hybrid_automatons);
-
-			if (_beginthreadex(NULL, 0, deserializeHybridAutomaton, (void*)thread_args, 0, NULL) == 0)
-			{
-				std::cerr << "[HybridAutomatonManager::updateHybridAutomaton] Error creating thread to deserialize xml string!" << std::endl;
-			}
-		}
-		catch(::std::string e)
-		{
-			std::cout << "[HybridAutomatonManager::updateHybridAutomaton] Error caught: " << std::endl;
-			::std::cout << e << ::std::endl;
-		}
-	}
-}
-
-void HybridAutomatonManager::setNominalSystem(const TCHAR* path, const TCHAR* aml, const HTransform& T0, const dVector& q0)
-{
-	this->_path = path;
-	this->_aml = aml;
-	this->_T0 = T0;
-	this->_q0 = q0;
-}
-
-void HybridAutomatonManager::setPeriod(const rTime& dT)
-{
-	this->_dT = dT;
-}
-
-
-void HybridAutomatonManager::_readDevices()
-{	
-	_qOld = _q;
-
-	int r = readDeviceValue(_robot, &_q[0], sizeof(double) * _q.size(), 0);
-	assert (r == sizeof(double) * _q.size());
-
-}
-
-
-void HybridAutomatonManager::_writeDevices()
-{
-	int w = writeDeviceValue(_robot, &_torque[0], sizeof(double) * _torque.size());
-	assert(w == sizeof(double)*_torque.size());
-}
-
 
 void HybridAutomatonManager::_reflect()
 {
-	
 #ifdef USE_LOCALIZATION
 	HTransform odoT;
 	odoT.r = Displacement(_q[7], _q[8], 0.0);
@@ -362,17 +164,8 @@ void HybridAutomatonManager::_reflect()
 	_sys->qdot(_qdot);
 }
 
-void HybridAutomatonManager::_compute(const double& t)
+void HybridAutomatonManager::updateMotionBehaviour(const rTime& t)
 {
-	if (_servo_on)
-	{
-		_torque = _activeMotionBehaviour->update(t);
-	}
-	else 
-	{
-		_torque.zero();
-	}
-
 	if(!_active)
 		return;
 
@@ -449,115 +242,20 @@ void HybridAutomatonManager::_compute(const double& t)
 	}
 }
 
-
-
-void HybridAutomatonManager::_estimate()
-{
-	//We calculate the velocity here. This might not be the best option.
-	_qdot  = _q - _qOld;
-	_qdot /= _dT;
-}
-
 int HybridAutomatonManager::command(const short& cmd, const int& arg)
 {
+	AbstractHybridAutomatonManager::command(cmd, arg);
+
 	switch (cmd)
 	{
-	case SERVO_ON:
-		{
-			_servo_on = !_servo_on;
-			std::cout << "[HybridAutomatonManager::command] Servo ON: " << _servo_on << std::endl;
-		}
-		break;
-
-	case ACTIVATE:
+		case ACTIVATE:
 		{
 			_active = !_active;
 		}
 		break;
-		
-	case BLACKBOARD_ON:
-		{
-			std::map<int, std::string> domain_names;
-			domain_names[URI_LOCAL] = "";
-			domain_names[URI_BOTTOM_1] = "130.149.238.178";
-			domain_names[URI_BOTTOM_2] = "130.149.238.179";
-			domain_names[URI_BOTTOM_3] = "130.149.238.180";
-			domain_names[URI_LOHENGRIN] = "130.149.238.186";
-			domain_names[URI_HASMA] = "130.149.238.184";
-			domain_names[URI_LEIBNIZ] = "130.149.238.185";
-            domain_names[URI_POSEIDON] = "130.149.238.193";
-			domain_names[URI_FIRSTMM] = "130.149.238.220";
-			domain_names[URI_SHOEFER] = "130.149.238.182";
-			domain_names[URI_RBO_EXTRA] = "130.149.238.188";
-
-			int bit_code = arg;
-			
-			int port = bit_code >> 16;
-			bit_code &= ~(port << 16);
-			
-			int local_host = bit_code >> 8;
-			bit_code &= ~(local_host << 8);
-
-			int remote_host = bit_code;
-			
-			std::cout << "Enabled BlackBoard. Establishing connection between " << domain_names[local_host] << ":" << port << " and " << domain_names[remote_host] << ":" << port << "." << std::endl;	
-			
-			if (local_host != URI_LOCAL && domain_names[local_host].empty() ||
-				remote_host != URI_LOCAL && domain_names[remote_host].empty())
-			{
-				std::cout << "WARNING! Unknown host: " << local_host << " or " << remote_host << "! (Will only establish unconnected BlackBoard)" << std::endl;
-			}
-
-			activateBlackboard(domain_names[local_host], port, domain_names[remote_host], port);
-		}
-		break;
-	default:
-		break;
 	}
 
 	return 0;
-}
-
-
-void HybridAutomatonManager::datanames(vector<string_type>& names, int channel)
-{
-	switch (channel) {
-		case 1: names.push_back(_T("Torque"));
-		case 2: names.push_back(_T("Q"));
-		case 3: names.push_back(_T("Velocity"));
-	}
-}
-
-void HybridAutomatonManager::collect(vector<double>& data, int channel)
-{
-	if (channel == PLOT_TORQUE)
-	{
-		for(int i = 0; i < _dof; ++i)
-			data.push_back(_torque[i]);
-	}
-	else if (channel == PLOT_Q)
-	{
-		for(int i = 0; i < _dof; ++i)
-			data.push_back(_sys->q()[i]);
-	}
-	else if (channel == PLOT_VELOCITY)
-	{
-		for(int i = 0; i < _dof; ++i)
-			data.push_back(_sys->qdot()[i]);
-			//data.push_back(_activeMotionBehaviour->getDesired()[i]);
-	}	
-	else if (channel == PLOT_EEFRAME)
-	{
-		HTransform relative_transform;
-		rxBody* end_effector = _sys->getUCSBody(_T("EE"), relative_transform);
-		HTransform absolute_transform = end_effector->T() * relative_transform;
-		for(int i = 0; i < 3; ++i)
-			data.push_back(absolute_transform.r(i));
-	}	
-}
-
-void HybridAutomatonManager::onSetInterestFrame(const TCHAR* name, const HTransform& T)
-{
 }
 
 rControlAlgorithm* CreateControlAlgorithm(rDC& rdc)
