@@ -70,6 +70,9 @@ void HybridAutomatonManager::setLocalDecisionCriterion(LocalDecisionCriterion* c
 
 void HybridAutomatonManager::updateBlackboard()
 {
+	if(!_blackboard)
+		return;
+
 #ifdef USE_LOCALIZATION
 	std::vector<double> b_position;
 	std::vector<double> b_velocity;

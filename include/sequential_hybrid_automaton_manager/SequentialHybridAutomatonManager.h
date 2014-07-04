@@ -22,5 +22,6 @@ public:
 
 private:
 	virtual void updateMotionBehaviour(const rTime& t);
+	virtual void updateBlackboard();
 };
 #endif

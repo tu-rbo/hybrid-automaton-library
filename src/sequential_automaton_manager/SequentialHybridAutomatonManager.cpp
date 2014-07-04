@@ -53,6 +53,20 @@ void SequentialHybridAutomatonManager::updateMotionBehaviour(const rTime& t)
 	}
 }
 
+
+void SequentialHybridAutomatonManager::updateBlackboard()
+{
+	if(!_blackboard)
+		return;
+
+	if (_currentMotionBehavior && _currentMotionBehavior->getChild())
+		_blackboard->setBool("idle", ((Milestone*)_currentMotionBehavior->getChild())->hasConverged(_sys));
+	else
+		_blackboard->setBool("idle", false);
+
+	AbstractHybridAutomatonManager::updateBlackboard();
+}
+
 rControlAlgorithm* CreateControlAlgorithm(rDC& rdc)
 {
 	return new SequentialHybridAutomatonManager(rdc);
