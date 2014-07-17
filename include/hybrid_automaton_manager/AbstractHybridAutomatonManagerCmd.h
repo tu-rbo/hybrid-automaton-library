@@ -11,6 +11,8 @@
 #define DEFAULT_CMD		(RCMD_USER + 1)
 #define SERVO_ON		(RCMD_USER + 5)
 #define BLACKBOARD_ON	(RCMD_USER + 6)
+#define BLACKBOARD_OFF	(RCMD_USER + 7)
+#define ACTIVATE		(RCMD_USER + 8)
 
 // use this scheme as follows:
 // control->command(BLACKBOARD_ON, (1999 << 16) | (URI_BOTTOM_2 << 8) | (URI_HASMA << 0));
