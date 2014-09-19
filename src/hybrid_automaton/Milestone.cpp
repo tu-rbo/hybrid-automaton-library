@@ -5,30 +5,26 @@ using namespace std;
 
 Milestone::Milestone() : 
 MDPNode(),
-status_(INVALID)
+status_(INVALID),
+activated_(false),
+name_("default")
 {
-	this->name_ = std::string("default");
 }
 
-Milestone::Milestone(std::string milestone_name) : 
+Milestone::Milestone(const std::string& milestone_name) : 
 MDPNode(milestone_name),
-status_(INVALID)
+status_(INVALID),
+activated_(false),
+name_(milestone_name)
 {
-	this->name_ = milestone_name;
-}
-
-Milestone::Milestone(const char* milestone_name) : 
-MDPNode(std::string(milestone_name)),
-status_(INVALID)
-{
-	this->name_ = std::string(milestone_name);
 }
 
 Milestone::Milestone(const Milestone &milestone_cpy) : 
 MDPNode(milestone_cpy),
-status_(milestone_cpy.status_)
+status_(milestone_cpy.status_),
+activated_(milestone_cpy.activated_),
+name_(milestone_cpy.name_)
 {
-	this->name_ = milestone_cpy.name_;
 }
 
 Milestone::~Milestone()
@@ -45,8 +41,18 @@ void Milestone::setStatus(Milestone::Status status)
 	this->status_ = status;
 }
 
-void Milestone::update() 
+void Milestone::activate(rxSystem* sys) 
 {
+	this->activated_ = true;
+}
+
+void Milestone::update(const rTime& t) 
+{
+}
+
+void Milestone::deactivate() 
+{
+	this->activated_ = false;
 }
 
 Milestone* Milestone::clone() const

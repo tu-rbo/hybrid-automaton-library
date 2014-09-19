@@ -140,7 +140,7 @@ dVector CSpaceBlackBoardMilestone::getConfiguration() const
 	return ret_value;
 }
 
-void CSpaceBlackBoardMilestone::update()
+void CSpaceBlackBoardMilestone::update(const rTime& t)
 {
 	//std::cout << "Trying to update milestone." << std::endl;
 
@@ -203,10 +203,6 @@ std::string CSpaceBlackBoardMilestone::getBlackBoardVariableName() {
 
 bool CSpaceBlackBoardMilestone::hasConverged(rxSystem* sys) 
 {
-	assert (sys != NULL);
-
-	update();
-
 	const dVector& q = sys->q();
 	for (int i = 0; i < sys->jdof(); i++) {
 		double e = ::std::abs(q[i] - configuration_[i]);

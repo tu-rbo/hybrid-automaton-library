@@ -183,6 +183,7 @@ public:
 	* This function only executes if the _updateAllowed flag is set to true
 	*/
 	bool updateControllers(MotionBehaviour* other);
+	bool replaceControllers(MotionBehaviour* other);
 
 	/**
 	* Update the controllers of thisbehaviour with the current robot position. This will make the robot stop instantly.
@@ -229,6 +230,9 @@ public:
 	*/
 	void calculateInterpolationTime();
 
+protected:
+	rxControlSetBase*								control_set_;		// Stores the set of rxController's defining this MotionBehaviour
+
 private:
 
 	/**
@@ -239,7 +243,6 @@ private:
 	*/
 	void RLabInfoString2ElementXML_(string_type string_data, TiXmlElement* out_xml_element, bool is_goal_controller) const;
 
-	rxControlSetBase*								control_set_;		// Stores the set of rxController's defining this MotionBehaviour
 	rxSystem*										robot_;	
 	double											time_;				// Execution time. Counts the time that the MotionBehaviour is active 
 																		// (for convergence check including time)

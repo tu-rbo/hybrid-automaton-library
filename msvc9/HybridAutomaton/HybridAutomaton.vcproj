@@ -167,6 +167,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\src\hybrid_automaton\ForceTorqueMilestone.cpp"
+				>
+			</File>
+			<File
 				RelativePath="..\..\src\hybrid_automaton\HybridAutomaton.cpp"
 				>
 			</File>
@@ -188,6 +192,10 @@
 			</File>
 			<File
 				RelativePath="..\..\src\hybrid_automaton\PostureMilestone.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\hybrid_automaton\TemporalMilestone.cpp"
 				>
 			</File>
 			<File
@@ -249,6 +257,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\include\hybrid_automaton\ForceTorqueMilestone.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\include\hybrid_automaton\HybridAutomaton.h"
 				>
 			</File>
@@ -270,6 +282,10 @@
 			</File>
 			<File
 				RelativePath="..\..\include\hybrid_automaton\PostureMilestone.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\include\hybrid_automaton\TemporalMilestone.h"
 				>
 			</File>
 			<File

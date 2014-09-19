@@ -315,6 +315,8 @@ void MotionBehaviour::activate()
 		return;
 	}
 
+	((Milestone*)(child))->activate(this->robot_);
+
 	calculateInterpolationTime();
 
 	std::list<rxController*> controllers = control_set_->getControllers();
@@ -409,6 +411,8 @@ void MotionBehaviour::activate()
 
 void MotionBehaviour::deactivate()
 {
+	((Milestone*)(child))->deactivate();
+
 	if (control_set_)
 	{
 		control_set_->deactivateAllControllers();
@@ -705,6 +709,38 @@ bool MotionBehaviour::wait()
 		}
 	}
 
+	return true;
+}
+
+bool MotionBehaviour::replaceControllers(MotionBehaviour* other)
+{
+	// check if both behaviours use the same controlset
+	if (typeid(*control_set_) != typeid(*(other->control_set_)))
+		return false;
+
+	// Change the edge parameters
+	this->setChild(other->child);
+	this->setParent(other->parent);
+	this->prob = other->prob;
+	this->length = other->length;
+
+	// deactivate all controllers and remove them
+	this->control_set_->deactivateAllControllers();
+	for(std::list<rxController*>::const_iterator it = this->control_set_->getControllers().begin(); it != this->control_set_->getControllers().end(); ++it)
+	{
+		this->control_set_->deleteController(*it);
+	}
+
+	goal_controllers_.clear();
+
+	// iterate through others and add them
+	for(std::list<rxController*>::const_iterator it = other->control_set_->getControllers().begin(); it != other->control_set_->getControllers().end(); ++it)
+	{
+		addController(*it, true);
+	}
+
+	// activate?
+	
 	return true;
 }
 

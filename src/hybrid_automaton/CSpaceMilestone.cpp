@@ -128,13 +128,8 @@ dVector CSpaceMilestone::getConfiguration() const
 	return ret_value;
 }
 
-void CSpaceMilestone::update()
+void CSpaceMilestone::update(const rTime& t)
 {
-	if(motion_behaviour_ != NULL){
-		cout << "[CSpaceMilestone::update] Updating CS Milestone (not implemented)" << endl;
-	}else{
-		cout << "[CSpaceMilestone::update] Can't update anything, motion_behaviour_ is NULL!!!" << endl;
-	}
 }
 
 CSpaceMilestone* CSpaceMilestone::clone() const

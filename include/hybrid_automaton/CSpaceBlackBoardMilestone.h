@@ -92,7 +92,7 @@ public:
 	* Milestones can change in real time. This should be considered here.
 	* Does nothing up to now.
 	*/
-	void update();
+	virtual void update(const rTime& t);
 
 	void setBlackBoardVariableName(const std::string& name);
 	std::string getBlackBoardVariableName();

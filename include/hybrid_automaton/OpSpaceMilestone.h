@@ -29,6 +29,10 @@ public:
 	OpSpaceMilestone(std::string osm_name, const Displacement& position, const Rotation& orientation, PosiOriSelector posi_ori_selection, 
 		MotionBehaviour * motion_behaviour, std::vector<double>& region_convergence_radius, Milestone::Status status, 
 		std::vector<Point> handle_points);
+	
+	OpSpaceMilestone(std::string osm_name, const Displacement& position, const Rotation& orientation, const std::string& frame_id, PosiOriSelector posi_ori_selection, 
+		MotionBehaviour * motion_behaviour, std::vector<double>& region_convergence_radius, Milestone::Status status, 
+		std::vector<Point> handle_points);
 
 	OpSpaceMilestone(std::string osm_name, const Displacement& position, const Rotation& orientation, PosiOriSelector posi_ori_selection, 
 		MotionBehaviour * motion_behaviour, std::vector<double>& region_convergence_radius);
@@ -42,14 +46,18 @@ public:
 
 	Displacement getPosition() const;
 	Rotation getOrientation() const;
+	std::string getFrame() const;
 
 	void setPosition(const Displacement pos){position_=pos;};
 	void setOrientation(const Rotation ori){orientation_=ori;};
+	void setFrame(const std::string& frame_id){frame_id_=frame_id;};
 
 	virtual PosiOriSelector getPosiOriSelector() const;
 	void setPosiOriSelector(const PosiOriSelector sel){posi_ori_selection_=sel;};
 
-	void update();
+	virtual void activate(rxSystem* sys);
+	virtual void update(const rTime& t);
+	virtual void deactivate();
 
 	virtual std::string toStringXML() const;
 	virtual TiXmlElement* toElementXML() const ;
@@ -73,6 +81,10 @@ protected:
 
 	Displacement			position_;							// Milestone goal position
 	Rotation				orientation_;						// Milestone goal orientation
+
+	Displacement			position_relative_;
+	Rotation				orientation_relative_;
+	std::string				frame_id_;
 };
 
 #endif // OP_SPACE_MILESTONE_

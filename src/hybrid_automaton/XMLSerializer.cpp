@@ -3,6 +3,8 @@
 #include "CSpaceBlackBoardMilestone.h"
 #include "OpSpaceMilestone.h"
 #include "PostureMilestone.h"
+#include "ForceTorqueMilestone.h"
+#include "TemporalMilestone.h"
 
 #include "MotionBehaviour.h"
 
@@ -253,6 +255,8 @@ TiXmlElement* OpSpaceMilestone::toElementXML() const
 	}
 	op_space_ms_xml->SetAttribute("orientation", ori_ss.str().c_str());
 
+	op_space_ms_xml->SetAttribute("frame", frame_id_.c_str());
+
 	std::stringstream epsilon_ss;
 	for(unsigned int i=0; i<this->region_convergence_radius_.size()-1; i++)
 	{
@@ -359,6 +363,119 @@ TiXmlElement* PostureMilestone::toElementXML() const
 	}
 	return op_space_ms_xml;
 }
+
+std::string ForceTorqueMilestone::toStringXML() const
+{
+	TiXmlDocument document_xml;
+	TiXmlElement * node_element = this->toElementXML();
+	document_xml.LinkEndChild(node_element);
+
+	// Declare a printer
+	TiXmlPrinter printer_xml;
+	// attach it to the document you want to convert in to a std::string
+	document_xml.Accept(&printer_xml);
+	// Create a std::string and copy your document data in to the string
+	std::string return_value = printer_xml.CStr();
+
+	//TODO: Memory leaks?????????
+	delete node_element;
+	return return_value;
+}
+
+//TODO: refactor from opSpace Milestone
+TiXmlElement* ForceTorqueMilestone::toElementXML() const 
+{
+	TiXmlElement* op_space_ms_xml = new TiXmlElement("Milestone");
+	op_space_ms_xml->SetAttribute("type", "ForceTorque");
+	op_space_ms_xml->SetAttribute("status", this->getStatus());
+	op_space_ms_xml->SetAttribute("name", this->name_.c_str());
+	op_space_ms_xml->SetAttribute("PosiOriSelector", posi_ori_selection_);
+
+	std::stringstream pos_ss;
+	for(unsigned int i=0; i<3; i++)
+	{
+		pos_ss << position_(i) << " ";
+	}	
+	op_space_ms_xml->SetAttribute("position", pos_ss.str().c_str());
+
+	std::stringstream ori_ss;
+	for(unsigned int i=0; i<3; i++)
+	{
+		for(unsigned int j=0; j<3; j++)
+			ori_ss << orientation_(i,j) << " ";
+	}
+	op_space_ms_xml->SetAttribute("orientation", ori_ss.str().c_str());
+
+	op_space_ms_xml->SetAttribute("frame", frame_id_.c_str());
+
+	std::stringstream forceTorque_ss;
+	for(int i=0; i<6; i++)
+	{
+		forceTorque_ss << forceTorque_(i) << " ";
+	}
+	op_space_ms_xml->SetAttribute("forcetorque", forceTorque_ss.str().c_str());
+
+	std::stringstream epsilon_ss;
+	for(unsigned int i=0; i<this->region_convergence_radius_.size()-1; i++)
+	{
+		epsilon_ss << region_convergence_radius_.at(i) << " ";
+	}
+	epsilon_ss << region_convergence_radius_.at(region_convergence_radius_.size()-1);
+	op_space_ms_xml->SetAttribute("epsilon", epsilon_ss.str().c_str());
+
+    op_space_ms_xml->SetDoubleAttribute("expectedLength", this->getExpectedLength());
+
+	TiXmlElement * handlePoints_txe = new TiXmlElement("HandlePoints");
+	op_space_ms_xml->LinkEndChild(handlePoints_txe);
+	std::vector<Point>::const_iterator handlePoints_it = handle_points_.begin();
+	for (; handlePoints_it
+		!= handle_points_.end(); handlePoints_it++) {
+			TiXmlElement * handlePoint_txe;
+			handlePoint_txe = new TiXmlElement("HandlePoint");
+			handlePoints_txe->LinkEndChild(handlePoint_txe);
+			handlePoint_txe->SetDoubleAttribute("x", handlePoints_it->x);
+			handlePoint_txe->SetDoubleAttribute("y", handlePoints_it->y);
+			handlePoint_txe->SetDoubleAttribute("z", handlePoints_it->z);
+	}
+
+	if(motion_behaviour_){
+		op_space_ms_xml->LinkEndChild(this->motion_behaviour_->toElementXML());
+	}
+	return op_space_ms_xml;
+}
+
+std::string TemporalMilestone::toStringXML() const
+{
+	TiXmlDocument document_xml;
+	TiXmlElement * ms_element = this->toElementXML();
+	document_xml.LinkEndChild(ms_element);
+
+	// Declare a printer
+	TiXmlPrinter printer_xml;
+	// attach it to the document you want to convert in to a std::string
+	document_xml.Accept(&printer_xml);
+	// Create a std::string and copy your document data in to the string
+	std::string return_value = printer_xml.CStr();
+
+	//TODO: Memory leaks?????????
+	delete ms_element;
+	return return_value;
+}
+
+TiXmlElement* TemporalMilestone::toElementXML() const 
+{
+	TiXmlElement* cspace_ms_xml = new TiXmlElement("Milestone");
+	cspace_ms_xml->SetAttribute("type", "Temporal");
+	cspace_ms_xml->SetAttribute("status", this->status_);
+	cspace_ms_xml->SetAttribute("name", this->name_.c_str());
+
+	cspace_ms_xml->SetDoubleAttribute("duration", this->getDuration());
+
+    cspace_ms_xml->SetDoubleAttribute("expectedLength", this->getExpectedLength());
+
+	return cspace_ms_xml;
+}
+
 
 std::string MotionBehaviour::toStringXML() const
 {

@@ -7,11 +7,14 @@
 
 #include "HybridAutomaton.h"
 #include "MotionBehaviour.h"
+
 #include "Milestone.h"
 #include "CSpaceMilestone.h"
 #include "CSpaceBlackBoardMilestone.h"
 #include "OpSpaceMilestone.h"
 #include "PostureMilestone.h"
+#include "ForceTorqueMilestone.h"
+#include "TemporalMilestone.h"
 
 #include "rxControlSDK\rxControlSDK.h"
 
@@ -136,19 +139,19 @@ public:
 
 	static HybridAutomaton* createHybridAutomaton(const std::string& xml_string, rxSystem* robot, double dT);
 
+	// different types of milestones
 	static CSpaceMilestone* createCSpaceMilestone(TiXmlElement* milestone_xml, rxSystem* robot, double dT);
 	static CSpaceBlackBoardMilestone* createCSpaceBlackBoardMilestone(TiXmlElement* milestone_xml, rxSystem* robot, double dT);
-
 	static OpSpaceMilestone* createOpSpaceMilestone(TiXmlElement* milestone_xml, rxSystem* robot, double dT);
-	
 	static PostureMilestone* createPostureMilestone(TiXmlElement* milestone_xml, rxSystem* robot, double dT);
+	static ForceTorqueMilestone* createForceTorqueMilestone(TiXmlElement* milestone_xml, rxSystem* robot, double dT);
+	static TemporalMilestone* createTemporalMilestone(TiXmlElement* milestone_xml, rxSystem* robot, double dT);
 	
 	static MotionBehaviour* createMotionBehaviour(TiXmlElement* motion_behaviour_xml , Milestone *dad, Milestone *son , rxSystem* robot, double dT );
 
 	static rxController* createController(TiXmlElement* rxController_xml , const Milestone *dad, const Milestone *son , rxSystem* robot, double dT, bool goal_controller, int controller_counter);
 	
 	static std::map<std::string, ControllerType> createControllerMapping();
-
 	static std::map<std::string, ControllerType>	controller_map_;	// Translation between class name (string) of the controllers and their type
 
 	//We only want to create control sets once for performance reasons.

@@ -90,7 +90,7 @@ public:
 	* Milestones can change in real time. This should be considered here.
 	* Does nothing up to now.
 	*/
-	void update();
+	virtual void update(const rTime& t);
 
 	void addHandlePoint( const Point & point_to_add );
 	

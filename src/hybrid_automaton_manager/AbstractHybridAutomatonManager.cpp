@@ -142,6 +142,12 @@ void AbstractHybridAutomatonManager::update(const rTime& t)
 
 	this->updateMotionBehaviour(t);
 
+	if (_activeMotionBehaviour)
+	{
+		Milestone* currentMilestone = (Milestone*)(_activeMotionBehaviour->getChild());
+		currentMilestone->update(t);
+	}
+
 	rControlAlgorithm::update(t);
 
 	this->updateBlackboard();

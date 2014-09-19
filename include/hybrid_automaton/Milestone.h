@@ -52,34 +52,28 @@ public:
 	};
 
 	Milestone();
-
-	Milestone(std::string milestone_name);
-
-	Milestone(const char* milestone_name);
-
-    Milestone(const Milestone &milestone_cpy);
+	Milestone(const std::string& milestone_name);
+	Milestone(const Milestone &milestone_cpy);
 
 	virtual ~Milestone();
 
-	Milestone::Status getStatus() const;
-
 	void setStatus(Milestone::Status status);
 
-	virtual void update();
+	Milestone::Status getStatus() const;
+	virtual dVector getConfiguration() const;
+	virtual std::string getName() const;
+
+	virtual void activate(rxSystem* sys);
+	virtual void update(const rTime& t);
+	virtual void deactivate();
 
 	virtual std::string toStringXML() const;
-
 	virtual TiXmlElement* toElementXML() const;
 
 	virtual Milestone* clone() const;
 
 	virtual bool operator ==(const Milestone & n) const;
-
 	virtual bool operator !=(const Milestone & n) const;
-
-	virtual dVector getConfiguration() const;
-
-	virtual std::string getName() const;
 
 	virtual bool hasConverged(rxSystem* sys);
 
@@ -87,6 +81,7 @@ protected:
 
 	Status			status_;
 	std::string		name_;
+	bool			activated_;
 };
 
 #endif // MILESTONE_
