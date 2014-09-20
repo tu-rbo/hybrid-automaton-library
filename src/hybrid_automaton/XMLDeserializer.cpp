@@ -14,6 +14,7 @@
 #include "SubdisplacementSimpleController.h"
 #include "ObstacleAvoidanceController.h"
 #include "JointBlackBoardController.h"
+#include "ROSServiceCallController.h"
 #include "AuxiliaryForceBlackBoardController.h"
 #include "AuxiliaryForceController.h"
 #include "SingularityAvoidanceController.h"
@@ -880,6 +881,12 @@ rxController* XMLDeserializer::createController(TiXmlElement *rxController_xml, 
 		special_controller->setGain(params.kv, params.kp, params.invL2sqr);	
 		controller = special_controller;
 	}
+	else if (params.type == "ROSServiceCallController")
+	{
+		ROSServiceCallController* special_controller = new ROSServiceCallController(robot, dT);
+		special_controller->setROSServiceName(params.blackboard_variable_name);
+		controller = special_controller;
+	}
 	else if (params.type == "AuxiliaryForceBlackBoardController")
 	{
 		AuxiliaryForceBlackBoardController* special_controller = new AuxiliaryForceBlackBoardController(robot, params.beta, Displacement(params.beta_displacement), params.alpha, Displacement(params.alpha_displacement), dT);
@@ -1336,6 +1343,8 @@ std::map<std::string, ControllerType> XMLDeserializer::createControllerMapping()
 	mapping["InterpolatedSetPointDisplacementController"]	= ControllerType(rxController::eControlType_Displacement, WITH_INTERPOLATION);
 	mapping["InterpolatedSetPointJointController"]			= ControllerType(rxController::eControlType_Joint, WITH_INTERPOLATION);
 	mapping["InterpolatedSetPointOrientationController"]	= ControllerType(rxController::eControlType_Orientation, WITH_INTERPOLATION);
+
+	mapping["ROSServiceCallController"]						= ControllerType(rxController::eControlType_UserDefined, NONE);
 
 	return mapping;
 }

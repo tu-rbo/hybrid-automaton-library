@@ -44,11 +44,16 @@ void SequentialHybridAutomatonManager::updateMotionBehaviour(const rTime& t)
 		std::vector<const Edge*> edges = _hybrid_automaton->outgoingEdges(childMs);
 		if (!edges.empty())
 		{
-			std::cout << "[HybridAutomatonManager::_compute] INFO: Milestone " << childMs->getName() << " converged." << std::endl;
+			std::cout << "[HybridAutomatonManager::_compute] Milestone " << childMs->getName() << " converged." << std::endl;
 			_activeMotionBehaviour->deactivate();
-			_activeMotionBehaviour = (MotionBehaviour*) edges[0];
+
+			if (!_activeMotionBehaviour->replaceControllers((MotionBehaviour*) edges[0]))
+			{
+				_activeMotionBehaviour = (MotionBehaviour*) edges[0];
+			}
+
 			_activeMotionBehaviour->activate();
-			std::cout << "[HybridAutomatonManager::_compute] INFO: Changed motion behavior. Next goal: " << ((Milestone*)(_activeMotionBehaviour->getChild()))->getName() << std::endl;
+			std::cout << "[HybridAutomatonManager::updateMotionBehaviour] Changed motion behavior. Next goal: " << ((Milestone*)(_activeMotionBehaviour->getChild()))->getName() << std::endl;
 		}
 	}
 }

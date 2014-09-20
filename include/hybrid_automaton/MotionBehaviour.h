@@ -232,6 +232,7 @@ public:
 
 protected:
 	rxControlSetBase*								control_set_;		// Stores the set of rxController's defining this MotionBehaviour
+	std::map<string_type, bool>						goal_controllers_;	// tells us if a controller is goal controller or not (if its convergence must be checked or not) 
 
 private:
 
@@ -253,8 +254,6 @@ private:
 
 	double											max_velocity_;		// maximum desired velocity at joint or tip (depending on controller); used for calculating the interpolation time
 	double											min_time_;			// minimum time that is used for interpolation (if max_velocity constraint is not set)
-	
-	std::map<string_type, bool>						goal_controllers_;	// tells us if a controller is goal controller or not (if its convergence must be checked or not) 
 
 	std::vector<OnDemandController*>				_onDemand_controllers;  // All controllers that can deactivate if not needed (i.e. obstacle avoidance, joint limits)
 

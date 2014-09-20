@@ -718,6 +718,8 @@ bool MotionBehaviour::replaceControllers(MotionBehaviour* other)
 	if (typeid(*control_set_) != typeid(*(other->control_set_)))
 		return false;
 
+	std::cout << "[MotionBehavior::replaceControllers] Doing the special control set transition!" << std::endl;
+
 	// Change the edge parameters
 	this->setChild(other->child);
 	this->setParent(other->parent);
@@ -726,17 +728,17 @@ bool MotionBehaviour::replaceControllers(MotionBehaviour* other)
 
 	// deactivate all controllers and remove them
 	this->control_set_->deactivateAllControllers();
-	for(std::list<rxController*>::const_iterator it = this->control_set_->getControllers().begin(); it != this->control_set_->getControllers().end(); ++it)
+	for(std::map<string_type, bool>::const_iterator it = this->goal_controllers_.begin(); it != this->goal_controllers_.end(); ++it)
 	{
-		this->control_set_->deleteController(*it);
+		this->control_set_->deleteController(this->control_set_->findController(it->first));
 	}
 
 	goal_controllers_.clear();
 
 	// iterate through others and add them
-	for(std::list<rxController*>::const_iterator it = other->control_set_->getControllers().begin(); it != other->control_set_->getControllers().end(); ++it)
+	for(std::map<string_type, bool>::const_iterator it = other->goal_controllers_.begin(); it != other->goal_controllers_.end(); ++it)
 	{
-		addController(*it, true);
+		addController(other->control_set_->findController(it->first), it->second);
 	}
 
 	// activate?
