@@ -259,6 +259,10 @@ bool OpSpaceMilestone::hasConverged(rxSystem* sys)
 		|| posi_ori_selection_ == POS_AND_ORI_SELECTION)
 	{
 		Displacement current_r = ee_pose.r - this->position_; //parent->getConfiguration();
+		
+/*		static int dbg_counter = 0;
+		if (dbg_counter++ % 300 == 0)
+			current_r.Print(_T("Error in displacement"));*/
 
 		if ( ::std::fabs(current_r[0]) > region_convergence_radius_[0] ||
 			 ::std::fabs(current_r[1]) > region_convergence_radius_[1] ||

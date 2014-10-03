@@ -29,6 +29,7 @@
 #define URI_SHOEFER			14
 #define URI_RBO_EXTRA		15
 #define URI_ARIS			16
+#define URI_ANGEL			17
 
 // this is for plotting from the rxApplication
 // (so you don't have to remember which channel to plot)

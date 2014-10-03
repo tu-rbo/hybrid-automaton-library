@@ -282,7 +282,7 @@ int AbstractHybridAutomatonManager::command(const short& cmd, const int& arg)
 			domain_names[URI_SHOEFER]	= "130.149.238.182";
 			domain_names[URI_RBO_EXTRA] = "130.149.238.188";
 			domain_names[URI_ARIS]		= "130.149.238.194";
-
+			domain_names[URI_ANGEL]		= "130.149.238.149";
 			int bit_code = arg;
 			
 			int port = bit_code >> 16;

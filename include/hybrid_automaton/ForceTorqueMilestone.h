@@ -21,13 +21,17 @@ public:
 	
 	ForceTorqueMilestone(const std::string& osm_name);
 
-	ForceTorqueMilestone(const std::string& osm_name, const dVector& forceTorque, PosiOriSelector posi_ori_selection, 
-		MotionBehaviour * motion_behaviour, std::vector<double>& region_convergence_radius, Milestone::Status status, 
+	ForceTorqueMilestone(const std::string& osm_name,
+		const dVector& minForceTorque, const dVector& maxForceTorque,
+		PosiOriSelector posi_ori_selection, MotionBehaviour * motion_behaviour,
+		std::vector<double>& region_convergence_radius, Milestone::Status status, 
 		std::vector<Point> handle_points, rxSystem* _sys);
 
-	ForceTorqueMilestone(const std::string& osm_name,  Displacement position, Rotation orientation, const std::string& frame_id, const dVector& forceTorque, PosiOriSelector posi_ori_selection, 
-								   MotionBehaviour * motion_behaviour, std::vector<double>& region_convergence_radius, Milestone::Status status, 
-								   std::vector<Point> handle_points, rxSystem* sys);
+	ForceTorqueMilestone(const std::string& osm_name,  Displacement position, Rotation orientation, const std::string& frame_id,
+		const dVector& minForceTorque, const dVector& maxForceTorque,
+		PosiOriSelector posi_ori_selection, MotionBehaviour * motion_behaviour,
+		std::vector<double>& region_convergence_radius, Milestone::Status status, 
+		std::vector<Point> handle_points, rxSystem* sys);
 
 	virtual ~ForceTorqueMilestone();
 
@@ -38,18 +42,20 @@ public:
 	//Like opSpaceMilestone::hasConverged but checks also for base position in 10 dof chain
 	virtual bool hasConverged(rxSystem* sys); 
 
-	// gets the force-torque
-	dVector getForceTorque() const;
+	dVector getMinForceTorque() const;
+	dVector getMaxForceTorque() const;
 
-	// Sets the force-torque
-	void setForceTorque(const dVector& forceTorque);
+	void setMinForceTorque(const dVector& forceTorque);
+	void setMaxForceTorque(const dVector& forceTorque);
 	
 	virtual std::string toStringXML() const;
 	virtual TiXmlElement* toElementXML() const ;
 
 protected:
 	rxDevice*   forceSensor_;
-	dVector		forceTorque_;
+
+	dVector		minForceTorque_;
+	dVector		maxForceTorque_;
 };
 
 #endif // FORCETORQUE_MILESTONE_

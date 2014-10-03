@@ -388,7 +388,7 @@ HybridAutomaton* XMLDeserializer::createHybridAutomaton(const std::string& xml_s
 		Milestone* ms_parent_ptr = automaton->getMilestoneByName(ms_parent);
 
 		if(ms_parent_ptr == NULL) {
-			throw std::string("[XMLDeserializer::createHybridAutomaton] ERROR: The name of the parent node does not match with the name of any milestone.");
+			throw std::string("[XMLDeserializer::createHybridAutomaton] ERROR: The name of the parent node '" + ms_parent + "'does not match with the name of any milestone.");
 			delete automaton;
 			return NULL;
 		}
@@ -591,11 +591,12 @@ ForceTorqueMilestone* XMLDeserializer::createForceTorqueMilestone(TiXmlElement* 
 	Displacement position = deserializeDisplacement(milestone_xml, "position", Displacement());
 	Rotation orientation = deserializeRotation(milestone_xml, "orientation", Rotation());
 	std::string frame_id = deserializeString(milestone_xml, "frame", "");
-	dVector force_torque = deserializeDVector(milestone_xml, "forcetorque");
+	dVector min_force_torque = deserializeDVector(milestone_xml, "minforcetorque");
+	dVector max_force_torque = deserializeDVector(milestone_xml, "maxforcetorque");
 	std::vector<double> mst_epsilon = deserializeStdVector<double>(milestone_xml, "epsilon");
-	if(force_torque.size()==0 || mst_epsilon.size()==0)
+	if(min_force_torque.size()==0 || max_force_torque.size()==0 || mst_epsilon.size()==0)
 	{
-		throw std::string("[XMLDeserializer::createForceTorqueMilestone] ERROR: The forcetorque or region of convergence (\"forcetorque\" or \"epsilon\") is not defined in the XML string.");
+		throw std::string("[XMLDeserializer::createForceTorqueMilestone] ERROR: The min/maxforcetorque or region of convergence (\"forcetorque\" or \"epsilon\") is not defined in the XML string.");
 	}
 
 	TiXmlElement* handle_point_set_element = milestone_xml->FirstChildElement("HandlePoints");
@@ -612,7 +613,7 @@ ForceTorqueMilestone* XMLDeserializer::createForceTorqueMilestone(TiXmlElement* 
 		}
 	}
 
-	ForceTorqueMilestone* mst = new ForceTorqueMilestone(mst_name, position, orientation, frame_id, force_torque, mst_pos, NULL, mst_epsilon, mst_status, mst_handle_points, robot);
+	ForceTorqueMilestone* mst = new ForceTorqueMilestone(mst_name, position, orientation, frame_id, min_force_torque, max_force_torque, mst_pos, NULL, mst_epsilon, mst_status, mst_handle_points, robot);
 
 	TiXmlElement* mb_element = milestone_xml->FirstChildElement("MotionBehaviour");
 	MotionBehaviour* mst_mb = NULL;
@@ -633,8 +634,31 @@ TemporalMilestone* XMLDeserializer::createTemporalMilestone(TiXmlElement* milest
 	Milestone::Status mst_status = (Milestone::Status)deserializeElement<int>(milestone_xml, "status");
 	std::string mst_name = deserializeString(milestone_xml, "name", "");
 	double duration = deserializeElement<double>(milestone_xml, "duration", 0.0);
+	PosiOriSelector mst_pos = (PosiOriSelector)deserializeElement<int>(milestone_xml, "PosiOriSelector", POS_AND_ORI_SELECTION);
+	Displacement position = deserializeDisplacement(milestone_xml, "position", Displacement());
+	Rotation orientation = deserializeRotation(milestone_xml, "orientation", Rotation());
+	std::string frame_id = deserializeString(milestone_xml, "frame", "");
+	std::vector<double> mst_epsilon = deserializeStdVector<double>(milestone_xml, "epsilon");
+	if(mst_epsilon.size()==0)
+	{
+		throw std::string("[XMLDeserializer::createTemporalMilestone] ERROR: The region of convergence (\"epsilon\") is not defined in the XML string.");
+	}
 
-	TemporalMilestone* mst = new TemporalMilestone(mst_name, duration);
+	TiXmlElement* handle_point_set_element = milestone_xml->FirstChildElement("HandlePoints");
+	std::vector<Point> mst_handle_points;
+	if(handle_point_set_element != NULL)
+	{
+		for(TiXmlElement* handle_point_element = handle_point_set_element->FirstChildElement("HandlePoint"); handle_point_element; handle_point_element = handle_point_element->NextSiblingElement())
+		{
+			Point handle_point_value(-1.f,-1.f,-1.f);
+			handle_point_value.x = deserializeElement<double>(handle_point_element, "x");
+			handle_point_value.y = deserializeElement<double>(handle_point_element, "y");
+			handle_point_value.z = deserializeElement<double>(handle_point_element, "z");
+			mst_handle_points.push_back(handle_point_value);
+		}
+	}
+
+	TemporalMilestone* mst = new TemporalMilestone(mst_name, position, orientation, frame_id, duration, mst_pos, NULL, mst_epsilon, mst_status, mst_handle_points, robot);
 
 	double expLength = deserializeElement<double>(milestone_xml, "expectedLength", -1.0);
 	mst->setExpectedLength(expLength);
@@ -708,6 +732,7 @@ MotionBehaviour* XMLDeserializer::createMotionBehaviour(TiXmlElement* motion_beh
 
 			if(control_set_name != "")
 			{
+				std::cout << "Creating new element in _controlSetMap with name '" << control_set_name << "'!" << std::endl;
 				_controlSetMap.insert(std::pair<std::string, rxControlSetBase*>(control_set_name, mb_control_set));
 			}
 
@@ -1196,6 +1221,8 @@ rxController* XMLDeserializer::createController(TiXmlElement *rxController_xml, 
 			special_controller->setDesiredDisplacement(disp);
 		
 		special_controller->setDesiredDistance(deserializeElement<double>(rxController_xml, "distance", 0.0));
+
+		special_controller->setDesiredForceDimension(deserializeElement<int>(rxController_xml, "desired_dimension", 2));
 
 		std::vector<double> minmax = deserializeStdVector<double>(rxController_xml, "desired_force");
 		if (!minmax.empty())

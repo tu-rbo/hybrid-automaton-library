@@ -408,12 +408,15 @@ TiXmlElement* ForceTorqueMilestone::toElementXML() const
 
 	op_space_ms_xml->SetAttribute("frame", frame_id_.c_str());
 
-	std::stringstream forceTorque_ss;
+	std::stringstream minForceTorque_ss;
+	std::stringstream maxForceTorque_ss;
 	for(int i=0; i<6; i++)
 	{
-		forceTorque_ss << forceTorque_(i) << " ";
+		minForceTorque_ss << minForceTorque_(i) << " ";
+		maxForceTorque_ss << maxForceTorque_(i) << " ";
 	}
-	op_space_ms_xml->SetAttribute("forcetorque", forceTorque_ss.str().c_str());
+	op_space_ms_xml->SetAttribute("minforcetorque", minForceTorque_ss.str().c_str());
+	op_space_ms_xml->SetAttribute("maxforcetorque", maxForceTorque_ss.str().c_str());
 
 	std::stringstream epsilon_ss;
 	for(unsigned int i=0; i<this->region_convergence_radius_.size()-1; i++)
@@ -469,7 +472,34 @@ TiXmlElement* TemporalMilestone::toElementXML() const
 	cspace_ms_xml->SetAttribute("status", this->status_);
 	cspace_ms_xml->SetAttribute("name", this->name_.c_str());
 
+	cspace_ms_xml->SetAttribute("PosiOriSelector", posi_ori_selection_);
+
+	std::stringstream pos_ss;
+	for(unsigned int i=0; i<3; i++)
+	{
+		pos_ss << position_(i) << " ";
+	}	
+	cspace_ms_xml->SetAttribute("position", pos_ss.str().c_str());
+
+	std::stringstream ori_ss;
+	for(unsigned int i=0; i<3; i++)
+	{
+		for(unsigned int j=0; j<3; j++)
+			ori_ss << orientation_(i,j) << " ";
+	}
+	cspace_ms_xml->SetAttribute("orientation", ori_ss.str().c_str());
+
+	cspace_ms_xml->SetAttribute("frame", frame_id_.c_str());
+
 	cspace_ms_xml->SetDoubleAttribute("duration", this->getDuration());
+
+	std::stringstream epsilon_ss;
+	for(unsigned int i=0; i<this->region_convergence_radius_.size()-1; i++)
+	{
+		epsilon_ss << region_convergence_radius_.at(i) << " ";
+	}
+	epsilon_ss << region_convergence_radius_.at(region_convergence_radius_.size()-1);
+	cspace_ms_xml->SetAttribute("epsilon", epsilon_ss.str().c_str());
 
     cspace_ms_xml->SetDoubleAttribute("expectedLength", this->getExpectedLength());
 

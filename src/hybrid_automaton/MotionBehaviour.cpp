@@ -4,6 +4,7 @@
 
 #include "XMLDeserializer.h"
 #include "TPImpedanceControlSet.h"
+#include "NakamuraControlSet.h"
 #include "PreferredPostureController.h" 
 
 using namespace std;
@@ -98,6 +99,10 @@ updateAllowed_(motion_behaviour_copy.updateAllowed_)
 		else if(dynamic_cast<TPImpedanceControlSet*>(motion_behaviour_copy.control_set_))
 		{
 			this->control_set_ = new TPImpedanceControlSet((*dynamic_cast<TPImpedanceControlSet*>(motion_behaviour_copy.control_set_)));
+		}
+		else if(dynamic_cast<NakamuraControlSet*>(motion_behaviour_copy.control_set_))
+		{
+			this->control_set_ = new NakamuraControlSet((*dynamic_cast<NakamuraControlSet*>(motion_behaviour_copy.control_set_)));
 		}
 	}
 	else
@@ -714,6 +719,9 @@ bool MotionBehaviour::wait()
 
 bool MotionBehaviour::replaceControllers(MotionBehaviour* other)
 {
+	if (!control_set_ || !(other->control_set_))
+		return false;
+
 	// check if both behaviours use the same controlset
 	if (typeid(*control_set_) != typeid(*(other->control_set_)))
 		return false;

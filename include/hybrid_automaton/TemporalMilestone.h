@@ -1,13 +1,13 @@
 #ifndef TEMPORAL_MILESTONE_
 #define TEMPORAL_MILESTONE_
 
-#include "Milestone.h"
+#include "OpSpaceMilestone.h"
 
 /**
 * A configuration-space milestone is one type of milestone that defines a goal in the robot's joint space.
 * It is a node in the graph represented by the hybrid automaton.
 */
-class TemporalMilestone : public Milestone
+class TemporalMilestone : public OpSpaceMilestone
 {
 
 public:
@@ -27,7 +27,11 @@ public:
 	* Creates an empty milestone with a name.
 	* \param name the name of the milestone.
 	*/
-	TemporalMilestone(const std::string& name, const rTime& duration);
+	TemporalMilestone(const std::string& osm_name,  Displacement position, Rotation orientation, const std::string& frame_id,
+		const rTime& duration,
+		PosiOriSelector posi_ori_selection, MotionBehaviour * motion_behaviour,
+		std::vector<double>& region_convergence_radius, Milestone::Status status, 
+		std::vector<Point> handle_points, rxSystem* sys);
 
 	/**
 	* Copy constructor.
