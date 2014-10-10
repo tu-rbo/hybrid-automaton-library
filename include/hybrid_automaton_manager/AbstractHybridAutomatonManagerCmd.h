@@ -27,8 +27,9 @@
 #define URI_POSEIDON		12
 #define URI_FIRSTMM			13
 #define URI_SHOEFER			14
-#define URI_RBO_EXTRA		15
-#define URI_ARIS			16
+#define URI_TOP_1A			15
+#define URI_TOP_1B			16
+#define URI_ARIS			17
 #define URI_ANGEL			17
 
 // this is for plotting from the rxApplication

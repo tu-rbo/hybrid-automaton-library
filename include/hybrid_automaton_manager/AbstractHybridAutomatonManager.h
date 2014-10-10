@@ -109,6 +109,8 @@ protected:
 	dVector				_qdot;
 	dVector				_torque;
 
+	rxFilteredDerivative*	 _qdot_filter;
+
 	/**
 	* An RTBlackBoard instance. The manager receives Hybrid automata from this blackboard.
 	*/

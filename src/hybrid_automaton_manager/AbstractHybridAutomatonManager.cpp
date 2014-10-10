@@ -56,6 +56,7 @@ AbstractHybridAutomatonManager::AbstractHybridAutomatonManager(rDC rdc)
 , _dof(0)
 , _servo_on(false)
 , _hybrid_automaton(NULL)
+, _qdot_filter(NULL)
 , _noQueue(false)
 {
 	_deserialize_mutex = CreateMutex(0, FALSE, 0);
@@ -74,6 +75,11 @@ AbstractHybridAutomatonManager::~AbstractHybridAutomatonManager()
 		delete _blackboard;
 		_blackboard = NULL;
 	}
+
+	if(_qdot_filter)
+	{
+		delete _qdot_filter;
+	}	
 
 	FREE_SYSTEMS();
 }
@@ -105,7 +111,10 @@ void AbstractHybridAutomatonManager::init(int mode)
 	_torque.zero();
 	_qdot.zero();
 
+	_qdot_filter = new rxFilteredDerivative(this->_dT, 10.0*this->_dT, this->_sys->jdof());
+
 	_activeMotionBehaviour = new MotionBehaviour(new Milestone(), new Milestone(), _sys);
+
 }
 
 void AbstractHybridAutomatonManager::activateBlackboard(std::string &rlab_host, int rlab_port, std::string &ros_host, int ros_port)
@@ -251,9 +260,7 @@ void AbstractHybridAutomatonManager::_compute(const double& t)
 
 void AbstractHybridAutomatonManager::_estimate()
 {
-	//We calculate the velocity here. This might not be the best option.
-	_qdot  = _q - _qOld;
-	_qdot /= _dT;
+	this->_qdot_filter->compute(this->_q, this->_qdot);
 }
 
 int AbstractHybridAutomatonManager::command(const short& cmd, const int& arg)
@@ -263,6 +270,10 @@ int AbstractHybridAutomatonManager::command(const short& cmd, const int& arg)
 	case SERVO_ON:
 		{
 			_servo_on = !_servo_on;
+
+			if(_servo_on)
+				this->_qdot_filter->initialize(this->_q);
+
 			std::cout << "[AbstractHybridAutomatonManager::command] Servo ON: " << _servo_on << std::endl;
 		}
 		break;
@@ -280,7 +291,8 @@ int AbstractHybridAutomatonManager::command(const short& cmd, const int& arg)
             domain_names[URI_POSEIDON]	= "130.149.238.193";
 			domain_names[URI_FIRSTMM]	= "130.149.238.220";
 			domain_names[URI_SHOEFER]	= "130.149.238.182";
-			domain_names[URI_RBO_EXTRA] = "130.149.238.188";
+			domain_names[URI_TOP_1A]	= "130.149.238.188";
+			domain_names[URI_TOP_1B]	= "130.149.238.189";
 			domain_names[URI_ARIS]		= "130.149.238.194";
 			domain_names[URI_ANGEL]		= "130.149.238.149";
 			int bit_code = arg;
