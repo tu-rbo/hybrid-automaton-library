@@ -5,6 +5,7 @@
 #include "XMLDeserializer.h"
 #include "TPImpedanceControlSet.h"
 #include "NakamuraControlSet.h"
+#include "VelocityControlSet.h"
 #include "PreferredPostureController.h" 
 
 using namespace std;
@@ -103,6 +104,10 @@ updateAllowed_(motion_behaviour_copy.updateAllowed_)
 		else if(dynamic_cast<NakamuraControlSet*>(motion_behaviour_copy.control_set_))
 		{
 			this->control_set_ = new NakamuraControlSet((*dynamic_cast<NakamuraControlSet*>(motion_behaviour_copy.control_set_)));
+		}
+		else if(dynamic_cast<VelocityControlSet*>(motion_behaviour_copy.control_set_))
+		{
+			this->control_set_ = new VelocityControlSet((*dynamic_cast<VelocityControlSet*>(motion_behaviour_copy.control_set_)));
 		}
 	}
 	else

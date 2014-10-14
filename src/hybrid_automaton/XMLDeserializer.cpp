@@ -37,6 +37,7 @@
 #include "PreferredPostureController.h"
 
 #include "NakamuraControlSet.h"
+#include "VelocityControlSet.h"
 #include "TPImpedanceControlSet.h"
 
 std::map<std::string, ControllerType> XMLDeserializer::controller_map_ = XMLDeserializer::createControllerMapping();
@@ -722,6 +723,14 @@ MotionBehaviour* XMLDeserializer::createMotionBehaviour(TiXmlElement* motion_beh
 				mb_control_set->setGravity(0, 0, -GRAV_ACC);
 				// TPImpedanceControlSet does not implement extra nullmotion behaviour - 
 				// This has to be done at lowest priority!
+				mb_control_set->nullMotionController()->setGain(0.0, 0.0, 0.0);
+			}
+			else if(control_set_type == "VelocityControlSet")
+			{
+				dVector kp = deserializeDVector(control_set_element, "kp");
+				dVector kv = deserializeDVector(control_set_element, "kv");
+				mb_control_set = new VelocityControlSet(robot, dT, kp, kv);
+				mb_control_set->setGravity(0, 0, -GRAV_ACC);
 				mb_control_set->nullMotionController()->setGain(0.0, 0.0, 0.0);
 			}
 			else
