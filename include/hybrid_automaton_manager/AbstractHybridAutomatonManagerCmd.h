@@ -30,7 +30,7 @@
 #define URI_TOP_1A			15
 #define URI_TOP_1B			16
 #define URI_ARIS			17
-#define URI_ANGEL			17
+#define URI_ANGEL			18
 
 // this is for plotting from the rxApplication
 // (so you don't have to remember which channel to plot)
