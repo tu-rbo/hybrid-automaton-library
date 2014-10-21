@@ -81,7 +81,9 @@ AbstractHybridAutomatonManager::~AbstractHybridAutomatonManager()
 		delete _qdot_filter;
 	}	
 
+	/*
 	FREE_SYSTEMS();
+	*/
 }
 
 void AbstractHybridAutomatonManager::init(int mode)
