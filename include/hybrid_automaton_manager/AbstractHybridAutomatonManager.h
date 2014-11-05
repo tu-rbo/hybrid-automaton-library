@@ -70,6 +70,9 @@ protected:
 	*/
 	rxSystem*			_sys;
 
+	// the force/torque sensor
+	rxDevice*			_ft_sensor;
+
 	/**
 	* The ROBOT device
 	*/

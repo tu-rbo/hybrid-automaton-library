@@ -51,6 +51,7 @@ unsigned __stdcall deserializeHybridAutomaton(void *udata)
 AbstractHybridAutomatonManager::AbstractHybridAutomatonManager(rDC rdc) 
 :rControlAlgorithm(rdc)
 , _sys(NULL)
+, _ft_sensor(NULL)
 , _blackboard(NULL)
 , _activeMotionBehaviour(NULL)
 , _dof(0)
@@ -96,9 +97,9 @@ void AbstractHybridAutomatonManager::init(int mode)
 	_robot = findDevice(_T("ROBOT"));
 	RASSERT(_robot != INVALID_RHANDLE);
 
-	rxDevice* ft_sensor = (rxDevice*)findDevice(_T("FT_SENSOR"));
-	if (ft_sensor)
-		_sys->addDevice(ft_sensor);
+	_ft_sensor = (rxDevice*)findDevice(_T("FT_SENSOR"));
+	if (_ft_sensor)
+		_sys->addDevice(_ft_sensor);
 
 	_dof = _sys->jointDOF() + _sys->earthDOF() + _sys->constraintDOF();
 
@@ -334,6 +335,7 @@ void AbstractHybridAutomatonManager::datanames(vector<string_type>& names, int c
 		case PLOT_Q: names.push_back(_T("Q"));
 		case PLOT_VELOCITY: names.push_back(_T("Velocity"));
 		case PLOT_EEFRAME: names.push_back(_T("EEPosition"));
+		case PLOT_FT: names.push_back(_T("FT"));
 	}
 }
 
@@ -361,7 +363,18 @@ void AbstractHybridAutomatonManager::collect(vector<double>& data, int channel)
 		HTransform absolute_transform = end_effector->T() * relative_transform;
 		for(int i = 0; i < 3; ++i)
 			data.push_back(absolute_transform.r(i));
-	}	
+	}
+	else if (channel == PLOT_FT)
+	{
+		if (_ft_sensor)
+		{
+			dVector currentFTMeasurement(6);
+			_ft_sensor->readDeviceValue(&currentFTMeasurement[0], sizeof(double)*6);
+
+			for (int i = 0; i < currentFTMeasurement.size(); ++i)
+				data.push_back(currentFTMeasurement[i]);
+		}
+	}
 }
 
 void AbstractHybridAutomatonManager::onSetInterestFrame(const TCHAR* name, const HTransform& T)

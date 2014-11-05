@@ -38,5 +38,6 @@
 #define PLOT_Q						2
 #define PLOT_VELOCITY				3
 #define PLOT_EEFRAME				4
+#define PLOT_FT						5
 
 #endif

@@ -16,7 +16,7 @@ ForceTorqueMilestone::ForceTorqueMilestone(const std::string& osm_name,
 										   std::vector<double>& region_convergence_radius, Milestone::Status status, 
 										   std::vector<Point> handle_points, rxSystem* sys):
 OpSpaceMilestone(osm_name, Displacement(), Rotation(), posi_ori_selection, motion_behaviour, region_convergence_radius, status, handle_points),
-minForceTorque_(minForceTorque), maxForceTorque_(maxForceTorque)
+minForceTorque_(minForceTorque), maxForceTorque_(maxForceTorque), referenceForceTorque_(6, 0.0)
 {
 	forceSensor_ = sys->findDevice(_T("FT_SENSOR"));
 	if (!forceSensor_)
@@ -29,7 +29,7 @@ ForceTorqueMilestone::ForceTorqueMilestone(const std::string& osm_name, Displace
 										   std::vector<double>& region_convergence_radius, Milestone::Status status,
 										   std::vector<Point> handle_points, rxSystem* sys):
 OpSpaceMilestone(osm_name, position, orientation, frame_id, posi_ori_selection, motion_behaviour, region_convergence_radius, status, handle_points),
-minForceTorque_(minForceTorque), maxForceTorque_(maxForceTorque)
+minForceTorque_(minForceTorque), maxForceTorque_(maxForceTorque), referenceForceTorque_(6, 0.0)
 {
 	forceSensor_ = sys->findDevice(_T("FT_SENSOR"));
 	if (!forceSensor_)
@@ -40,6 +40,7 @@ ForceTorqueMilestone::ForceTorqueMilestone(const ForceTorqueMilestone& ft_milest
 OpSpaceMilestone(ft_milestone_cpy),
 minForceTorque_(ft_milestone_cpy.minForceTorque_),
 maxForceTorque_(ft_milestone_cpy.maxForceTorque_),
+referenceForceTorque_(ft_milestone_cpy.referenceForceTorque_),
 forceSensor_(ft_milestone_cpy.forceSensor_)
 {
 	if(ft_milestone_cpy.motion_behaviour_)
@@ -87,6 +88,7 @@ ForceTorqueMilestone& ForceTorqueMilestone::operator=(const ForceTorqueMilestone
 	this->frame_id_ = ft_milestone_assignment.frame_id_;
 	this->minForceTorque_ = ft_milestone_assignment.minForceTorque_;
 	this->maxForceTorque_ = ft_milestone_assignment.maxForceTorque_;
+	this->referenceForceTorque_ = ft_milestone_assignment.referenceForceTorque_;
 	this->forceSensor_ = ft_milestone_assignment.forceSensor_;
 	return *this;
 }
@@ -112,6 +114,13 @@ void ForceTorqueMilestone::setMaxForceTorque(const dVector& maxForceTorque)
 	maxForceTorque_ = maxForceTorque;
 }
 
+void ForceTorqueMilestone::activate(rxSystem* sys)
+{
+	OpSpaceMilestone::activate(sys);
+	
+	forceSensor_->readDeviceValue(&referenceForceTorque_[0], sizeof(double)*6);
+}
+
 bool ForceTorqueMilestone::hasConverged(rxSystem* sys) 
 {
 	//if(!OpSpaceMilestone::hasConverged(sys))
@@ -119,6 +128,8 @@ bool ForceTorqueMilestone::hasConverged(rxSystem* sys)
 	
 	dVector currentFTMeasurement(6);
 	forceSensor_->readDeviceValue(&currentFTMeasurement[0], sizeof(double)*6);
+
+	currentFTMeasurement -= referenceForceTorque_;
 
 	static int dbg_cntr = 0;
 	if (dbg_cntr++ % 250 == 0) {

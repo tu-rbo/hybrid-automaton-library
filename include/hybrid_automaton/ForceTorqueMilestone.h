@@ -39,6 +39,8 @@ public:
 	virtual ForceTorqueMilestone& operator=(const ForceTorqueMilestone & ft_milestone_assignment);
 	ForceTorqueMilestone* ForceTorqueMilestone::clone() const;
 
+	virtual void activate(rxSystem* sys);
+
 	//Like opSpaceMilestone::hasConverged but checks also for base position in 10 dof chain
 	virtual bool hasConverged(rxSystem* sys); 
 
@@ -56,6 +58,8 @@ protected:
 
 	dVector		minForceTorque_;
 	dVector		maxForceTorque_;
+
+	dVector		referenceForceTorque_;
 };
 
 #endif // FORCETORQUE_MILESTONE_

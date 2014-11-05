@@ -12,6 +12,7 @@
 #include "FeatureAttractorController.h"
 #include "SubdisplacementController.h"
 #include "SubdisplacementSimpleController.h"
+#include "SubjointController.h"
 #include "ObstacleAvoidanceController.h"
 #include "JointBlackBoardController.h"
 #include "ROSServiceCallController.h"
@@ -1151,6 +1152,14 @@ rxController* XMLDeserializer::createController(TiXmlElement *rxController_xml, 
 		special_controller->setGain(params.kv, params.kp, params.invL2sqr);
 		controller = special_controller;
 	}
+	/*
+	else if (params.type == "SubjointController")
+    {
+		SubjointController* special_controller = new SubjointController(robot, params.index, dT);
+		special_controller->setGain(params.kv, params.kp, params.invL2sqr);
+		controller = special_controller;
+	}
+	*/
 	else if (params.type == "ObstacleAvoidanceController")
 	{
 		if(CollisionInterface::instance)
@@ -1160,7 +1169,6 @@ rxController* XMLDeserializer::createController(TiXmlElement *rxController_xml, 
 		}
 		else
 			throw std::string("[XMLDeserializer::createController] ERROR: No collision interface used for obstacleAvoidanceController.");
-
 	}
 	else if (params.type == "JointLimitAvoidanceControllerOnDemand")
 	{
