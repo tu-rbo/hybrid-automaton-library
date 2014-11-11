@@ -4,6 +4,7 @@
 #include "hybrid_automaton/Controller.h"
 #include "hybrid_automaton/ControlMode.h"
 
+#include <map>
 #include <assert.h>
 
 // FIXME remove
@@ -13,22 +14,25 @@ namespace ha {
 
 class HybridAutomaton {
 
+public:
+  typedef Controller* (*ControllerCreator) (void);
+
 protected:
   
   // FIXME
   ControlMode* control_mode;
 
-  static std::map<std::string, ControllerCreator> _controller_type_map;
+private:  
+
+  // see http://stackoverflow.com/questions/8057682/accessing-a-static-map-from-a-static-member-function-segmentation-fault-c
+  static std::map<std::string, ControllerCreator> & getControllerTypeMap() {
+    static std::map<std::string, ControllerCreator> controller_type_map;
+    return controller_type_map;
+  }   
   
 public:
-  
-  typedef Controller* (*ControllerCreator) (void);
 
-  static void registerController(const std::string& crtl_name, ControllerCreator cc) {
-    assert ( _controller_type_map.find(crtl_name) == _controller_type_map.end() );
-    std::cout << "Registering " << crtl_name << std::endl;
-    _controller_type_map[crtl_name] = cc;
-  }
+  static void registerController(const std::string& crtl_name, ControllerCreator cc);
   
   void addControlMode(ControlMode* cm) {
     // FIXME

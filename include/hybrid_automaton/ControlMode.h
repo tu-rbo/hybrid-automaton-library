@@ -9,8 +9,15 @@ class ControlMode {
 public:
   ControlMode() {}
   
-  virtual void addController(Controller* c) = 0;
-  virtual void step() = 0;
+  virtual void addController(Controller* c) {
+    // TODO
+    //throw NotImplementedException;
+  }
+    
+  virtual void step() {
+    // TODO
+    //throw NotImplementedException;
+  }    
 };
 
 }
