@@ -168,6 +168,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\include\hybrid_automaton\ControlSet.h"
+				>
+			</File>
+			<File
 				RelativePath=".\include\hybrid_automaton\HybridAutomaton.h"
 				>
 			</File>

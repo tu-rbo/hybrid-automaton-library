@@ -41,7 +41,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="&quot;$(RSWIN_ROOT)\hybrid_automaton\include&quot;"
+				AdditionalIncludeDirectories="&quot;$(RSWIN_ROOT)\hybrid_automaton\include&quot;;&quot;$(RSWIN_ROOT)/thirdparty/gtest/include&quot;"
 				PreprocessorDefinitions="WIN32;_DEBUG;_CONSOLE"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -61,7 +61,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="&quot;$(RSWIN_ROOT)/hybrid_automaton/Debug/hybrid_automaton.lib&quot;"
+				AdditionalDependencies="&quot;$(RSWIN_ROOT)/hybrid_automaton/$(ConfigurationName)/hybrid_automaton.lib&quot; &quot;$(RSWIN_ROOT)/thirdparty/gtest/msvc/gtest/$(ConfigurationName)/gtestd.lib&quot; &quot;$(RSWIN_ROOT)/thirdparty/gtest/msvc/gtest/$(ConfigurationName)/gtest_maind.lib&quot;"
 				LinkIncremental="2"
 				GenerateDebugInformation="true"
 				SubSystem="1"
@@ -117,7 +117,7 @@
 				Optimization="2"
 				EnableIntrinsicFunctions="true"
 				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE"
-				RuntimeLibrary="2"
+				RuntimeLibrary="3"
 				EnableFunctionLevelLinking="true"
 				UsePrecompiledHeader="0"
 				WarningLevel="3"
@@ -134,6 +134,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
+				AdditionalDependencies="&quot;$(RSWIN_ROOT)/hybrid_automaton/$(ConfigurationName)/hybrid_automaton.lib&quot; &quot;$(RSWIN_ROOT)/thirdparty/gtest/msvc/gtest/$(ConfigurationName)/gtest.lib&quot; &quot;$(RSWIN_ROOT)/thirdparty/gtest/msvc/gtest/$(ConfigurationName)/gtest_main.lib&quot;"
 				LinkIncremental="1"
 				GenerateDebugInformation="true"
 				SubSystem="1"
@@ -172,6 +173,10 @@
 			Filter="cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx"
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
+			<File
+				RelativePath=".\gtest_example.cpp"
+				>
+			</File>
 			<File
 				RelativePath=".\protype_test.cpp"
 				>

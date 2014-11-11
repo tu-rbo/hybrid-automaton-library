@@ -144,6 +144,7 @@ rlabJointController::Initializer::Initializer() {
 
 //----------------------------
 
+/*
 int main() {
   
   cout << "Main starts " << endl;
@@ -163,3 +164,4 @@ int main() {
   
   return 0;
 }
+*/
