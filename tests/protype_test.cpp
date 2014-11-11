@@ -120,7 +120,7 @@ public:
   }
 
   void step() {
-    cout << " Stepping rlabJointController!" << endl;
+    //cout << " Stepping rlabJointController!" << endl;
   }
 
   static ha::Controller* instance() {

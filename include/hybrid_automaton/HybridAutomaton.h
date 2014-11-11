@@ -4,6 +4,7 @@
 #include "hybrid_automaton/Controller.h"
 #include "hybrid_automaton/ControlMode.h"
 
+#include <string>
 #include <map>
 #include <assert.h>
 
@@ -27,8 +28,8 @@ private:
   // see http://stackoverflow.com/questions/8057682/accessing-a-static-map-from-a-static-member-function-segmentation-fault-c
   static std::map<std::string, ControllerCreator> & getControllerTypeMap() {
     static std::map<std::string, ControllerCreator> controller_type_map;
-    return controller_type_map;
-  }   
+    return controller_type_map; 
+  }
   
 public:
 
