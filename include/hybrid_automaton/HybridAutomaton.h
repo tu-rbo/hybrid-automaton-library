@@ -9,20 +9,28 @@
 #include <map>
 #include <assert.h>
 
+#include <boost/shared_ptr.hpp>
+
 // FIXME remove
 #include <iostream>
 
 namespace ha {
 
+	class HybridAutomaton;
+	typedef boost::shared_ptr<HybridAutomaton> HybridAutomatonPtr;
+
 	class HybridAutomaton : public Serializable {
 
 	public:
-		typedef Controller* (*ControllerCreator) (void);
+		class HybridAutomaton;
+		typedef boost::shared_ptr<HybridAutomaton> Ptr;
+
+		typedef ControllerPtr (*ControllerCreator) (void);
 
 	protected:
 
 		// FIXME
-		ControlMode* control_mode;
+		ControlMode::Ptr control_mode;
 
 	private:  
 
@@ -37,7 +45,7 @@ namespace ha {
 		static void registerController(const std::string& crtl_name, ControllerCreator cc);
 
 
-		void addControlMode(ControlMode* cm) {
+		void addControlMode(ControlMode::Ptr cm) {
 			// FIXME
 			control_mode = cm;
 		}
@@ -49,6 +57,14 @@ namespace ha {
 		virtual void serialize(DescriptionTreeNode& tree) const;
 		virtual void deserialize(const DescriptionTreeNode& tree);
 
+		HybridAutomatonPtr clone() const {
+			return HybridAutomatonPtr(_doClone());
+		}
+
+	protected:
+		virtual HybridAutomaton* _doClone() const {
+			return new HybridAutomaton(*this);
+		}
 	};
 
 }
