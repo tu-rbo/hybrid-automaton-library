@@ -151,6 +151,14 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
+				RelativePath=".\src\DescriptionTree.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\DescriptionTreeNode.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\HybridAutomaton.cpp"
 				>
 			</File>
@@ -170,6 +178,14 @@
 			</File>
 			<File
 				RelativePath=".\include\hybrid_automaton\ControlSet.h"
+				>
+			</File>
+			<File
+				RelativePath=".\include\hybrid_automaton\DescriptionTree.h"
+				>
+			</File>
+			<File
+				RelativePath=".\include\hybrid_automaton\DescriptionTreeNode.h"
 				>
 			</File>
 			<File
