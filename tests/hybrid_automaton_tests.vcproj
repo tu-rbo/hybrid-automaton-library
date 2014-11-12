@@ -41,7 +41,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="&quot;$(RSWIN_ROOT)\hybrid_automaton\include&quot;;&quot;$(RSWIN_ROOT)/thirdparty/gtest/include&quot;;&quot;$(BOOST_DIR)&quot;;&quot;$(RSWIN_ROOT)/thirdparty/gmock/include&quot;"
+				AdditionalIncludeDirectories="&quot;$(RSWIN_ROOT)&quot;;&quot;$(RSWIN_ROOT)\hybrid_automaton\include&quot;;&quot;$(RSWIN_ROOT)/thirdparty/gtest/include&quot;;&quot;$(RSWIN_ROOT)/thirdparty/gmock/include&quot;;&quot;$(BOOST_DIR)&quot;"
 				PreprocessorDefinitions="WIN32;_DEBUG;_CONSOLE"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -116,7 +116,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="2"
 				EnableIntrinsicFunctions="true"
-				AdditionalIncludeDirectories="&quot;$(RSWIN_ROOT)\hybrid_automaton\include&quot;;&quot;$(RSWIN_ROOT)/thirdparty/gtest/include&quot;;&quot;$(BOOST_DIR)&quot;;&quot;$(RSWIN_ROOT)/thirdparty/gmock/include&quot;"
+				AdditionalIncludeDirectories="&quot;$(RSWIN_ROOT)&quot;;&quot;$(RSWIN_ROOT)\hybrid_automaton\include&quot;;&quot;$(RSWIN_ROOT)/thirdparty/gtest/include&quot;;&quot;$(RSWIN_ROOT)/thirdparty/gmock/include&quot;;&quot;$(BOOST_DIR)&quot;"
 				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE"
 				RuntimeLibrary="3"
 				EnableFunctionLevelLinking="true"

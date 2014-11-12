@@ -6,7 +6,7 @@
 
 #include <boost/shared_ptr.hpp>
 
-#include "tinyxml.h"
+#include "thirdparty/tinyxml/include/tinyxml.h"
 
 #include "hybrid_automaton/DescriptionTreeNode.h"
 

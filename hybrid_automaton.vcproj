@@ -41,7 +41,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="include;&quot;$(RSWIN_ROOT)\thirdparty\tinyxml\include&quot;;&quot;$(BOOST_DIR)&quot;"
+				AdditionalIncludeDirectories="include;&quot;$(RSWIN_ROOT)&quot;;&quot;$(BOOST_DIR)&quot;;&quot;$(RSWIN_ROOT)\thirdparty\tinyxml\include&quot;"
 				PreprocessorDefinitions="WIN32;_DEBUG;_LIB"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -105,7 +105,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="2"
 				EnableIntrinsicFunctions="true"
-				AdditionalIncludeDirectories="include;$(RSWIN_ROOT)\thirdparty\tinyxml\include;$(BOOST_DIR)"
+				AdditionalIncludeDirectories="include;&quot;$(RSWIN_ROOT)&quot;;&quot;$(BOOST_DIR)&quot;"
 				PreprocessorDefinitions="WIN32;NDEBUG;_LIB"
 				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="true"
