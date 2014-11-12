@@ -14,7 +14,8 @@ namespace ha {
 	class ControlMode : public Serializable {
 
 	protected:
-		ControlSet::Ptr _control_set;
+		// TODO
+		//ControlSet::Ptr _control_set;
 
 	public:
 		typedef boost::shared_ptr<ControlMode> Ptr;
@@ -28,8 +29,11 @@ namespace ha {
 		//}
 
 		virtual void step() {
-			// TODO
-			//throw NotImplementedException;
+			throw "not implemented";
+		}    
+
+		virtual ControlSet::Ptr getControlSet() {
+			throw "not implemented";
 		}    
 
 		virtual void serialize(DescriptionTreeNode& tree) const;

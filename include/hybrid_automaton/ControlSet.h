@@ -16,7 +16,8 @@ namespace ha {
 	class ControlSet : public Serializable {
 
 	protected:
-		std::vector<Controller::Ptr> _controllers;
+		// TODO
+		//std::vector<Controller::Ptr> _controllers;
 
 	public:
 		typedef boost::shared_ptr<ControlSet> Ptr;
@@ -25,6 +26,10 @@ namespace ha {
 		}
 
 		virtual void step() {
+			throw "not implemented";
+		}
+
+		virtual std::vector<Controller::Ptr> getControllers() {
 			throw "not implemented";
 		}
 
