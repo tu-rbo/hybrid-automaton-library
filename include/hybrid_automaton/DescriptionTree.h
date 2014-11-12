@@ -14,15 +14,12 @@ namespace ha {
 	class DescriptionTree{
 
 	protected:
-
+	
 	private:  
 
 	public:		
-		// Generate / parse Description Tree
-		virtual bool initTree(std::istream input) = 0;
-
 		//Return first tree element
-		virtual bool getRootNode(DescriptionTreeNode* root_node) = 0;
+		virtual bool getRootNode(DescriptionTreeNode& root_node) = 0;
 	};
 }
 

@@ -17,23 +17,25 @@ namespace ha {
 	protected:
 
 	private:  
-		TiXmlElement node;
+		TiXmlElement* node;
 
 	public:
 		
-		/**
-		* getAttribute
-		* returns true, iff field_name exists
-		* returns string value of field field_name in field_value
-		*/
-		virtual bool getAttribute(const std::string& field_name, std::string& field_value);
+		virtual bool getAttribute(const std::string& field_name, std::string& field_value) const;
 
 		/**
-		* getChildNode
-		* returns true, iff node has child field_name
-		* returns child node in child_node
+		* getChildrenNodes
+		* returns true, if node has at least one child of type type
+		* returns child nodes in children
 		*/
-		virtual bool getChildNode(const std::string& field_name, const DescriptionTreeNode& child_node);
+		virtual bool getChildrenNodes(const std::string& type, const ConstNodeList& children) const;
+		
+		/**
+		* getChildrenNodes
+		* returns true, if node has at least one child of any type
+		* returns all child nodes
+		*/
+		virtual bool getChildrenNodes(const ConstNodeList& children) const;
 
 	};
 

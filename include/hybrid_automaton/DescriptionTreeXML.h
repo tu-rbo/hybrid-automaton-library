@@ -22,14 +22,14 @@ namespace ha {
 
 	private:  
 		TiXmlDocument _document;
-		boost::shared_ptr<TiXmlElement> _rootNode;
+		TiXmlElement* _rootNode;
 
 	public:		
 		// Generate / parse Description Tree
 		virtual bool initTree(std::istream input);
 
 		//Return first tree element
-		bool getRootNode(DescriptionTreeNode* root_node);
+		virtual bool getRootNode(DescriptionTreeNode* root_node);
 	};
 }
 

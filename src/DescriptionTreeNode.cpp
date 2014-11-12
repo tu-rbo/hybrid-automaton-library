@@ -1,10 +1,14 @@
 #include "hybrid_automaton/DescriptionTreeNode.h"
+
+#include <algorithm>
+
 namespace ha {
 	bool DescriptionTreeNode::
-		getAttributeBool(const std::string& field_name, bool& return_value, bool default_value)
+		getAttributeBool(const std::string& field_name, bool& return_value, bool default_value) const
 	{
 		std::string val;
 		bool ret = getAttribute(field_name, val);
+		std::transform(val.begin(), val.end(), val.begin(), ::tolower);
 		if (ret)
 		{
 			if (val == "true")
@@ -18,6 +22,7 @@ namespace ha {
 			else
 			{
 				//Malformed field value
+				throw("todo");
 				assert(0);
 			}
 			return true;
@@ -30,7 +35,7 @@ namespace ha {
 	}
 
 	bool DescriptionTreeNode::
-		getAttributeString(const std::string& field_name, std::string& return_value, std::string& default_value)
+		getAttributeString(const std::string& field_name, std::string& return_value, std::string& default_value) const
 	{
 		std::string val;
 		bool ret = getAttribute(field_name, val);
