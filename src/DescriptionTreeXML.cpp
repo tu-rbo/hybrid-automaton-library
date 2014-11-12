@@ -27,7 +27,7 @@ namespace ha {
 
 	bool DescriptionTreeXML::getRootNode(DescriptionTreeNode* root_node)
 	{
-		root_node = new DescriptionTreeNodeXML();
+		//root_node = new DescriptionTreeNodeXML();
 		return true;
 	}
 
