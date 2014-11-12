@@ -176,6 +176,10 @@
 				RelativePath=".\include\hybrid_automaton\HybridAutomaton.h"
 				>
 			</File>
+			<File
+				RelativePath=".\include\hybrid_automaton\Serializable.h"
+				>
+			</File>
 		</Filter>
 		<Filter
 			Name="Resource Files"
