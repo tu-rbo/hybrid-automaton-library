@@ -11,33 +11,7 @@
 
 #include <boost/shared_ptr.hpp>
 
-// FIXME remove
-#include <iostream>
-
 namespace ha {
-
-// Macros for registering controllers with HybridAutomaton
-
-// Required to enable deserialization of this controller.
-// Invoke this in the header of your controller.
-// Example:
-//   HA_RLAB_CONTROLLER_REGISTER_HEADER()
-#define HA_RLAB_CONTROLLER_REGISTER_HEADER()\
-	class Initializer {\
-	public:\
-	Initializer();\
-	};\
-	static Initializer initializer;\
-
-// The first parameter specifies the name that will be used 
-// in the serialization, the second is the class name
-// of your controller.
-// Invoke this in the cpp file of your controller.
-// Example:
-//   HA_RLAB_CONTROLLER_REGISTER_CPP("JointController", rlabJointController)
-#define HA_RLAB_CONTROLLER_REGISTER_CPP(STR, NAME) NAME::Initializer initializer;\
-	NAME::Initializer::Initializer() { ha::HybridAutomaton::registerController(STR, &NAME::instance); }
-
 
 	class HybridAutomaton;
 	typedef boost::shared_ptr<HybridAutomaton> HybridAutomatonPtr;
@@ -52,11 +26,12 @@ namespace ha {
 		typedef boost::shared_ptr<HybridAutomaton> Ptr;
 
 		typedef ControllerPtr (*ControllerCreator) (void);
+		typedef ControlSetPtr (*ControlSetCreator) (void);
 
 	protected:
 
 		// FIXME
-		ControlMode::Ptr control_mode;
+		std::vector<ControlMode::Ptr> control_modes;
 
 		std::string name;
 
@@ -68,18 +43,54 @@ namespace ha {
 			return controller_type_map; 
 		}
 
-	public:
+		static std::map<std::string, ControlSetCreator> & getControlSetTypeMap() {
+			static std::map<std::string, ControlSetCreator> controlset_type_map;
+			return controlset_type_map; 
+		}
 
+	public:
+		/** 
+		 * @brief Instantiate a controller with given name 
+		 *
+		 * In order to work you must register your controller properly
+		 */
+		static Controller::Ptr createController(const std::string& crtl_name);
+
+		/**
+		 * @brief Register a controller with the hybrid automaton
+		 *
+		 * Do not call this function yourself but rather use the macros:
+		 *  HA_RLAB_CONTROLLER_REGISTER_HEADER()
+		 *		-> to your header file
+		 *  HA_RLAB_CONTROLLER_REGISTER_CPP("YourController", YourController)
+		 *      -> to your cpp file
+		 *
+		 * @see hybrid_automaton/hybrid_automaton_registration.h
+		 */
 		static void registerController(const std::string& crtl_name, ControllerCreator cc);
+		
+		/**
+		 * @brief Register a control set with the hybrid automaton
+		 *
+		 * Do not call this function yourself but rather use the macros:
+		 *  HA_RLAB_CONTROLSET_REGISTER_HEADER()
+		 *		-> to your header file
+		 *  HA_RLAB_CONTROLSET_REGISTER_CPP("YourControlSet", YourControlSet)
+		 *      -> to your cpp file
+	     *
+		 * @see hybrid_automaton/hybrid_automaton_registration.h
+		 */
+		static void registerControlSet(const std::string& crtl_name, ControlSetCreator cc);
 
 
 		void addControlMode(ControlMode::Ptr cm) {
 			// FIXME
-			control_mode = cm;
+			control_modes.push_back(cm);
 		}
 
 		void step() {
-			control_mode->step();
+			// TODO
+			control_modes[0]->step();
 		}
 
 		virtual void serialize(DescriptionTreeNode& tree) const;

@@ -18,7 +18,7 @@
 	<Configurations>
 		<Configuration
 			Name="Debug|Win32"
-			OutputDirectory="$(SolutionDir)$(ConfigurationName)"
+			OutputDirectory="$(ProjectDir)$(ConfigurationName)"
 			IntermediateDirectory="$(ConfigurationName)"
 			ConfigurationType="1"
 			CharacterSet="1"
@@ -41,7 +41,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="&quot;$(RSWIN_ROOT)&quot;;&quot;$(RSWIN_ROOT)\hybrid_automaton\include&quot;;&quot;$(RSWIN_ROOT)/thirdparty/gtest/include&quot;;&quot;$(RSWIN_ROOT)/thirdparty/gmock/include&quot;;&quot;$(BOOST_DIR)&quot;"
+				AdditionalIncludeDirectories="include;&quot;$(RSWIN_ROOT)&quot;;&quot;$(RSWIN_ROOT)\hybrid_automaton\include&quot;;&quot;$(RSWIN_ROOT)/thirdparty/gtest/include&quot;;&quot;$(RSWIN_ROOT)/thirdparty/gmock/include&quot;;&quot;$(BOOST_DIR)&quot;"
 				PreprocessorDefinitions="WIN32;_DEBUG;_CONSOLE"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -91,7 +91,7 @@
 		</Configuration>
 		<Configuration
 			Name="Release|Win32"
-			OutputDirectory="$(SolutionDir)$(ConfigurationName)"
+			OutputDirectory="$(ProjectDir)$(ConfigurationName)"
 			IntermediateDirectory="$(ConfigurationName)"
 			ConfigurationType="1"
 			CharacterSet="1"
@@ -116,7 +116,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="2"
 				EnableIntrinsicFunctions="true"
-				AdditionalIncludeDirectories="&quot;$(RSWIN_ROOT)&quot;;&quot;$(RSWIN_ROOT)\hybrid_automaton\include&quot;;&quot;$(RSWIN_ROOT)/thirdparty/gtest/include&quot;;&quot;$(RSWIN_ROOT)/thirdparty/gmock/include&quot;;&quot;$(BOOST_DIR)&quot;"
+				AdditionalIncludeDirectories="include;&quot;$(RSWIN_ROOT)&quot;;&quot;$(RSWIN_ROOT)\hybrid_automaton\include&quot;;&quot;$(RSWIN_ROOT)/thirdparty/gtest/include&quot;;&quot;$(RSWIN_ROOT)/thirdparty/gmock/include&quot;;&quot;$(BOOST_DIR)&quot;"
 				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE"
 				RuntimeLibrary="3"
 				EnableFunctionLevelLinking="true"
@@ -175,6 +175,10 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
+				RelativePath=".\controller_test.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\description_tree_tinyxml_test.cpp"
 				>
 			</File>
@@ -184,10 +188,6 @@
 			</File>
 			<File
 				RelativePath=".\hybrid_automaton_serialization_test.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\protype_test.cpp"
 				>
 			</File>
 		</Filter>
