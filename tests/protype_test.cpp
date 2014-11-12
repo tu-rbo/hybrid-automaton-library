@@ -10,6 +10,8 @@
 
 #include <iostream>
 
+/*
+
 // DELETE ME
 //
 // File used for showing basic wiring of classes + their functionality
@@ -144,7 +146,6 @@ rlabJointController::Initializer::Initializer() {
 
 //----------------------------
 
-/*
 int main() {
   
   cout << "Main starts " << endl;

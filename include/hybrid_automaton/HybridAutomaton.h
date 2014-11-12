@@ -3,48 +3,69 @@
 
 #include "hybrid_automaton/Controller.h"
 #include "hybrid_automaton/ControlMode.h"
+#include "hybrid_automaton/Serializable.h"
 
 #include <string>
 #include <map>
 #include <assert.h>
+
+#include <boost/shared_ptr.hpp>
 
 // FIXME remove
 #include <iostream>
 
 namespace ha {
 
-class HybridAutomaton {
+	class HybridAutomaton;
+	typedef boost::shared_ptr<HybridAutomaton> HybridAutomatonPtr;
 
-public:
-  typedef Controller* (*ControllerCreator) (void);
+	class HybridAutomaton : public Serializable {
 
-protected:
-  
-  // FIXME
-  ControlMode* control_mode;
+	public:
+		class HybridAutomaton;
+		typedef boost::shared_ptr<HybridAutomaton> Ptr;
 
-private:  
+		typedef ControllerPtr (*ControllerCreator) (void);
 
-  // see http://stackoverflow.com/questions/8057682/accessing-a-static-map-from-a-static-member-function-segmentation-fault-c
-  static std::map<std::string, ControllerCreator> & getControllerTypeMap() {
-    static std::map<std::string, ControllerCreator> controller_type_map;
-    return controller_type_map; 
-  }
-  
-public:
+	protected:
 
-  static void registerController(const std::string& crtl_name, ControllerCreator cc);
-  
-  void addControlMode(ControlMode* cm) {
-    // FIXME
-    control_mode = cm;
-  }
-  
-  void step() {
-    control_mode->step();
-  }
-  
-};
+		// FIXME
+		ControlMode::Ptr control_mode;
+
+	private:  
+
+		// see http://stackoverflow.com/questions/8057682/accessing-a-static-map-from-a-static-member-function-segmentation-fault-c
+		static std::map<std::string, ControllerCreator> & getControllerTypeMap() {
+			static std::map<std::string, ControllerCreator> controller_type_map;
+			return controller_type_map; 
+		}
+
+	public:
+
+		static void registerController(const std::string& crtl_name, ControllerCreator cc);
+
+
+		void addControlMode(ControlMode::Ptr cm) {
+			// FIXME
+			control_mode = cm;
+		}
+
+		void step() {
+			control_mode->step();
+		}
+
+		virtual void serialize(DescriptionTreeNode& tree) const;
+		virtual void deserialize(const DescriptionTreeNode& tree);
+
+		HybridAutomatonPtr clone() const {
+			return HybridAutomatonPtr(_doClone());
+		}
+
+	protected:
+		virtual HybridAutomaton* _doClone() const {
+			return new HybridAutomaton(*this);
+		}
+	};
 
 }
 

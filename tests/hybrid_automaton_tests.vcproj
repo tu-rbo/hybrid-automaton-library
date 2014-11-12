@@ -41,7 +41,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="&quot;$(RSWIN_ROOT)\hybrid_automaton\include&quot;;&quot;$(RSWIN_ROOT)/thirdparty/gtest/include&quot;"
+				AdditionalIncludeDirectories="&quot;$(RSWIN_ROOT)\hybrid_automaton\include&quot;;&quot;$(RSWIN_ROOT)/thirdparty/gtest/include&quot;;&quot;$(BOOST_DIR)&quot;;&quot;$(RSWIN_ROOT)/thirdparty/gmock/include&quot;"
 				PreprocessorDefinitions="WIN32;_DEBUG;_CONSOLE"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -61,7 +61,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="&quot;$(RSWIN_ROOT)/hybrid_automaton/$(ConfigurationName)/hybrid_automaton.lib&quot; &quot;$(RSWIN_ROOT)/thirdparty/gtest/msvc/gtest/$(ConfigurationName)/gtestd.lib&quot; &quot;$(RSWIN_ROOT)/thirdparty/gtest/msvc/gtest/$(ConfigurationName)/gtest_maind.lib&quot;"
+				AdditionalDependencies="&quot;$(RSWIN_ROOT)/hybrid_automaton/$(ConfigurationName)/hybrid_automaton.lib&quot; &quot;$(RSWIN_ROOT)/thirdparty/gtest/msvc/gtest/$(ConfigurationName)/gtestd.lib&quot; &quot;$(RSWIN_ROOT)/thirdparty/gmock/msvc/2005/$(ConfigurationName)/gmock.lib&quot; &quot;$(RSWIN_ROOT)/thirdparty/gmock/msvc/2005/$(ConfigurationName)/gmock_main.lib&quot;"
 				LinkIncremental="2"
 				GenerateDebugInformation="true"
 				SubSystem="1"
@@ -116,6 +116,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="2"
 				EnableIntrinsicFunctions="true"
+				AdditionalIncludeDirectories="&quot;$(RSWIN_ROOT)\hybrid_automaton\include&quot;;&quot;$(RSWIN_ROOT)/thirdparty/gtest/include&quot;;&quot;$(BOOST_DIR)&quot;;&quot;$(RSWIN_ROOT)/thirdparty/gmock/include&quot;"
 				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE"
 				RuntimeLibrary="3"
 				EnableFunctionLevelLinking="true"
@@ -134,7 +135,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="&quot;$(RSWIN_ROOT)/hybrid_automaton/$(ConfigurationName)/hybrid_automaton.lib&quot; &quot;$(RSWIN_ROOT)/thirdparty/gtest/msvc/gtest/$(ConfigurationName)/gtest.lib&quot; &quot;$(RSWIN_ROOT)/thirdparty/gtest/msvc/gtest/$(ConfigurationName)/gtest_main.lib&quot;"
+				AdditionalDependencies="&quot;$(RSWIN_ROOT)/hybrid_automaton/$(ConfigurationName)/hybrid_automaton.lib&quot; &quot;$(RSWIN_ROOT)/thirdparty/gtest/msvc/gtest/$(ConfigurationName)/gtest.lib&quot; &quot;$(RSWIN_ROOT)/thirdparty/gmock/msvc/2005/$(ConfigurationName)/gmock.lib&quot; &quot;$(RSWIN_ROOT)/thirdparty/gmock/msvc/2005/$(ConfigurationName)/gmock_main.lib&quot;"
 				LinkIncremental="1"
 				GenerateDebugInformation="true"
 				SubSystem="1"
@@ -174,11 +175,11 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
-				RelativePath=".\description_tree_tinyxml_test.cpp"
+				RelativePath=".\gtest_example.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\gtest_example.cpp"
+				RelativePath=".\hybrid_automaton_serialization_test.cpp"
 				>
 			</File>
 			<File

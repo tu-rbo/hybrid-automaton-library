@@ -5,19 +5,14 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "hybrid_automaton", "hybrid_
 	ProjectSection(ProjectDependencies) = postProject
 		{5495853A-700C-4656-9AEF-8D957D4AB0AF} = {5495853A-700C-4656-9AEF-8D957D4AB0AF}
 	EndProjectSection
+	ProjectSection(ProjectDependencies) = postProject
+		{5495853A-700C-4656-9AEF-8D957D4AB0AF} = {5495853A-700C-4656-9AEF-8D957D4AB0AF}
+	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "hybrid_automaton_tests", "tests\hybrid_automaton_tests.vcproj", "{DFEB1F59-B884-4026-BCD2-FE63571D442C}"
 	ProjectSection(ProjectDependencies) = postProject
 		{A06B8156-ED50-429B-9A4A-9EB9ADF4DF50} = {A06B8156-ED50-429B-9A4A-9EB9ADF4DF50}
 	EndProjectSection
-EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "control_ha_rlab_prototype", "..\hybrid_automaton_rlab\msvc9\control_ha_rlab_prototype\control_ha_rlab_prototype.vcproj", "{816B98E4-62A1-4840-BB72-5306A564C7C3}"
-	ProjectSection(ProjectDependencies) = postProject
-		{8CC5FA2B-EC53-4831-87C5-75EAF208DF54} = {8CC5FA2B-EC53-4831-87C5-75EAF208DF54}
-		{A06B8156-ED50-429B-9A4A-9EB9ADF4DF50} = {A06B8156-ED50-429B-9A4A-9EB9ADF4DF50}
-	EndProjectSection
-EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ha_rlab_prototype", "..\hybrid_automaton_rlab\msvc9\ha_rlab_prototype\ha_rlab_prototype.vcproj", "{8CC5FA2B-EC53-4831-87C5-75EAF208DF54}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "tinyxml", "..\thirdparty\tinyxml\msvc9\tinyxml\tinyxml.vcproj", "{5495853A-700C-4656-9AEF-8D957D4AB0AF}"
 EndProject
@@ -35,14 +30,6 @@ Global
 		{DFEB1F59-B884-4026-BCD2-FE63571D442C}.Debug|Win32.Build.0 = Debug|Win32
 		{DFEB1F59-B884-4026-BCD2-FE63571D442C}.Release|Win32.ActiveCfg = Release|Win32
 		{DFEB1F59-B884-4026-BCD2-FE63571D442C}.Release|Win32.Build.0 = Release|Win32
-		{816B98E4-62A1-4840-BB72-5306A564C7C3}.Debug|Win32.ActiveCfg = Debug|Win32
-		{816B98E4-62A1-4840-BB72-5306A564C7C3}.Debug|Win32.Build.0 = Debug|Win32
-		{816B98E4-62A1-4840-BB72-5306A564C7C3}.Release|Win32.ActiveCfg = Release|Win32
-		{816B98E4-62A1-4840-BB72-5306A564C7C3}.Release|Win32.Build.0 = Release|Win32
-		{8CC5FA2B-EC53-4831-87C5-75EAF208DF54}.Debug|Win32.ActiveCfg = Debug|Win32
-		{8CC5FA2B-EC53-4831-87C5-75EAF208DF54}.Debug|Win32.Build.0 = Debug|Win32
-		{8CC5FA2B-EC53-4831-87C5-75EAF208DF54}.Release|Win32.ActiveCfg = Release|Win32
-		{8CC5FA2B-EC53-4831-87C5-75EAF208DF54}.Release|Win32.Build.0 = Release|Win32
 		{5495853A-700C-4656-9AEF-8D957D4AB0AF}.Debug|Win32.ActiveCfg = Debug|Win32
 		{5495853A-700C-4656-9AEF-8D957D4AB0AF}.Debug|Win32.Build.0 = Debug|Win32
 		{5495853A-700C-4656-9AEF-8D957D4AB0AF}.Release|Win32.ActiveCfg = Release|Win32
