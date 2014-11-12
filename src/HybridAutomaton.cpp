@@ -19,6 +19,8 @@ void HybridAutomaton::serialize(DescriptionTreeNode& tree) const {
 }
 
 void HybridAutomaton::deserialize(const DescriptionTreeNode& tree){
+	tree.getAttribute(std::string("name"));
+	//name = tree.getAttribute("name");
 }
 
 }

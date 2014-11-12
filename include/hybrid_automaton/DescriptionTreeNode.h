@@ -17,8 +17,8 @@ namespace ha {
 	public:
 		
 		// Override these in the implementation class (i.e. DescriptionTreeNodeTinyXML)
-		virtual std::string getAttribute(const std::string& field_name) = 0;
-		virtual const DescriptionTreeNode& getChildNode(const std::string& field_name) = 0;
+		virtual std::string getAttribute(const std::string& field_name) const = 0;
+		virtual const DescriptionTreeNode& getChildNode(const std::string& field_name) const = 0;
 
 		//Implement these helper functions here (internally they call getAttribute)
 		virtual bool getAttributeBool(const std::string& field_name, bool default_value)

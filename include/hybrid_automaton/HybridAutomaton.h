@@ -32,6 +32,8 @@ namespace ha {
 		// FIXME
 		ControlMode::Ptr control_mode;
 
+		std::string name;
+
 	private:  
 
 		// see http://stackoverflow.com/questions/8057682/accessing-a-static-map-from-a-static-member-function-segmentation-fault-c
