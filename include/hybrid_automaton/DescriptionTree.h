@@ -22,7 +22,7 @@ namespace ha {
 		virtual bool initTree(std::istream input) = 0;
 
 		//Return first tree element
-		virtual const DescriptionTreeNode& getRootNode() = 0;
+		virtual bool getRootNode(DescriptionTreeNode* root_node) = 0;
 	};
 }
 
