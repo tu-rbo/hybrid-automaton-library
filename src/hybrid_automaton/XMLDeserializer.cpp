@@ -714,6 +714,11 @@ MotionBehaviour* XMLDeserializer::createMotionBehaviour(TiXmlElement* motion_beh
 			{
 				dVector kp = deserializeDVector(control_set_element, "kp");
 				dVector kv = deserializeDVector(control_set_element, "kv");
+				if ((kp.size() != 0 && kp.size() != robot->q().size()) || 
+					(kv.size() != 0 && kv.size() != robot->q().size()))
+				{
+					throw std::string("[XMLDeserializer::createMotionBehaviour] ERROR: NakamuraControlSet needs kp/kv parameters of size robot->q().size().");
+				}
 				mb_control_set = new NakamuraControlSet(robot, dT, kp, kv);
 				mb_control_set->setGravity(0, 0, -GRAV_ACC);
 				mb_control_set->nullMotionController()->setGain(0.0, 0.0, 0.0);
@@ -1152,14 +1157,14 @@ rxController* XMLDeserializer::createController(TiXmlElement *rxController_xml, 
 		special_controller->setGain(params.kv, params.kp, params.invL2sqr);
 		controller = special_controller;
 	}
-	/*
 	else if (params.type == "SubjointController")
     {
 		SubjointController* special_controller = new SubjointController(robot, params.index, dT);
+		if(!goal_controller)
+			special_controller->addPoint(params.dVectorGoal, params.timeGoal, params.reuseGoal, eInterpolatorType_Cubic);
 		special_controller->setGain(params.kv, params.kp, params.invL2sqr);
 		controller = special_controller;
 	}
-	*/
 	else if (params.type == "ObstacleAvoidanceController")
 	{
 		if(CollisionInterface::instance)
