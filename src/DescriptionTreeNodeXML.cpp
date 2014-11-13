@@ -63,7 +63,7 @@ namespace ha {
 		_node->SetAttribute(field_name.c_str(), field_value.c_str());
 	}
 
-	void DescriptionTreeNodeXML::addChildNode(const DescriptionTreeNode::Ptr child) 
+	void DescriptionTreeNodeXML::addChildNode(const DescriptionTreeNode::Ptr& child) 
 	{
 		//Downcast
 		DescriptionTreeNodeXML::Ptr childXMLNode = boost::dynamic_pointer_cast<DescriptionTreeNodeXML>(child);

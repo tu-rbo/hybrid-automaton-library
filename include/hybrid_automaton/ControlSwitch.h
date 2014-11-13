@@ -4,13 +4,14 @@
 #include <boost/shared_ptr.hpp>
 
 #include "hybrid_automaton/JumpCondition.h" 
+#include "hybrid_automaton/Serializable.h"
 
 namespace ha {
 
   class ControlSwitch;
   typedef boost::shared_ptr<ControlSwitch> ControlSwitchPtr;
 
-  class ControlSwitch
+  class ControlSwitch : public Serializable
   {
   public:
     typedef boost::shared_ptr<ControlSwitch> Ptr;
@@ -25,8 +26,11 @@ namespace ha {
     }
 
     virtual bool isActive() {
-        throw "not_implemented";
+        throw "not implemented";
     }
+
+	virtual void serialize(const DescriptionTreeNode::Ptr& tree) const;
+	virtual void deserialize(const DescriptionTreeNode::ConstPtr& tree);
 
     protected:
 

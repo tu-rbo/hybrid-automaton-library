@@ -41,7 +41,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="include;&quot;$(RSWIN_ROOT)&quot;;&quot;$(RSWIN_ROOT)\hybrid_automaton\include&quot;;&quot;$(RSWIN_ROOT)/thirdparty/gtest/include&quot;;&quot;$(RSWIN_ROOT)/thirdparty/gmock/include&quot;;&quot;$(BOOST_DIR)&quot;"
+				AdditionalIncludeDirectories="include;&quot;$(RSWIN_ROOT)&quot;;&quot;$(RSWIN_ROOT)\hybrid_automaton\include&quot;;&quot;$(RSWIN_ROOT)/thirdparty/gtest/include&quot;;&quot;$(RSWIN_ROOT)/thirdparty/gmock/include&quot;;&quot;$(BOOST_DIR)&quot;;&quot;$(EIGEN_DIR)&quot;"
 				PreprocessorDefinitions="WIN32;_DEBUG;_CONSOLE"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -116,7 +116,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="2"
 				EnableIntrinsicFunctions="true"
-				AdditionalIncludeDirectories="include;&quot;$(RSWIN_ROOT)&quot;;&quot;$(RSWIN_ROOT)\hybrid_automaton\include&quot;;&quot;$(RSWIN_ROOT)/thirdparty/gtest/include&quot;;&quot;$(RSWIN_ROOT)/thirdparty/gmock/include&quot;;&quot;$(BOOST_DIR)&quot;"
+				AdditionalIncludeDirectories="include;&quot;$(RSWIN_ROOT)&quot;;&quot;$(RSWIN_ROOT)\hybrid_automaton\include&quot;;&quot;$(RSWIN_ROOT)/thirdparty/gtest/include&quot;;&quot;$(RSWIN_ROOT)/thirdparty/gmock/include&quot;;&quot;$(BOOST_DIR)&quot;;&quot;$(EIGEN_DIR)&quot;"
 				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE"
 				RuntimeLibrary="3"
 				EnableFunctionLevelLinking="true"
@@ -179,6 +179,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\controlset_test.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\description_tree_tinyxml_test.cpp"
 				>
 			</File>
@@ -196,6 +200,10 @@
 			Filter="h;hpp;hxx;hm;inl;inc;xsd"
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
+			<File
+				RelativePath=".\MockDescriptionTreeNode.h"
+				>
+			</File>
 		</Filter>
 		<Filter
 			Name="Resource Files"
