@@ -17,6 +17,9 @@ namespace ha {
 		// TODO
 		//ControlSet::Ptr _control_set;
 
+		// unique identifier within one hybrid automaton
+		std::string _name;
+
 	public:
 		typedef boost::shared_ptr<ControlMode> Ptr;
 
@@ -28,7 +31,7 @@ namespace ha {
 		//	throw "not implemented";
 		//}
 
-		virtual void step() {
+		virtual Eigen::Vector step() {
 			throw "not implemented";
 		}    
 
@@ -41,6 +44,14 @@ namespace ha {
 
 		ControlModePtr clone() const {
 			return ControlModePtr(_doClone());
+		}
+
+		void setName(const std::string& name) {
+			_name = name;
+		}
+
+		const std::string& getName() const {
+			return _name;
 		}
 
 	protected:
