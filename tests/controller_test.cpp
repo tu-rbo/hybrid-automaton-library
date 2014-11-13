@@ -41,7 +41,6 @@ using ::testing::_;
 
 TEST(Controller, SuccessfulRegistration) {
 
-
 	System::Ptr emptySystem;
 
 	std::string ctrlName1("MockRegisteredController");

@@ -18,6 +18,9 @@ namespace ha {
 		System() {
 		}
 
+		virtual ~System() {
+		}
+
 	};
 
 }
