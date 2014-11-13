@@ -153,8 +153,8 @@ namespace ha {
 			return _name;
 		}
 
-		virtual void serialize(DescriptionTreeNode& tree) const;
-		virtual void deserialize(const DescriptionTreeNode& tree);
+		virtual void serialize(DescriptionTreeNode::Ptr& tree) const;
+		virtual void deserialize(const DescriptionTreeNode::Ptr tree);
 
 		HybridAutomatonPtr clone() const {
 			return HybridAutomatonPtr(_doClone());

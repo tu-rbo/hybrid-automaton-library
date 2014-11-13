@@ -30,11 +30,11 @@ Controller::Ptr HybridAutomaton::createController(const std::string& crtl_name) 
 }
 
 
-void HybridAutomaton::serialize(DescriptionTreeNode& tree) const {
+void HybridAutomaton::serialize(DescriptionTreeNode::Ptr& tree) const {
 	throw "not implemented";
 }
 
-void HybridAutomaton::deserialize(const DescriptionTreeNode& tree){
+void HybridAutomaton::deserialize(const DescriptionTreeNode::Ptr tree){
 	//tree.getAttribute(std::string("name"));
 	//name = tree.getAttribute("name");
 }

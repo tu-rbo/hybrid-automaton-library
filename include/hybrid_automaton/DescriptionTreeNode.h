@@ -24,7 +24,7 @@ namespace ha {
 	public:
 		typedef boost::shared_ptr<DescriptionTreeNode> Ptr;
 
-		typedef std::list<const DescriptionTreeNodePtr> ConstNodeList;
+		typedef std::list<const DescriptionTreeNode::Ptr> ConstNodeList;
 		
 
 		///////////////////////////////////////////////////////////////////////////////////////////////
@@ -63,7 +63,7 @@ namespace ha {
 		* setAttribute 
 		* @param field_name returns string value of field field_name in field_value
 		*/
-		virtual void addChildNode(DescriptionTreeNode& child) = 0;
+		virtual void addChildNode(DescriptionTreeNode::Ptr child) = 0;
 		
 		
 		///////////////////////////////////////////////////////////////////////////////////////////////

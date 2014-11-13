@@ -1,14 +1,14 @@
 #ifndef HYBRID_AUTOMATON_SERIALIZABLE_H_
 #define HYBRID_AUTOMATON_SERIALIZABLE_H_
 
-namespace ha {
+#include "hybrid_automaton/DescriptionTreeNode.h"
 
-class DescriptionTreeNode;
+namespace ha {
 
 class Serializable {
 
-	virtual void serialize(DescriptionTreeNode& tree) const = 0;
-	virtual void deserialize(const DescriptionTreeNode& tree) = 0;
+	virtual void serialize(DescriptionTreeNode::Ptr& tree) const = 0;
+	virtual void deserialize(const DescriptionTreeNode::Ptr tree) = 0;
 
 };
 
