@@ -1,73 +1,111 @@
-#ifndef HYBRID_AUTOMATON_
-#define HYBRID_AUTOMATON_
+#ifndef HYBRID_AUTOMATON_HYBRID_AUTOMATON_H_
+#define HYBRID_AUTOMATON_HYBRID_AUTOMATON_H_
 
-#include "graph/include/MDP.h"
-#include "graph/include/MDPNode.h"
-#include "graph/include/MDPEdge.h"
-#include "Milestone.h"
-#include "MotionBehaviour.h"
+#include "hybrid_automaton/Controller.h"
+#include "hybrid_automaton/ControlMode.h"
+#include "hybrid_automaton/Serializable.h"
 
-/**
-* HybridAutomaton class. 
-* @brief Class extending DiGraph. It defines the types for the template to be Milestone and MotionBehaviour. Adds the required parser/deparser functionalities.
-*/
-class HybridAutomaton : public MDP
-{
-public:
+#include <string>
+#include <map>
+#include <assert.h>
 
-	/**
-	* Constructor. Creates an empty graph.
-	*/
-	HybridAutomaton();
+#include <boost/shared_ptr.hpp>
+
+namespace ha {
+
+	class HybridAutomaton;
+	typedef boost::shared_ptr<HybridAutomaton> HybridAutomatonPtr;
 
 	/**
-	* Destructor.
-	*/
-	virtual ~HybridAutomaton();
+	 * @brief Hybrid Automaton implementation and interface
+	 */
+	class HybridAutomaton : public Serializable {
 
-	/**
-	* Return a pointer to the first Milestone.
-	*/
-	Milestone* getStartNode() const;
+	public:
+		class HybridAutomaton;
+		typedef boost::shared_ptr<HybridAutomaton> Ptr;
 
-	/**
-	* Set the pointer to the first Milestone.
-	* @param nodeID Pointer to the first Milestone.
-	*/
-	void setStartNode(Milestone* nodeID);
+		typedef ControllerPtr (*ControllerCreator) (void);
+		typedef ControlSetPtr (*ControlSetCreator) (void);
 
-	/**
-	* Return the pointer of a specific Milestone or NULL if it doesn't exist.
-	* @param name Name of the Milestone.
-	*/
-	Milestone* getMilestoneByName(const std::string& name) const;
+	protected:
 
-	/**
-	* Return a string with XML format with all required parameters of the HybridAutomaton to recreate it 
-	* in the other side of a network connection.
-	* Note: It uses tinyXML library to create the string with XML format.
-	*/
-	virtual std::string toStringXML() const;
+		// FIXME
+		std::vector<ControlMode::Ptr> control_modes;
 
-	/**
-	* REPLACE the current values of the HybridAutomaton with the values contained in a string with XML format.
-	* @param xmlString String with XML format containing the new values for the HybridAutomaton.
-	* @param robot Pointer to the rxSystem, used to create the rxControllers.
-	* @param dT Interval to be used by all the controllers in this HybridSystem
-	* Note: It uses tinyXML library to read the string with XML format.
-	*/
-	//virtual void fromStringXML(const std::string& xml_string, rxSystem* robot, double dT);
+		std::string name;
 
-private:
-	Milestone* start_node_id_;	// Pointer to the first Milestone (if exists). 
-	// CAREFUL! This pointer is the same as the stored in the vector of Milestones. Don't modify/delete it!
-};
+	private:  
 
-/**
-* Creates an ostream with the data and parameters of a HybridAutomaton.
-* @param out Object to add the data and be returned.
-* @param hybrid_system HybridAutomaton to be parsed.
-*/
-ostream& operator<<(ostream & out, const HybridAutomaton & hybrid_system);
+		// see http://stackoverflow.com/questions/8057682/accessing-a-static-map-from-a-static-member-function-segmentation-fault-c
+		static std::map<std::string, ControllerCreator> & getControllerTypeMap() {
+			static std::map<std::string, ControllerCreator> controller_type_map;
+			return controller_type_map; 
+		}
+
+		static std::map<std::string, ControlSetCreator> & getControlSetTypeMap() {
+			static std::map<std::string, ControlSetCreator> controlset_type_map;
+			return controlset_type_map; 
+		}
+
+	public:
+		/** 
+		 * @brief Instantiate a controller with given name 
+		 *
+		 * In order to work you must register your controller properly
+		 */
+		static Controller::Ptr createController(const std::string& crtl_name);
+
+		/**
+		 * @brief Register a controller with the hybrid automaton
+		 *
+		 * Do not call this function yourself but rather use the macros:
+		 *  HA_RLAB_CONTROLLER_REGISTER_HEADER()
+		 *		-> to your header file
+		 *  HA_RLAB_CONTROLLER_REGISTER_CPP("YourController", YourController)
+		 *      -> to your cpp file
+		 *
+		 * @see hybrid_automaton/hybrid_automaton_registration.h
+		 */
+		static void registerController(const std::string& crtl_name, ControllerCreator cc);
+		
+		/**
+		 * @brief Register a control set with the hybrid automaton
+		 *
+		 * Do not call this function yourself but rather use the macros:
+		 *  HA_RLAB_CONTROLSET_REGISTER_HEADER()
+		 *		-> to your header file
+		 *  HA_RLAB_CONTROLSET_REGISTER_CPP("YourControlSet", YourControlSet)
+		 *      -> to your cpp file
+	     *
+		 * @see hybrid_automaton/hybrid_automaton_registration.h
+		 */
+		static void registerControlSet(const std::string& crtl_name, ControlSetCreator cc);
+
+
+		void addControlMode(ControlMode::Ptr cm) {
+			// FIXME
+			control_modes.push_back(cm);
+		}
+
+		void step() {
+			// TODO
+			control_modes[0]->step();
+		}
+
+		virtual void serialize(DescriptionTreeNode::Ptr& tree) const;
+		virtual void deserialize(const DescriptionTreeNode::Ptr tree);
+
+		HybridAutomatonPtr clone() const {
+			return HybridAutomatonPtr(_doClone());
+		}
+
+	protected:
+		virtual HybridAutomaton* _doClone() const {
+			return new HybridAutomaton(*this);
+		}
+	};
+
+}
 
 #endif
