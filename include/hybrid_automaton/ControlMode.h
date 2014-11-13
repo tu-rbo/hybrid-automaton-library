@@ -36,8 +36,8 @@ namespace ha {
 			throw "not implemented";
 		}    
 
-		virtual void serialize(DescriptionTreeNode::Ptr& tree) const;
-		virtual void deserialize(const DescriptionTreeNode::Ptr tree);
+		virtual void serialize(const DescriptionTreeNode::Ptr& tree) const;
+		virtual void deserialize(const DescriptionTreeNode::ConstPtr& tree);
 
 		ControlModePtr clone() const {
 			return ControlModePtr(_doClone());

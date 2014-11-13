@@ -14,6 +14,7 @@ namespace ha {
 
 	class DescriptionTreeNode;
 	typedef boost::shared_ptr<DescriptionTreeNode> DescriptionTreeNodePtr;
+	typedef boost::shared_ptr<const DescriptionTreeNode> DescriptionTreeNodeConstPtr;
 
 	class DescriptionTreeNode {	
 
@@ -23,6 +24,7 @@ namespace ha {
 
 	public:
 		typedef boost::shared_ptr<DescriptionTreeNode> Ptr;
+		typedef boost::shared_ptr<const DescriptionTreeNode> ConstPtr;
 
 		typedef std::list<const DescriptionTreeNode::Ptr> ConstNodeList;
 		
