@@ -97,11 +97,34 @@ void HybridAutomaton::deserialize(const DescriptionTreeNode::ConstPtr& tree){
 }
 
 void HybridAutomaton::setName(const std::string& name) {
-			_name = name;
-		}
+	_name = name;
+}
 
 const std::string& HybridAutomaton::getName() const {
 	return _name;
 	}
+
+void HybridAutomaton::activate() {
+	if (!_current_control_mode) {
+		throw "ERROR: No current control mode defined!";
+	}
+	_current_control_mode->activate();
+}
+
+void HybridAutomaton::deactivate() {
+}
+
+void HybridAutomaton::setCurrentControlMode(const std::string& control_mode) {
+	if (::boost::vertex_by_label(control_mode, _graph) == GraphTraits::null_vertex())
+		throw std::string("WARNING: Control mode '") + control_mode + "' does not exist!";
+
+	_current_control_mode->deactivate();
+	_current_control_mode = _graph[control_mode];
+	_current_control_mode->activate();
+}
+
+ControlMode::Ptr HybridAutomaton::getCurrentControlMode() const {
+	return _current_control_mode;
+}
 
 }
