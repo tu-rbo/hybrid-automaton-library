@@ -2,11 +2,11 @@
 
 namespace ha {
 	
-	void Controller::serialize(DescriptionTreeNode& tree) const {
+	void Controller::serialize(DescriptionTreeNode::Ptr& tree) const {
 		// TODO
 	}
 	
-	void Controller::deserialize(const DescriptionTreeNode& tree) {
+	void Controller::deserialize(const DescriptionTreeNode::Ptr tree) {
 		// TODO
 	}
 
