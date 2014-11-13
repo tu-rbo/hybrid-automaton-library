@@ -10,7 +10,26 @@
 // FIXME remove
 #include <iostream>
 
+#include <Eigen/Dense>
+
 namespace ha {
+
+
+	class ha_istringstream : public std::istringstream
+	{
+	public:
+		ha_istringstream(std::string string)
+			:
+		std::istringstream(string)
+		{
+		}
+	};
+
+
+
+	class ha_ostringstream : public std::ostringstream
+	{
+	};
 
 	class DescriptionTreeNode;
 	typedef boost::shared_ptr<DescriptionTreeNode> DescriptionTreeNodePtr;
@@ -27,13 +46,13 @@ namespace ha {
 		typedef boost::shared_ptr<const DescriptionTreeNode> ConstPtr;
 
 		typedef std::list<const DescriptionTreeNode::Ptr> ConstNodeList;
-		
+
 
 		///////////////////////////////////////////////////////////////////////////////////////////////
 		// Override all following methods in the implementation class (i.e. DescriptionTreeNodeTinyXML)
 		///////////////////////////////////////////////////////////////////////////////////////////////
 		virtual const std::string getType() const = 0;
-		
+
 		/**
 		* getAttribute
 		* @return true, if field_name exists
@@ -60,19 +79,89 @@ namespace ha {
 		* @param field_name returns string value of field field_name in field_value
 		*/
 		virtual void setAttribute(const std::string& field_name, std::string& field_value) = 0;
-		
+
 		/**
 		* setAttribute 
 		* @param field_name returns string value of field field_name in field_value
 		*/
 		virtual void addChildNode(const DescriptionTreeNode::Ptr& child) = 0;
-		
-		
+
+
+		friend ha_istringstream& operator>>(ha_istringstream& iss, Eigen::VectorXd& vector)
+		{
+			double value = -1.0;
+			while(iss >> value)
+			{	
+				vector << value;
+			}
+			return iss;
+		};
+
+		friend ha_ostringstream& operator<<(ha_ostringstream& oss, Eigen::VectorXd& vector)
+		{
+			std::stringstream epsilon_ss;
+			for(unsigned int idx=0; idx<vector.size(); ++idx)
+			{
+				oss << vector(idx);
+
+				if(idx != vector.size() -1)
+				{
+					oss << " ";
+				}
+			}
+			return oss;
+		}
+
 		///////////////////////////////////////////////////////////////////////////////////////////////
 		//Implement these helper functions here (internally they will call getAttribute)
 		///////////////////////////////////////////////////////////////////////////////////////////////
-		virtual bool getAttributeBool(const std::string& field_name, bool& return_value, bool default_value = false) const;			
-		virtual bool getAttributeString(const std::string& field_name, std::string& return_value, std::string& default_value = std::string("")) const;
+		template <typename T> void setAttribute(const std::string& field_name, const T& field_value)
+		{
+			ha_ostringstream ss;
+			ss << field_value;
+			setAttribute(field_name, ss.str());
+		}
+
+		template <typename T> bool getAttribute(const std::string& field_name, T& return_value, const T& default_value) const
+		{
+			std::string val;
+			bool ret = getAttribute(field_name, val);
+			if (ret)
+			{
+				ha_istringstream ss(val);
+				if(ss >> return_value)
+				{
+					return true;
+				}else{
+					throw std::string("DescriptionTreeNode::getAttribute. There is no conversion from string to type T.");
+				}
+			}
+			else
+			{
+				return_value = default_value;
+				return false;
+			}
+		}
+
+		template <typename T> bool getAttribute(const std::string& field_name, T& return_value) const
+		{
+			std::string val;
+			bool ret = getAttribute(field_name, val);
+			if (ret)
+			{
+				ha_istringstream ss(val);
+				if(ss >> return_value)
+				{
+					return true;
+				}else{
+					throw std::string("DescriptionTreeNode::getAttribute. There is no conversion from string to type T.");
+				}
+			}
+			else
+			{
+				return false;
+			}
+		}
 	};
 
 }
