@@ -5,10 +5,15 @@
 #include <assert.h>
 #include <list>
 
+#include <boost/shared_ptr.hpp>
+
 // FIXME remove
 #include <iostream>
 
 namespace ha {
+
+	class DescriptionTreeNode;
+	typedef boost::shared_ptr<DescriptionTreeNode> DescriptionTreeNodePtr;
 
 	class DescriptionTreeNode {	
 
@@ -17,14 +22,16 @@ namespace ha {
 	private:  
 
 	public:
+		typedef boost::shared_ptr<DescriptionTreeNode> Ptr;
 
-		typedef std::list<const DescriptionTreeNode> ConstNodeList;
+		typedef std::list<const DescriptionTreeNodePtr> ConstNodeList;
 		
-		// Override these two methods in the implementation class (i.e. DescriptionTreeNodeTinyXML)
 
+		///////////////////////////////////////////////////////////////////////////////////////////////
+		// Override all following methods in the implementation class (i.e. DescriptionTreeNodeTinyXML)
+		///////////////////////////////////////////////////////////////////////////////////////////////
+		virtual const std::string getType() const = 0;
 		
-		virtual const std::string getType();
-
 		/**
 		* getAttribute
 		* @return true, if field_name exists
@@ -37,7 +44,14 @@ namespace ha {
 		* returns true, if node has at least one child of type type
 		* returns child nodes in children
 		*/
-		virtual bool getChildrenNodes(const std::string& type, const ConstNodeList& children) const = 0;
+		virtual bool getChildrenNodes(const std::string& type, ConstNodeList& children) const = 0;
+
+		/**
+		* getChildrenNodes
+		* returns true, if node has at least one child of any type
+		* returns all child nodes
+		*/
+		virtual bool getChildrenNodes(ConstNodeList& children) const = 0;
 
 		/**
 		* setAttribute 
@@ -49,19 +63,14 @@ namespace ha {
 		* setAttribute 
 		* @param field_name returns string value of field field_name in field_value
 		*/
-		virtual void addChildNode(DescriptionTreeNode child) = 0;
+		virtual void addChildNode(DescriptionTreeNode& child) = 0;
 		
-
-		/**
-		* getChildrenNodes
-		* returns true, if node has at least one child of any type
-		* returns all child nodes
-		*/
-		virtual bool getChildrenNodes(const ConstNodeList& children) const = 0;
-
+		
+		///////////////////////////////////////////////////////////////////////////////////////////////
+		//Implement these helper functions here (internally they will call getAttribute)
+		///////////////////////////////////////////////////////////////////////////////////////////////
 		virtual bool getAttributeBool(const std::string& field_name, bool& return_value, bool default_value = false) const;			
 		virtual bool getAttributeString(const std::string& field_name, std::string& return_value, std::string& default_value = std::string("")) const;
-	
 	};
 
 }

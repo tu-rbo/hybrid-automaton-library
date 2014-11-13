@@ -189,6 +189,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\include\hybrid_automaton\ControlSwitch.h"
+				>
+			</File>
+			<File
 				RelativePath=".\include\hybrid_automaton\DescriptionTree.h"
 				>
 			</File>
@@ -210,6 +214,10 @@
 			</File>
 			<File
 				RelativePath=".\include\hybrid_automaton\HybridAutomaton.h"
+				>
+			</File>
+			<File
+				RelativePath=".\include\hybrid_automaton\JumpCondition.h"
 				>
 			</File>
 			<File
