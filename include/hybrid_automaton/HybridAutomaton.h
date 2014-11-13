@@ -43,6 +43,7 @@ namespace ha {
 		//Modes and Switches by calling Graph[Handle]
 		typedef ::boost::graph_traits< Graph >::vertex_descriptor ModeHandle;
 		typedef ::boost::graph_traits< Graph >::edge_descriptor SwitchHandle;
+		typedef ::boost::graph_traits< Graph > GraphTraits;
 
 		//an Iterator - there are more variations possible
 		typedef ::boost::graph_traits< Graph >::out_edge_iterator OutEdgeIterator;
@@ -108,6 +109,12 @@ namespace ha {
 
 		void setName(const std::string& name);
 		const std::string& getName() const;
+
+		void activate();
+		void deactivate();
+
+		void setCurrentControlMode(const std::string& control_mode);
+		ControlMode::Ptr getCurrentControlMode() const;
 
 		virtual void serialize(const DescriptionTreeNode::Ptr& tree) const;
 		virtual void deserialize(const DescriptionTreeNode::ConstPtr& tree);
