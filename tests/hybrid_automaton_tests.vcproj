@@ -179,6 +179,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\controlset_test.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\description_tree_tinyxml_test.cpp"
 				>
 			</File>

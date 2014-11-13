@@ -19,14 +19,28 @@ namespace ha {
 	}
 
 	Controller::Ptr HybridAutomaton::createController(DescriptionTreeNode::Ptr node, System::Ptr system) {
-		std::string crtl_name;
-		node->getAttribute("name", crtl_name);
+		std::string crtl_type;
+		node->getAttribute("type", crtl_type);
 
 		std::map<std::string, HybridAutomaton::ControllerCreator>& controller_type_map = getControllerTypeMap();
-		std::map<std::string, HybridAutomaton::ControllerCreator>::iterator it = controller_type_map.find(crtl_name);
+		std::map<std::string, HybridAutomaton::ControllerCreator>::iterator it = controller_type_map.find(crtl_type);
 		if ( it == controller_type_map.end() ) {
 			std::stringstream ss;
-			ss << "[HybridAutomaton::createController] Controller not registered: " << crtl_name;
+			ss << "[HybridAutomaton::createController] Controller type not registered: " << crtl_type;
+			throw ss.str();
+		}
+		return (*(it->second))(node, system);
+	}
+
+	ControlSet::Ptr HybridAutomaton::createControlSet(DescriptionTreeNode::Ptr node, System::Ptr system) {
+		std::string crtl_type;
+		node->getAttribute("type", crtl_type);
+
+		std::map<std::string, HybridAutomaton::ControlSetCreator>& controlset_type_map = getControlSetTypeMap();
+		std::map<std::string, HybridAutomaton::ControlSetCreator>::iterator it = controlset_type_map.find(crtl_type);
+		if ( it == controlset_type_map.end() ) {
+			std::stringstream ss;
+			ss << "[HybridAutomaton::createControlSet] ControlSet type not registered: " << crtl_type;
 			throw ss.str();
 		}
 		return (*(it->second))(node, system);

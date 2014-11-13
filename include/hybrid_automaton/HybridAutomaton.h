@@ -29,7 +29,7 @@ namespace ha {
 		typedef boost::shared_ptr<HybridAutomaton> Ptr;
 
 		typedef ::ha::Controller::Ptr (*ControllerCreator) (::ha::DescriptionTreeNode::Ptr, ::ha::System::Ptr);
-		typedef ::ha::ControlSet::Ptr (*ControlSetCreator) (void);
+		typedef ::ha::ControlSet::Ptr (*ControlSetCreator) (::ha::DescriptionTreeNode::Ptr, ::ha::System::Ptr);
 
 	protected:
 
@@ -53,11 +53,18 @@ namespace ha {
 
 	public:
 		/** 
-		 * @brief Instantiate a controller with given name 
+		 * @brief Instantiate a controller of given type 
 		 *
 		 * In order to work you must register your controller properly
 		 */
 		static Controller::Ptr createController(DescriptionTreeNode::Ptr node, System::Ptr system);
+
+		/** 
+		 * @brief Instantiate a control set of given type 
+		 *
+		 * In order to work you must register your control set properly
+		 */
+		static ControlSet::Ptr createControlSet(DescriptionTreeNode::Ptr node, System::Ptr system);
 
 		/**
 		 * @brief Register a controller with the hybrid automaton

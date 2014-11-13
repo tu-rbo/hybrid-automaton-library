@@ -3,6 +3,7 @@
 
 #include "hybrid_automaton/Controller.h"
 #include "hybrid_automaton/Serializable.h"
+#include "hybrid_automaton/hybrid_automaton_registration.h"
 
 #include <boost/shared_ptr.hpp>
 

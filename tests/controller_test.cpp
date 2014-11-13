@@ -44,13 +44,13 @@ TEST(Controller, SuccessfulRegistration) {
 
 	System::Ptr emptySystem;
 
-	std::string fantasyCtrlName1("MockRegisteredController");
+	std::string ctrlName1("MockRegisteredController");
 
 	// create a MockDescriptionTreeNode object
 	MockDescriptionTreeNode* mockedNode = new MockDescriptionTreeNode;
 
-	EXPECT_CALL(*mockedNode, getAttribute(std::string("name"), _))
-		.WillOnce(DoAll(SetArgReferee<1>(fantasyCtrlName1),Return(true)));
+	EXPECT_CALL(*mockedNode, getAttribute(std::string("type"), _))
+		.WillOnce(DoAll(SetArgReferee<1>(ctrlName1),Return(true)));
 
 	// wrap mockedNode into a smart pointer to pass to 
 	// HybridAutomaton::createController.
@@ -74,7 +74,7 @@ TEST(Controller, UnsuccessfulRegistration) {
 	// create a MockDescriptionTreeNode object
 	MockDescriptionTreeNode* mockedNode = new MockDescriptionTreeNode;
 
-	EXPECT_CALL(*mockedNode, getAttribute(std::string("name"), _))
+	EXPECT_CALL(*mockedNode, getAttribute(std::string("type"), _))
 		.WillOnce(DoAll(SetArgReferee<1>(fantasyCtrlName1),Return(true)));
 
 	// wrap mockedNode into a smart pointer to pass to 
