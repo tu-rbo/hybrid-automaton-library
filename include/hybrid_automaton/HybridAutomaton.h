@@ -3,13 +3,22 @@
 
 #include "hybrid_automaton/Controller.h"
 #include "hybrid_automaton/ControlMode.h"
+#include "hybrid_automaton/ControlSwitch.h"
 #include "hybrid_automaton/Serializable.h"
+
+#include "hybrid_automaton/System.h"
+#include "hybrid_automaton/DescriptionTreeNode.h"
 
 #include <string>
 #include <map>
 #include <assert.h>
+#include <iostream>
 
 #include <boost/shared_ptr.hpp>
+#include <boost/graph/adjacency_list.hpp>
+#include <boost/graph/labeled_graph.hpp>
+
+#include <Eigen/Dense>
 
 namespace ha {
 
@@ -27,15 +36,26 @@ namespace ha {
 		typedef boost::shared_ptr<HybridAutomaton> Ptr;
 		typedef boost::shared_ptr<const HybridAutomaton> ConstPtr;
 
-		typedef ControllerPtr (*ControllerCreator) (void);
-		typedef ControlSetPtr (*ControlSetCreator) (void);
+		typedef ::ha::Controller::Ptr (*ControllerCreator) (::ha::DescriptionTreeNode::Ptr, ::ha::System::Ptr);
+		typedef ::ha::ControlSet::Ptr (*ControlSetCreator) (::ha::DescriptionTreeNode::Ptr, ::ha::System::Ptr);
+
+		// a directed labeled graph based on an adjacency list
+		typedef ::boost::labeled_graph< boost::adjacency_list< boost::vecS, boost::vecS, boost::directedS, ControlMode::Ptr, ControlSwitch::Ptr >, std::string > Graph;
+
+		//Handle objects for vertices and edges of the graph structure - you can obtain the 
+		//Modes and Switches by calling Graph[Handle]
+		typedef ::boost::graph_traits< Graph >::vertex_descriptor ModeHandle;
+		typedef ::boost::graph_traits< Graph >::edge_descriptor SwitchHandle;
+		typedef ::boost::graph_traits< Graph > GraphTraits;
+
+		//an Iterator - there are more variations possible
+		typedef ::boost::graph_traits< Graph >::out_edge_iterator OutEdgeIterator;
 
 	protected:
+		Graph _graph;
+		ControlMode::Ptr _current_control_mode;
 
-		// FIXME
-		std::vector<ControlMode::Ptr> control_modes;
-
-		std::string name;
+		std::string _name;
 
 	private:  
 
@@ -52,11 +72,18 @@ namespace ha {
 
 	public:
 		/** 
-		 * @brief Instantiate a controller with given name 
+		 * @brief Instantiate a controller of given type 
 		 *
 		 * In order to work you must register your controller properly
 		 */
-		static Controller::Ptr createController(const std::string& crtl_name);
+		static Controller::Ptr createController(DescriptionTreeNode::Ptr node, System::Ptr system);
+
+		/** 
+		 * @brief Instantiate a control set of given type 
+		 *
+		 * In order to work you must register your control set properly
+		 */
+		static ControlSet::Ptr createControlSet(DescriptionTreeNode::Ptr node, System::Ptr system);
 
 		/**
 		 * @brief Register a controller with the hybrid automaton
@@ -84,16 +111,20 @@ namespace ha {
 		 */
 		static void registerControlSet(const std::string& crtl_name, ControlSetCreator cc);
 
+		void addControlMode(const ControlMode::Ptr& control_mode);
+		void addControlSwitch(const std::string& source_mode, const ControlSwitch::Ptr& control_switch, const std::string& target_mode);
+		void addControlSwitchAndMode(const std::string& source_mode, const ControlSwitch::Ptr& control_switch, const ControlMode::Ptr& target_mode);
 
-		void addControlMode(ControlMode::Ptr cm) {
-			// FIXME
-			control_modes.push_back(cm);
-		}
+		::Eigen::VectorXd step(const double& t);
 
-		void step() {
-			// TODO
-			control_modes[0]->step();
-		}
+		void setName(const std::string& name);
+		const std::string& getName() const;
+
+		void activate();
+		void deactivate();
+
+		void setCurrentControlMode(const std::string& control_mode);
+		ControlMode::Ptr getCurrentControlMode() const;
 
 		virtual void serialize(const DescriptionTreeNode::Ptr& tree) const;
 		virtual void deserialize(const DescriptionTreeNode::ConstPtr& tree);

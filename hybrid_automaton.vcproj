@@ -155,6 +155,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\ControlSet.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\DescriptionTreeNode.cpp"
 				>
 			</File>
@@ -222,6 +226,10 @@
 			</File>
 			<File
 				RelativePath=".\include\hybrid_automaton\Serializable.h"
+				>
+			</File>
+			<File
+				RelativePath=".\include\hybrid_automaton\System.h"
 				>
 			</File>
 		</Filter>

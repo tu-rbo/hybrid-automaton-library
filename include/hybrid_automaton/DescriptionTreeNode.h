@@ -1,3 +1,9 @@
+/*!
+ * DescriptionTreeNode.h
+ * 
+ * Copyright (c) 2014 by RBO TU Berlin
+ */
+
 #ifndef HYBRID_AUTOMATON_DESCRIPTION_TREE_NODE_H_
 #define HYBRID_AUTOMATON_DESCRIPTION_TREE_NODE_H_
 
@@ -35,6 +41,13 @@ namespace ha {
 	typedef boost::shared_ptr<DescriptionTreeNode> DescriptionTreeNodePtr;
 	typedef boost::shared_ptr<const DescriptionTreeNode> DescriptionTreeNodeConstPtr;
 
+	/*!
+	 * \brief
+	 * General interface for a hierarchical, text based description object.
+	 * 
+	 * Code against this interface to integrate your xml, yaml, whatever - based description of
+	 * hybrid automata.
+	 */
 	class DescriptionTreeNode {	
 
 	protected:
@@ -46,11 +59,13 @@ namespace ha {
 		typedef boost::shared_ptr<const DescriptionTreeNode> ConstPtr;
 
 		typedef std::list<const DescriptionTreeNode::Ptr> ConstNodeList;
+		typedef std::list<const DescriptionTreeNode::Ptr>::const_iterator ConstNodeListIterator;
 
 
 		///////////////////////////////////////////////////////////////////////////////////////////////
 		// Override all following methods in the implementation class (i.e. DescriptionTreeNodeTinyXML)
 		///////////////////////////////////////////////////////////////////////////////////////////////
+		
 		virtual const std::string getType() const = 0;
 
 		/**
@@ -78,7 +93,7 @@ namespace ha {
 		* setAttribute 
 		* @param field_name returns string value of field field_name in field_value
 		*/
-		virtual void setAttribute(const std::string& field_name, std::string& field_value) = 0;
+		virtual void setAttribute(const std::string& field_name, const std::string& field_value) = 0;
 
 		/**
 		* setAttribute 

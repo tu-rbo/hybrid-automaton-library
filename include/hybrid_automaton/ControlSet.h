@@ -3,8 +3,11 @@
 
 #include "hybrid_automaton/Controller.h"
 #include "hybrid_automaton/Serializable.h"
+#include "hybrid_automaton/hybrid_automaton_registration.h"
 
 #include <boost/shared_ptr.hpp>
+
+#include <Eigen/Dense>
 
 #include <vector>
 
@@ -17,7 +20,6 @@ namespace ha {
 	class ControlSet : public Serializable {
 
 	protected:
-		// TODO
 		//std::vector<Controller::Ptr> _controllers;
 
 	public:
@@ -27,8 +29,16 @@ namespace ha {
 		ControlSet() {
 		}
 
-		virtual void step() {
+		virtual void activate() {
 			throw "not implemented";
+		}
+
+		virtual void deactivate() {
+			throw "not implemented";
+		}
+
+		virtual ::Eigen::VectorXd step(const double& t) {
+			throw "not implemented"; 
 		}
 
 		virtual std::vector<Controller::Ptr> getControllers() {

@@ -22,14 +22,16 @@ namespace ha {
 
 	private:  
 		TiXmlDocument _document;
-		TiXmlElement* _rootNode;
+		DescriptionTreeNode::Ptr _rootNode;
 
 	public:		
+		DescriptionTreeXML();
+
 		// Generate / parse Description Tree
-		virtual bool initTree(std::istream input);
+		virtual bool initTree(const std::string& input);
 
 		//Return first tree element
-		virtual bool getRootNode(DescriptionTreeNode* root_node);
+		virtual bool getRootNode(DescriptionTreeNode::Ptr root_node);
 	};
 }
 
