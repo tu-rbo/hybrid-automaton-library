@@ -9,43 +9,13 @@
 #include <string>
 #include <map>
 #include <assert.h>
+#include <iostream>
 
 #include <boost/shared_ptr.hpp>
 #include <boost/graph/adjacency_list.hpp>
 #include <boost/graph/labeled_graph.hpp>
-#include <iostream>
 
-
-////Some typedefs for our classes
-//
-//
-//int main()
-//{
-////Now create an empty graph
-//Graph g;
-//
-////add vertices
-//ControlMode mode1,mode2;
-//mode1.val=1; mode2.val=2;
-//
-//ModeHandle m1 = boost::add_vertex(mode1, g);
-//ModeHandle m2 = boost::add_vertex(mode2, g);
-//
-////add edge
-//ControlSwitch s1;
-//s1.val = 1;
-//boost::add_edge(m1,m2,s1,g);
-////iterate over outgoing edges of mode1
-//std::pair<OutEdgeIterator, OutEdgeIterator> outEdges = boost::out_edges(m1, g);
-//for(; outEdges.first != outEdges.second; ++outEdges.first)
-//{
-//SwitchHandle s = *outEdges.first;
-////Get the switch object
-//ControlSwitch testSwitch = g[s];
-////Find what the edge is pointing to
-//ModeHandle m = boost::target(s, g);
-////Receive the mode object - should be mode2
-//ControlMode testMode = g[m];
+#include <Eigen/Dense>
 
 namespace ha {
 
@@ -64,7 +34,7 @@ namespace ha {
 		typedef ControllerPtr (*ControllerCreator) (void);
 		typedef ControlSetPtr (*ControlSetCreator) (void);
 
-		//First a directed graph based on an adjacency list
+		// a directed labeled graph based on an adjacency list
 		typedef ::boost::labeled_graph< boost::adjacency_list< boost::vecS, boost::vecS, boost::directedS, ControlMode::Ptr, ControlSwitch::Ptr >, std::string > Graph;
 
 		//Handle objects for vertices and edges of the graph structure - you can obtain the 
@@ -128,30 +98,14 @@ namespace ha {
 		 */
 		static void registerControlSet(const std::string& crtl_name, ControlSetCreator cc);
 
-		void addControlMode(const ControlMode::Ptr& control_mode) {
-			boost::add_vertex(control_mode->getName(), control_mode, _graph);
-		}
+		void addControlMode(const ControlMode::Ptr& control_mode);
+		void addControlSwitch(const std::string& source_mode, const ControlSwitch::Ptr& control_switch, const std::string& target_mode);
+		void addControlSwitchAndMode(const std::string& source_mode, const ControlSwitch::Ptr& control_switch, const ControlMode::Ptr& target_mode);
 
-		void addControlSwitch(const std::string& source_mode, const ControlSwitch::Ptr& control_switch, const std::string& target_mode) {
-			boost::add_edge_by_label(source_mode, target_mode, control_switch, _graph);
-		}
+		::Eigen::VectorXd step(const double& t);
 
-		void addControlSwitchAndMode(const std::string& source_mode, const ControlSwitch::Ptr& control_switch, const ControlMode::Ptr& target_mode) {
-			boost::add_vertex(target_mode->getName(), target_mode, _graph);
-			boost::add_edge_by_label(source_mode, target_mode->getName(), _graph);
-		}
-
-		void step() {
-			_current_control_mode->step(); 
-		}
-
-		void setName(const std::string& name) {
-			_name = name;
-		}
-
-		const std::string& getName() const {
-			return _name;
-		}
+		void setName(const std::string& name);
+		const std::string& getName() const;
 
 		virtual void serialize(DescriptionTreeNode::Ptr& tree) const;
 		virtual void deserialize(const DescriptionTreeNode::Ptr tree);

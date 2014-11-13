@@ -6,6 +6,8 @@
 
 #include <boost/shared_ptr.hpp>
 
+#include <Eigen/Dense>
+
 namespace ha {
 
 	class ControlMode;
@@ -14,8 +16,7 @@ namespace ha {
 	class ControlMode : public Serializable {
 
 	protected:
-		// TODO
-		//ControlSet::Ptr _control_set;
+		ControlSet::Ptr _control_set;
 
 		// unique identifier within one hybrid automaton
 		std::string _name;
@@ -31,12 +32,20 @@ namespace ha {
 		//	throw "not implemented";
 		//}
 
-		virtual Eigen::Vector step() {
+		virtual void activate() {
 			throw "not implemented";
+		}
+
+		virtual void deactivate() {
+			throw "not implemented";
+		}
+
+		virtual ::Eigen::VectorXd step(const double& t) {
+			return _control_set->step(t);
 		}    
 
 		virtual ControlSet::Ptr getControlSet() {
-			throw "not implemented";
+			return _control_set;
 		}    
 
 		virtual void serialize(DescriptionTreeNode::Ptr& tree) const;
