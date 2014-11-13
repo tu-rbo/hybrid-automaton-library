@@ -12,7 +12,7 @@ namespace ha {
 		MOCK_CONST_METHOD3(getAttributeBool, bool (const std::string& field_name, bool& return_value, bool default_value) );
 		MOCK_CONST_METHOD3(getAttributeString, bool (const std::string& field_name, std::string& return_value, std::string& default_value) );
 
-		MOCK_METHOD2(setAttribute, void (const std::string& field_name, std::string& field_value) );
+		MOCK_METHOD2(setAttribute, void (const std::string& field_name, const std::string& field_value) );
 		MOCK_METHOD1(addChildNode, void (const DescriptionTreeNode::Ptr& child) );
 	};
 
