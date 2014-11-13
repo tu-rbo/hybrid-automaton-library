@@ -8,12 +8,12 @@
 
 #include <string>
 
-namespace ha {
-	class MockControlMode : public ControlMode {
-		MOCK_METHOD2(serialize, void (DescriptionTreeNode) );
-
-	};
-}
+//namespace ha {
+//	class MockControlMode : public ControlMode {
+//		MOCK_METHOD2(serialize, void (DescriptionTreeNode) );
+//
+//	};
+//}
 
 TEST(HybridAutomatonSerialization, deserializeSimple) {
 	using namespace ha;
@@ -21,12 +21,9 @@ TEST(HybridAutomatonSerialization, deserializeSimple) {
 
 	HybridAutomaton hybaut;
 
-	MockDescriptionTreeNode mock_dtn;
-	EXPECT_CALL(mock_dtn, getAttribute(std::string("name")))
-		.WillOnce(Return("example_ha"));
-
-	EXPECT_CALL(mock_dtn, getAttribute(std::string("name")))
-	.WillOnce(Return("example_ha"));
+	//MockDescriptionTreeNode mock_dtn;
+	//EXPECT_CALL(mock_dtn, getAttribute(std::string("name")))
+	//	.WillOnce(Return("example_ha"));
 
 	//hybaut.deserialize(mock_dtn);
 
