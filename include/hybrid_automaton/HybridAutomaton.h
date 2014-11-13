@@ -5,6 +5,9 @@
 #include "hybrid_automaton/ControlMode.h"
 #include "hybrid_automaton/Serializable.h"
 
+#include "hybrid_automaton/System.h"
+#include "hybrid_automaton/DescriptionTreeNode.h"
+
 #include <string>
 #include <map>
 #include <assert.h>
@@ -25,8 +28,8 @@ namespace ha {
 		class HybridAutomaton;
 		typedef boost::shared_ptr<HybridAutomaton> Ptr;
 
-		typedef ControllerPtr (*ControllerCreator) (void);
-		typedef ControlSetPtr (*ControlSetCreator) (void);
+		typedef ::ha::Controller::Ptr (*ControllerCreator) (::ha::DescriptionTreeNode::Ptr, ::ha::System::Ptr);
+		typedef ::ha::ControlSet::Ptr (*ControlSetCreator) (void);
 
 	protected:
 
@@ -54,7 +57,7 @@ namespace ha {
 		 *
 		 * In order to work you must register your controller properly
 		 */
-		static Controller::Ptr createController(const std::string& crtl_name);
+		static Controller::Ptr createController(DescriptionTreeNode::Ptr node, System::Ptr system);
 
 		/**
 		 * @brief Register a controller with the hybrid automaton
