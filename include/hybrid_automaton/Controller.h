@@ -16,11 +16,13 @@ namespace ha {
 
 	class Controller;
 	typedef boost::shared_ptr<Controller> ControllerPtr;
+	typedef boost::shared_ptr<const Controller> ControllerConstPtr;
 
 	class Controller : public Serializable {
 
 	public:
 		typedef boost::shared_ptr<Controller> Ptr;
+		typedef boost::shared_ptr<const Controller> ConstPtr;
 
 		/*!
 		* Constructor
@@ -75,7 +77,7 @@ namespace ha {
 		* \see
 		* Separate items with the '|' character.
 		*/
-		virtual void serialize(DescriptionTreeNode::Ptr& tree) const;
+		virtual void serialize(const DescriptionTreeNode::Ptr& tree) const;
 
 		/*!
 		* \brief
@@ -95,7 +97,7 @@ namespace ha {
 		* \see
 		* Separate items with the '|' character.
 		*/
-		virtual void deserialize(const DescriptionTreeNode::Ptr tree);
+		virtual void deserialize(const DescriptionTreeNode::ConstPtr& tree);
 
 		/*!
 		* \brief
@@ -116,6 +118,26 @@ namespace ha {
 		ControllerPtr clone() const {
 			return ControllerPtr(_doClone());
 		}
+
+		virtual int getDimensionality() const;
+
+		virtual void setDimensionality(const int& new_dimensionality);
+
+		virtual Eigen::VectorXd getGoal() const;
+
+		virtual void setGoal(const Eigen::VectorXd& new_goal);
+
+		virtual Eigen::VectorXd getKp() const;
+
+		virtual void setKp(const Eigen::VectorXd& new_kp);
+
+		virtual Eigen::VectorXd getKv() const;
+
+		virtual void setKv(const Eigen::VectorXd& new_kv);
+
+		virtual std::string getName() const;
+
+		virtual void setName(const std::string& new_name);
 
 	protected:
 
@@ -139,12 +161,12 @@ namespace ha {
 
 		
 	protected:
-		int priority;
-		double max_velocity;
 
-		Eigen::VectorXd _goal;
-		Eigen::VectorXd _kp;
-		Eigen::VectorXd _kv;
+		int					_dimensionality;
+		Eigen::VectorXd		_goal;
+		Eigen::VectorXd		_kp;
+		Eigen::VectorXd		_kv;
+		std::string			_name;
 	};
 
 }

@@ -21,6 +21,7 @@ namespace ha {
 
 	class HybridAutomaton;
 	typedef boost::shared_ptr<HybridAutomaton> HybridAutomatonPtr;
+	typedef boost::shared_ptr<const HybridAutomaton> HybridAutomatonConstPtr;
 
 	/**
 	 * @brief Hybrid Automaton implementation and interface
@@ -30,6 +31,7 @@ namespace ha {
 	public:
 		class HybridAutomaton;
 		typedef boost::shared_ptr<HybridAutomaton> Ptr;
+		typedef boost::shared_ptr<const HybridAutomaton> ConstPtr;
 
 		typedef ControllerPtr (*ControllerCreator) (void);
 		typedef ControlSetPtr (*ControlSetCreator) (void);
@@ -107,8 +109,8 @@ namespace ha {
 		void setName(const std::string& name);
 		const std::string& getName() const;
 
-		virtual void serialize(DescriptionTreeNode::Ptr& tree) const;
-		virtual void deserialize(const DescriptionTreeNode::Ptr tree);
+		virtual void serialize(const DescriptionTreeNode::Ptr& tree) const;
+		virtual void deserialize(const DescriptionTreeNode::ConstPtr& tree);
 
 		HybridAutomatonPtr clone() const {
 			return HybridAutomatonPtr(_doClone());

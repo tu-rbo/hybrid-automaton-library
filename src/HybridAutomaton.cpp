@@ -70,11 +70,11 @@ void HybridAutomaton::addControlSwitchAndMode(const std::string& source_mode, co
 	return _current_control_mode->step(t); 
 }
 
-void HybridAutomaton::serialize(DescriptionTreeNode::Ptr& tree) const {
+void HybridAutomaton::serialize(const DescriptionTreeNode::Ptr& tree) const {
 	throw "not implemented";
 }
 
-void HybridAutomaton::deserialize(const DescriptionTreeNode::Ptr tree){
+void HybridAutomaton::deserialize(const DescriptionTreeNode::ConstPtr& tree){
 	//tree.getAttribute(std::string("name"));
 	//name = tree.getAttribute("name");
 }

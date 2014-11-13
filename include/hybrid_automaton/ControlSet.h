@@ -14,6 +14,7 @@ namespace ha {
 
 	class ControlSet;
 	typedef boost::shared_ptr<ControlSet> ControlSetPtr;
+	typedef boost::shared_ptr<const ControlSet> ControlSetConstPtr;
 
 	class ControlSet : public Serializable {
 
@@ -22,6 +23,7 @@ namespace ha {
 
 	public:
 		typedef boost::shared_ptr<ControlSet> Ptr;
+		typedef boost::shared_ptr<const ControlSet> ConstPtr;
 
 		ControlSet() {
 		}
@@ -42,8 +44,8 @@ namespace ha {
 			throw "not implemented";
 		}
 
-		virtual void serialize(DescriptionTreeNode::Ptr& tree) const;
-		virtual void deserialize(const DescriptionTreeNode::Ptr tree);
+		virtual void serialize(const DescriptionTreeNode::Ptr& tree) const;
+		virtual void deserialize(const DescriptionTreeNode::ConstPtr& tree);
 
 		ControlSetPtr clone() const {
 			return ControlSetPtr(_doClone());
