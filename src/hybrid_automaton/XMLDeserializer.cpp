@@ -13,6 +13,7 @@
 #include "SubdisplacementController.h"
 #include "SubdisplacementSimpleController.h"
 #include "SubjointController.h"
+#include "SubjointBlackBoardController.h"
 #include "ObstacleAvoidanceController.h"
 #include "JointBlackBoardController.h"
 #include "ROSServiceCallController.h"
@@ -1162,6 +1163,15 @@ rxController* XMLDeserializer::createController(TiXmlElement *rxController_xml, 
 		SubjointController* special_controller = new SubjointController(robot, params.index, dT);
 		if(!goal_controller)
 			special_controller->addPoint(params.dVectorGoal, params.timeGoal, params.reuseGoal, eInterpolatorType_Cubic);
+		special_controller->setGain(params.kv, params.kp, params.invL2sqr);
+		controller = special_controller;
+	}
+	else if (params.type == "SubjointBlackBoardController")
+    {
+		SubjointBlackBoardController* special_controller = new SubjointBlackBoardController(robot, params.index, dT);
+		if(!goal_controller)
+			special_controller->addPoint(params.dVectorGoal, params.timeGoal, params.reuseGoal, eInterpolatorType_Cubic);
+		special_controller->setBlackBoardVariableName(params.blackboard_variable_name);
 		special_controller->setGain(params.kv, params.kp, params.invL2sqr);
 		controller = special_controller;
 	}
