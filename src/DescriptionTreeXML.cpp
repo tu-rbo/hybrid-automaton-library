@@ -1,33 +1,40 @@
 #include "hybrid_automaton/DescriptionTreeXML.h"
 namespace ha {
 
-	bool DescriptionTreeXML::initTree(std::istream input)
+	DescriptionTreeXML::DescriptionTreeXML()
 	{
-		//istream to std::string
-		std::string tmp( (std::istreambuf_iterator<char>( input )),
-               (std::istreambuf_iterator<char>()));
+		TiXmlHandle docHandle(&_document);
+		_rootNode = DescriptionTreeNodeXML::Ptr(new DescriptionTreeNodeXML(docHandle.Element()));
+		//std::cout<<_rootNode->Value();
+	}
 
-		const char* ret_val = _document.Parse(tmp.c_str());
+	bool DescriptionTreeXML::initTree(const std::string& input)
+	{
+		const char* ret_val = _document.Parse(input.c_str());
 		
 		if(ret_val == NULL && _document.Error()) 	
 		{
 			std::cout << "ERROR CODE: " <<  _document.ErrorId() << std::endl;
 			std::cout << _document.ErrorDesc() << std::endl;
-			throw std::string("[XMLDeserializer::createHybridAutomaton] ERROR: Parsing the string.");
+			throw std::string("[DescriptionTreeXML::initTree] ERROR: Parsing the xml document.");
 			return false;
 		}
 		
 		TiXmlHandle docHandle(&_document);
-
-		_rootNode;
-
+		_rootNode = DescriptionTreeNodeXML::Ptr(new DescriptionTreeNodeXML(docHandle.Element()));
+		
+		// Check if the HybridAutomaton element was found
+		if (_rootNode == NULL) {
+			throw std::string("[DescriptionTreeXML::initTree] ERROR: undefined");
+			return false;
+		}
 
 		return true;
 	}
 
-	bool DescriptionTreeXML::getRootNode(DescriptionTreeNode* root_node)
+	bool DescriptionTreeXML::getRootNode(DescriptionTreeNode::Ptr root_node)
 	{
-		//root_node = new DescriptionTreeNodeXML();
+		root_node = _rootNode;
 		return true;
 	}
 
