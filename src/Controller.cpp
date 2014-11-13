@@ -17,7 +17,8 @@ namespace ha {
 
 	}
 
-	void Controller::serialize(const DescriptionTreeNode::Ptr& tree) const {
+	void Controller::serialize(const DescriptionTreeNode::Ptr& tree) const 
+	{
 		// TODO
 	}
 

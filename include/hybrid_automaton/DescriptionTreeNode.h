@@ -65,7 +65,7 @@ namespace ha {
 		* setAttribute 
 		* @param field_name returns string value of field field_name in field_value
 		*/
-		virtual void addChildNode(DescriptionTreeNode::Ptr child) = 0;
+		virtual void addChildNode(const DescriptionTreeNode::Ptr& child) = 0;
 		
 		
 		///////////////////////////////////////////////////////////////////////////////////////////////
