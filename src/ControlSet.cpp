@@ -17,9 +17,10 @@ namespace ha {
 		return this->_type;
 	}
 
-	void ControlSet::addController(const Controller::Ptr& controller)
+	void ControlSet::appendController(const Controller::Ptr& controller)
 	{
 		this->_controllers.push_back(controller);
+		_addController(controller);
 	}
 
 	const std::vector<Controller::Ptr>& ControlSet::getControllers() const

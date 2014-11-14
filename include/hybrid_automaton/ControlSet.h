@@ -38,14 +38,6 @@ namespace ha {
 			throw "not implemented"; 
 		}
 
-		virtual std::vector<Controller::Ptr> getControllers() const {
-			throw "not implemented";
-		}
-
-		virtual void addController(const Controller::Ptr) {
-			throw "not implemented";
-		}
-
 		virtual void serialize(const DescriptionTreeNode::Ptr& tree) const;
 		virtual void deserialize(const DescriptionTreeNode::ConstPtr& tree);
 
@@ -57,7 +49,7 @@ namespace ha {
 
 		virtual const std::string& getType() const;
 
-		virtual void addController(const Controller::Ptr& controller);
+		void appendController(const Controller::Ptr& controller);
 
 		virtual const std::vector<Controller::Ptr>& getControllers() const;
 
@@ -66,8 +58,11 @@ namespace ha {
 			return new ControlSet(*this);
 		}
 
+		virtual void _addController(const Controller::Ptr) {
+			// empty - can be overloaded			
+		}
+
 	protected:
-		//std::vector<Controller::Ptr> _controllers;
 		std::string						_type;
 		std::vector<Controller::Ptr>	_controllers;
 	};
