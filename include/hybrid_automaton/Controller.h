@@ -56,7 +56,7 @@ namespace ha {
 		* \see
 		* Separate items with the '|' character.
 		*/
-		virtual void step() {
+		virtual ::Eigen::VectorXd step(const double& t) {
 			throw "not implemented";
 		}
 
