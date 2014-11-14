@@ -3,6 +3,8 @@
 
 #include <boost/shared_ptr.hpp>
 
+#include <vector>
+
 #include "hybrid_automaton/JumpCondition.h" 
 #include "hybrid_automaton/Serializable.h"
 
@@ -25,22 +27,22 @@ namespace ha {
       return (ControlSwitchPtr(_doClone()));
     }
 
-    virtual bool isActive() {
-        throw "not implemented";
-    }
+	virtual void activate(const double& t);
+	virtual void deactivate();
+
+	virtual void step(const double& t);
+    virtual bool isActive() const;
 
 	virtual DescriptionTreeNode::Ptr serialize(const DescriptionTree::ConstPtr factory) const;
 	virtual void deserialize(const DescriptionTreeNode::ConstPtr& tree);
 
-    protected:
-
+  protected:
     std::vector<JumpConditionPtr> _jump_conditions;
 
     virtual ControlSwitch* _doClone() const
     {
       return (new ControlSwitch(*this));
     }
-
   };
 
 }
