@@ -20,9 +20,7 @@ namespace ha {
 	class DescriptionTreeNodeXML: public DescriptionTreeNode{
 
 	protected:
-
-	private:  
-		boost::shared_ptr<TiXmlElement> _node;
+		boost::shared_ptr<TiXmlElement> _tinyxml_node;
 
 	public:
 
@@ -34,7 +32,7 @@ namespace ha {
 		 */
 		DescriptionTreeNodeXML(const std::string& type);
 
-		DescriptionTreeNodeXML(TiXmlElement* xmlNode);
+		DescriptionTreeNodeXML(TiXmlElement* tynyxml_node);
 
 		DescriptionTreeNodeXMLPtr clone() const {
 			return DescriptionTreeNodeXMLPtr(_doClone());
@@ -82,6 +80,8 @@ namespace ha {
 		* @param field_name returns string value of field field_name in field_value
 		*/
 		virtual void addChildNode(const DescriptionTreeNode::Ptr& child);
+
+		boost::shared_ptr<TiXmlElement> getXMLNode() const;
 
 	protected:
 

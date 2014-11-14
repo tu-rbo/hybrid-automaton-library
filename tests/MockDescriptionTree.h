@@ -7,6 +7,7 @@
 namespace ha {
 
 	class MockDescriptionTree : public DescriptionTree {
+
 	public:
 		MOCK_METHOD0(getRootNode, DescriptionTreeNode::Ptr () );
 		MOCK_CONST_METHOD1(createNode, DescriptionTreeNode::Ptr (const std::string& type) );

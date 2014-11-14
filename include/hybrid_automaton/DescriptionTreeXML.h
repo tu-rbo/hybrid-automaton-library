@@ -25,14 +25,10 @@ namespace ha {
 		typedef boost::shared_ptr<DescriptionTreeXML> Ptr;
 		typedef boost::shared_ptr<const DescriptionTreeXML> ConstPtr;
 
-	protected:
-
-	private:  
-		TiXmlDocument _document;
-		DescriptionTreeNode::Ptr _rootNode;
-
 	public:		
 		DescriptionTreeXML();
+
+		virtual ~DescriptionTreeXML();
 
 		/**
 		 * @brief Factory method for creating DescriptionTreeNodes of this type
@@ -44,6 +40,10 @@ namespace ha {
 
 		//Return first tree element
 		virtual DescriptionTreeNode::Ptr getRootNode();
+	
+	protected: 
+		TiXmlDocument* _tinyxml_document;
+		DescriptionTreeNodeXML::Ptr _root_node;
 	};
 }
 
