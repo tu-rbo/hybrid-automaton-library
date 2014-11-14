@@ -1,7 +1,7 @@
 #ifndef HYBRID_AUTOMATON_TIME_CONDITION_H
 #define HYBRID_AUTOMATON_TIME_CONDITION_H
 
-#include "hybrid_automaton/Serializable.h"
+#include "hybrid_automaton/JumpCondition.h"
 
 #include <boost/shared_ptr.hpp>
 
@@ -10,7 +10,7 @@ namespace ha {
     class TimeCondition;
     typedef boost::shared_ptr<TimeCondition> TimeConditionPtr;
 
-	class TimeCondition : public Serializable
+	class TimeCondition : public JumpCondition
     {
     public:
 

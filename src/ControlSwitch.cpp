@@ -26,9 +26,9 @@ namespace ha {
 			(*it)->step(t);
 		}
 	}
-
-	void ControlSwitch::serialize(const DescriptionTreeNode::Ptr& tree) const {
-		// TODO
+	
+	DescriptionTreeNode::Ptr ControlSwitch::serialize(const DescriptionTree::ConstPtr factory) const {
+		throw "Not implemented";
 	}
 	
 	void ControlSwitch::deserialize(const DescriptionTreeNode::ConstPtr& tree) {
