@@ -155,6 +155,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\ControlMode.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\ControlSet.cpp"
 				>
 			</File>
