@@ -20,6 +20,8 @@
 
 namespace ha {
 
+	// forward declaration
+	class DescriptionTree;
 
 	class ha_istringstream : public std::istringstream
 	{
@@ -65,7 +67,7 @@ namespace ha {
 		///////////////////////////////////////////////////////////////////////////////////////////////
 		// Override all following methods in the implementation class (i.e. DescriptionTreeNodeTinyXML)
 		///////////////////////////////////////////////////////////////////////////////////////////////
-		
+
 		virtual const std::string getType() const = 0;
 
 		/**

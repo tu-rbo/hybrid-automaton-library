@@ -24,11 +24,16 @@ Controller::Controller(const ha::Controller &controller)
 	this->_name = controller._name;
 }
 
-void Controller::serialize(const DescriptionTreeNode::Ptr& tree) const 
+DescriptionTreeNode::Ptr Controller::serialize(const DescriptionTree::ConstPtr factory) const 
 {
+	DescriptionTreeNode::Ptr tree = factory->createNode(this->getType());
+	tree->setAttribute<std::string>(std::string("name"), this->getName());
+
 	tree->setAttribute<Eigen::VectorXd>(std::string("goal"), this->_goal);
 	tree->setAttribute<Eigen::VectorXd>(std::string("kp"), this->_kp);
 	tree->setAttribute<Eigen::VectorXd>(std::string("kv"), this->_kv);
+
+	return tree;
 }
 
 void Controller::deserialize(const DescriptionTreeNode::ConstPtr& tree) 

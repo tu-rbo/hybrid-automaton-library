@@ -2,12 +2,10 @@
 #include "gmock/gmock.h"
 
 #include "hybrid_automaton/HybridAutomaton.h"
-
-#include "hybrid_automaton/tests/MockDescriptionTreeNode.h"
-
 #include "hybrid_automaton/Controller.h"
 
-using namespace std;
+#include "hybrid_automaton/tests/MockDescriptionTree.h"
+#include "hybrid_automaton/tests/MockDescriptionTreeNode.h"
 
 // ----------------------------------
 // create some controller which does not register itself
@@ -31,6 +29,7 @@ HA_CONTROLLER_REGISTER("MockRegisteredController", MockRegisteredController)
 
 //=========================================
 
+using namespace std;
 using namespace ha;
 
 using ::testing::Return;
@@ -86,4 +85,32 @@ TEST(Controller, UnsuccessfulRegistration) {
 	// FantasyNonRegisteredController was not registered
 	ASSERT_ANY_THROW( HybridAutomaton::createController(mockedNodePtr, emptySystem));
 
+}
+
+
+//----------------------------
+
+
+
+TEST(Controller, Serialization) {
+	using namespace ha;
+	using namespace std;
+
+	// Controller to be serialized
+	Controller * _ctrl = new Controller;
+	Controller::Ptr ctrl(_ctrl);
+	_ctrl->setType("JointController");
+	_ctrl->setName("myCtrl");
+
+	MockDescriptionTree* _desc_tree = new MockDescriptionTree;
+	DescriptionTree::Ptr desc_tree(_desc_tree);
+
+	// Mocked description returned by controller
+	MockDescriptionTreeNode* _ctrl_node = new MockDescriptionTreeNode;
+	DescriptionTreeNode::Ptr ctrl_node(_ctrl_node);
+	EXPECT_CALL(*_ctrl_node, getType()).WillOnce(Return("JointController"));
+	//EXPECT_CALL(*_ctrl_node, getAttribute<string>(std::string("name"), _))
+	//	.WillOnce(DoAll(SetArgReferee<1>("myCtrl"),Return(true)));
+
+	ctrl_node = ctrl->serialize(desc_tree);
 }

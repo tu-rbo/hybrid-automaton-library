@@ -8,6 +8,14 @@ namespace ha {
 		//std::cout<<_rootNode->Value();
 	}
 
+	/**
+	 * @brief Factory method for creating DescriptionTreeNodes of this type
+	 */
+	DescriptionTreeNode::Ptr DescriptionTreeXML::createNode(const std::string& type) const {
+		return DescriptionTreeNode::Ptr (new DescriptionTreeNodeXML(type));
+	}
+
+
 	bool DescriptionTreeXML::initTree(const std::string& input)
 	{
 		const char* ret_val = _document.Parse(input.c_str());

@@ -85,7 +85,7 @@ namespace ha {
 		* \see
 		* Separate items with the '|' character.
 		*/
-		virtual void serialize(const DescriptionTreeNode::Ptr& tree) const;
+		virtual DescriptionTreeNode::Ptr serialize(const DescriptionTree::ConstPtr factory) const;
 
 		/*!
 		* \brief

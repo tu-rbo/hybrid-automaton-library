@@ -54,3 +54,54 @@ TEST(HybridAutomatonSerialization, getAttribute) {
 
 	EXPECT_EQ(dimensionality, dimensionality_result);
 }
+
+// --------------------------------------------
+
+class MockSerializableController : public ha::Controller {
+	public:
+		MOCK_CONST_METHOD1(serialize, void (const ha::DescriptionTreeNode::Ptr& tree) );
+		MOCK_CONST_METHOD1(deserialize, void (const ha::DescriptionTreeNode::ConstPtr& tree) );
+
+		HA_CONTROLLER_INSTANCE(node, system) {
+			return Controller::Ptr(new MockSerializableController);
+		}
+};
+
+HA_CONTROLLER_REGISTER("JointController", MockSerializableController);
+
+/*
+TEST(HybridAutomatonSerialization, minimalFullHA) {
+	using namespace ha;
+	using namespace std;
+
+	//-------
+	// (mocked) controller to be serialized
+	Controller * _ctrl = new MockSerializableController;
+	Controller::Ptr ctrl(_ctrl);
+	_ctrl->setType("JointController");
+	_ctrl->setName("myCtrl");
+
+	// Mocked description returned by controller
+	MockDescriptionTreeNode* _ctrl_node = new MockDescriptionTreeNode;
+	DescriptionTreeNode::Ptr ctrl_node(_ctrl_node);
+	EXPECT_CALL(*_ctrl_node, getType()).WillOnce(Return("JointController"));
+	EXPECT_CALL(*_ha_node, getAttribute<string>(std::string("name"), _))
+		.WillOnce(DoAll(SetArgReferee<1>("myCtrl"),Return(true)));
+
+	//-------
+	// Serialized and deserialized ControlMode
+
+
+	//-------
+	// Serialized and deserialized HybridAutomaton
+	HybridAutomaton ha;
+	ha.setName("myHA");
+	ha.addContr
+
+	MockDescriptionTreeNode* _ha_node = new MockDescriptionTreeNode;
+	DescriptionTreeNode::Ptr ha_node(_ga_node);
+	EXPECT_CALL(*_ha_node, getAttribute<string>(std::string("name"), _))
+		.WillOnce(DoAll(SetArgReferee<1>("myHA"),Return(true)));
+
+}
+*/

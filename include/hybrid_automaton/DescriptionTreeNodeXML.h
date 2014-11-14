@@ -8,6 +8,7 @@
 
 #include "thirdparty/tinyxml/include/tinyxml.h"
 
+#include "hybrid_automaton/DescriptionTree.h"
 #include "hybrid_automaton/DescriptionTreeNode.h"
 
 namespace ha {
@@ -26,7 +27,11 @@ namespace ha {
 
 		typedef boost::shared_ptr<DescriptionTreeNodeXML> Ptr;
 
+		/** 
+		 * @brief Constructor for DescriptionTreeNodeXML
+		 */
 		DescriptionTreeNodeXML(const std::string& type);
+
 		DescriptionTreeNodeXML(TiXmlElement* xmlNode);
 
 		virtual const std::string getType() const;

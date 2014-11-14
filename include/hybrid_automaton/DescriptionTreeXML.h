@@ -27,6 +27,11 @@ namespace ha {
 	public:		
 		DescriptionTreeXML();
 
+		/**
+		 * @brief Factory method for creating DescriptionTreeNodes of this type
+		 */
+		virtual DescriptionTreeNode::Ptr createNode(const std::string& type) const;
+
 		// Generate / parse Description Tree
 		virtual bool initTree(const std::string& input);
 

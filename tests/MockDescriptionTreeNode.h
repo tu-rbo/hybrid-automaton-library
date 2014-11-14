@@ -1,3 +1,6 @@
+#ifndef HYBRID_AUTOMATON_TESTS_MOCK_DESCRIPTION_TREE_NODE_H_
+#define HYBRID_AUTOMATON_TESTS_MOCK_DESCRIPTION_TREE_NODE_H_
+
 #include "hybrid_automaton/DescriptionTreeNode.h"
 
 namespace ha {
@@ -14,3 +17,5 @@ namespace ha {
 	};
 
 }
+
+#endif
