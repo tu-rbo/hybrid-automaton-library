@@ -3,7 +3,6 @@
 namespace ha {
 
 	Controller::Controller():
-_dimensionality(-1),
 _goal(),
 _kp(),
 _kv(),
@@ -19,7 +18,6 @@ Controller::~Controller()
 
 Controller::Controller(const ha::Controller &controller)
 {
-	this->_dimensionality = controller._dimensionality;
 	this->_goal = controller._goal;
 	this->_kp = controller._kp;
 	this->_kv = controller._kv;
@@ -28,7 +26,6 @@ Controller::Controller(const ha::Controller &controller)
 
 void Controller::serialize(const DescriptionTreeNode::Ptr& tree) const 
 {
-	tree->setAttribute<int>(std::string("dimensionality"), this->_dimensionality);
 	tree->setAttribute<Eigen::VectorXd>(std::string("goal"), this->_goal);
 	tree->setAttribute<Eigen::VectorXd>(std::string("kp"), this->_kp);
 	tree->setAttribute<Eigen::VectorXd>(std::string("kv"), this->_kv);
@@ -36,11 +33,6 @@ void Controller::serialize(const DescriptionTreeNode::Ptr& tree) const
 
 void Controller::deserialize(const DescriptionTreeNode::ConstPtr& tree) 
 {
-	if(!tree->getAttribute<int>(std::string("dimensionality"), this->_dimensionality))
-	{
-		std::cout << "error" <<std::endl;
-	}
-
 	if(!tree->getAttribute<Eigen::VectorXd>(std::string("goal"), this->_goal))
 	{
 		std::cout << "error" <<std::endl;
@@ -59,12 +51,7 @@ void Controller::deserialize(const DescriptionTreeNode::ConstPtr& tree)
 
 int Controller::getDimensionality() const
 {
-	return this->_dimensionality;
-}
-
-void Controller::setDimensionality(const int& new_dimensionality)
-{
-	this->_dimensionality = new_dimensionality;
+	return -1;
 }
 
 Eigen::VectorXd Controller::getGoal() const
@@ -74,10 +61,6 @@ Eigen::VectorXd Controller::getGoal() const
 
 void Controller::setGoal(const Eigen::VectorXd& new_goal)
 {
-	if(new_goal.size() != this->_dimensionality)
-	{
-		throw std::string("Controller::setGoal. The size of the new goal does not match the dimensionality of the controller");
-	}
 	this->_goal = new_goal;
 }
 
@@ -88,10 +71,6 @@ Eigen::VectorXd Controller::getKp() const
 
 void Controller::setKp(const Eigen::VectorXd& new_kp)
 {
-	if(new_kp.size() != this->_dimensionality)
-	{
-		throw std::string("Controller::setGoal. The size of the new Kp does not match the dimensionality of the controller");
-	}
 	this->_kp = new_kp;
 }
 
@@ -102,10 +81,6 @@ Eigen::VectorXd Controller::getKv() const
 
 void Controller::setKv(const Eigen::VectorXd& new_kv)
 {
-	if(new_kv.size() != this->_dimensionality)
-	{
-		throw std::string("Controller::setGoal. The size of the new Kv does not match the dimensionality of the controller");
-	}
 	this->_kv = new_kv;
 }
 

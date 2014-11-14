@@ -122,8 +122,6 @@ namespace ha {
 
 		virtual int getDimensionality() const;
 
-		virtual void setDimensionality(const int& new_dimensionality);
-
 		virtual Eigen::VectorXd getGoal() const;
 
 		virtual void setGoal(const Eigen::VectorXd& new_goal);
@@ -163,7 +161,6 @@ namespace ha {
 		
 	protected:
 
-		int					_dimensionality;
 		Eigen::VectorXd		_goal;
 		Eigen::VectorXd		_kp;
 		Eigen::VectorXd		_kv;
