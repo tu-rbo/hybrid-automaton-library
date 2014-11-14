@@ -93,4 +93,14 @@ void Controller::setName(const std::string& new_name)
 {
 	this->_name = new_name;
 }
+
+std::string Controller::getType() const
+{
+	return this->_type;
+}
+
+void Controller::setType(const std::string& new_type)
+{
+	this->_type = new_type;
+}
 }
