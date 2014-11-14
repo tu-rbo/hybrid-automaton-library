@@ -28,10 +28,6 @@ namespace ha {
 
 		virtual ~ControlMode() {}
 
-		//virtual void setControlSet(ControlSet::Ptr cs) {
-		//	throw "not implemented";
-		//}
-
 		virtual void activate() {
 			throw "not implemented";
 		}
@@ -42,9 +38,13 @@ namespace ha {
 
 		virtual ::Eigen::VectorXd step(const double& t) {
 			return _control_set->step(t);
+		}
+
+		virtual void setControlSet(const ControlSet::Ptr control_set) {
+			_control_set = control_set;
 		}    
 
-		virtual ControlSet::Ptr getControlSet() {
+		virtual ControlSet::Ptr getControlSet() const {
 			return _control_set;
 		}    
 

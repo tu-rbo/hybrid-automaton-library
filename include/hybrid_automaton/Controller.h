@@ -41,6 +41,13 @@ namespace ha {
 		Controller(const Controller& controller);
 
 		/*!
+		* @brief Activate the controller for execution
+	    */
+		virtual void activate() {
+			throw "not implemented";
+		}
+
+		/*!
 		* \brief
 		* Step function
 		* 

@@ -38,6 +38,7 @@
 	Initializer();\
 	};\
 	static Initializer initializer;\
+	virtual std::string getType() const;\
 	static Controller::Ptr instance(::ha::DescriptionTreeNode::Ptr NODE_NAME, ::ha::System::Ptr SYSTEM_NAME)
 
 // Registration method for registering your controller with the HybridAutomaton.
@@ -49,7 +50,8 @@
 // Example:
 //   HA_CONTROLLER_REGISTER("JointController", rlabJointController)
 #define HA_CONTROLLER_REGISTER(STR, NAME) NAME::Initializer initializer;\
-	NAME::Initializer::Initializer() { ha::HybridAutomaton::registerController(STR, &NAME::instance); }
+	NAME::Initializer::Initializer() { ha::HybridAutomaton::registerController(STR, &NAME::instance); }\
+	std::string NAME::getType() const { return STR; }
 
 
 ///////////////////////////////////////////////////////////
@@ -91,6 +93,7 @@
 	};\
 	static Initializer initializer;\
 	static ControlSet::Ptr instance(::ha::DescriptionTreeNode::Ptr NODE_NAME, ::ha::System::Ptr SYSTEM_NAME)
+//	virtual std::string getType() const;\
 
 // Registration method for registering your control set with the HybridAutomaton.
 //
@@ -101,5 +104,6 @@
 // Example:
 //   HA_CONTROLSET_REGISTER("MyControlSet", rlabMyControlSet)
 #define HA_CONTROLSET_REGISTER(STR, NAME) NAME::Initializer initializer;\
-	NAME::Initializer::Initializer() { ha::HybridAutomaton::registerControlSet(STR, &NAME::instance); }
+	NAME::Initializer::Initializer() { ha::HybridAutomaton::registerControlSet(STR, &NAME::instance); } \
+//	std::string NAME::getType() const { return STR; }
 

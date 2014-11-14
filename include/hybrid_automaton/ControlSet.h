@@ -41,7 +41,11 @@ namespace ha {
 			throw "not implemented"; 
 		}
 
-		virtual std::vector<Controller::Ptr> getControllers() {
+		virtual std::vector<Controller::Ptr> getControllers() const {
+			throw "not implemented";
+		}
+
+		virtual void addController(const Controller::Ptr) {
 			throw "not implemented";
 		}
 
