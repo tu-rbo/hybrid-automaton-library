@@ -48,7 +48,7 @@ TEST(ControlSet, SuccessfulRegistration) {
 	// create a MockDescriptionTreeNode object
 	MockDescriptionTreeNode* mockedNode = new MockDescriptionTreeNode;
 
-	EXPECT_CALL(*mockedNode, getAttribute(std::string("type"), _))
+	EXPECT_CALL(*mockedNode, getAttributeString(std::string("type"), _))
 		.WillOnce(DoAll(SetArgReferee<1>(ctrlName1),Return(true)));
 
 	// wrap mockedNode into a smart pointer to pass to 
@@ -73,7 +73,7 @@ TEST(ControlSet, UnsuccessfulRegistration) {
 	// create a MockDescriptionTreeNode object
 	MockDescriptionTreeNode* mockedNode = new MockDescriptionTreeNode;
 
-	EXPECT_CALL(*mockedNode, getAttribute(std::string("type"), _))
+	EXPECT_CALL(*mockedNode, getAttributeString(std::string("type"), _))
 		.WillOnce(DoAll(SetArgReferee<1>(fantasyCtrlName1),Return(true)));
 
 	// wrap mockedNode into a smart pointer to pass to 

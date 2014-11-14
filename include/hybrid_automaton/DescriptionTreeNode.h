@@ -69,13 +69,6 @@ namespace ha {
 		virtual const std::string getType() const = 0;
 
 		/**
-		* getAttribute
-		* @return true, if field_name exists
-		* @param field_name returns string value of field field_name in field_value
-		*/
-		virtual bool getAttribute(const std::string& field_name, std::string& field_value) const = 0;
-
-		/**
 		* getChildrenNodes
 		* returns true, if node has at least one child of type type
 		* returns child nodes in children
@@ -88,12 +81,6 @@ namespace ha {
 		* returns all child nodes
 		*/
 		virtual bool getChildrenNodes(ConstNodeList& children) const = 0;
-
-		/**
-		* setAttribute 
-		* @param field_name returns string value of field field_name in field_value
-		*/
-		virtual void setAttribute(const std::string& field_name, const std::string& field_value) = 0;
 
 		/**
 		* setAttribute 
@@ -115,7 +102,7 @@ namespace ha {
 		friend ha_ostringstream& operator<<(ha_ostringstream& oss, Eigen::VectorXd& vector)
 		{
 			std::stringstream epsilon_ss;
-			for(unsigned int idx=0; idx<vector.size(); ++idx)
+			for(int idx=0; idx<vector.size(); ++idx)
 			{
 				oss << vector(idx);
 
@@ -134,13 +121,13 @@ namespace ha {
 		{
 			ha_ostringstream ss;
 			ss << field_value;
-			setAttribute(field_name, ss.str());
+			this->setAttributeString(field_name, ss.str());
 		}
 
 		template <typename T> bool getAttribute(const std::string& field_name, T& return_value, const T& default_value) const
 		{
 			std::string val;
-			bool ret = getAttribute(field_name, val);
+			bool ret = this->getAttributeString(field_name, val);
 			if (ret)
 			{
 				ha_istringstream ss(val);
@@ -161,7 +148,7 @@ namespace ha {
 		template <typename T> bool getAttribute(const std::string& field_name, T& return_value) const
 		{
 			std::string val;
-			bool ret = getAttribute(field_name, val);
+			bool ret = this->getAttributeString(field_name, val);
 			if (ret)
 			{
 				ha_istringstream ss(val);
@@ -177,6 +164,20 @@ namespace ha {
 				return false;
 			}
 		}
+
+	protected:
+		/**
+		* setAttribute 
+		* @param field_name returns string value of field field_name in field_value
+		*/
+		virtual void setAttributeString(const std::string& field_name, const std::string& field_value) = 0;
+
+		/**
+		* getAttribute
+		* @return true, if field_name exists
+		* @param field_name returns string value of field field_name in field_value
+		*/
+		virtual bool getAttributeString(const std::string& field_name, std::string& field_value) const = 0;
 	};
 
 }

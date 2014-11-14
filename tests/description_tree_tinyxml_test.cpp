@@ -51,15 +51,15 @@ TEST(TestDescriptionTreeStructure, Positive) {
 	EXPECT_EQ(sonsOfSon.size(), 0);
 
 	//test fields
-	daughterNode->setAttribute("name", "lucy");
+	daughterNode->setAttribute<std::string>("name", "lucy");
 	std::string daughtersname;
-	EXPECT_TRUE(daughterNode->getAttribute("name", daughtersname));
-	EXPECT_FALSE(daughterNode->getAttribute("beer", std::string("Lucy is too young too drink!")));
+	EXPECT_TRUE(daughterNode->getAttribute<std::string>("name", daughtersname));
+	EXPECT_FALSE(daughterNode->getAttribute<std::string>("beer", std::string("Lucy is too young too drink!")));
 
 	EXPECT_EQ(daughtersname, "lucy");
 
 	//Oh my god, what happened to Lucy?
-	daughterNode->setAttribute("name", "lucifer");
-	EXPECT_TRUE(daughterNode->getAttribute("name", daughtersname));
+	daughterNode->setAttribute<std::string>("name", "lucifer");
+	EXPECT_TRUE(daughterNode->getAttribute<std::string>("name", daughtersname));
 	EXPECT_EQ(daughtersname, "lucifer");
 }
