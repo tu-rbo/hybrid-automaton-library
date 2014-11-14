@@ -57,6 +57,8 @@ namespace ha {
 
 		std::string _name;
 
+		bool _active;
+
 	private:  
 
 		// see http://stackoverflow.com/questions/8057682/accessing-a-static-map-from-a-static-member-function-segmentation-fault-c
@@ -120,13 +122,17 @@ namespace ha {
 		void setName(const std::string& name);
 		const std::string& getName() const;
 
+		virtual bool isActive() const {
+			return _active;
+		}
+
 		void activate();
 		void deactivate();
 
 		void setCurrentControlMode(const std::string& control_mode);
 		ControlMode::Ptr getCurrentControlMode() const;
 
-		virtual void serialize(const DescriptionTreeNode::Ptr& tree) const;
+		virtual DescriptionTreeNode::Ptr serialize(const DescriptionTree::ConstPtr factory) const;
 		virtual void deserialize(const DescriptionTreeNode::ConstPtr& tree);
 
 		HybridAutomatonPtr clone() const {

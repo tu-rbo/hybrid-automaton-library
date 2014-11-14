@@ -1,8 +1,8 @@
 /*!
- * DescriptionTreeNode.h
- * 
- * Copyright (c) 2014 by RBO TU Berlin
- */
+* DescriptionTreeNode.h
+* 
+* Copyright (c) 2014 by RBO TU Berlin
+*/
 
 #ifndef HYBRID_AUTOMATON_DESCRIPTION_TREE_NODE_H_
 #define HYBRID_AUTOMATON_DESCRIPTION_TREE_NODE_H_
@@ -20,6 +20,8 @@
 
 namespace ha {
 
+	// forward declaration
+	class DescriptionTree;
 
 	class ha_istringstream : public std::istringstream
 	{
@@ -42,12 +44,12 @@ namespace ha {
 	typedef boost::shared_ptr<const DescriptionTreeNode> DescriptionTreeNodeConstPtr;
 
 	/*!
-	 * \brief
-	 * General interface for a hierarchical, text based description object.
-	 * 
-	 * Code against this interface to integrate your xml, yaml, whatever - based description of
-	 * hybrid automata.
-	 */
+	* \brief
+	* General interface for a hierarchical, text based description object.
+	* 
+	* Code against this interface to integrate your xml, yaml, whatever - based description of
+	* hybrid automata.
+	*/
 	class DescriptionTreeNode {	
 
 	protected:
@@ -62,10 +64,21 @@ namespace ha {
 		typedef std::list<const DescriptionTreeNode::Ptr>::const_iterator ConstNodeListIterator;
 
 
+		DescriptionTreeNode();
+
+		virtual ~DescriptionTreeNode();
+
+		DescriptionTreeNode(const DescriptionTreeNode& dtn);
+
+		DescriptionTreeNodePtr clone() const {
+			return DescriptionTreeNodePtr(_doClone());
+		}
+
+
 		///////////////////////////////////////////////////////////////////////////////////////////////
 		// Override all following methods in the implementation class (i.e. DescriptionTreeNodeTinyXML)
 		///////////////////////////////////////////////////////////////////////////////////////////////
-		
+
 		virtual const std::string getType() const = 0;
 
 		/**
@@ -178,6 +191,8 @@ namespace ha {
 		* @param field_name returns string value of field field_name in field_value
 		*/
 		virtual bool getAttributeString(const std::string& field_name, std::string& field_value) const = 0;
+
+		virtual DescriptionTreeNode* _doClone() const = 0;
 	};
 
 }

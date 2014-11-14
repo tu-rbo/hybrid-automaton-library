@@ -7,7 +7,8 @@ using namespace ha;
 
 //This just test the structure of the tree - no XML specific things are tested
 TEST(TestDescriptionTreeStructure, Positive) {
-	DescriptionTreeXML tree;
+
+	DescriptionTreeXML::Ptr tree(new DescriptionTreeXML());
 	DescriptionTreeNodeXML::Ptr rootNode(new DescriptionTreeNodeXML("root"));
 	EXPECT_EQ(rootNode->getType(), "root");
 
@@ -16,13 +17,12 @@ TEST(TestDescriptionTreeStructure, Positive) {
 	DescriptionTreeNodeXML::Ptr son2Node(new DescriptionTreeNodeXML("son"));
 	DescriptionTreeNodeXML::Ptr grandDaughterNode(new DescriptionTreeNodeXML("granddaughter"));
 
-	tree.getRootNode(rootNode);	
+	rootNode = boost::dynamic_pointer_cast<DescriptionTreeNodeXML>(tree->getRootNode());	
 	rootNode->addChildNode(daughterNode);
 	rootNode->addChildNode(sonNode);
 	rootNode->addChildNode(son2Node);
 	sonNode->addChildNode(grandDaughterNode);
 
-	
 	//test getter for children nodes
 	DescriptionTreeNode::ConstNodeList childrenOfRoot;
 	EXPECT_TRUE(rootNode->getChildrenNodes(childrenOfRoot));

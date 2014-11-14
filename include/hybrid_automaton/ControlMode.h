@@ -12,25 +12,16 @@ namespace ha {
 
 	class ControlMode;
 	typedef boost::shared_ptr<ControlMode> ControlModePtr;
+	typedef boost::shared_ptr<const ControlMode> ControlModeConstPtr;
 
 	class ControlMode : public Serializable {
-
-	protected:
-		ControlSet::Ptr _control_set;
-
-		// unique identifier within one hybrid automaton
-		std::string _name;
-
 	public:
 		typedef boost::shared_ptr<ControlMode> Ptr;
+		typedef boost::shared_ptr<const ControlMode> ConstPtr;
 
 		ControlMode() {}
 
 		virtual ~ControlMode() {}
-
-		//virtual void setControlSet(ControlSet::Ptr cs) {
-		//	throw "not implemented";
-		//}
 
 		virtual void activate() {
 			throw "not implemented";
@@ -42,13 +33,17 @@ namespace ha {
 
 		virtual ::Eigen::VectorXd step(const double& t) {
 			return _control_set->step(t);
+		}
+
+		virtual void setControlSet(const ControlSet::Ptr control_set) {
+			_control_set = control_set;
 		}    
 
-		virtual ControlSet::Ptr getControlSet() {
+		virtual ControlSet::Ptr getControlSet() const {
 			return _control_set;
 		}    
 
-		virtual void serialize(const DescriptionTreeNode::Ptr& tree) const;
+		virtual DescriptionTreeNode::Ptr serialize(const DescriptionTree::ConstPtr factory) const;
 		virtual void deserialize(const DescriptionTreeNode::ConstPtr& tree);
 
 		ControlModePtr clone() const {
@@ -67,6 +62,12 @@ namespace ha {
 		virtual ControlMode* _doClone() const {
 			return new ControlMode(*this);
 		}
+
+	protected:
+		ControlSet::Ptr _control_set;
+
+		// unique identifier within one hybrid automaton
+		std::string _name;
 
 	};
 

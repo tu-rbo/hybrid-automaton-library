@@ -8,7 +8,7 @@
 
 #include "hybrid_automaton/Serializable.h"
 #include "hybrid_automaton/System.h"
-#include "hybrid_automaton/hybrid_automaton_registration.h"
+#include "hybrid_automaton/HybridAutomatonRegistration.h"
 
 #include <boost/shared_ptr.hpp>
 #include <Eigen/Dense>
@@ -41,6 +41,13 @@ namespace ha {
 		Controller(const Controller& controller);
 
 		/*!
+		* @brief Activate the controller for execution
+	    */
+		virtual void activate() {
+			throw "not implemented";
+		}
+
+		/*!
 		* \brief
 		* Step function
 		* 
@@ -56,7 +63,7 @@ namespace ha {
 		* \see
 		* Separate items with the '|' character.
 		*/
-		virtual void step() {
+		virtual ::Eigen::VectorXd step(const double& t) {
 			throw "not implemented";
 		}
 
@@ -78,7 +85,7 @@ namespace ha {
 		* \see
 		* Separate items with the '|' character.
 		*/
-		virtual void serialize(const DescriptionTreeNode::Ptr& tree) const;
+		virtual DescriptionTreeNode::Ptr serialize(const DescriptionTree::ConstPtr factory) const;
 
 		/*!
 		* \brief
@@ -122,8 +129,6 @@ namespace ha {
 
 		virtual int getDimensionality() const;
 
-		virtual void setDimensionality(const int& new_dimensionality);
-
 		virtual Eigen::VectorXd getGoal() const;
 
 		virtual void setGoal(const Eigen::VectorXd& new_goal);
@@ -139,6 +144,10 @@ namespace ha {
 		virtual std::string getName() const;
 
 		virtual void setName(const std::string& new_name);
+
+		virtual std::string getType() const;
+
+		virtual void setType(const std::string& new_type);
 
 	protected:
 
@@ -163,11 +172,11 @@ namespace ha {
 		
 	protected:
 
-		int					_dimensionality;
 		Eigen::VectorXd		_goal;
 		Eigen::VectorXd		_kp;
 		Eigen::VectorXd		_kv;
 		std::string			_name;
+		std::string			_type;
 	};
 
 }
