@@ -16,7 +16,7 @@ namespace ha {
 		return std::string(_node->Value());
 	}
 
-	bool DescriptionTreeNodeXML::getAttribute(const std::string& field_name, std::string& field_value) const
+	bool DescriptionTreeNodeXML::getAttributeString(const std::string& field_name, std::string& field_value) const
 	{
 		const char* value = _node->Attribute(field_name.c_str());
 		if(value != NULL)
@@ -58,7 +58,7 @@ namespace ha {
 		return foundChildren;
 	}
 
-	void DescriptionTreeNodeXML::setAttribute(const std::string& field_name, const std::string& field_value)
+	void DescriptionTreeNodeXML::setAttributeString(const std::string& field_name, const std::string& field_value)
 	{
 		_node->SetAttribute(field_name.c_str(), field_value.c_str());
 	}
