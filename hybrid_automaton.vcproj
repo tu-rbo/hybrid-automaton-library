@@ -155,7 +155,7 @@
 				>
 			</File>
 			<File
-				RelativePath=".\ControlMode.cpp"
+				RelativePath=".\src\ControlMode.cpp"
 				>
 			</File>
 			<File
@@ -217,11 +217,11 @@
 				>
 			</File>
 			<File
-				RelativePath=".\hybrid_automaton_registration.h"
+				RelativePath=".\include\hybrid_automaton\HybridAutomaton.h"
 				>
 			</File>
 			<File
-				RelativePath=".\include\hybrid_automaton\HybridAutomaton.h"
+				RelativePath=".\include\hybrid_automaton\HybridAutomatonRegistration.h"
 				>
 			</File>
 			<File
