@@ -32,9 +32,9 @@ namespace ha {
 		return true;
 	}
 
-	bool DescriptionTreeXML::getRootNode(DescriptionTreeNode::Ptr root_node)
+	bool DescriptionTreeXML::getRootNode(DescriptionTreeNode::Ptr& root_node)
 	{
-		root_node = _rootNode;
+		root_node = this->_rootNode;
 		return true;
 	}
 

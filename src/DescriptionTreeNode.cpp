@@ -3,6 +3,24 @@
 #include <algorithm>
 
 namespace ha {
+
+
+	DescriptionTreeNode::DescriptionTreeNode()
+	{
+
+	}
+
+	DescriptionTreeNode::~DescriptionTreeNode()
+	{
+
+	}
+
+	DescriptionTreeNode::DescriptionTreeNode(const DescriptionTreeNode& dtn)
+	{
+
+	}
+
+
 	//bool DescriptionTreeNode::
 	//	getAttributeBool(const std::string& field_name, bool& return_value, bool default_value) const
 	//{

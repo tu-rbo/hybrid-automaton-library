@@ -19,7 +19,9 @@ namespace ha {
 
 	public:		
 		//Return first tree element
-		virtual bool getRootNode(const DescriptionTreeNode::Ptr root_node) = 0;
+		virtual bool getRootNode(DescriptionTreeNode::Ptr& root_node) = 0;
+
+		//virtual DescriptionTreeNode::Ptr createNode() = 0;
 	};
 }
 

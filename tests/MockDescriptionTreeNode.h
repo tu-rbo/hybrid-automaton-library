@@ -11,6 +11,14 @@ namespace ha {
 
 		MOCK_METHOD2(setAttributeString, void (const std::string& field_name, const std::string& field_value) );
 		MOCK_METHOD1(addChildNode, void (const DescriptionTreeNode::Ptr& child) );
+
+	protected:
+		MOCK_CONST_METHOD1(_doClone, MockDescriptionTreeNode* (const MockDescriptionTreeNode& dtn) );
+
+		MockDescriptionTreeNode* _doClone() const
+		{
+			return new MockDescriptionTreeNode();
+		}
 	};
 
 }

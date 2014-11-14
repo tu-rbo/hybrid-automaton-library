@@ -12,10 +12,11 @@
 
 namespace ha {
 
-	class DescriptionTreeNodeXML: public DescriptionTreeNode{
-
 	class DescriptionTreeNodeXML;
 	typedef boost::shared_ptr<DescriptionTreeNodeXML> DescriptionTreeNodeXMLPtr;
+	typedef boost::shared_ptr<const DescriptionTreeNodeXML> DescriptionTreeNodeXMLConstPtr;
+
+	class DescriptionTreeNodeXML: public DescriptionTreeNode{
 
 	protected:
 
@@ -25,9 +26,35 @@ namespace ha {
 	public:
 
 		typedef boost::shared_ptr<DescriptionTreeNodeXML> Ptr;
+		typedef boost::shared_ptr<const DescriptionTreeNodeXML> ConstPtr;
 
 		DescriptionTreeNodeXML(const std::string& type);
 		DescriptionTreeNodeXML(TiXmlElement* xmlNode);
+
+		DescriptionTreeNodeXMLPtr clone() const {
+			return DescriptionTreeNodeXMLPtr(_doClone());
+		}
+
+
+		/*!
+		 * \brief
+		 * Copy constructor
+		 * 
+		 * \param dtn
+		 * Description of parameter dtn.
+		 * 
+		 * \throws Nothing
+		 * Description of criteria for throwing this exception.
+		 * 
+		 * Write detailed description for DescriptionTreeNodeXML here.
+		 * 
+		 * \remarks
+		 * Write remarks for DescriptionTreeNodeXML here.
+		 * 
+		 * \see
+		 * Separate items with the '|' character.
+		 */
+		DescriptionTreeNodeXML(const DescriptionTreeNodeXML& dtn);
 
 		virtual const std::string getType() const;
 
@@ -60,6 +87,11 @@ namespace ha {
 		* @param field_name returns string value of field field_name in field_value
 		*/
 		virtual void setAttributeString(const std::string& field_name, const std::string& field_value);
+
+
+		virtual DescriptionTreeNodeXML* _doClone() const {
+			return new DescriptionTreeNodeXML(*this);
+		}
 
 	};
 

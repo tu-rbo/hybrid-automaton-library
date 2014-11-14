@@ -11,6 +11,11 @@ namespace ha {
 	{
 	}
 
+	DescriptionTreeNodeXML::DescriptionTreeNodeXML(const DescriptionTreeNodeXML& dtn)
+	{
+		this->_node = dtn._node;
+	}
+
 	const std::string DescriptionTreeNodeXML::getType() const
 	{
 		return std::string(_node->Value());
