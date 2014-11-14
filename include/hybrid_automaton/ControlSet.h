@@ -19,9 +19,6 @@ namespace ha {
 
 	class ControlSet : public Serializable {
 
-	protected:
-		//std::vector<Controller::Ptr> _controllers;
-
 	public:
 		typedef boost::shared_ptr<ControlSet> Ptr;
 		typedef boost::shared_ptr<const ControlSet> ConstPtr;
@@ -52,10 +49,23 @@ namespace ha {
 			return ControlSetPtr(_doClone());
 		}
 
+		virtual void setType(const std::string& new_type);
+
+		virtual const std::string& getType() const;
+
+		virtual void addController(const Controller::Ptr& controller);
+
+		virtual const std::vector<Controller::Ptr>& getControllers() const;
+
 	protected:
 		virtual ControlSet* _doClone() const {
 			return new ControlSet(*this);
 		}
+
+	protected:
+		//std::vector<Controller::Ptr> _controllers;
+		std::string						_type;
+		std::vector<Controller::Ptr>	_controllers;
 	};
 
 }

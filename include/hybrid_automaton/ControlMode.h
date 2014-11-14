@@ -12,17 +12,12 @@ namespace ha {
 
 	class ControlMode;
 	typedef boost::shared_ptr<ControlMode> ControlModePtr;
+	typedef boost::shared_ptr<const ControlMode> ControlModeConstPtr;
 
 	class ControlMode : public Serializable {
-
-	protected:
-		ControlSet::Ptr _control_set;
-
-		// unique identifier within one hybrid automaton
-		std::string _name;
-
 	public:
 		typedef boost::shared_ptr<ControlMode> Ptr;
+		typedef boost::shared_ptr<const ControlMode> ConstPtr;
 
 		ControlMode() {}
 
@@ -67,6 +62,12 @@ namespace ha {
 		virtual ControlMode* _doClone() const {
 			return new ControlMode(*this);
 		}
+
+	protected:
+		ControlSet::Ptr _control_set;
+
+		// unique identifier within one hybrid automaton
+		std::string _name;
 
 	};
 
