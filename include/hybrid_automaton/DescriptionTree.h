@@ -11,18 +11,24 @@
 
 namespace ha {
 
-	class DescriptionTree{
+	class DescriptionTree {
 
 	protected:
 	
 	private:  
 
 	public:		
-		//Return first tree element
-		virtual bool getRootNode(DescriptionTreeNode::Ptr& root_node) = 0;
+		typedef boost::shared_ptr<DescriptionTree> Ptr;
+		typedef boost::shared_ptr<const DescriptionTree> ConstPtr;
 
-		//virtual DescriptionTreeNode::Ptr createNode() = 0;
+		//Return first tree element
+		virtual DescriptionTreeNode::Ptr getRootNode() = 0;
+
+		virtual DescriptionTreeNode::Ptr createNode(const std::string& type) const  = 0;
 	};
+
+	typedef boost::shared_ptr<DescriptionTree> DescriptionTreePtr;
+	typedef boost::shared_ptr<const DescriptionTree> DescriptionTreeConstPtr;
 }
 
 #endif

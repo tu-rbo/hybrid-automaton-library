@@ -20,6 +20,8 @@
 
 namespace ha {
 
+	// forward declaration
+	class DescriptionTree;
 
 	class ha_istringstream : public std::istringstream
 	{

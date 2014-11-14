@@ -1,13 +1,15 @@
+#include "hybrid_automaton/DescriptionTree.h"
 #include "hybrid_automaton/DescriptionTreeNodeXML.h"
+
 namespace ha {
 
-	DescriptionTreeNodeXML::DescriptionTreeNodeXML(const std::string& type )
+	DescriptionTreeNodeXML::DescriptionTreeNodeXML(const std::string& type)
 	{
 		_node = boost::shared_ptr<TiXmlElement>(new TiXmlElement(type.c_str()));
 	}
 
-	DescriptionTreeNodeXML::DescriptionTreeNodeXML(TiXmlElement* xmlNode):
-	_node(xmlNode)
+	DescriptionTreeNodeXML::DescriptionTreeNodeXML(TiXmlElement* xmlNode)
+		: _node(xmlNode)
 	{
 	}
 

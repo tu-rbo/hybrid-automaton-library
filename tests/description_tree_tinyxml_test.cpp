@@ -17,7 +17,7 @@ TEST(TestDescriptionTreeStructure, Positive) {
 	DescriptionTreeNodeXML::Ptr son2Node(new DescriptionTreeNodeXML("son"));
 	DescriptionTreeNodeXML::Ptr grandDaughterNode(new DescriptionTreeNodeXML("granddaughter"));
 
-	tree->getRootNode(rootNode);	
+	rootNode = boost::dynamic_pointer_cast<DescriptionTreeNodeXML>(tree->getRootNode());	
 	rootNode->addChildNode(daughterNode);
 	rootNode->addChildNode(sonNode);
 	rootNode->addChildNode(son2Node);
