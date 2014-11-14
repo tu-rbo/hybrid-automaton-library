@@ -159,6 +159,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\ControlSwitch.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\DescriptionTreeNode.cpp"
 				>
 			</File>
@@ -172,6 +176,10 @@
 			</File>
 			<File
 				RelativePath=".\src\HybridAutomaton.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\TimeCondition.cpp"
 				>
 			</File>
 		</Filter>
@@ -230,6 +238,10 @@
 			</File>
 			<File
 				RelativePath=".\include\hybrid_automaton\System.h"
+				>
+			</File>
+			<File
+				RelativePath=".\include\hybrid_automaton\TimeCondition.h"
 				>
 			</File>
 		</Filter>
