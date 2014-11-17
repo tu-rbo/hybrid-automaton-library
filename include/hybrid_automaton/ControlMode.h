@@ -20,15 +20,18 @@ namespace ha {
 		typedef boost::shared_ptr<const ControlMode> ConstPtr;
 
 		ControlMode() {}
+		ControlMode(const std::string& name);
 
 		virtual ~ControlMode() {}
 
 		virtual void activate() {
-			throw "not implemented";
+			if (_control_set)
+				_control_set->activate();
 		}
 
 		virtual void deactivate() {
-			throw "not implemented";
+			if (_control_set)
+				_control_set->deactivate();
 		}
 
 		virtual ::Eigen::VectorXd step(const double& t) {
