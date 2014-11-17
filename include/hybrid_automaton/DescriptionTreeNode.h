@@ -115,6 +115,7 @@ namespace ha {
 		{
 			std::ostringstream ss;
 			ss << field_value ;
+			//std::cout << "in setAttribute: " << ss.str() << std::endl;
 			this->setAttributeString(field_name, ss.str());
 		}
 
@@ -138,18 +139,17 @@ namespace ha {
 				}
 				++num_rows;
 			}
-			
-			std::cout << num_rows << " " << num_cols << std::endl;
+
 			matrix.resize(num_rows,num_cols);
 
 			for(int i = 0; i<num_rows; ++i)
 			{
 				for(int j=0; j<num_cols; ++j)
 				{
-					matrix(j,i) = matrix_elements.at(i*num_cols+j);
+					matrix(i,j) = matrix_elements.at(i*num_cols+j);
 				}
 			}
-			
+
 			return iss;
 		};
 
@@ -160,12 +160,9 @@ namespace ha {
 			if (ret)
 			{
 				std::istringstream ss(val);
-				if(ss >> return_value)
-				{
-					return true;
-				}else{
-					throw std::string("DescriptionTreeNode::getAttribute. There is no conversion from string to type T.");
-				}
+				ss >> return_value;
+
+				return true;
 			}
 			else
 			{
@@ -181,12 +178,8 @@ namespace ha {
 			if (ret)
 			{
 				std::istringstream ss(val);
-				if(ss >> return_value)
-				{
-					return true;
-				}else{
-					throw std::string("DescriptionTreeNode::getAttribute. There is no conversion from string to type T.");
-				}
+				ss >> return_value;
+				return true;
 			}
 			else
 			{
