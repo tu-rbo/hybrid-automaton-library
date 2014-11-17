@@ -187,6 +187,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\controlswitch_test.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\description_tree_test.cpp"
 				>
 			</File>

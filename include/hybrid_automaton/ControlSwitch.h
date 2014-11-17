@@ -39,8 +39,22 @@ namespace ha {
 	virtual DescriptionTreeNode::Ptr serialize(const DescriptionTree::ConstPtr& factory) const;
 	virtual void deserialize(const DescriptionTreeNode::ConstPtr& tree);
 
+	virtual void setSourceControlMode(const std::string& source);
+	virtual const std::string getSourceControlMode() const;
+
+	virtual void setTargetControlMode(const std::string& source);
+	virtual const std::string getTargetControlMode() const;
+
+	virtual void setName(const std::string& name);
+	virtual const std::string getName() const;
+
   protected:
     std::vector<JumpConditionPtr> _jump_conditions;
+
+	std::string _source_control_mode;
+	std::string _target_control_mode;
+
+	std::string _name;
 
     virtual ControlSwitch* _doClone() const
     {
