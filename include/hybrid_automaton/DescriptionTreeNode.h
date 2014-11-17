@@ -18,6 +18,8 @@
 
 #include <Eigen/Dense>
 
+#include <vector>
+
 namespace ha {
 
 	// forward declaration
@@ -116,14 +118,38 @@ namespace ha {
 			this->setAttributeString(field_name, ss.str());
 		}
 
-		friend std::istringstream& operator>>(std::istringstream& iss, Eigen::MatrixXd& vector)
+		friend std::istringstream& operator>>(std::istringstream& iss, Eigen::MatrixXd& matrix)
 		{
-			double value = -1.0;
-			vector.resize(0,0);
-			while(iss >> value)
-			{	
-				vector << value;
+			std::vector<double> matrix_elements;
+			std::string row_string;
+			double matrix_element = -1.0;
+			int num_rows = 0;
+			int num_cols = 0;
+			while(getline(iss, row_string))
+			{
+				std::istringstream iss_row(row_string);
+				while(iss_row >> matrix_element)
+				{	
+					if(num_rows == 0)
+					{
+						++num_cols;
+					}
+					matrix_elements.push_back(matrix_element);
+				}
+				++num_rows;
 			}
+			
+			std::cout << num_rows << " " << num_cols << std::endl;
+			matrix.resize(num_rows,num_cols);
+
+			for(int i = 0; i<num_rows; ++i)
+			{
+				for(int j=0; j<num_cols; ++j)
+				{
+					matrix(j,i) = matrix_elements.at(i*num_cols+j);
+				}
+			}
+			
 			return iss;
 		};
 

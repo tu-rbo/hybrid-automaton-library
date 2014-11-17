@@ -75,14 +75,14 @@ TEST(HybridAutomatonSerialization, getAttributeVector) {
 
 	MockDescriptionTreeNode mock_dtn;
 
-	::Eigen::MatrixXd goal(5,1);
+	::Eigen::MatrixXd goal(1,1);
 	goal << 1.,2.,3.,4.,5;
 	std::string goal_exp = "1\n2\n3\n4\n5";
 
 	EXPECT_CALL(mock_dtn, getAttributeString(std::string("goal"), _)).WillOnce(DoAll(SetArgReferee<1>(goal_exp), Return(true)));
 
-	::Eigen::MatrixXd goal_result(5,1);
-	goal_result << 1.,2.,3.,4.,5;
+	::Eigen::MatrixXd goal_result(1,1);
+	goal_result << 1.;
 	mock_dtn.getAttribute<::Eigen::MatrixXd>("goal", goal_result);
 
 	EXPECT_EQ(goal, goal_result);
