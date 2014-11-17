@@ -63,7 +63,7 @@ namespace ha {
 		* \see
 		* Separate items with the '|' character.
 		*/
-		virtual ::Eigen::VectorXd step(const double& t) {
+		virtual ::Eigen::MatrixXd step(const double& t) {
 			throw "not implemented";
 		}
 
@@ -129,17 +129,17 @@ namespace ha {
 
 		virtual int getDimensionality() const;
 
-		virtual Eigen::VectorXd getGoal() const;
+		virtual Eigen::MatrixXd getGoal() const;
 
-		virtual void setGoal(const Eigen::VectorXd& new_goal);
+		virtual void setGoal(const Eigen::MatrixXd& new_goal);
 
-		virtual Eigen::VectorXd getKp() const;
+		virtual Eigen::MatrixXd getKp() const;
 
-		virtual void setKp(const Eigen::VectorXd& new_kp);
+		virtual void setKp(const Eigen::MatrixXd& new_kp);
 
-		virtual Eigen::VectorXd getKv() const;
+		virtual Eigen::MatrixXd getKv() const;
 
-		virtual void setKv(const Eigen::VectorXd& new_kv);
+		virtual void setKv(const Eigen::MatrixXd& new_kv);
 
 		virtual std::string getName() const;
 
@@ -172,9 +172,9 @@ namespace ha {
 		
 	protected:
 
-		Eigen::VectorXd		_goal;
-		Eigen::VectorXd		_kp;
-		Eigen::VectorXd		_kv;
+		Eigen::MatrixXd		_goal;
+		Eigen::MatrixXd		_kp;
+		Eigen::MatrixXd		_kv;
 		std::string			_name;
 		std::string			_type;
 	};

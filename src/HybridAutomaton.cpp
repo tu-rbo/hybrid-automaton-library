@@ -59,7 +59,7 @@ namespace ha {
 		boost::add_edge_by_label(source_mode, target_mode->getName(), control_switch, _graph);
 	}
 
-	::Eigen::VectorXd HybridAutomaton::step(const double& t) {
+	::Eigen::MatrixXd HybridAutomaton::step(const double& t) {
 		// check if any out-going jump condition is true
 		::std::pair<OutEdgeIterator, OutEdgeIterator> out_edges = ::boost::out_edges(_graph.vertex(_current_control_mode->getName()), _graph);
 		for(; out_edges.first != out_edges.second; ++out_edges.first) {
