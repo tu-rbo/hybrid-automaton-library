@@ -127,9 +127,11 @@ TEST(Controller, Serialization) {
 	// Mocked description returned by controller
 	MockDescriptionTreeNode* _ctrl_node = new MockDescriptionTreeNode;
 	DescriptionTreeNode::Ptr ctrl_node(_ctrl_node);
+
 	EXPECT_CALL(*_ctrl_node, getType()).WillOnce(Return("JointController"));
-	//EXPECT_CALL(*_ctrl_node, getAttribute<string>(std::string("name"), _))
-	//	.WillOnce(DoAll(SetArgReferee<1>("myCtrl"),Return(true)));
+
+	////EXPECT_CALL(*_ctrl_node, getAttribute<string>(std::string("name"), _))
+	////	.WillOnce(DoAll(SetArgReferee<1>("myCtrl"),Return(true)));
 
 	ctrl_node = ctrl->serialize(desc_tree);
 	*/

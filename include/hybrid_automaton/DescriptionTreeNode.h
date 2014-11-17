@@ -1,8 +1,8 @@
 /*!
- * DescriptionTreeNode.h
- * 
- * Copyright (c) 2014 by RBO TU Berlin
- */
+* DescriptionTreeNode.h
+* 
+* Copyright (c) 2014 by RBO TU Berlin
+*/
 
 #ifndef HYBRID_AUTOMATON_DESCRIPTION_TREE_NODE_H_
 #define HYBRID_AUTOMATON_DESCRIPTION_TREE_NODE_H_
@@ -44,12 +44,12 @@ namespace ha {
 	typedef boost::shared_ptr<const DescriptionTreeNode> DescriptionTreeNodeConstPtr;
 
 	/*!
-	 * \brief
-	 * General interface for a hierarchical, text based description object.
-	 * 
-	 * Code against this interface to integrate your xml, yaml, whatever - based description of
-	 * hybrid automata.
-	 */
+	* \brief
+	* General interface for a hierarchical, text based description object.
+	* 
+	* Code against this interface to integrate your xml, yaml, whatever - based description of
+	* hybrid automata.
+	*/
 	class DescriptionTreeNode {	
 
 	protected:
@@ -62,6 +62,17 @@ namespace ha {
 
 		typedef std::list<const DescriptionTreeNode::Ptr> ConstNodeList;
 		typedef std::list<const DescriptionTreeNode::Ptr>::const_iterator ConstNodeListIterator;
+
+
+		DescriptionTreeNode();
+
+		virtual ~DescriptionTreeNode();
+
+		DescriptionTreeNode(const DescriptionTreeNode& dtn);
+
+		DescriptionTreeNodePtr clone() const {
+			return DescriptionTreeNodePtr(_doClone());
+		}
 
 
 		///////////////////////////////////////////////////////////////////////////////////////////////
@@ -91,7 +102,7 @@ namespace ha {
 		virtual void addChildNode(const DescriptionTreeNode::Ptr& child) = 0;
 
 
-		friend ha_istringstream& operator>>(ha_istringstream& iss, Eigen::VectorXd& vector)
+		friend ha_istringstream& operator>>(ha_istringstream& iss, Eigen::MatrixXd& vector)
 		{
 			double value = -1.0;
 			while(iss >> value)
@@ -101,12 +112,12 @@ namespace ha {
 			return iss;
 		};
 
-		friend ha_ostringstream& operator<<(ha_ostringstream& oss, Eigen::VectorXd& vector)
+		friend ha_ostringstream& operator<<(ha_ostringstream& oss, Eigen::MatrixXd& vector)
 		{
 			std::stringstream epsilon_ss;
 			for(int idx=0; idx<vector.size(); ++idx)
 			{
-				oss << vector(idx);
+				oss << vector(idx, 0);
 
 				if(idx != vector.size() -1)
 				{
@@ -180,6 +191,8 @@ namespace ha {
 		* @param field_name returns string value of field field_name in field_value
 		*/
 		virtual bool getAttributeString(const std::string& field_name, std::string& field_value) const = 0;
+
+		virtual DescriptionTreeNode* _doClone() const = 0;
 	};
 
 }

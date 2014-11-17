@@ -16,16 +16,19 @@
 
 namespace ha {
 
+	class DescriptionTreeXML;
+	typedef boost::shared_ptr<DescriptionTreeXML> DescriptionTreeXMLPtr;
+	typedef boost::shared_ptr<const DescriptionTreeXML> DescriptionTreeXMLConstPtr;
+
 	class DescriptionTreeXML: public DescriptionTree{
-
-	protected:
-
-	private:  
-		TiXmlDocument _document;
-		DescriptionTreeNode::Ptr _rootNode;
+	public:
+		typedef boost::shared_ptr<DescriptionTreeXML> Ptr;
+		typedef boost::shared_ptr<const DescriptionTreeXML> ConstPtr;
 
 	public:		
 		DescriptionTreeXML();
+
+		virtual ~DescriptionTreeXML();
 
 		/**
 		 * @brief Factory method for creating DescriptionTreeNodes of this type
@@ -36,7 +39,11 @@ namespace ha {
 		virtual bool initTree(const std::string& input);
 
 		//Return first tree element
-		virtual bool getRootNode(DescriptionTreeNode::Ptr root_node);
+		virtual DescriptionTreeNode::Ptr getRootNode();
+	
+	protected: 
+		boost::shared_ptr<TiXmlDocument> _tinyxml_document;
+		DescriptionTreeNodeXML::Ptr _root_node;
 	};
 }
 

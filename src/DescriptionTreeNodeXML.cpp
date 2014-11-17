@@ -4,23 +4,28 @@
 namespace ha {
 
 	DescriptionTreeNodeXML::DescriptionTreeNodeXML(const std::string& type)
-	{
-		_node = boost::shared_ptr<TiXmlElement>(new TiXmlElement(type.c_str()));
+		: _tinyxml_node(new TiXmlElement(type.c_str()))
+	{		
 	}
 
-	DescriptionTreeNodeXML::DescriptionTreeNodeXML(TiXmlElement* xmlNode)
-		: _node(xmlNode)
+	DescriptionTreeNodeXML::DescriptionTreeNodeXML(TiXmlElement* tinyxml_node)
+		: _tinyxml_node(tinyxml_node)
 	{
+	}
+
+	DescriptionTreeNodeXML::DescriptionTreeNodeXML(const DescriptionTreeNodeXML& dtn)
+	{
+		this->_tinyxml_node = dtn._tinyxml_node;
 	}
 
 	const std::string DescriptionTreeNodeXML::getType() const
 	{
-		return std::string(_node->Value());
+		return std::string(_tinyxml_node->Value());
 	}
 
 	bool DescriptionTreeNodeXML::getAttributeString(const std::string& field_name, std::string& field_value) const
 	{
-		const char* value = _node->Attribute(field_name.c_str());
+		const char* value = _tinyxml_node->Attribute(field_name.c_str());
 		if(value != NULL)
 		{
 			field_value = std::string(value);
@@ -33,7 +38,7 @@ namespace ha {
 	bool DescriptionTreeNodeXML::getChildrenNodes(const std::string& type, ConstNodeList& children) const
 	{
 		bool foundChildren = false;
-		for (TiXmlElement* mst_element = _node->FirstChildElement(type.c_str()); 
+		for (TiXmlElement* mst_element = _tinyxml_node->FirstChildElement(type.c_str()); 
 			mst_element != NULL; 
 			mst_element = mst_element->NextSiblingElement(type.c_str())) 
 		{
@@ -48,7 +53,7 @@ namespace ha {
 	bool DescriptionTreeNodeXML::getChildrenNodes(ConstNodeList& children) const
 	{
 		bool foundChildren = false;
-		for (TiXmlElement* mst_element = _node->FirstChildElement(); 
+		for (TiXmlElement* mst_element = _tinyxml_node->FirstChildElement(); 
 			mst_element != NULL; 
 			mst_element = mst_element->NextSiblingElement() )
 		{
@@ -62,14 +67,20 @@ namespace ha {
 
 	void DescriptionTreeNodeXML::setAttributeString(const std::string& field_name, const std::string& field_value)
 	{
-		_node->SetAttribute(field_name.c_str(), field_value.c_str());
+		_tinyxml_node->SetAttribute(field_name.c_str(), field_value.c_str());
 	}
 
 	void DescriptionTreeNodeXML::addChildNode(const DescriptionTreeNode::Ptr& child) 
 	{
 		//Downcast
 		DescriptionTreeNodeXML::Ptr childXMLNode = boost::dynamic_pointer_cast<DescriptionTreeNodeXML>(child);
-		_node->InsertEndChild(*(childXMLNode->_node));
+
+		_tinyxml_node->InsertEndChild(*(childXMLNode->_tinyxml_node));
+	}
+
+	TiXmlElement* DescriptionTreeNodeXML::getXMLNode() const
+	{
+		return this->_tinyxml_node;
 	}
 
 }

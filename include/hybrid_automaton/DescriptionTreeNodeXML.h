@@ -13,26 +13,51 @@
 
 namespace ha {
 
-	class DescriptionTreeNodeXML: public DescriptionTreeNode{
-
 	class DescriptionTreeNodeXML;
 	typedef boost::shared_ptr<DescriptionTreeNodeXML> DescriptionTreeNodeXMLPtr;
+	typedef boost::shared_ptr<const DescriptionTreeNodeXML> DescriptionTreeNodeXMLConstPtr;
+
+	class DescriptionTreeNodeXML: public DescriptionTreeNode{
 
 	protected:
-
-	private:  
-		boost::shared_ptr<TiXmlElement> _node;
+		TiXmlElement* _tinyxml_node;
 
 	public:
 
 		typedef boost::shared_ptr<DescriptionTreeNodeXML> Ptr;
+		typedef boost::shared_ptr<const DescriptionTreeNodeXML> ConstPtr;
 
 		/** 
 		 * @brief Constructor for DescriptionTreeNodeXML
 		 */
 		DescriptionTreeNodeXML(const std::string& type);
 
-		DescriptionTreeNodeXML(TiXmlElement* xmlNode);
+		DescriptionTreeNodeXML(TiXmlElement* tynyxml_node);
+
+		DescriptionTreeNodeXMLPtr clone() const {
+			return DescriptionTreeNodeXMLPtr(_doClone());
+		}
+
+
+		/*!
+		 * \brief
+		 * Copy constructor
+		 * 
+		 * \param dtn
+		 * Description of parameter dtn.
+		 * 
+		 * \throws Nothing
+		 * Description of criteria for throwing this exception.
+		 * 
+		 * Write detailed description for DescriptionTreeNodeXML here.
+		 * 
+		 * \remarks
+		 * Write remarks for DescriptionTreeNodeXML here.
+		 * 
+		 * \see
+		 * Separate items with the '|' character.
+		 */
+		DescriptionTreeNodeXML(const DescriptionTreeNodeXML& dtn);
 
 		virtual const std::string getType() const;
 
@@ -56,6 +81,8 @@ namespace ha {
 		*/
 		virtual void addChildNode(const DescriptionTreeNode::Ptr& child);
 
+		TiXmlElement* getXMLNode() const;
+
 	protected:
 
 		virtual bool getAttributeString(const std::string& field_name, std::string& field_value) const;
@@ -65,6 +92,11 @@ namespace ha {
 		* @param field_name returns string value of field field_name in field_value
 		*/
 		virtual void setAttributeString(const std::string& field_name, const std::string& field_value);
+
+
+		virtual DescriptionTreeNodeXML* _doClone() const {
+			return new DescriptionTreeNodeXML(*this);
+		}
 
 	};
 

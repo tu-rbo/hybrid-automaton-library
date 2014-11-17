@@ -1,11 +1,28 @@
 #include "hybrid_automaton/DescriptionTreeXML.h"
 namespace ha {
 
-	DescriptionTreeXML::DescriptionTreeXML()
+	DescriptionTreeXML::DescriptionTreeXML():
+		_tinyxml_document(new TiXmlDocument())
 	{
-		TiXmlHandle docHandle(&_document);
-		_rootNode = DescriptionTreeNodeXML::Ptr(new DescriptionTreeNodeXML(docHandle.Element()));
-		//std::cout<<_rootNode->Value();
+		// ACHTUNG: This is ugly but is the only way to avoid segmentation fault
+		// TinyXML stores a list of pointers to the elements
+		// Externally, we also store smart pointers to the same elements
+		// When it goes out of scope, the objected pointed by the smart pointers are deleted
+		// If tinyxml_document is also a smart pointer, the object will also get deleted, deleting the object pointed by root_node, 
+		// that is also cleared by the smart pointer of root_node
+		// SOLUTION: tinyxml_document is created with new and never deleted.
+		//this->_tinyxml_document = new TiXmlDocument();
+
+		// Create the first (and only) root element and link it to the base document
+		this->_root_node.reset(new DescriptionTreeNodeXML(new TiXmlElement("HybridAutomaton")));
+
+		this->_tinyxml_document->LinkEndChild(this->_root_node->getXMLNode());
+	}
+
+	DescriptionTreeXML::~DescriptionTreeXML()
+	{
+		// This tries to delete an element that is also deleted by a smart pointer (read note in the constructor)
+		//delete this->_tinyxml_document;
 	}
 
 	/**
@@ -18,32 +35,30 @@ namespace ha {
 
 	bool DescriptionTreeXML::initTree(const std::string& input)
 	{
-		const char* ret_val = _document.Parse(input.c_str());
+		const char* ret_val = _tinyxml_document->Parse(input.c_str());
 		
-		if(ret_val == NULL && _document.Error()) 	
+		if(ret_val == NULL && _tinyxml_document->Error()) 	
 		{
-			std::cout << "ERROR CODE: " <<  _document.ErrorId() << std::endl;
-			std::cout << _document.ErrorDesc() << std::endl;
+			std::cout << "ERROR CODE: " <<  _tinyxml_document->ErrorId() << std::endl;
+			std::cout << _tinyxml_document->ErrorDesc() << std::endl;
 			throw std::string("[DescriptionTreeXML::initTree] ERROR: Parsing the xml document.");
 			return false;
 		}
 		
-		TiXmlHandle docHandle(&_document);
-		_rootNode = DescriptionTreeNodeXML::Ptr(new DescriptionTreeNodeXML(docHandle.Element()));
+		TiXmlHandle docHandle(this->_tinyxml_document.get());
+		this->_root_node.reset(new DescriptionTreeNodeXML(docHandle.Element()));
 		
 		// Check if the HybridAutomaton element was found
-		if (_rootNode == NULL) {
+		if (this->_root_node == NULL) {
 			throw std::string("[DescriptionTreeXML::initTree] ERROR: undefined");
 			return false;
 		}
-
 		return true;
 	}
 
-	bool DescriptionTreeXML::getRootNode(DescriptionTreeNode::Ptr root_node)
+	DescriptionTreeNode::Ptr DescriptionTreeXML::getRootNode()
 	{
-		root_node = _rootNode;
-		return true;
+		return this->_root_node;
 	}
 
 }

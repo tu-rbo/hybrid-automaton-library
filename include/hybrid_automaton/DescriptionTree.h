@@ -22,7 +22,7 @@ namespace ha {
 		typedef boost::shared_ptr<const DescriptionTree> ConstPtr;
 
 		//Return first tree element
-		virtual bool getRootNode(const DescriptionTreeNode::Ptr root_node) = 0;
+		virtual DescriptionTreeNode::Ptr getRootNode() = 0;
 
 		virtual DescriptionTreeNode::Ptr createNode(const std::string& type) const  = 0;
 	};

@@ -34,11 +34,11 @@ namespace ha {
 			throw "not implemented";
 		}
 
-		virtual ::Eigen::VectorXd step(const double& t) {
+		virtual ::Eigen::MatrixXd step(const double& t) {
 			throw "not implemented"; 
 		}
 
-		virtual DescriptionTreeNode::Ptr serialize(const DescriptionTree::ConstPtr factory) const;
+		virtual DescriptionTreeNode::Ptr serialize(const DescriptionTree::ConstPtr& factory) const;
 		virtual void deserialize(const DescriptionTreeNode::ConstPtr& tree);
 
 		ControlSetPtr clone() const {

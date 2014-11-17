@@ -2,7 +2,7 @@
 #include "hybrid_automaton/HybridAutomaton.h"
 
 namespace ha {
-	DescriptionTreeNode::Ptr ControlSet::serialize(const DescriptionTree::ConstPtr factory) const {
+	DescriptionTreeNode::Ptr ControlSet::serialize(const DescriptionTree::ConstPtr& factory) const {
 		// TODO
 		return DescriptionTreeNode::Ptr();
 	}

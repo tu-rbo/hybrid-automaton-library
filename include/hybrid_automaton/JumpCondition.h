@@ -24,11 +24,23 @@ namespace ha {
       return (JumpConditionPtr(_doClone()));
     }
 
-    virtual bool isActive() {
+	virtual void activate(const double& t) {
+		throw "not implemented";
+	}
+
+	virtual void deactivate() {
+		throw "not implemented";
+	}
+
+	virtual void step(const double& t) {
+		throw "not implemented";
+	}
+
+    virtual bool isActive() const {
         throw "not implemented";
     }
 
-	virtual DescriptionTreeNode::Ptr serialize(const DescriptionTree::ConstPtr factory) const;
+	virtual DescriptionTreeNode::Ptr serialize(const DescriptionTree::ConstPtr& factory) const;
 	virtual void deserialize(const DescriptionTreeNode::ConstPtr& tree);
 
     protected:

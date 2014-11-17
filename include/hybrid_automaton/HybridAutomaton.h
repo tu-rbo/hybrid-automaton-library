@@ -129,7 +129,7 @@ namespace ha {
 		void addControlSwitch(const std::string& source_mode, const ControlSwitch::Ptr& control_switch, const std::string& target_mode);
 		void addControlSwitchAndMode(const std::string& source_mode, const ControlSwitch::Ptr& control_switch, const ControlMode::Ptr& target_mode);
 
-		::Eigen::VectorXd step(const double& t);
+		::Eigen::MatrixXd step(const double& t);
 
 		void setName(const std::string& name);
 		const std::string& getName() const;
@@ -144,7 +144,7 @@ namespace ha {
 		void setCurrentControlMode(const std::string& control_mode);
 		ControlMode::Ptr getCurrentControlMode() const;
 
-		virtual DescriptionTreeNode::Ptr serialize(const DescriptionTree::ConstPtr factory) const;
+		virtual DescriptionTreeNode::Ptr serialize(const DescriptionTree::ConstPtr& factory) const;
 		virtual void deserialize(const DescriptionTreeNode::ConstPtr& tree);
 
 		HybridAutomatonPtr clone() const {

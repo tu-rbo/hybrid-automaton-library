@@ -194,6 +194,10 @@
 				RelativePath=".\hybrid_automaton_serialization_test.cpp"
 				>
 			</File>
+			<File
+				RelativePath=".\hybrid_automaton_stepping_test.cpp"
+				>
+			</File>
 		</Filter>
 		<Filter
 			Name="Header Files"
