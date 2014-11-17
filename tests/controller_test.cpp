@@ -16,7 +16,7 @@ public:
 	MockRegisteredController() : ha::Controller() {
 	}
 
-	MOCK_METHOD0(step, void());
+	//MOCK_METHOD0(step, void());
 
 	HA_CONTROLLER_INSTANCE(node, system) {
 		Controller::Ptr ctrl(new MockRegisteredController);
@@ -47,19 +47,27 @@ TEST(Controller, SuccessfulRegistration) {
 	std::string ctrlType("MockRegisteredController");
 	std::string ctrlName("MyCtrl");
 
+	EXPECT_EQ(true, HybridAutomaton::isControllerRegistered(ctrlType));
+
 	// create a MockDescriptionTreeNode object
 	MockDescriptionTreeNode* mockedNode = new MockDescriptionTreeNode;
 	DescriptionTreeNode::Ptr mockedNodePtr(mockedNode);
 
 	EXPECT_CALL(*mockedNode, getType())
 		.Times(2) // once in registration, once in deserialization
-		.WillOnce(Return(ctrlType));
+		.WillRepeatedly(Return("Controller"));
+
+	// FIXME
+	EXPECT_CALL(*mockedNode, getAttributeString(_, _))
+		.WillRepeatedly(DoAll(SetArgReferee<1>(""),Return(false)));
+
+	EXPECT_CALL(*mockedNode, getAttributeString(std::string("type"), _))
+		.Times(AtLeast(1))
+		.WillRepeatedly(DoAll(SetArgReferee<1>(ctrlType),Return(true)));
 
 	EXPECT_CALL(*mockedNode, getAttributeString(std::string("name"), _))
 		.Times(AtLeast(1))
 		.WillRepeatedly(DoAll(SetArgReferee<1>(ctrlName),Return(true)));
-
-	// problem: other values are called too. how to ignore them?
 
 	// wrap mockedNode into a smart pointer to pass to 
 	// HybridAutomaton::createController.
