@@ -5,6 +5,7 @@
 
 using namespace ha;
 
+
 //This just tests the structure of the tree - no XML specific things are tested
 TEST(TestDescriptionTreeStructure, Positive) {
 	DescriptionTreeXML::Ptr tree(new DescriptionTreeXML());
@@ -86,14 +87,53 @@ TEST(TestDescriptionTreeFromXMLString, Positive)
 	EXPECT_EQ(ret, "k");
 
 	//Case sensitive!!!
-	EXPECT_FALSE(root->getAttribute<std::string>("Par", ret));
+	EXPECT_FALSE(root->getAttribute<std::string>("Par", ret)); 
 	
 	DescriptionTreeNode::ConstNodeListIterator it = childrenOfRoot.begin();
 	
 	EXPECT_EQ(it->get()->getType(), "b");
 	it++;
 	EXPECT_EQ(it->get()->getType(), "c");
+}
 
-	std::string xmlString2 = tree->writeTreeXML();
-	EXPECT_EQ(xmlString2, XMLString);
+//This test tests out an xml string
+TEST(TestDescriptionTreeToXMLString, Positive) 
+{
+	DescriptionTreeXML::Ptr tree(new DescriptionTreeXML());
+	DescriptionTreeNodeXML::Ptr rootNode(new DescriptionTreeNodeXML("root"));
+
+	DescriptionTreeNodeXML::Ptr firstNode(new DescriptionTreeNodeXML("firstchild"));
+	DescriptionTreeNodeXML::Ptr secondNode(new DescriptionTreeNodeXML("secondchild"));
+
+	DescriptionTreeNode::Ptr raw = tree->getRootNode();
+
+	rootNode = boost::dynamic_pointer_cast<DescriptionTreeNodeXML>(raw);	
+
+	rootNode->addChildNode(firstNode);
+	secondNode->setAttribute<std::string>("param", "value");
+	rootNode->addChildNode(secondNode);
+
+	std::string outString = tree->writeTreeXML();
+	//std::cout<<outString<<std::endl;
+
+	//Now parse again and compare 
+	DescriptionTreeXML::Ptr tree2(new DescriptionTreeXML());
+
+	//Test three xml cases - field with parameter a, child field b, and empty field c.
+	tree->initTree(outString);
+	DescriptionTreeNode::Ptr root2 = tree->getRootNode();
+
+	DescriptionTreeNode::ConstNodeList childrenOfRoot;
+	root2->getChildrenNodes(childrenOfRoot);
+
+	DescriptionTreeNode::ConstNodeListIterator it = childrenOfRoot.begin();
+	
+	EXPECT_EQ(it->get()->getType(), "firstchild");
+	it++;
+	EXPECT_EQ(it->get()->getType(), "secondchild");
+	std::string ret;
+	EXPECT_TRUE(it->get()->getAttribute<std::string>("param", ret));
+	EXPECT_EQ(ret, "value");
+
+
 }
