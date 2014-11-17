@@ -23,22 +23,18 @@ namespace ha {
 		typedef boost::shared_ptr<ControlSet> Ptr;
 		typedef boost::shared_ptr<const ControlSet> ConstPtr;
 
-		ControlSet() {
-		}
+		ControlSet(); 
 
-		virtual void activate() {
-			throw "not implemented";
-		}
+		ControlSet(const ControlSet& cs);
 
-		virtual void deactivate() {
-			throw "not implemented";
-		}
+		virtual void activate();
 
-		virtual ::Eigen::MatrixXd step(const double& t) {
-			throw "not implemented"; 
-		}
+		virtual void deactivate();
+
+		virtual ::Eigen::MatrixXd step(const double& t);
 
 		virtual DescriptionTreeNode::Ptr serialize(const DescriptionTree::ConstPtr& factory) const;
+
 		virtual void deserialize(const DescriptionTreeNode::ConstPtr& tree);
 
 		ControlSetPtr clone() const {
@@ -58,9 +54,7 @@ namespace ha {
 			return new ControlSet(*this);
 		}
 
-		virtual void _addController(const Controller::Ptr) {
-			// empty - can be overloaded			
-		}
+		virtual void _addController(const Controller::Ptr& cntrl);
 
 	protected:
 		std::string						_type;

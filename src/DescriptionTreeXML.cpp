@@ -60,4 +60,11 @@ namespace ha {
 		return this->_root_node;
 	}
 
+	void DescriptionTreeXML::setRootNode(const DescriptionTreeNode::Ptr& root_node)
+	{
+		this->_tinyxml_document->Clear();
+		this->_root_node = boost::dynamic_pointer_cast<DescriptionTreeNodeXML>(root_node);
+		this->_tinyxml_document->LinkEndChild(this->_root_node->getXMLNode());
+	}
+
 }

@@ -55,6 +55,72 @@ TEST(HybridAutomatonSerialization, getAttribute) {
 	EXPECT_EQ(dimensionality, dimensionality_result);
 }
 
+TEST(HybridAutomatonSerialization, setAttributeVector) {
+	using namespace ha;
+	using ::testing::Return;
+
+	MockDescriptionTreeNode mock_dtn;
+
+	::Eigen::MatrixXd goal(5,1);
+	goal << 1.,2.,3.,4.,5;
+	std::string goal_exp = "1\n2\n3\n4\n5";
+
+	EXPECT_CALL(mock_dtn, setAttributeString(std::string("goal"), goal_exp));
+
+	mock_dtn.setAttribute<::Eigen::MatrixXd>("goal", goal);
+}
+
+TEST(HybridAutomatonSerialization, getAttributeVector) {
+	using namespace ha;
+
+	MockDescriptionTreeNode mock_dtn;
+
+	::Eigen::MatrixXd goal(5,1);
+	goal << 1.,2.,3.,4.,5;
+	std::string goal_exp = "1\n2\n3\n4\n5";
+
+	EXPECT_CALL(mock_dtn, getAttributeString(std::string("goal"), _)).WillOnce(DoAll(SetArgReferee<1>(goal_exp), Return(true)));
+
+	::Eigen::MatrixXd goal_result(5,1);
+	goal_result << 1.,2.,3.,4.,5;
+	mock_dtn.getAttribute<::Eigen::MatrixXd>("goal", goal_result);
+
+	EXPECT_EQ(goal, goal_result);
+}
+
+TEST(HybridAutomatonSerialization, setAttributeMatrix) {
+	using namespace ha;
+	using ::testing::Return;
+
+	MockDescriptionTreeNode mock_dtn;
+
+	::Eigen::MatrixXd goal(5,2);
+	goal << 1.,2.,3.,4.,5, 6.,7.,8.,9.,10.;
+	std::string goal_exp = "1 2\n3 4\n5 6\n7 8\n9 10";
+
+	EXPECT_CALL(mock_dtn, setAttributeString(std::string("goal"), goal_exp));
+
+	mock_dtn.setAttribute<::Eigen::MatrixXd>("goal", goal);
+}
+
+TEST(HybridAutomatonSerialization, getAttributeMatrix) {
+	using namespace ha;
+
+	MockDescriptionTreeNode mock_dtn;
+
+	::Eigen::MatrixXd goal(5,1);
+	goal << 1.,2.,3.,4.,5;
+	std::string goal_exp = "1\n2\n3\n4\n5";
+
+	EXPECT_CALL(mock_dtn, getAttributeString(std::string("goal"), _)).WillOnce(DoAll(SetArgReferee<1>(goal_exp), Return(true)));
+
+	::Eigen::MatrixXd goal_result(5,1);
+	goal_result << 1.,2.,3.,4.,5;
+	mock_dtn.getAttribute<::Eigen::MatrixXd>("goal", goal_result);
+
+	EXPECT_EQ(goal, goal_result);
+}
+
 // --------------------------------------------
 
 class MockSerializableController : public ha::Controller {

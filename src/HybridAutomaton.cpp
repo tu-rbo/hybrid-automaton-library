@@ -88,7 +88,22 @@ namespace ha {
 	}
 
 	DescriptionTreeNode::Ptr HybridAutomaton::serialize(const DescriptionTree::ConstPtr& factory) const {
-		throw "not implemented";
+		DescriptionTreeNode::Ptr tree_node = factory->createNode("HybridAutomaton");
+		tree_node->setAttribute<std::string>(std::string("name"), this->getName());
+
+		// Iterate over the vertices and serialize them
+		::std::pair<VertexIterator, VertexIterator> v_pair;
+		for(v_pair = ::boost::vertices(this->_graph); v_pair.first != v_pair.second; ++v_pair.first)
+		{
+			tree_node->addChildNode(_graph.graph()[*v_pair.first]->serialize(factory));
+
+			for(::std::pair<OutEdgeIterator, OutEdgeIterator> out_edges = ::boost::out_edges(_graph.vertex(_graph.graph()[*v_pair.first]->getName()), _graph); out_edges.first != out_edges.second; ++out_edges.first) 
+			{
+				tree_node->addChildNode(_graph.graph()[*out_edges.first]->serialize(factory));
+			}
+		}
+
+		return tree_node;
 	}
 
 	void HybridAutomaton::deserialize(const DescriptionTreeNode::ConstPtr& tree){
