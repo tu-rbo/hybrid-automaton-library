@@ -48,7 +48,9 @@ namespace ha {
 		typedef ::boost::graph_traits< Graph >::edge_descriptor SwitchHandle;
 		typedef ::boost::graph_traits< Graph > GraphTraits;
 
-		//an Iterator - there are more variations possible
+		//Iterators
+		typedef ::boost::graph_traits< Graph >::vertex_iterator ModeIterator;
+		typedef ::boost::graph_traits< Graph >::edge_iterator SwitchIterator;
 		typedef ::boost::graph_traits< Graph >::out_edge_iterator OutEdgeIterator;
 
 	protected:

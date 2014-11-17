@@ -179,7 +179,15 @@
 				>
 			</File>
 			<File
+				RelativePath=".\controlmode_test.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\controlset_test.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\description_tree_test.cpp"
 				>
 			</File>
 			<File

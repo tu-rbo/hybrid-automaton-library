@@ -129,7 +129,26 @@ namespace ha {
 	}
 
 	DescriptionTreeNode::Ptr HybridAutomaton::serialize(const DescriptionTree::ConstPtr& factory) const {
-		throw "not implemented";
+		DescriptionTreeNode::Ptr tree = factory->createNode("HybridAutomaton");
+
+		// serialize properties
+		tree->setAttribute<std::string>(std::string("name"), _name);
+
+		if (_current_control_mode)
+			tree->setAttribute<std::string>(std::string("current_control_mode"), _current_control_mode->getName());
+
+		// serialize control modes
+		std::pair<ModeIterator, ModeIterator> mp;
+		for (mp = ::boost::vertices(_graph); mp.first != mp.second; ++mp.first) {
+			ModeHandle mode_handle = *mp.first;
+			ControlMode::Ptr mode = _graph.graph()[mode_handle];
+			std::cout << mode->getName() << std::endl;
+			tree->addChildNode(mode->serialize(factory));
+		}
+
+		// serialize control switches
+		// TODO
+		return tree;
 	}
 
 	void HybridAutomaton::deserialize(const DescriptionTreeNode::ConstPtr& tree){

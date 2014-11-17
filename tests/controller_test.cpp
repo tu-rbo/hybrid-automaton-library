@@ -7,26 +7,24 @@
 #include "hybrid_automaton/tests/MockDescriptionTree.h"
 #include "hybrid_automaton/tests/MockDescriptionTreeNode.h"
 
+
 // ----------------------------------
 // create some controller which registers itself
 class MockRegisteredController : public ha::Controller {
-
 public:
-
 	MockRegisteredController() : ha::Controller() {
 	}
-
-	//MOCK_METHOD0(step, void());
 
 	HA_CONTROLLER_INSTANCE(node, system) {
 		Controller::Ptr ctrl(new MockRegisteredController);
 		ctrl->deserialize(node);
 		return ctrl;
 	}
-
 };
 
 HA_CONTROLLER_REGISTER("MockRegisteredController", MockRegisteredController)
+// Attention: Only use this controller in ONE test and de-register 
+// in this test. Otherwise you might have weird side effects with other tests
 
 //=========================================
 
@@ -84,6 +82,7 @@ TEST(Controller, SuccessfulRegistration) {
 
 //----------------------------
 
+
 TEST(Controller, UnsuccessfulRegistration) {
 
 	System::Ptr emptySystem;
@@ -109,19 +108,39 @@ TEST(Controller, UnsuccessfulRegistration) {
 }
 
 
-//----------------------------
+// ----------------------------------
+// create some controller which registers itself
+namespace ControllerSerialization {
 
+class CSMockSerializableController : public ha::Controller {
+public:
+	CSMockSerializableController() : ha::Controller() {
+	}
 
+	HA_CONTROLLER_INSTANCE(node, system) {
+		Controller::Ptr ctrl(new CSMockSerializableController);
+		ctrl->deserialize(node);
+		return ctrl;
+	}
+};
+
+HA_CONTROLLER_REGISTER("CSMockSerializableController", CSMockSerializableController)
+// Attention: Only use this controller in ONE test and de-register 
+// in this test. Otherwise you might have weird side effects with other tests
+
+}
 
 TEST(Controller, Serialization) {
-	/*
 	using namespace ha;
 	using namespace std;
 
+	string ctrlType("CSMockSerializableController");
+
+	/*
 	// Controller to be serialized
 	Controller * _ctrl = new Controller;
 	Controller::Ptr ctrl(_ctrl);
-	_ctrl->setType("JointController");
+	_ctrl->setType(ctrlType);
 	_ctrl->setName("myCtrl");
 
 	MockDescriptionTree* _desc_tree = new MockDescriptionTree;
@@ -137,5 +156,10 @@ TEST(Controller, Serialization) {
 	////	.WillOnce(DoAll(SetArgReferee<1>("myCtrl"),Return(true)));
 
 	ctrl_node = ctrl->serialize(desc_tree);
+
+	HybridAutomaton::unregisterController(ctrlType);
+	EXPECT_FALSE(HybridAutomaton::isControllerRegistered(ctrlType));
 	*/
 }
+
+

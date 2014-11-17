@@ -11,6 +11,13 @@ namespace ha {
 	public:
 		MOCK_METHOD0(getRootNode, DescriptionTreeNode::Ptr () );
 		MOCK_CONST_METHOD1(createNode, DescriptionTreeNode::Ptr (const std::string& type) );
+		
+		/*
+		DescriptionTreeNode::Ptr createNode(const std::string& type) const {
+			DescriptionTreeNode::Ptr node(new MockDescriptionTreeNode);
+			return node;
+		}
+		*/
 	};
 
 }

@@ -3,7 +3,7 @@
 namespace ha {
 	DescriptionTreeNode::Ptr ControlMode::serialize(const DescriptionTree::ConstPtr& factory) const {
 		// TODO
-		return DescriptionTreeNode::Ptr();
+		return factory->createNode("ControlMode");
 	}
 	
 	void ControlMode::deserialize(const DescriptionTreeNode::ConstPtr& tree) {

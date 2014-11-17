@@ -3,8 +3,14 @@
 
 namespace ha {
 	DescriptionTreeNode::Ptr ControlSet::serialize(const DescriptionTree::ConstPtr& factory) const {
-		// TODO
-		return DescriptionTreeNode::Ptr();
+		DescriptionTreeNode::Ptr tree = factory->createNode("ControlSet");
+
+		tree->setAttribute<std::string>(std::string("type"), this->getType());
+		tree->setAttribute<std::string>(std::string("name"), this->getName());
+
+		// TODO more properties
+
+		return tree;
 	}
 
 	void ControlSet::deserialize(const DescriptionTreeNode::ConstPtr& tree) {
@@ -24,7 +30,7 @@ namespace ha {
 
 		tree->getAttribute<std::string>("name", _name, "");
 
-		// TODO more attributes
+		// TODO more properties
 	}
 
 	void ControlSet::setType(const std::string& new_type) {
@@ -33,6 +39,14 @@ namespace ha {
 
 	const std::string& ControlSet::getType() const {
 		return this->_type;
+	}
+
+	void ControlSet::setName(const std::string& new_name) {
+		this->_name = new_name;
+	}
+
+	const std::string& ControlSet::getName() const {
+		return this->_name;
 	}
 
 	void ControlSet::appendController(const Controller::Ptr& controller)

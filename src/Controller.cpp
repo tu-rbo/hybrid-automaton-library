@@ -27,7 +27,9 @@ Controller::Controller(const ha::Controller &controller)
 
 DescriptionTreeNode::Ptr Controller::serialize(const DescriptionTree::ConstPtr& factory) const 
 {
-	DescriptionTreeNode::Ptr tree = factory->createNode(this->getType());
+	DescriptionTreeNode::Ptr tree = factory->createNode("Controller");
+
+	tree->setAttribute<std::string>(std::string("type"), this->getType());
 	tree->setAttribute<std::string>(std::string("name"), this->getName());
 
 	tree->setAttribute<Eigen::MatrixXd>(std::string("goal"), this->_goal);

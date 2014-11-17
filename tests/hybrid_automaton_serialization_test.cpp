@@ -5,103 +5,79 @@
 
 #include "hybrid_automaton/HybridAutomaton.h"
 #include "hybrid_automaton/DescriptionTreeNode.h"
+#include "hybrid_automaton/tests/MockDescriptionTree.h"
 #include "hybrid_automaton/tests/MockDescriptionTreeNode.h"
 
 using ::testing::Return;
 using ::testing::DoAll;
 using ::testing::SetArgReferee;
+using ::testing::AtLeast;
 using ::testing::_;
 
-TEST(HybridAutomatonSerialization, deserializeSimple) {
-	using namespace ha;
-	using ::testing::Return;
-
-	HybridAutomaton hybaut;
-
-	//MockDescriptionTreeNode mock_dtn;
-	//EXPECT_CALL(mock_dtn, getAttribute(std::string("name")))
-	//	.WillOnce(Return("example_ha"));
-
-	//hybaut.deserialize(mock_dtn);
-}
-
-TEST(HybridAutomatonSerialization, setAttribute) {
-	using namespace ha;
-	using ::testing::Return;
-
-	MockDescriptionTreeNode mock_dtn;
-
-	int dimensionality = 6;
-	std::string dimensionality_exp = "6";
-
-	EXPECT_CALL(mock_dtn, setAttributeString(std::string("dimensionality"), dimensionality_exp));
-
-	mock_dtn.setAttribute<int>("dimensionality", dimensionality);
-}
-
-TEST(HybridAutomatonSerialization, getAttribute) {
-	using namespace ha;
-
-	MockDescriptionTreeNode mock_dtn;
-
-	int dimensionality = 6;
-	std::string dimensionality_exp = "6";
-
-	EXPECT_CALL(mock_dtn, getAttributeString(std::string("dimensionality"), _)).WillOnce(DoAll(SetArgReferee<1>(dimensionality_exp), Return(true)));
-
-	int dimensionality_result;
-	mock_dtn.getAttribute<int>("dimensionality", dimensionality_result);
-
-	EXPECT_EQ(dimensionality, dimensionality_result);
-}
+using namespace ::ha;
 
 // --------------------------------------------
 
-class MockSerializableController : public ha::Controller {
+class MockSerializableControlMode : public ha::ControlMode {
 	public:
-		MOCK_CONST_METHOD1(serialize, void (const ha::DescriptionTreeNode::Ptr& tree) );
+		MOCK_CONST_METHOD1(serialize, DescriptionTreeNode::Ptr (const DescriptionTree::ConstPtr& factory) );
 		MOCK_CONST_METHOD1(deserialize, void (const ha::DescriptionTreeNode::ConstPtr& tree) );
-
-		HA_CONTROLLER_INSTANCE(node, system) {
-			return Controller::Ptr(new MockSerializableController);
-		}
 };
 
-HA_CONTROLLER_REGISTER("JointController", MockSerializableController);
-
-/*
-TEST(HybridAutomatonSerialization, minimalFullHA) {
+TEST(HybridAutomaton, Serialization) {
 	using namespace ha;
 	using namespace std;
 
-	//-------
-	// (mocked) controller to be serialized
-	Controller * _ctrl = new MockSerializableController;
-	Controller::Ptr ctrl(_ctrl);
-	_ctrl->setType("JointController");
-	_ctrl->setName("myCtrl");
+	MockDescriptionTree* _tree = new MockDescriptionTree;
+	MockDescriptionTree::Ptr tree(_tree);
 
-	// Mocked description returned by controller
-	MockDescriptionTreeNode* _ctrl_node = new MockDescriptionTreeNode;
-	DescriptionTreeNode::Ptr ctrl_node(_ctrl_node);
-	EXPECT_CALL(*_ctrl_node, getType()).WillOnce(Return("JointController"));
-	EXPECT_CALL(*_ha_node, getAttribute<string>(std::string("name"), _))
-		.WillOnce(DoAll(SetArgReferee<1>("myCtrl"),Return(true)));
+	//-------
+	string ctrlType("MockSerializableController");
+	string ctrlSetType("MockSerializableControlSet");
 
 	//-------
 	// Serialized and deserialized ControlMode
+	MockSerializableControlMode* _cm1 = new MockSerializableControlMode;
+	ControlMode::Ptr cm1(_cm1);	
+	cm1->setName("myCM1");
 
+	// Mocked node returned by control mode
+	MockDescriptionTreeNode* _cm1_node = new MockDescriptionTreeNode;
+	DescriptionTreeNode::Ptr cm1_node(_cm1_node);
+	EXPECT_CALL(*_cm1_node, getType()).WillRepeatedly(Return("ControlMode"));
+	EXPECT_CALL(*_cm1_node, getAttributeString(_, _))
+		.WillRepeatedly(DoAll(SetArgReferee<1>(""),Return(true)));
 
+	EXPECT_CALL(*_cm1, serialize(_))
+		.WillRepeatedly(Return(cm1_node));
+	
 	//-------
-	// Serialized and deserialized HybridAutomaton
+	// Serialize HybridAutomaton
 	HybridAutomaton ha;
 	ha.setName("myHA");
-	ha.addContr
+	ha.addControlMode(cm1);
 
+	// this will be the node "generated" by the tree
 	MockDescriptionTreeNode* _ha_node = new MockDescriptionTreeNode;
-	DescriptionTreeNode::Ptr ha_node(_ga_node);
-	EXPECT_CALL(*_ha_node, getAttribute<string>(std::string("name"), _))
-		.WillOnce(DoAll(SetArgReferee<1>("myHA"),Return(true)));
+	DescriptionTreeNode::Ptr ha_node(_ha_node);
 
+	EXPECT_CALL(*_tree, createNode("HybridAutomaton"))
+		.WillOnce(Return(ha_node));
+
+	// asserts on what serialization of HA will do
+	// -> child node
+	EXPECT_CALL(*_ha_node, addChildNode(cm1_node))
+		.WillOnce(Return());
+	// -> some properties (don't care)
+	EXPECT_CALL(*_ha_node, setAttributeString(_,_))
+		.Times(AtLeast(0));
+
+	//MockDescriptionTreeNode* _ha_node = new MockDescriptionTreeNode;
+	//DescriptionTreeNode::Ptr ha_node(_ha_node);
+	//EXPECT_CALL(*_ha_node, getAttributeString(std::string("name"), _))
+	//	.WillOnce(DoAll(SetArgReferee<1>("myHA"),Return(true)));
+
+	DescriptionTreeNode::Ptr ha_serialized;
+	ha_serialized = ha.serialize(tree);
+	
 }
-*/

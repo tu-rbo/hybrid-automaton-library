@@ -53,6 +53,11 @@ namespace ha {
 
 		virtual const std::vector<Controller::Ptr>& getControllers() const;
 
+		virtual void setName(const std::string& new_name);
+
+		virtual const std::string& getName() const;
+
+
 	protected:
 		virtual ControlSet* _doClone() const {
 			return new ControlSet(*this);
