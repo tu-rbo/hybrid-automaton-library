@@ -66,6 +66,8 @@ TEST(ControlSet, SuccessfulRegistration) {
 	ControlSet::Ptr c = HybridAutomaton::createControlSet(mockedNodePtr, emptySystem);
 	EXPECT_FALSE(c.get() == NULL);
 	
+	HybridAutomaton::unregisterControlSet(ctrlName1);
+	EXPECT_FALSE(HybridAutomaton::isControlSetRegistered(ctrlName1));
 }
 
 //----------------------------

@@ -16,18 +16,13 @@ namespace ha {
 		std::map<std::string, HybridAutomaton::ControllerCreator>& controller_type_map = getControllerTypeMap();
 		return ( controller_type_map.find(ctrl_type) != controller_type_map.end() );
 	}
-
-	void HybridAutomaton::registerControlSet(const std::string& ctrl_type, ControlSetCreator cc) {
-		std::map<std::string, HybridAutomaton::ControlSetCreator>& controlset_type_map = getControlSetTypeMap();
-		assert ( controlset_type_map.find(ctrl_type) == controlset_type_map.end() );
-		controlset_type_map[ctrl_type] = cc;
+	
+	void HybridAutomaton::unregisterController(const std::string& ctrl_type) {
+		std::map<std::string, HybridAutomaton::ControllerCreator>& controller_type_map = getControllerTypeMap();
+		std::map<std::string, HybridAutomaton::ControllerCreator>::iterator it = controller_type_map.find(ctrl_type);
+		if (it == controller_type_map.end()) return;
+		controller_type_map.erase(it);
 	}
-
-	bool HybridAutomaton::isControlSetRegistered(const std::string& ctrl_type) {
-		std::map<std::string, HybridAutomaton::ControlSetCreator>& controlset_type_map = getControlSetTypeMap();
-		return ( controlset_type_map.find(ctrl_type) != controlset_type_map.end() );
-	}
-
 
 	Controller::Ptr HybridAutomaton::createController(DescriptionTreeNode::Ptr node, System::Ptr system) {
 		if (node->getType() != "Controller") {
@@ -51,6 +46,17 @@ namespace ha {
 		return (*(it->second))(node, system);
 	}
 
+	void HybridAutomaton::registerControlSet(const std::string& ctrl_type, ControlSetCreator cc) {
+		std::map<std::string, HybridAutomaton::ControlSetCreator>& controlset_type_map = getControlSetTypeMap();
+		assert ( controlset_type_map.find(ctrl_type) == controlset_type_map.end() );
+		controlset_type_map[ctrl_type] = cc;
+	}
+
+	bool HybridAutomaton::isControlSetRegistered(const std::string& ctrl_type) {
+		std::map<std::string, HybridAutomaton::ControlSetCreator>& controlset_type_map = getControlSetTypeMap();
+		return ( controlset_type_map.find(ctrl_type) != controlset_type_map.end() );
+	}
+
 	ControlSet::Ptr HybridAutomaton::createControlSet(DescriptionTreeNode::Ptr node, System::Ptr system) {
 		if (node->getType() != "ControlSet") {
 			std::stringstream ss;
@@ -72,6 +78,14 @@ namespace ha {
 		}
 		return (*(it->second))(node, system);
 	}
+
+	void HybridAutomaton::unregisterControlSet(const std::string& ctrl_type) {
+		std::map<std::string, HybridAutomaton::ControlSetCreator>& controlset_type_map = getControlSetTypeMap();
+		std::map<std::string, HybridAutomaton::ControlSetCreator>::iterator it = controlset_type_map.find(ctrl_type);
+		if (it == controlset_type_map.end()) return;
+		controlset_type_map.erase(it);
+	}
+
 
 	void HybridAutomaton::addControlMode(const ControlMode::Ptr& control_mode) {
 		boost::add_vertex(control_mode->getName(), control_mode, _graph);

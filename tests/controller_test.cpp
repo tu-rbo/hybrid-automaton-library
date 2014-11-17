@@ -47,7 +47,7 @@ TEST(Controller, SuccessfulRegistration) {
 	std::string ctrlType("MockRegisteredController");
 	std::string ctrlName("MyCtrl");
 
-	EXPECT_EQ(true, HybridAutomaton::isControllerRegistered(ctrlType));
+	EXPECT_TRUE(HybridAutomaton::isControllerRegistered(ctrlType));
 
 	// create a MockDescriptionTreeNode object
 	MockDescriptionTreeNode* mockedNode = new MockDescriptionTreeNode;
@@ -76,7 +76,10 @@ TEST(Controller, SuccessfulRegistration) {
 
 	Controller::Ptr c = HybridAutomaton::createController(mockedNodePtr, emptySystem);
 	EXPECT_FALSE(c.get() == NULL);
-	
+
+	HybridAutomaton::unregisterController(ctrlType);
+	EXPECT_FALSE(HybridAutomaton::isControllerRegistered(ctrlType));
+
 }
 
 //----------------------------

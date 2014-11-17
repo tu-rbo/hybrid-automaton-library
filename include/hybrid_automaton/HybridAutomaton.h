@@ -105,6 +105,12 @@ namespace ha {
 		 */
 		static bool isControllerRegistered(const std::string& crtl_type);
 
+		/**
+		 * @brief Unregister a controller with the hybrid automaton
+		 *
+		 * Usually you do not need that except for testing
+		 */
+		static void unregisterController(const std::string& crtl_type);
 
 		/**
 		 * @brief Register a control set with the hybrid automaton
@@ -124,6 +130,12 @@ namespace ha {
 		 */
 		static bool isControlSetRegistered(const std::string& crtl_type);
 
+		/**
+		 * @brief Unregister a control set with the hybrid automaton
+		 *
+		 * Usually you do not need that except for testing
+		 */
+		static void unregisterControlSet(const std::string& crtl_name);
 
 		void addControlMode(const ControlMode::Ptr& control_mode);
 		void addControlSwitch(const std::string& source_mode, const ControlSwitch::Ptr& control_switch, const std::string& target_mode);
