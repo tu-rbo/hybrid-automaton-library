@@ -1,6 +1,8 @@
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
 
+#include <Eigen/Dense>
+
 #include "hybrid_automaton/HybridAutomaton.h"
 #include "hybrid_automaton/ControlMode.h"
 #include "hybrid_automaton/ControlSwitch.h"
@@ -10,23 +12,15 @@
 using namespace std;
 
 // ----------------------------------
-// create some control set which does not register itself
-/*
-class MockRegisteredControlSet : public ha::ControlSet {
+// create some control mode
+class TestControlMode : public ha::ControlMode {
 
-public:
-
-	MockRegisteredControlSet() : ha::ControlSet() {
-	}
-
-	MOCK_METHOD0(step, void());
-
-	HA_CONTROLSET_INSTANCE(node, system) {
-		return ControlSet::Ptr(new MockRegisteredControlSet);
-	}
-
+  public:
+	TestControlMode(const std::string& s): ha::ControlMode(s) {};
+	virtual void activate() {};
+	virtual void deactivate() {};
+	virtual ::Eigen::MatrixXd step(const double& t)	{ return ::Eigen::MatrixXd(0,0); }
 };
-*/
 
 using namespace ha;
 
@@ -34,12 +28,12 @@ class HybridAutomatonTest : public ::testing::Test {
 
 protected:
 	HybridAutomaton hybrid_automaton;
-	ControlMode::Ptr m1, m2;
+	TestControlMode::Ptr m1, m2;
 	ControlSwitch::Ptr s1;
 
 	virtual void SetUp() {
-		m1.reset(new ControlMode("m1"));
-		m2.reset(new ControlMode("m2"));
+		m1.reset(new TestControlMode("m1"));
+		m2.reset(new TestControlMode("m2"));
 
 		s1.reset(new ControlSwitch());
 
@@ -71,29 +65,29 @@ TEST_F(HybridAutomatonTest, setCurrentControlMode) {
 
 TEST_F(HybridAutomatonTest, activate) {
 	// should throw an exception because no current control mode is defined
-	EXPECT_ANY_THROW(hybrid_automaton.activate());
+	EXPECT_ANY_THROW(hybrid_automaton.activate(0.0));
 	
 	EXPECT_NO_THROW(hybrid_automaton.setCurrentControlMode("m1"));
 
-	EXPECT_NO_THROW(hybrid_automaton.activate());
+	EXPECT_NO_THROW(hybrid_automaton.activate(0.0));
 }
 
 TEST_F(HybridAutomatonTest, step) {
 	ASSERT_NO_THROW(hybrid_automaton.setCurrentControlMode("m1"));
-	ASSERT_NO_THROW(hybrid_automaton.activate());
+	ASSERT_NO_THROW(hybrid_automaton.activate(0.0));
 
-	//EXPECT_NO_THROW(hybrid_automaton.step(0.0));
+	::Eigen::MatrixXd expected_result(0,0);
+	ASSERT_TRUE(expected_result == hybrid_automaton.step(0.0));
 }
 
 TEST_F(HybridAutomatonTest, stepAndSwitch) {
-	ASSERT_NO_THROW(hybrid_automaton.setCurrentControlMode("m1"));
-	ASSERT_NO_THROW(hybrid_automaton.activate());
-
 	double switching_time = 1.0;
 	TimeConditionPtr time_switch(new TimeCondition(switching_time));
 	s1->add(time_switch);
 
-	/*
+	ASSERT_NO_THROW(hybrid_automaton.setCurrentControlMode("m1"));
+	ASSERT_NO_THROW(hybrid_automaton.activate(0.0));
+
 	double time = 0.0;
 	while (time <= 2.0) {
 		hybrid_automaton.step(time);
@@ -104,7 +98,6 @@ TEST_F(HybridAutomatonTest, stepAndSwitch) {
 
 		time += 0.1;
 	}
-	*/
 }
 
 //----------------------------

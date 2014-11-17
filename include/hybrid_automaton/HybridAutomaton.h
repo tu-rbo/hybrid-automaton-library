@@ -61,6 +61,9 @@ namespace ha {
 
 		bool _active;
 
+		// helper function -- not virtual!
+		void _activateCurrentControlMode(const double& t);
+
 	private:  
 
 		// see http://stackoverflow.com/questions/8057682/accessing-a-static-map-from-a-static-member-function-segmentation-fault-c
@@ -152,7 +155,7 @@ namespace ha {
 			return _active;
 		}
 
-		void activate();
+		void activate(const double& t);
 		void deactivate();
 
 		void setCurrentControlMode(const std::string& control_mode);

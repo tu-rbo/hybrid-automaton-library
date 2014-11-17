@@ -27,20 +27,27 @@ namespace ha {
 		virtual void activate() {
 			if (_control_set)
 				_control_set->activate();
+			else
+				throw std::string("[ControlMode::activate] No control set defined.");
 		}
 
 		virtual void deactivate() {
 			if (_control_set)
 				_control_set->deactivate();
+			else
+				throw std::string("[ControlMode::deactivate] No control set defined.");
 		}
 
 		virtual ::Eigen::MatrixXd step(const double& t) {
-			return _control_set->step(t);
+			if (_control_set)
+				return _control_set->step(t);
+			else
+				throw std::string("[ControlMode::step] No control set defined.");
 		}
 
 		virtual void setControlSet(const ControlSet::Ptr control_set) {
 			_control_set = control_set;
-		}    
+		}
 
 		virtual ControlSet::Ptr getControlSet() const {
 			return _control_set;

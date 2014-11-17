@@ -99,7 +99,7 @@ namespace ha {
 		boost::add_vertex(target_mode->getName(), target_mode, _graph);
 		boost::add_edge_by_label(source_mode, target_mode->getName(), control_switch, _graph);
 	}
-
+	
 	::Eigen::MatrixXd HybridAutomaton::step(const double& t) {
 		if (_active)
 		{
@@ -109,6 +109,8 @@ namespace ha {
 				SwitchHandle switch_handle = *out_edges.first;
 				ControlSwitch::Ptr control_switch = _graph[switch_handle];
 
+				control_switch->step(t);
+
 				if (control_switch->isActive())
 				{
 					// switch to the next control mode
@@ -116,7 +118,8 @@ namespace ha {
 
 					_current_control_mode->deactivate();
 					_current_control_mode = _graph.graph()[mode_handle];
-					_current_control_mode->activate();
+					
+					_activateCurrentControlMode(t);
 
 					// CE: We still need to encapsulate this functionality:
 					//		if (!_activeMotionBehaviour->replaceControllers((MotionBehaviour*) edges[0]))
@@ -126,9 +129,9 @@ namespace ha {
 					break;
 				}
 			}
+			return _current_control_mode->step(t); 
 		}
-
-		return _current_control_mode->step(t); 
+		throw std::string("[HybridAutomaton::step] No current control mode defined.");
 	}
 
 
@@ -167,18 +170,25 @@ namespace ha {
 		return _name;
 	}
 
-	void HybridAutomaton::activate() {
+	void HybridAutomaton::activate(const double& t) {
 		if (!_current_control_mode) {
 			throw std::string("ERROR: No current control mode defined!");
 		}
 		_active = true;
-		_current_control_mode->activate();
+
+		_activateCurrentControlMode(t);
 	}
 
 	void HybridAutomaton::deactivate() {
 		if (_current_control_mode)
 			_current_control_mode->deactivate();
 		_active = false;
+
+		// deactivate all outgoing edges
+		::std::pair<OutEdgeIterator, OutEdgeIterator> out_edges = ::boost::out_edges(_graph.vertex(_current_control_mode->getName()), _graph);
+		for(; out_edges.first != out_edges.second; ++out_edges.first) {
+			_graph[*out_edges.first]->deactivate();
+		}
 	}
 
 	void HybridAutomaton::setCurrentControlMode(const std::string& control_mode) {
@@ -197,11 +207,22 @@ namespace ha {
 		if (_current_control_mode != NULL)
 			_current_control_mode->deactivate();
 		_current_control_mode = _graph[control_mode];
-		_current_control_mode->activate();
+
+		_activateCurrentControlMode(0.0);
 	}
 
 	ControlMode::Ptr HybridAutomaton::getCurrentControlMode() const {
 		return _current_control_mode;
+	}
+
+	void HybridAutomaton::_activateCurrentControlMode(const double& t) {
+		_current_control_mode->activate();
+
+		// activate all outgoing edges
+		::std::pair<OutEdgeIterator, OutEdgeIterator> out_edges = ::boost::out_edges(_graph.vertex(_current_control_mode->getName()), _graph);
+		for(; out_edges.first != out_edges.second; ++out_edges.first) {
+			_graph[*out_edges.first]->activate(t);
+		}
 	}
 
 }
