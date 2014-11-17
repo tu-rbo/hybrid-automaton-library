@@ -171,7 +171,7 @@ TEST(ControlSet, Serialization) {
 	MockDescriptionTree* _tree = new MockDescriptionTree;
 	MockDescriptionTree::Ptr tree(_tree);
 	// second call
-	EXPECT_CALL(*_cs_node, addChildNode(ctrl1_node))
+	EXPECT_CALL(*_cs_node, addChildNode(ctrl2_node))
 		.WillOnce(Return());
 	// first call
 	EXPECT_CALL(*_cs_node, addChildNode(ctrl1_node))

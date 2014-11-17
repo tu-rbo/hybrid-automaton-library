@@ -5,7 +5,6 @@ namespace ha {
 
 	ControlSet::ControlSet()
 	{
-
 	}
 
 	ControlSet::ControlSet(const ControlSet& cs)

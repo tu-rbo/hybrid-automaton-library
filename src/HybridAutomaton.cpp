@@ -137,7 +137,7 @@ namespace ha {
 		tree_node->setAttribute<std::string>(std::string("name"), this->getName());
 
 		if (_current_control_mode)
-			tree->setAttribute<std::string>(std::string("current_control_mode"), _current_control_mode->getName());
+			tree_node->setAttribute<std::string>(std::string("current_control_mode"), _current_control_mode->getName());
 
 		// Iterate over the vertices and serialize them
 		::std::pair<ModeIterator, ModeIterator> v_pair;
