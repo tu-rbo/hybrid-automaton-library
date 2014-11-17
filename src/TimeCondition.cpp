@@ -31,7 +31,7 @@ namespace ha {
 	}
 
 
-	void TimeCondition::serialize(const DescriptionTreeNode::Ptr& tree) const {
+	void TimeCondition::serialize(const DescriptionTreeNode::ConstPtr& factory) const {
 		// TODO
 	}
 	

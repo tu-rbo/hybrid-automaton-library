@@ -132,7 +132,7 @@ namespace ha {
 		void setCurrentControlMode(const std::string& control_mode);
 		ControlMode::Ptr getCurrentControlMode() const;
 
-		virtual DescriptionTreeNode::Ptr serialize(const DescriptionTree::ConstPtr factory) const;
+		virtual DescriptionTreeNode::Ptr serialize(const DescriptionTree::ConstPtr& factory) const;
 		virtual void deserialize(const DescriptionTreeNode::ConstPtr& tree);
 
 		HybridAutomatonPtr clone() const {

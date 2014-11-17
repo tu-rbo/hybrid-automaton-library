@@ -20,7 +20,7 @@ namespace ha {
 	class DescriptionTreeNodeXML: public DescriptionTreeNode{
 
 	protected:
-		boost::shared_ptr<TiXmlElement> _tinyxml_node;
+		TiXmlElement* _tinyxml_node;
 
 	public:
 
@@ -81,7 +81,7 @@ namespace ha {
 		*/
 		virtual void addChildNode(const DescriptionTreeNode::Ptr& child);
 
-		boost::shared_ptr<TiXmlElement> getXMLNode() const;
+		TiXmlElement* getXMLNode() const;
 
 	protected:
 

@@ -78,7 +78,7 @@ namespace ha {
 		_tinyxml_node->InsertEndChild(*(childXMLNode->_tinyxml_node));
 	}
 
-	boost::shared_ptr<TiXmlElement> DescriptionTreeNodeXML::getXMLNode() const
+	TiXmlElement* DescriptionTreeNodeXML::getXMLNode() const
 	{
 		return this->_tinyxml_node;
 	}

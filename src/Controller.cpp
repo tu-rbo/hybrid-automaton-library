@@ -24,7 +24,7 @@ Controller::Controller(const ha::Controller &controller)
 	this->_name = controller._name;
 }
 
-DescriptionTreeNode::Ptr Controller::serialize(const DescriptionTree::ConstPtr factory) const 
+DescriptionTreeNode::Ptr Controller::serialize(const DescriptionTree::ConstPtr& factory) const 
 {
 	DescriptionTreeNode::Ptr tree = factory->createNode(this->getType());
 	tree->setAttribute<std::string>(std::string("name"), this->getName());

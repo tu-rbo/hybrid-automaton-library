@@ -33,7 +33,7 @@ namespace ha {
 	virtual void step(const double& t);
     virtual bool isActive() const;
 
-	virtual DescriptionTreeNode::Ptr serialize(const DescriptionTree::ConstPtr factory) const;
+	virtual DescriptionTreeNode::Ptr serialize(const DescriptionTree::ConstPtr& factory) const;
 	virtual void deserialize(const DescriptionTreeNode::ConstPtr& tree);
 
   protected:

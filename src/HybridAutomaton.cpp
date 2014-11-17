@@ -87,7 +87,7 @@ namespace ha {
 		return _current_control_mode->step(t); 
 	}
 
-	DescriptionTreeNode::Ptr HybridAutomaton::serialize(const DescriptionTree::ConstPtr factory) const {
+	DescriptionTreeNode::Ptr HybridAutomaton::serialize(const DescriptionTree::ConstPtr& factory) const {
 		throw "not implemented";
 	}
 

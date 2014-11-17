@@ -42,7 +42,7 @@ namespace ha {
 		virtual DescriptionTreeNode::Ptr getRootNode();
 	
 	protected: 
-		TiXmlDocument* _tinyxml_document;
+		boost::shared_ptr<TiXmlDocument> _tinyxml_document;
 		DescriptionTreeNodeXML::Ptr _root_node;
 	};
 }

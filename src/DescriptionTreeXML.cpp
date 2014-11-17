@@ -1,7 +1,8 @@
 #include "hybrid_automaton/DescriptionTreeXML.h"
 namespace ha {
 
-	DescriptionTreeXML::DescriptionTreeXML()
+	DescriptionTreeXML::DescriptionTreeXML():
+		_tinyxml_document(new TiXmlDocument())
 	{
 		// ACHTUNG: This is ugly but is the only way to avoid segmentation fault
 		// TinyXML stores a list of pointers to the elements
@@ -10,12 +11,12 @@ namespace ha {
 		// If tinyxml_document is also a smart pointer, the object will also get deleted, deleting the object pointed by root_node, 
 		// that is also cleared by the smart pointer of root_node
 		// SOLUTION: tinyxml_document is created with new and never deleted.
-		this->_tinyxml_document = new TiXmlDocument();
+		//this->_tinyxml_document = new TiXmlDocument();
 
 		// Create the first (and only) root element and link it to the base document
 		this->_root_node.reset(new DescriptionTreeNodeXML(new TiXmlElement("HybridAutomaton")));
 
-		this->_tinyxml_document->LinkEndChild(this->_root_node->getXMLNode().get());
+		this->_tinyxml_document->LinkEndChild(this->_root_node->getXMLNode());
 	}
 
 	DescriptionTreeXML::~DescriptionTreeXML()
@@ -44,8 +45,8 @@ namespace ha {
 			return false;
 		}
 		
-		TiXmlHandle docHandle(this->_tinyxml_document);
-		this->_root_node = DescriptionTreeNodeXML::Ptr(new DescriptionTreeNodeXML(docHandle.Element()));
+		TiXmlHandle docHandle(this->_tinyxml_document.get());
+		this->_root_node.reset(new DescriptionTreeNodeXML(docHandle.Element()));
 		
 		// Check if the HybridAutomaton element was found
 		if (this->_root_node == NULL) {

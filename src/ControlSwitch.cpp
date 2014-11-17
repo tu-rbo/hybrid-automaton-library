@@ -27,7 +27,7 @@ namespace ha {
 		}
 	}
 	
-	DescriptionTreeNode::Ptr ControlSwitch::serialize(const DescriptionTree::ConstPtr factory) const {
+	DescriptionTreeNode::Ptr ControlSwitch::serialize(const DescriptionTree::ConstPtr& factory) const {
 		throw "Not implemented";
 	}
 	

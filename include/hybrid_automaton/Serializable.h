@@ -8,7 +8,7 @@ namespace ha {
 
 class Serializable {
 
-	virtual DescriptionTreeNode::Ptr serialize(const DescriptionTree::ConstPtr factory) const = 0;
+	virtual DescriptionTreeNode::Ptr serialize(const DescriptionTree::ConstPtr& factory) const = 0;
 	virtual void deserialize(const DescriptionTreeNode::ConstPtr& tree) = 0;
 
 };

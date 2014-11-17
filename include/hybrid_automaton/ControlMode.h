@@ -43,7 +43,7 @@ namespace ha {
 			return _control_set;
 		}    
 
-		virtual DescriptionTreeNode::Ptr serialize(const DescriptionTree::ConstPtr factory) const;
+		virtual DescriptionTreeNode::Ptr serialize(const DescriptionTree::ConstPtr& factory) const;
 		virtual void deserialize(const DescriptionTreeNode::ConstPtr& tree);
 
 		ControlModePtr clone() const {
