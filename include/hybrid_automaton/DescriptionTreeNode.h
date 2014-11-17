@@ -18,26 +18,31 @@
 
 #include <Eigen/Dense>
 
+#include <vector>
+
 namespace ha {
 
 	// forward declaration
-	class DescriptionTree;
+	//class DescriptionTree;
 
-	class ha_istringstream : public std::istringstream
-	{
-	public:
-		ha_istringstream(std::string string)
-			:
-		std::istringstream(string)
-		{
-		}
-	};
+	//class ha_istringstream// : public std::istringstream
+	//{
+	//public:
+	//	ha_istringstream(std::string string)
+	///*		:
+	//	std::istringstream(string)*/
+	//	{
+	//	}
 
+	//	
+	//	ha_istringstream& operator>>(Eigen::MatrixXd& vector);
+	//};
 
-
-	class ha_ostringstream : public std::ostringstream
-	{
-	};
+	//class ha_ostringstream// : public std::ostringstream
+	//{
+	//public:
+	//	ha_ostringstream& operator<<(const ::Eigen::MatrixXd& vector);
+	//};
 
 	class DescriptionTreeNode;
 	typedef boost::shared_ptr<DescriptionTreeNode> DescriptionTreeNodePtr;
@@ -75,6 +80,8 @@ namespace ha {
 		}
 
 
+
+
 		///////////////////////////////////////////////////////////////////////////////////////////////
 		// Override all following methods in the implementation class (i.e. DescriptionTreeNodeTinyXML)
 		///////////////////////////////////////////////////////////////////////////////////////////////
@@ -101,41 +108,50 @@ namespace ha {
 		*/
 		virtual void addChildNode(const DescriptionTreeNode::Ptr& child) = 0;
 
-
-		friend ha_istringstream& operator>>(ha_istringstream& iss, Eigen::MatrixXd& vector)
-		{
-			double value = -1.0;
-			while(iss >> value)
-			{	
-				vector << value;
-			}
-			return iss;
-		};
-
-		friend ha_ostringstream& operator<<(ha_ostringstream& oss, Eigen::MatrixXd& vector)
-		{
-			std::stringstream epsilon_ss;
-			for(int idx=0; idx<vector.size(); ++idx)
-			{
-				oss << vector(idx, 0);
-
-				if(idx != vector.size() -1)
-				{
-					oss << " ";
-				}
-			}
-			return oss;
-		}
-
 		///////////////////////////////////////////////////////////////////////////////////////////////
 		//Implement these helper functions here (internally they will call getAttribute)
 		///////////////////////////////////////////////////////////////////////////////////////////////
 		template <typename T> void setAttribute(const std::string& field_name, const T& field_value)
 		{
-			ha_ostringstream ss;
-			ss << field_value;
+			std::ostringstream ss;
+			ss << field_value ;
+			//std::cout << "in setAttribute: " << ss.str() << std::endl;
 			this->setAttributeString(field_name, ss.str());
 		}
+
+		friend std::istringstream& operator>>(std::istringstream& iss, Eigen::MatrixXd& matrix)
+		{
+			std::vector<double> matrix_elements;
+			std::string row_string;
+			double matrix_element = -1.0;
+			int num_rows = 0;
+			int num_cols = 0;
+			while(getline(iss, row_string))
+			{
+				std::istringstream iss_row(row_string);
+				while(iss_row >> matrix_element)
+				{	
+					if(num_rows == 0)
+					{
+						++num_cols;
+					}
+					matrix_elements.push_back(matrix_element);
+				}
+				++num_rows;
+			}
+
+			matrix.resize(num_rows,num_cols);
+
+			for(int i = 0; i<num_rows; ++i)
+			{
+				for(int j=0; j<num_cols; ++j)
+				{
+					matrix(i,j) = matrix_elements.at(i*num_cols+j);
+				}
+			}
+
+			return iss;
+		};
 
 		template <typename T> bool getAttribute(const std::string& field_name, T& return_value, const T& default_value) const
 		{
@@ -143,13 +159,10 @@ namespace ha {
 			bool ret = this->getAttributeString(field_name, val);
 			if (ret)
 			{
-				ha_istringstream ss(val);
-				if(ss >> return_value)
-				{
-					return true;
-				}else{
-					throw std::string("DescriptionTreeNode::getAttribute. There is no conversion from string to type T.");
-				}
+				std::istringstream ss(val);
+				ss >> return_value;
+
+				return true;
 			}
 			else
 			{
@@ -164,13 +177,9 @@ namespace ha {
 			bool ret = this->getAttributeString(field_name, val);
 			if (ret)
 			{
-				ha_istringstream ss(val);
-				if(ss >> return_value)
-				{
-					return true;
-				}else{
-					throw std::string("DescriptionTreeNode::getAttribute. There is no conversion from string to type T.");
-				}
+				std::istringstream ss(val);
+				ss >> return_value;
+				return true;
 			}
 			else
 			{

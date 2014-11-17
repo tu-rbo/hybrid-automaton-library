@@ -45,8 +45,14 @@ TEST(ControlSet, SuccessfulRegistration) {
 
 	std::string ctrlName1("MockRegisteredControlSet");
 
+	EXPECT_TRUE(HybridAutomaton::isControlSetRegistered(ctrlName1));
+
 	// create a MockDescriptionTreeNode object
 	MockDescriptionTreeNode* mockedNode = new MockDescriptionTreeNode;
+
+	EXPECT_CALL(*mockedNode, getType())
+		.Times(1) // only once in deserialization
+		.WillOnce(Return("ControlSet"));
 
 	EXPECT_CALL(*mockedNode, getAttributeString(std::string("type"), _))
 		.WillOnce(DoAll(SetArgReferee<1>(ctrlName1),Return(true)));
@@ -60,6 +66,8 @@ TEST(ControlSet, SuccessfulRegistration) {
 	ControlSet::Ptr c = HybridAutomaton::createControlSet(mockedNodePtr, emptySystem);
 	EXPECT_FALSE(c.get() == NULL);
 	
+	HybridAutomaton::unregisterControlSet(ctrlName1);
+	EXPECT_FALSE(HybridAutomaton::isControlSetRegistered(ctrlName1));
 }
 
 //----------------------------
@@ -70,11 +78,14 @@ TEST(ControlSet, UnsuccessfulRegistration) {
 
 	std::string fantasyCtrlName1("FantasyNonRegisteredControlSet");
 
+	EXPECT_FALSE(HybridAutomaton::isControlSetRegistered(fantasyCtrlName1));
+
 	// create a MockDescriptionTreeNode object
 	MockDescriptionTreeNode* mockedNode = new MockDescriptionTreeNode;
 
-	EXPECT_CALL(*mockedNode, getAttributeString(std::string("type"), _))
-		.WillOnce(DoAll(SetArgReferee<1>(fantasyCtrlName1),Return(true)));
+	EXPECT_CALL(*mockedNode, getType())
+		.Times(1) // only once in deserialization
+		.WillOnce(Return("ControlSet"));
 
 	// wrap mockedNode into a smart pointer to pass to 
 	// HybridAutomaton::createController.

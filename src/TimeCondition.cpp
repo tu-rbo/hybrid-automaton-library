@@ -30,9 +30,9 @@ namespace ha {
 		_current_time = t;
 	}
 
-
-	void TimeCondition::serialize(const DescriptionTreeNode::ConstPtr& factory) const {
+	DescriptionTreeNode::Ptr TimeCondition::serialize(const DescriptionTree::ConstPtr& factory) const {
 		// TODO
+		return DescriptionTreeNode::Ptr();
 	}
 	
 	void TimeCondition::deserialize(const DescriptionTreeNode::ConstPtr& tree) {

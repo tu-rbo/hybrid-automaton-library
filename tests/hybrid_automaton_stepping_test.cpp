@@ -4,8 +4,7 @@
 #include "hybrid_automaton/HybridAutomaton.h"
 #include "hybrid_automaton/ControlMode.h"
 #include "hybrid_automaton/ControlSwitch.h"
-
-#include "hybrid_automaton/tests/MockDescriptionTreeNode.h"
+#include "hybrid_automaton/TimeCondition.h"
 
 
 using namespace std;
@@ -27,13 +26,31 @@ public:
 	}
 
 };
-
-HA_CONTROLSET_REGISTER("MockRegisteredControlSet", MockRegisteredControlSet)
 */
+
+using namespace ha;
+
+class HybridAutomatonTest : public ::testing::Test {
+
+protected:
+	HybridAutomaton hybrid_automaton;
+	ControlMode::Ptr m1, m2;
+	ControlSwitch::Ptr s1;
+
+	virtual void SetUp() {
+		m1.reset(new ControlMode("m1"));
+		m2.reset(new ControlMode("m2"));
+
+		s1.reset(new ControlSwitch());
+
+		hybrid_automaton.addControlMode(m1);
+		hybrid_automaton.addControlMode(m2);
+		hybrid_automaton.addControlSwitch(m1->getName(), s1, m2->getName());
+	}
+};
 
 //=========================================
 
-using namespace ha;
 
 using ::testing::Return;
 using ::testing::DoAll;
@@ -41,39 +58,53 @@ using ::testing::SetArgReferee;
 using ::testing::_;
 
 
-TEST(HybridAutomaton, SuccessfulStepping) {
-	
-	HybridAutomaton hybrid_automaton;
-	
-	ControlMode::Ptr m1(new ControlMode());
-	ControlMode::Ptr m2(new ControlMode());
+TEST_F(HybridAutomatonTest, setCurrentControlMode) {
+	// should throw an exception because the control mode doesn't exist
+	EXPECT_ANY_THROW(hybrid_automaton.setCurrentControlMode("huhu"));
 
-	ControlSwitch::Ptr s1(new ControlSwitch());
+	// should not throw anything
+	EXPECT_NO_THROW(hybrid_automaton.setCurrentControlMode("m1"));
 
-	hybrid_automaton.addControlMode(m1);
-	hybrid_automaton.addControlMode(m2);
-	hybrid_automaton.addControlSwitch(m1->getName(), s1, m2->getName());
+	// should return the shit i added before
+	EXPECT_TRUE(m1 == hybrid_automaton.getCurrentControlMode());
+}
+
+TEST_F(HybridAutomatonTest, activate) {
+	// should throw an exception because no current control mode is defined
+	EXPECT_ANY_THROW(hybrid_automaton.activate());
+	
+	EXPECT_NO_THROW(hybrid_automaton.setCurrentControlMode("m1"));
+
+	EXPECT_NO_THROW(hybrid_automaton.activate());
+}
+
+TEST_F(HybridAutomatonTest, step) {
+	ASSERT_NO_THROW(hybrid_automaton.setCurrentControlMode("m1"));
+	ASSERT_NO_THROW(hybrid_automaton.activate());
+
+	//EXPECT_NO_THROW(hybrid_automaton.step(0.0));
+}
+
+TEST_F(HybridAutomatonTest, stepAndSwitch) {
+	ASSERT_NO_THROW(hybrid_automaton.setCurrentControlMode("m1"));
+	ASSERT_NO_THROW(hybrid_automaton.activate());
+
+	double switching_time = 1.0;
+	TimeConditionPtr time_switch(new TimeCondition(switching_time));
+	s1->add(time_switch);
 
 	/*
-	System::Ptr emptySystem;
+	double time = 0.0;
+	while (time <= 2.0) {
+		hybrid_automaton.step(time);
+		if (time <= switching_time)
+			EXPECT_TRUE(m1 == hybrid_automaton.getCurrentControlMode());
+		else
+			EXPECT_TRUE(m2 == hybrid_automaton.getCurrentControlMode());
 
-	std::string ctrlName1("MockRegisteredControlSet");
-
-	// create a MockDescriptionTreeNode object
-	MockDescriptionTreeNode* mockedNode = new MockDescriptionTreeNode;
-
-	EXPECT_CALL(*mockedNode, getAttributeString(std::string("type"), _))
-		.WillOnce(DoAll(SetArgReferee<1>(ctrlName1),Return(true)));
-
-	// wrap mockedNode into a smart pointer to pass to 
-	// HybridAutomaton::createController.
-	// (google mock somewhat does not like to use EXPECT_CALL with
-	// shared pointers)
-	DescriptionTreeNode::Ptr mockedNodePtr(mockedNode);
-
-	ControlSet::Ptr c = HybridAutomaton::createControlSet(mockedNodePtr, emptySystem);
+		time += 0.1;
+	}
 	*/
-	EXPECT_TRUE(true);
 }
 
 //----------------------------
