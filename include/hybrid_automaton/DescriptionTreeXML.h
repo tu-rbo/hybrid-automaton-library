@@ -38,6 +38,8 @@ namespace ha {
 		// Generate / parse Description Tree
 		virtual bool initTree(const std::string& input);
 
+		virtual std::string writeTreeXML() const;
+
 		//Return first tree element
 		virtual DescriptionTreeNode::Ptr getRootNode();
 	

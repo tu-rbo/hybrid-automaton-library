@@ -5,73 +5,95 @@
 
 using namespace ha;
 
-//This just test the structure of the tree - no XML specific things are tested
+//This just tests the structure of the tree - no XML specific things are tested
 TEST(TestDescriptionTreeStructure, Positive) {
+	DescriptionTreeXML::Ptr tree(new DescriptionTreeXML());
+	DescriptionTreeNodeXML::Ptr rootNode(new DescriptionTreeNodeXML("root"));
 
+	EXPECT_EQ(rootNode->getType(), "root");
+
+	DescriptionTreeNodeXML::Ptr daughterNode(new DescriptionTreeNodeXML("daughter"));
+
+	DescriptionTreeNodeXML::Ptr sonNode(new DescriptionTreeNodeXML("son"));
+	DescriptionTreeNodeXML::Ptr son2Node(new DescriptionTreeNodeXML("son"));
+	DescriptionTreeNodeXML::Ptr grandDaughterNode(new DescriptionTreeNodeXML("granddaughter"));
+
+	DescriptionTreeNode::Ptr raw = tree->getRootNode();
+
+	rootNode = boost::dynamic_pointer_cast<DescriptionTreeNodeXML>(raw);	
+
+	rootNode->addChildNode(daughterNode);
+	rootNode->addChildNode(sonNode);
+	rootNode->addChildNode(son2Node);
+	sonNode->addChildNode(grandDaughterNode);
+
+	//test getter for children nodes
+	DescriptionTreeNode::ConstNodeList childrenOfRoot;
+	EXPECT_TRUE(rootNode->getChildrenNodes(childrenOfRoot));
+	EXPECT_EQ(childrenOfRoot.size(), 3);
+
+	DescriptionTreeNode::ConstNodeList childrenOfDaughter;
+	EXPECT_FALSE(daughterNode->getChildrenNodes(childrenOfDaughter));
+	EXPECT_EQ(childrenOfDaughter.size(), 0);
+
+	//test named getter for children nodes
+	DescriptionTreeNode::ConstNodeList sonsOfRoot;
+	EXPECT_TRUE(rootNode->getChildrenNodes("son", sonsOfRoot));
+	EXPECT_EQ(sonsOfRoot.size(), 2);
+	DescriptionTreeNode::ConstNodeListIterator it = sonsOfRoot.begin();
+	for(it; it!=sonsOfRoot.end(); it++)
+	{
+		EXPECT_EQ(it->get()->getType(), "son");
+	}
+
+	DescriptionTreeNode::ConstNodeList daughtersOfRoot;
+	EXPECT_TRUE(rootNode->getChildrenNodes("daughter", daughtersOfRoot));
+	EXPECT_EQ(daughtersOfRoot.size(), 1);
+
+	DescriptionTreeNode::ConstNodeList sonsOfSon;
+	EXPECT_FALSE(sonNode->getChildrenNodes("son", sonsOfSon));
+	EXPECT_EQ(sonsOfSon.size(), 0);
+
+	//test fields
+	daughterNode->setAttribute<std::string>("name", "lucy");
+	std::string daughtersname;
+	EXPECT_TRUE(daughterNode->getAttribute<std::string>("name", daughtersname));
+	EXPECT_FALSE(daughterNode->getAttribute<std::string>("beer", std::string("Lucy is too young too drink!")));
+
+	EXPECT_EQ(daughtersname, "lucy");
+
+	//Oh my god, what happened to Lucy?
+	daughterNode->setAttribute<std::string>("name", "lucifer");
+	EXPECT_TRUE(daughterNode->getAttribute<std::string>("name", daughtersname));
+	EXPECT_EQ(daughtersname, "lucifer");
+}
+
+//This test tests deparsing and reading out an xml string
+TEST(TestDescriptionTreeFromXMLString, Positive) 
+{
 	DescriptionTreeXML::Ptr tree(new DescriptionTreeXML());
 
+	//Test three xml cases - field with parameter a, child field b, and empty field c.
+	std::string XMLString("<a par=k><b></b><c/></a>");
+	tree->initTree(XMLString);
+	DescriptionTreeNode::Ptr root = tree->getRootNode();
 
-	//DescriptionTreeNodeXML::Ptr rootNode(new DescriptionTreeNodeXML("root"));
+	DescriptionTreeNode::ConstNodeList childrenOfRoot;
+	root->getChildrenNodes(childrenOfRoot);
+	EXPECT_EQ(root->getType(), "a");
+	std::string ret;
+	EXPECT_TRUE(root->getAttribute<std::string>("par", ret));
+	EXPECT_EQ(ret, "k");
 
+	//Case sensitive!!!
+	EXPECT_FALSE(root->getAttribute<std::string>("Par", ret));
+	
+	DescriptionTreeNode::ConstNodeListIterator it = childrenOfRoot.begin();
+	
+	EXPECT_EQ(it->get()->getType(), "b");
+	it++;
+	EXPECT_EQ(it->get()->getType(), "c");
 
-	//EXPECT_EQ(rootNode->getType(), "root");
-
-
-
-	//DescriptionTreeNodeXML::Ptr daughterNode(new DescriptionTreeNodeXML("daughter"));
-
-
-	//DescriptionTreeNodeXML::Ptr sonNode(new DescriptionTreeNodeXML("son"));
-	//DescriptionTreeNodeXML::Ptr son2Node(new DescriptionTreeNodeXML("son"));
-	//DescriptionTreeNodeXML::Ptr grandDaughterNode(new DescriptionTreeNodeXML("granddaughter"));
-
-
-	//DescriptionTreeNode::Ptr raw = tree->getRootNode();
-
-	//rootNode = boost::dynamic_pointer_cast<DescriptionTreeNodeXML>(raw);	
-
-	//rootNode->addChildNode(daughterNode);
-	//rootNode->addChildNode(sonNode);
-	//rootNode->addChildNode(son2Node);
-	//sonNode->addChildNode(grandDaughterNode);
-
-	////test getter for children nodes
-	//DescriptionTreeNode::ConstNodeList childrenOfRoot;
-	//EXPECT_TRUE(rootNode->getChildrenNodes(childrenOfRoot));
-	//EXPECT_EQ(childrenOfRoot.size(), 3);
-
-	//DescriptionTreeNode::ConstNodeList childrenOfDaughter;
-	//EXPECT_FALSE(daughterNode->getChildrenNodes(childrenOfDaughter));
-	//EXPECT_EQ(childrenOfDaughter.size(), 0);
-
-	////test named getter for children nodes
-	//DescriptionTreeNode::ConstNodeList sonsOfRoot;
-	//EXPECT_TRUE(rootNode->getChildrenNodes("son", sonsOfRoot));
-	//EXPECT_EQ(sonsOfRoot.size(), 2);
-	//DescriptionTreeNode::ConstNodeListIterator it = sonsOfRoot.begin();
-	//for(it; it!=sonsOfRoot.end(); it++)
-	//{
-	//	EXPECT_EQ(it->get()->getType(), "son");
-	//}
-
-	//DescriptionTreeNode::ConstNodeList daughtersOfRoot;
-	//EXPECT_TRUE(rootNode->getChildrenNodes("daughter", daughtersOfRoot));
-	//EXPECT_EQ(daughtersOfRoot.size(), 1);
-
-	//DescriptionTreeNode::ConstNodeList sonsOfSon;
-	//EXPECT_FALSE(sonNode->getChildrenNodes("son", sonsOfSon));
-	//EXPECT_EQ(sonsOfSon.size(), 0);
-
-	////test fields
-	//daughterNode->setAttribute<std::string>("name", "lucy");
-	//std::string daughtersname;
-	//EXPECT_TRUE(daughterNode->getAttribute<std::string>("name", daughtersname));
-	//EXPECT_FALSE(daughterNode->getAttribute<std::string>("beer", std::string("Lucy is too young too drink!")));
-
-	//EXPECT_EQ(daughtersname, "lucy");
-
-	////Oh my god, what happened to Lucy?
-	//daughterNode->setAttribute<std::string>("name", "lucifer");
-	//EXPECT_TRUE(daughterNode->getAttribute<std::string>("name", daughtersname));
-	//EXPECT_EQ(daughtersname, "lucifer");
+	std::string xmlString2 = tree->writeTreeXML();
+	EXPECT_EQ(xmlString2, XMLString);
 }
