@@ -34,7 +34,7 @@ namespace ha {
 				_control_set->deactivate();
 		}
 
-		virtual ::Eigen::VectorXd step(const double& t) {
+		virtual ::Eigen::MatrixXd step(const double& t) {
 			return _control_set->step(t);
 		}
 
