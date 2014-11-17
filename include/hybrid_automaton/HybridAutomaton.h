@@ -149,7 +149,7 @@ namespace ha {
 		::Eigen::MatrixXd step(const double& t);
 
 		void setName(const std::string& name);
-		const std::string& getName() const;
+		const std::string getName() const;
 
 		virtual bool isActive() const {
 			return _active;

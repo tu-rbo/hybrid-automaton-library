@@ -158,15 +158,47 @@ namespace ha {
 	}
 
 	void HybridAutomaton::deserialize(const DescriptionTreeNode::ConstPtr& tree){
-		//tree.getAttribute(std::string("name"));
-		//name = tree.getAttribute("name");
+		if (tree->getType() != "HybridAutomaton") {
+			std::stringstream ss;
+			ss << "[HybridAutomaton::deserialize] DescriptionTreeNode must have type 'HybridAutomaton', not '" << tree->getType() << "'!";
+			throw ss.str();
+		}
+
+		tree->getAttribute<std::string>("name", _name);
+ 
+		// control modes
+		DescriptionTreeNode::ConstNodeList control_modes;
+		tree->getChildrenNodes("ControlMode", control_modes);
+
+		if (control_modes.empty()) {
+			throw "[HybridAutomaton::deserialize] No control modes found!";
+		}
+
+		DescriptionTreeNode::ConstNodeList::iterator cm_it;
+		for (cm_it = control_modes.begin(); cm_it != control_modes.end(); ++cm_it) {
+			ControlMode::Ptr cm(new ControlMode);
+			cm->deserialize(*cm_it);
+			this->addControlMode(cm);
+		}
+
+		// control switches
+		DescriptionTreeNode::ConstNodeList control_switches;
+		tree->getChildrenNodes("ControlSwitch", control_switches);
+		DescriptionTreeNode::ConstNodeList::iterator cs_it;
+		for (cs_it = control_switches.begin(); cs_it != control_switches.end(); ++cs_it) {
+			ControlSwitch::Ptr cs(new ControlSwitch);
+			cs->deserialize(*cs_it);
+			// TODO check if source and target are in graph
+			this->addControlSwitch(cs->getSourceControlMode(),  
+				cs, cs->getTargetControlMode());
+		}
 	}
 
 	void HybridAutomaton::setName(const std::string& name) {
 		_name = name;
 	}
 
-	const std::string& HybridAutomaton::getName() const {
+	const std::string HybridAutomaton::getName() const {
 		return _name;
 	}
 
