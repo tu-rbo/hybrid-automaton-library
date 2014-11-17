@@ -83,7 +83,6 @@ TEST(Controller, SuccessfulRegistration) {
 
 TEST(Controller, UnsuccessfulRegistration) {
 
-	/*
 	System::Ptr emptySystem;
 
 	std::string fantasyCtrlType("FantasyNonRegisteredController");
@@ -91,8 +90,9 @@ TEST(Controller, UnsuccessfulRegistration) {
 	// create a MockDescriptionTreeNode object
 	MockDescriptionTreeNode* mockedNode = new MockDescriptionTreeNode;
 
-	EXPECT_CALL(*mockedNode, getAttributeString(std::string("type"), _))
-		.WillOnce(DoAll(SetArgReferee<1>(fantasyCtrlType),Return(true)));
+	EXPECT_CALL(*mockedNode, getType())
+		.Times(1) // only once in deserialization
+		.WillOnce(Return("Controller"));
 
 	// wrap mockedNode into a smart pointer to pass to 
 	// HybridAutomaton::createController.
@@ -103,7 +103,6 @@ TEST(Controller, UnsuccessfulRegistration) {
 	// create controller should throw an exception because
 	// FantasyNonRegisteredController was not registered
 	ASSERT_ANY_THROW( HybridAutomaton::createController(mockedNodePtr, emptySystem));
-	*/
 }
 
 

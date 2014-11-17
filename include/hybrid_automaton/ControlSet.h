@@ -63,6 +63,7 @@ namespace ha {
 		}
 
 	protected:
+		std::string						_name;
 		std::string						_type;
 		std::vector<Controller::Ptr>	_controllers;
 	};

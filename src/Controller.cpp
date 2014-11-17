@@ -54,7 +54,7 @@ void Controller::deserialize(const DescriptionTreeNode::ConstPtr& tree)
 	}
 
 	tree->getAttribute<std::string>("name", _name, "");
-	// register object with HybridAutomaton / check that it is unique!
+	// TODO register object with HybridAutomaton / check that it is unique!
 
 	// FIXME nicer error handling, sir?
 	if(!tree->getAttribute<Eigen::VectorXd>(std::string("goal"), this->_goal))
