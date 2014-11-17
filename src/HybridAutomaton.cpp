@@ -16,7 +16,7 @@ namespace ha {
 		std::map<std::string, HybridAutomaton::ControllerCreator>& controller_type_map = getControllerTypeMap();
 		return ( controller_type_map.find(ctrl_type) != controller_type_map.end() );
 	}
-	
+
 	void HybridAutomaton::unregisterController(const std::string& ctrl_type) {
 		std::map<std::string, HybridAutomaton::ControllerCreator>& controller_type_map = getControllerTypeMap();
 		std::map<std::string, HybridAutomaton::ControllerCreator>::iterator it = controller_type_map.find(ctrl_type);
@@ -101,54 +101,57 @@ namespace ha {
 	}
 
 	::Eigen::MatrixXd HybridAutomaton::step(const double& t) {
-		// check if any out-going jump condition is true
-		::std::pair<OutEdgeIterator, OutEdgeIterator> out_edges = ::boost::out_edges(_graph.vertex(_current_control_mode->getName()), _graph);
-		for(; out_edges.first != out_edges.second; ++out_edges.first) {
-			SwitchHandle switch_handle = *out_edges.first;
-			ControlSwitch::Ptr control_switch = _graph[switch_handle];
+		if (_active)
+		{
+			// check if any out-going jump condition is true
+			::std::pair<OutEdgeIterator, OutEdgeIterator> out_edges = ::boost::out_edges(_graph.vertex(_current_control_mode->getName()), _graph);
+			for(; out_edges.first != out_edges.second; ++out_edges.first) {
+				SwitchHandle switch_handle = *out_edges.first;
+				ControlSwitch::Ptr control_switch = _graph[switch_handle];
 
-			if (control_switch->isActive())
-			{
-				// switch to the next control mode
-				ModeHandle mode_handle = boost::target(switch_handle, _graph);
+				if (control_switch->isActive())
+				{
+					// switch to the next control mode
+					ModeHandle mode_handle = boost::target(switch_handle, _graph);
 
-				_current_control_mode->deactivate();
-				_current_control_mode = _graph.graph()[mode_handle];
-				_current_control_mode->activate();
+					_current_control_mode->deactivate();
+					_current_control_mode = _graph.graph()[mode_handle];
+					_current_control_mode->activate();
 
-				// CE: We still need to encapsulate this functionality:
-				//		if (!_activeMotionBehaviour->replaceControllers((MotionBehaviour*) edges[0]))
-				//		{
-				//			_activeMotionBehaviour = (MotionBehaviour*) edges[0];
-				//		}
-				break;
+					// CE: We still need to encapsulate this functionality:
+					//		if (!_activeMotionBehaviour->replaceControllers((MotionBehaviour*) edges[0]))
+					//		{
+					//			_activeMotionBehaviour = (MotionBehaviour*) edges[0];
+					//		}
+					break;
+				}
 			}
 		}
 
 		return _current_control_mode->step(t); 
 	}
 
-	DescriptionTreeNode::Ptr HybridAutomaton::serialize(const DescriptionTree::ConstPtr& factory) const {
-		DescriptionTreeNode::Ptr tree = factory->createNode("HybridAutomaton");
 
-		// serialize properties
-		tree->setAttribute<std::string>(std::string("name"), _name);
+	DescriptionTreeNode::Ptr HybridAutomaton::serialize(const DescriptionTree::ConstPtr& factory) const {
+		DescriptionTreeNode::Ptr tree_node = factory->createNode("HybridAutomaton");
+		tree_node->setAttribute<std::string>(std::string("name"), this->getName());
 
 		if (_current_control_mode)
 			tree->setAttribute<std::string>(std::string("current_control_mode"), _current_control_mode->getName());
 
-		// serialize control modes
-		std::pair<ModeIterator, ModeIterator> mp;
-		for (mp = ::boost::vertices(_graph); mp.first != mp.second; ++mp.first) {
-			ModeHandle mode_handle = *mp.first;
-			ControlMode::Ptr mode = _graph.graph()[mode_handle];
-			std::cout << mode->getName() << std::endl;
-			tree->addChildNode(mode->serialize(factory));
+		// Iterate over the vertices and serialize them
+		::std::pair<ModeIterator, ModeIterator> v_pair;
+		for(v_pair = ::boost::vertices(this->_graph); v_pair.first != v_pair.second; ++v_pair.first)
+		{
+			tree_node->addChildNode(_graph.graph()[*v_pair.first]->serialize(factory));
+
+			for(::std::pair<OutEdgeIterator, OutEdgeIterator> out_edges = ::boost::out_edges(_graph.vertex(_graph.graph()[*v_pair.first]->getName()), _graph); out_edges.first != out_edges.second; ++out_edges.first) 
+			{
+				tree_node->addChildNode(_graph.graph()[*out_edges.first]->serialize(factory));
+			}
 		}
 
-		// serialize control switches
-		// TODO
-		return tree;
+		return tree_node;
 	}
 
 	void HybridAutomaton::deserialize(const DescriptionTreeNode::ConstPtr& tree){
@@ -166,19 +169,30 @@ namespace ha {
 
 	void HybridAutomaton::activate() {
 		if (!_current_control_mode) {
-			throw "ERROR: No current control mode defined!";
+			throw std::string("ERROR: No current control mode defined!");
 		}
 		_active = true;
 		_current_control_mode->activate();
 	}
 
 	void HybridAutomaton::deactivate() {
+		if (_current_control_mode)
+			_current_control_mode->deactivate();
 		_active = false;
 	}
 
 	void HybridAutomaton::setCurrentControlMode(const std::string& control_mode) {
+		/* useful code
+		typedef Graph::vertex_iterator VertexIter; 
+		VertexIter vertexIter, vertexEnd; 
+		for (boost::tie(vertexIter, vertexEnd) = boost::vertices(_graph); vertexIter != vertexEnd; vertexIter++) 
+		{ 
+		std::cout << "Name " << _graph.graph()[*vertexIter]->getName() << std::endl;
+		} 
+		*/
+
 		if (::boost::vertex_by_label(control_mode, _graph) == GraphTraits::null_vertex())
-			throw std::string("WARNING: Control mode '") + control_mode + "' does not exist!";
+			throw std::string("ERROR: Control mode '") + control_mode + "' does not exist! Cannot set current control mode.";
 
 		if (_current_control_mode != NULL)
 			_current_control_mode->deactivate();

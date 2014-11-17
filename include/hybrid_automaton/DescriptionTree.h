@@ -24,6 +24,8 @@ namespace ha {
 		//Return first tree element
 		virtual DescriptionTreeNode::Ptr getRootNode() = 0;
 
+		virtual void setRootNode(const DescriptionTreeNode::Ptr& root_node) = 0;
+
 		virtual DescriptionTreeNode::Ptr createNode(const std::string& type) const  = 0;
 	};
 

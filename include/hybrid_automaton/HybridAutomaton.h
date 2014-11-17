@@ -53,6 +53,9 @@ namespace ha {
 		typedef ::boost::graph_traits< Graph >::edge_iterator SwitchIterator;
 		typedef ::boost::graph_traits< Graph >::out_edge_iterator OutEdgeIterator;
 
+		typedef ::boost::graph_traits< Graph >::vertex_iterator VertexIterator;
+		typedef ::boost::graph_traits< Graph >::edge_iterator EdgeIterator;
+
 	protected:
 		Graph _graph;
 		ControlMode::Ptr _current_control_mode;
