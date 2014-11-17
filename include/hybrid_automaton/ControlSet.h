@@ -57,6 +57,7 @@ namespace ha {
 		virtual void _addController(const Controller::Ptr& cntrl);
 
 	protected:
+		std::string						_name;
 		std::string						_type;
 		std::vector<Controller::Ptr>	_controllers;
 	};

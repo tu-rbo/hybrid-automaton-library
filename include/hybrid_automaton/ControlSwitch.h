@@ -33,6 +33,9 @@ namespace ha {
 	virtual void step(const double& t);
     virtual bool isActive() const;
 
+	virtual void add(const JumpConditionPtr& jump_condition);
+	virtual const std::vector<JumpConditionPtr>& getJumpConditions();
+
 	virtual DescriptionTreeNode::Ptr serialize(const DescriptionTree::ConstPtr& factory) const;
 	virtual void deserialize(const DescriptionTreeNode::ConstPtr& tree);
 

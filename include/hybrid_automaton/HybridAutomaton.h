@@ -101,8 +101,20 @@ namespace ha {
 		 *
 		 * @see hybrid_automaton/hybrid_automaton_registration.h
 		 */
-		static void registerController(const std::string& crtl_name, ControllerCreator cc);
-		
+		static void registerController(const std::string& crtl_type, ControllerCreator cc);
+
+		/**
+		 * @brief Check whether a controller with given type is registered
+		 */
+		static bool isControllerRegistered(const std::string& crtl_type);
+
+		/**
+		 * @brief Unregister a controller with the hybrid automaton
+		 *
+		 * Usually you do not need that except for testing
+		 */
+		static void unregisterController(const std::string& crtl_type);
+
 		/**
 		 * @brief Register a control set with the hybrid automaton
 		 *
@@ -115,6 +127,18 @@ namespace ha {
 		 * @see hybrid_automaton/hybrid_automaton_registration.h
 		 */
 		static void registerControlSet(const std::string& crtl_name, ControlSetCreator cc);
+
+		/**
+		 * @brief Check whether a control set with given type is registered
+		 */
+		static bool isControlSetRegistered(const std::string& crtl_type);
+
+		/**
+		 * @brief Unregister a control set with the hybrid automaton
+		 *
+		 * Usually you do not need that except for testing
+		 */
+		static void unregisterControlSet(const std::string& crtl_name);
 
 		void addControlMode(const ControlMode::Ptr& control_mode);
 		void addControlSwitch(const std::string& source_mode, const ControlSwitch::Ptr& control_switch, const std::string& target_mode);

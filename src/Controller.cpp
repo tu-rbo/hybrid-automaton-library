@@ -1,8 +1,9 @@
 #include "hybrid_automaton/Controller.h"
+#include "hybrid_automaton/HybridAutomaton.h"
 
 namespace ha {
 
-	Controller::Controller():
+Controller::Controller():
 _goal(),
 _kp(),
 _kv(),
@@ -38,6 +39,24 @@ DescriptionTreeNode::Ptr Controller::serialize(const DescriptionTree::ConstPtr& 
 
 void Controller::deserialize(const DescriptionTreeNode::ConstPtr& tree) 
 {
+	if (tree->getType() != "Controller") {
+		std::stringstream ss;
+		ss << "[Controller::deserialize] DescriptionTreeNode must have type 'Controller', not '" << tree->getType() << "'!";
+		throw ss.str();
+	}
+	tree->getAttribute<std::string>("type", _type, "");
+
+	if (_type == "" || !HybridAutomaton::isControllerRegistered(_type)) {
+		std::stringstream ss;
+		ss << "[Controller::deserialize] Controller type '" << _type << "' "
+		   << "invalid - empty or not registered with HybridAutomaton!";
+		throw ss.str();
+	}
+
+	tree->getAttribute<std::string>("name", _name, "");
+	// TODO register object with HybridAutomaton / check that it is unique!
+
+	// FIXME nicer error handling, sir?
 	if(!tree->getAttribute<Eigen::MatrixXd>(std::string("goal"), this->_goal))
 	{
 		std::cout << "error" <<std::endl;

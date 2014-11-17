@@ -1,4 +1,5 @@
 #include "hybrid_automaton/ControlSet.h"
+#include "hybrid_automaton/HybridAutomaton.h"
 
 namespace ha {
 
@@ -43,7 +44,23 @@ namespace ha {
 	}
 
 	void ControlSet::deserialize(const DescriptionTreeNode::ConstPtr& tree) {
-		// TODO
+		if (tree->getType() != "ControlSet") {
+			std::stringstream ss;
+			ss << "[ControlSet::deserialize] DescriptionTreeNode must have type 'ControlSet', not '" << tree->getType() << "'!";
+			throw ss.str();
+		}
+		tree->getAttribute<std::string>("type", _type, "");
+
+		if (_type == "" || !HybridAutomaton::isControlSetRegistered(_type)) {
+			std::stringstream ss;
+			ss << "[ControlSet::deserialize] ControlSet type '" << _type << "' "
+			   << "invalid - empty or not registered with HybridAutomaton!";
+			throw ss.str();
+		}
+
+		tree->getAttribute<std::string>("name", _name, "");
+
+		// TODO more attributes
 	}
 
 	void ControlSet::setType(const std::string& new_type) {
