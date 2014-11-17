@@ -11,6 +11,9 @@ namespace ha {
 		DescriptionTreeNode::Ptr tree_node = factory->createNode("ControlMode");
 		tree_node->setAttribute<std::string>(std::string("name"), this->getName());
 
+		if (!this->_control_set) {
+			throw std::string("[ControlMode::serialize] Control set is null!");
+		}
 		tree_node->addChildNode(this->_control_set->serialize(factory));
 		return tree_node;
 	}

@@ -52,20 +52,28 @@ TEST(ControlMode, Serialization) {
 		.WillRepeatedly(Return(cs_node));
 
 	//-------
-	// TESTED ControlMode
+	// TEST ControlMode
+
+	// Mocked tree factory
+	MockDescriptionTree* _tree = new MockDescriptionTree;
+	MockDescriptionTree::Ptr tree(_tree);
 
 	ControlMode* _cm1 = new ControlMode;
 	ControlMode::Ptr cm1(_cm1);	
 	cm1->setName("myCM1");
 
+	// assert throwing of exception if no control set has been set
+	EXPECT_CALL(*_tree, createNode("ControlMode"))
+		.WillOnce(Return(MockDescriptionTreeNode::Ptr(new MockDescriptionTreeNode)));
+
+	ASSERT_ANY_THROW(cm1->serialize(tree));
+
+	cm1->setControlSet(cs);
 
 	// this will be the node "generated" by the tree
 	MockDescriptionTreeNode* _cm1_node = new MockDescriptionTreeNode;
 	DescriptionTreeNode::Ptr cm1_node(_cm1_node);
 
-	// Mocked tree factory
-	MockDescriptionTree* _tree = new MockDescriptionTree;
-	MockDescriptionTree::Ptr tree(_tree);
 	EXPECT_CALL(*_tree, createNode("ControlMode"))
 		.WillOnce(Return(cm1_node));
 
