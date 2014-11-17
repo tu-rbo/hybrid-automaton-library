@@ -102,7 +102,7 @@ namespace ha {
 		virtual void addChildNode(const DescriptionTreeNode::Ptr& child) = 0;
 
 
-		friend ha_istringstream& operator>>(ha_istringstream& iss, Eigen::VectorXd& vector)
+		friend ha_istringstream& operator>>(ha_istringstream& iss, Eigen::MatrixXd& vector)
 		{
 			double value = -1.0;
 			while(iss >> value)
@@ -112,12 +112,12 @@ namespace ha {
 			return iss;
 		};
 
-		friend ha_ostringstream& operator<<(ha_ostringstream& oss, Eigen::VectorXd& vector)
+		friend ha_ostringstream& operator<<(ha_ostringstream& oss, Eigen::MatrixXd& vector)
 		{
 			std::stringstream epsilon_ss;
 			for(int idx=0; idx<vector.size(); ++idx)
 			{
-				oss << vector(idx);
+				oss << vector(idx, 0);
 
 				if(idx != vector.size() -1)
 				{
