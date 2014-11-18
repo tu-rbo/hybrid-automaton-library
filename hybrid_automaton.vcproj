@@ -151,6 +151,10 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
+				RelativePath=".\src\ConfigurationConvergenceCondition.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\Controller.cpp"
 				>
 			</File>
@@ -183,6 +187,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\HybridAutomatonOStringStream.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\TimeCondition.cpp"
 				>
 			</File>
@@ -192,6 +200,10 @@
 			Filter="h;hpp;hxx;hm;inl;inc;xsd"
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
+			<File
+				RelativePath=".\include\hybrid_automaton\ConfigurationConvergenceCondition.h"
+				>
+			</File>
 			<File
 				RelativePath=".\include\hybrid_automaton\Controller.h"
 				>
@@ -230,6 +242,10 @@
 			</File>
 			<File
 				RelativePath=".\include\hybrid_automaton\HybridAutomaton.h"
+				>
+			</File>
+			<File
+				RelativePath=".\include\hybrid_automaton\HybridAutomatonOStringStream.h"
 				>
 			</File>
 			<File

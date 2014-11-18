@@ -20,7 +20,12 @@
 
 #include <vector>
 
+#include "hybrid_automaton/HybridAutomatonOStringStream.h"
+
 namespace ha {
+
+	// Forward declaration to avoid circular dependencies
+	//class ha_ostringstream;
 
 	// forward declaration
 	//class DescriptionTree;
@@ -43,6 +48,9 @@ namespace ha {
 	//public:
 	//	ha_ostringstream& operator<<(const ::Eigen::MatrixXd& vector);
 	//};
+
+
+
 
 	class DescriptionTreeNode;
 	typedef boost::shared_ptr<DescriptionTreeNode> DescriptionTreeNodePtr;
@@ -113,40 +121,51 @@ namespace ha {
 		///////////////////////////////////////////////////////////////////////////////////////////////
 		template <typename T> void setAttribute(const std::string& field_name, const T& field_value)
 		{
-			std::ostringstream ss;
-			ss << field_value ;
+			//std::ostringstream ss;
+			ha_ostringstream ha_oss;
+			ha_oss << field_value ;
 			//std::cout << "in setAttribute: " << ss.str() << std::endl;
-			this->setAttributeString(field_name, ss.str());
+			this->setAttributeString(field_name, ha_oss.str());
 		}
+
+
 
 		friend std::istringstream& operator>>(std::istringstream& iss, Eigen::MatrixXd& matrix)
 		{
-			std::vector<double> matrix_elements;
-			std::string row_string;
-			double matrix_element = -1.0;
 			int num_rows = 0;
 			int num_cols = 0;
-			while(getline(iss, row_string))
-			{
-				std::istringstream iss_row(row_string);
-				while(iss_row >> matrix_element)
-				{	
-					if(num_rows == 0)
-					{
-						++num_cols;
-					}
-					matrix_elements.push_back(matrix_element);
-				}
-				++num_rows;
-			}
+			std::string deparsing_string;
 
+			// First we read the char '['
+			getline(iss,deparsing_string,'[');
+
+			// Then we read the number of rows
+			getline(iss,deparsing_string,',');
+			std::istringstream iss_num_rows(deparsing_string);
+			iss_num_rows >> num_rows;
+			//std::cout << "Num of rows: " << num_rows << std::endl;
+
+			// Then we read the number of cols
+			getline(iss,deparsing_string,']');
+			std::istringstream iss_num_cols(deparsing_string);
+			iss_num_cols >> num_cols;
+			//std::cout << "Num of cols: " << num_cols << std::endl;
+
+			// Resize the output matrix
 			matrix.resize(num_rows,num_cols);
 
+			// Read matrix values from the string
+			double matrix_element = -1.0;
 			for(int i = 0; i<num_rows; ++i)
 			{
+				getline(iss,deparsing_string,';');
+				std::istringstream iss_row(deparsing_string);
 				for(int j=0; j<num_cols; ++j)
 				{
-					matrix(i,j) = matrix_elements.at(i*num_cols+j);
+					getline(iss_row, deparsing_string, ',');
+					std::istringstream iss_element(deparsing_string);
+					iss_element >> matrix_element;
+					matrix(i,j) = matrix_element;
 				}
 			}
 
