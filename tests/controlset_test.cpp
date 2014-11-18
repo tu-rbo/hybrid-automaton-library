@@ -186,6 +186,9 @@ TEST(ControlSet, Serialization) {
 	EXPECT_CALL(*_cs_node, addChildNode(ctrl1_node))
 		.WillOnce(Return());
 
+	EXPECT_CALL(*_cs_node, setAttributeString(_, _))
+		.Times(AtLeast(2)); // name & type (we don't care about parameters yet here)
+
 	// mocked node for control set
 	EXPECT_CALL(*_tree, createNode("ControlSet"))
 		.WillOnce(Return(cs_node));

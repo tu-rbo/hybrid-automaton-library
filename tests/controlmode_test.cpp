@@ -62,9 +62,12 @@ TEST(ControlMode, Serialization) {
 	ControlMode::Ptr cm1(_cm1);	
 	cm1->setName("myCM1");
 
+	MockDescriptionTreeNode::Ptr cm1_node_faulty(new MockDescriptionTreeNode);
+	EXPECT_CALL(*cm1_node_faulty, setAttributeString(_,_))
+		.Times(AtLeast(0)); 
 	// assert throwing of exception if no control set has been set
 	EXPECT_CALL(*_tree, createNode("ControlMode"))
-		.WillOnce(Return(MockDescriptionTreeNode::Ptr(new MockDescriptionTreeNode)));
+		.WillOnce(Return(cm1_node_faulty));
 
 	ASSERT_ANY_THROW(cm1->serialize(tree));
 
