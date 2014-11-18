@@ -2,6 +2,7 @@
 #define HYBRID_AUTOMATON_JUMP_CONDITION_H
 
 #include "hybrid_automaton/Serializable.h"
+#include "hybrid_automaton/error_handling.h"
 
 #include <boost/shared_ptr.hpp>
 
@@ -25,19 +26,19 @@ namespace ha {
     }
 
 	virtual void activate(const double& t) {
-		throw "not implemented";
+		HA_THROW_ERROR("JumpCondition.activate", "not implemented");
 	}
 
 	virtual void deactivate() {
-		throw "not implemented";
+		HA_THROW_ERROR("JumpCondition.deactivate", "not implemented");
 	}
 
 	virtual void step(const double& t) {
-		throw "not implemented";
+		HA_THROW_ERROR("JumpCondition.step", "not implemented");
 	}
 
     virtual bool isActive() const {
-        throw "not implemented";
+		HA_THROW_ERROR("JumpCondition.isActive", "not implemented");
     }
 
 	virtual DescriptionTreeNode::Ptr serialize(const DescriptionTree::ConstPtr& factory) const { return DescriptionTreeNode::Ptr(); };

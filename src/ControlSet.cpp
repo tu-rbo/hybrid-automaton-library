@@ -1,5 +1,6 @@
 #include "hybrid_automaton/ControlSet.h"
 #include "hybrid_automaton/HybridAutomaton.h"
+#include "hybrid_automaton/error_handling.h"
 
 namespace ha {
 
@@ -14,15 +15,15 @@ namespace ha {
 	}
 
 	void ControlSet::activate() {
-		throw std::string("[ControlSet::activate] Not implemented");
+		HA_THROW_ERROR("ControlSet.activate", "Not implemented");
 	}
 
 	void ControlSet::deactivate() {
-		throw std::string("[ControlSet::deactivate] Not implemented");
+		HA_THROW_ERROR("ControlSet.deactivate", "Not implemented");
 	}
 
 	::Eigen::MatrixXd ControlSet::step(const double& t) {
-		throw std::string("[ControlSet::step] Not implemented");
+		HA_THROW_ERROR("ControlSet.step", "Not implemented");
 	}
 
 	void ControlSet::_addController(const Controller::Ptr& cntrl) {
@@ -47,17 +48,13 @@ namespace ha {
 
 	void ControlSet::deserialize(const DescriptionTreeNode::ConstPtr& tree, const System::ConstPtr& system, const HybridAutomaton* ha) {
 		if (tree->getType() != "ControlSet") {
-			std::stringstream ss;
-			ss << "[ControlSet::deserialize] DescriptionTreeNode must have type 'ControlSet', not '" << tree->getType() << "'!";
-			throw ss.str();
+			HA_THROW_ERROR("ControlSet.deserialize", "DescriptionTreeNode must have type 'ControlSet', not '" << tree->getType() << "'!");
 		}
 		tree->getAttribute<std::string>("type", _type, "");
 
 		if (_type == "" || !HybridAutomaton::isControlSetRegistered(_type)) {
-			std::stringstream ss;
-			ss << "[ControlSet::deserialize] ControlSet type '" << _type << "' "
-			   << "invalid - empty or not registered with HybridAutomaton!";
-			throw ss.str();
+			HA_THROW_ERROR("ControlSet.deserialize", "ControlSet type '" << _type << "' "
+			   << "invalid - empty or not registered with HybridAutomaton!");
 		}
 
 		tree->getAttribute<std::string>("name", _name, "");
@@ -89,7 +86,7 @@ namespace ha {
 
 		std::map<std::string, Controller::Ptr>::iterator it = _controllers.find(name);
 		if (it != _controllers.end()) {
-			throw std::string("[ControlSet.appendController] Controller with same name already registered: ") + name;
+			HA_THROW_ERROR("ControlSet.appendController", "Controller with same name already registered: " << name);
 		}
 
 		this->_controllers[name] = controller;

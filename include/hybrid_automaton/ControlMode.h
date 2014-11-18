@@ -3,6 +3,7 @@
 
 #include "hybrid_automaton/ControlSet.h"
 #include "hybrid_automaton/Serializable.h"
+#include "hybrid_automaton/error_handling.h"
 
 #include <boost/shared_ptr.hpp>
 
@@ -30,21 +31,21 @@ namespace ha {
 			if (_control_set)
 				_control_set->activate();
 			else
-				throw std::string("[ControlMode::activate] No control set defined.");
+				HA_THROW_ERROR("ControlSet.activate", "No control set defined.");
 		}
 
 		virtual void deactivate() {
 			if (_control_set)
 				_control_set->deactivate();
 			else
-				throw std::string("[ControlMode::deactivate] No control set defined.");
+				HA_THROW_ERROR("ControlSet.deactivate", "No control set defined.");
 		}
 
 		virtual ::Eigen::MatrixXd step(const double& t) {
 			if (_control_set)
 				return _control_set->step(t);
 			else
-				throw std::string("[ControlMode::step] No control set defined.");
+				HA_THROW_ERROR("ControlSet.step", "No control set defined.");
 		}
 
 		virtual void setControlSet(const ControlSet::Ptr control_set) {

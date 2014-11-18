@@ -76,9 +76,7 @@ namespace ha {
 	
 	void ControlSwitch::deserialize(const DescriptionTreeNode::ConstPtr& tree, const System::ConstPtr& system, const HybridAutomaton* ha) {
 		if (tree->getType() != "ControlSwitch") {
-			std::stringstream ss;
-			ss << "[ControlSwitch::deserialize] DescriptionTreeNode must have type 'ControlSwitch', not '" << tree->getType() << "'!";
-			throw ss.str();
+			HA_THROW_ERROR("ControlSwitch.deserialize", "DescriptionTreeNode must have type 'ControlSwitch', not '" << tree->getType() << "'!");
 		}
 
 		tree->getAttribute<std::string>("name", _name, "");
@@ -86,17 +84,17 @@ namespace ha {
 		tree->getAttribute<std::string>("target", _target_control_mode_name, "");
 		
 		if (_source_control_mode_name == "") {
-			throw "[ControlSwitch::deserialize] source must not be empty!";
+			HA_THROW_ERROR("ControlSwitch.deserialize", "Source must not be empty!");
 		}
 		if (_target_control_mode_name == "") {
-			throw "[ControlSwitch::deserialize] target must not be empty!";
+			HA_THROW_ERROR("ControlSwitch.deserialize", "Target must not be empty!");
 		}
 
 		DescriptionTreeNode::ConstNodeList jump_conditions;
 		tree->getChildrenNodes("JumpCondition", jump_conditions);
 
 		if (jump_conditions.empty()) {
-			throw "[ControlSwitch::deserialize] No jump conditions found!";
+			HA_THROW_ERROR("ControlSwitch.deserialize", "No jump conditions found!");
 		}
 
 		DescriptionTreeNode::ConstNodeList::iterator js_it;
