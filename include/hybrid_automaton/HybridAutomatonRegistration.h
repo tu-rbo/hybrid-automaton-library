@@ -74,10 +74,10 @@
 //
 // Example:
 //   public:
-//   HA_CONTROLSET_INSTANCE(node, system) {
+//   HA_CONTROLSET_INSTANCE(node, system, ha) {
 //		YourControlSet::Ptr mc(new YourControlSet);
 //		mc->setSystem(system);
-//		mc->deserialize(node, system);
+//		mc->deserialize(node, system, ha);
 //		return mc;
 //   }
 //

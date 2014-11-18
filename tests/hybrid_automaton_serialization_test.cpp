@@ -254,7 +254,7 @@ public:
 	//MOCK_METHOD0(deserialize, void (const DescriptionTreeNode::ConstPtr& tree) );
 	MOCK_CONST_METHOD0(getName, const std::string () );
 
-	HA_CONTROLSET_INSTANCE(node, system) {
+	HA_CONTROLSET_INSTANCE(node, system, ha) {
 		ControlSet::Ptr ctrlSet(new MockRegisteredControlSet);
 		return ctrlSet;
 	}
