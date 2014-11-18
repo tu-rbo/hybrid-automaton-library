@@ -10,6 +10,8 @@
 
 namespace ha {
 
+	class HybridAutomaton;
+
 	class ControlMode;
 	typedef boost::shared_ptr<ControlMode> ControlModePtr;
 	typedef boost::shared_ptr<const ControlMode> ControlModeConstPtr;

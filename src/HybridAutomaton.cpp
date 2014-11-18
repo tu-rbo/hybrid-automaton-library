@@ -177,6 +177,8 @@ namespace ha {
 		DescriptionTreeNode::ConstNodeList::iterator cm_it;
 		for (cm_it = control_modes.begin(); cm_it != control_modes.end(); ++cm_it) {
 			ControlMode::Ptr cm(new ControlMode);
+			//cm->setHybridAutomaton((const HybridAutomaton*) this);
+			cm->setHybridAutomaton(this);
 			cm->deserialize(*cm_it, system);
 			this->addControlMode(cm);
 		}
