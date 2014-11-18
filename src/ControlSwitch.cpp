@@ -86,10 +86,10 @@ namespace ha {
 		tree->getAttribute<std::string>("target", _target_control_mode, "");
 		
 		if (_source_control_mode == "") {
-			throw "[ControlSwitch::deserialize] source_control_mode must not be empty!";
+			throw "[ControlSwitch::deserialize] source must not be empty!";
 		}
 		if (_target_control_mode == "") {
-			throw "[ControlSwitch::deserialize] target_control_mode must not be empty!";
+			throw "[ControlSwitch::deserialize] target must not be empty!";
 		}
 
 		DescriptionTreeNode::ConstNodeList jump_conditions;

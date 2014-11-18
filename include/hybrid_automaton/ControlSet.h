@@ -51,7 +51,7 @@ namespace ha {
 
 		virtual void setName(const std::string& new_name);
 
-		virtual const std::string& getName() const;
+		virtual const std::string getName() const;
 
 
 	protected:

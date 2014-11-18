@@ -76,7 +76,7 @@ namespace ha {
 		this->_name = new_name;
 	}
 
-	const std::string& ControlSet::getName() const {
+	const std::string ControlSet::getName() const {
 		return this->_name;
 	}
 

@@ -3,6 +3,7 @@
 
 #include "hybrid_automaton/DescriptionTree.h"
 #include "hybrid_automaton/DescriptionTreeNode.h"
+#include "hybrid_automaton/System.h"
 
 namespace ha {
 

@@ -148,11 +148,6 @@ TEST(HybridAutomaton, Serialization) {
 	EXPECT_CALL(*ha_node, setAttributeString(_,_))
 		.Times(AtLeast(0));
 
-	//MockDescriptionTreeNode* _ha_node = new MockDescriptionTreeNode;
-	//DescriptionTreeNode::Ptr ha_node(_ha_node);
-	//EXPECT_CALL(*ha_node, getAttributeString(std::string("name"), _))
-	//	.WillOnce(DoAll(SetArgReferee<1>("myHA"),Return(true)));
-
 	DescriptionTreeNode::Ptr ha_serialized;
 	ha_serialized = ha.serialize(tree);
 
@@ -252,7 +247,29 @@ TEST(HybridAutomaton, DeserializationOnlyControlMode) {
 
 
 // =============================================================
-/*
+
+namespace DeserializationControlSet {
+
+class MockRegisteredControlSet : public ha::ControlSet {
+public:
+	MockRegisteredControlSet() : ha::ControlSet() {
+	}
+
+	//MOCK_METHOD0(deserialize, void (const DescriptionTreeNode::ConstPtr& tree) );
+	MOCK_CONST_METHOD0(getName, const std::string () );
+
+	HA_CONTROLSET_INSTANCE(node, system) {
+		ControlSet::Ptr ctrlSet(new MockRegisteredControlSet);
+		return ctrlSet;
+	}
+};
+
+HA_CONTROLSET_REGISTER("DeserializationControlSetMockRegisteredControlSet", MockRegisteredControlSet)
+// Attention: Only use this controller in ONE test and de-register 
+// in this test. Otherwise you might have weird side effects with other tests
+
+}
+
 class HybridAutomatonDeserializationTest : public ::testing::Test {
 protected:
 	virtual void SetUp() {
@@ -273,6 +290,8 @@ protected:
 		cset1_node.reset(new MockDescriptionTreeNode);
 		EXPECT_CALL(*cset1_node, getType())
 			.WillRepeatedly(Return("ControlSet"));
+		EXPECT_CALL(*cset1_node, getAttributeString(std::string("type"), _))
+			.WillRepeatedly(DoAll(SetArgReferee<1>("DeserializationControlSetMockRegisteredControlSet"),Return(true)));
 		EXPECT_CALL(*cset1_node, getAttributeString(std::string("name"), _))
 			.WillRepeatedly(DoAll(SetArgReferee<1>("CS1"),Return(true)));
 		EXPECT_CALL(*cset1_node, getChildrenNodes(std::string("Controller"), _))
@@ -293,7 +312,7 @@ protected:
 			.WillRepeatedly(Return("ControlMode"));
 		EXPECT_CALL(*cm2_node, getAttributeString(std::string("name"), _))
 			.WillRepeatedly(DoAll(SetArgReferee<1>("CM2"),Return(true)));
-		EXPECT_CALL(*cm1_node, getChildrenNodes(std::string("ControlSet"), _))
+		EXPECT_CALL(*cm2_node, getChildrenNodes(std::string("ControlSet"), _))
 			.WillRepeatedly(DoAll(SetArgReferee<1>(cset_list),Return(true)));
 
 		cm_list.push_back(cm1_node);
@@ -343,21 +362,21 @@ protected:
 		ctrl_list.clear();
 	}
 
-	DescriptionTreeNode::ConstNodeList cm_list;
-	DescriptionTreeNode::ConstNodeList ctrl_list;
-	DescriptionTreeNode::ConstNodeList cset_list;
-	DescriptionTreeNode::ConstNodeList cs_list;
-	DescriptionTreeNode::ConstNodeList js_list;
+	MockDescriptionTreeNode::ConstNodeList cm_list;
+	MockDescriptionTreeNode::ConstNodeList ctrl_list;
+	MockDescriptionTreeNode::ConstNodeList cset_list;
+	MockDescriptionTreeNode::ConstNodeList cs_list;
+	MockDescriptionTreeNode::ConstNodeList js_list;
 
-	ha::DescriptionTree::Ptr tree;
+	MockDescriptionTree::Ptr tree;
 
-	ha::DescriptionTreeNode::Ptr cm1_node;
-	ha::DescriptionTreeNode::Ptr cm2_node;
-	ha::DescriptionTreeNode::Ptr cset1_node;
-	ha::DescriptionTreeNode::Ptr ctrl_node;
-	ha::DescriptionTreeNode::Ptr ha_node;
-	ha::DescriptionTreeNode::Ptr cs_node;
-	ha::DescriptionTreeNode::Ptr js_node;
+	MockDescriptionTreeNode::Ptr cm1_node;
+	MockDescriptionTreeNode::Ptr cm2_node;
+	MockDescriptionTreeNode::Ptr cset1_node;
+	MockDescriptionTreeNode::Ptr ctrl_node;
+	MockDescriptionTreeNode::Ptr ha_node;
+	MockDescriptionTreeNode::Ptr cs_node;
+	MockDescriptionTreeNode::Ptr js_node;
 
 };
 
@@ -377,4 +396,3 @@ TEST_F(HybridAutomatonDeserializationTest, DeserializationSuccessful) {
 	ha.deserialize(ha_node);
 	
 }
-*/
