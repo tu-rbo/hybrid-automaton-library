@@ -23,6 +23,10 @@ namespace ha {
 		virtual ~System() {
 		}
 
+		virtual ::Eigen::MatrixXd getConfiguration() const = 0;
+		virtual ::Eigen::MatrixXd getEEFrame() const = 0;
+		virtual int getDof() const = 0;
+
 	};
 
 }
