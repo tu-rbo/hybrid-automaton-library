@@ -33,7 +33,7 @@ namespace ha {
 		_epsilon = epsilon;
 	}
 
-	::Eigen::MatrixXd onfigurationConvergenceCondition::getEpsilon() const
+	::Eigen::MatrixXd ConfigurationConvergenceCondition::getEpsilon() const
 	{
 		return _epsilon;
 	}
