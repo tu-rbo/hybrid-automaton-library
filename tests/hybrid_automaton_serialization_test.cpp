@@ -98,6 +98,8 @@ TEST(HybridAutomatonSerialization, getAttributeMatrix) {
 
 class MockSerializableControlMode : public ha::ControlMode {
 public:
+	typedef boost::shared_ptr<MockSerializableControlMode> Ptr;
+
 	MOCK_CONST_METHOD1(serialize, DescriptionTreeNode::Ptr (const DescriptionTree::ConstPtr& factory) );
 	MOCK_CONST_METHOD1(deserialize, void (const ha::DescriptionTreeNode::ConstPtr& tree) );
 };
@@ -106,8 +108,7 @@ TEST(HybridAutomaton, Serialization) {
 	using namespace ha;
 	using namespace std;
 
-	MockDescriptionTree* _tree = new MockDescriptionTree;
-	MockDescriptionTree::Ptr tree(_tree);
+	MockDescriptionTree::Ptr tree(new MockDescriptionTree);
 
 	//-------
 	string ctrlType("MockSerializableController");
@@ -115,18 +116,16 @@ TEST(HybridAutomaton, Serialization) {
 
 	//-------
 	// Serialized and deserialized ControlMode
-	MockSerializableControlMode* _cm1 = new MockSerializableControlMode;
-	ControlMode::Ptr cm1(_cm1);	
+	MockSerializableControlMode::Ptr cm1(new MockSerializableControlMode);	
 	cm1->setName("myCM1");
 
 	// Mocked node returned by control mode
-	MockDescriptionTreeNode* _cm1_node = new MockDescriptionTreeNode;
-	DescriptionTreeNode::Ptr cm1_node(_cm1_node);
-	EXPECT_CALL(*_cm1_node, getType()).WillRepeatedly(Return("ControlMode"));
-	EXPECT_CALL(*_cm1_node, getAttributeString(_, _))
+	MockDescriptionTreeNode::Ptr cm1_node(new MockDescriptionTreeNode);
+	EXPECT_CALL(*cm1_node, getType()).WillRepeatedly(Return("ControlMode"));
+	EXPECT_CALL(*cm1_node, getAttributeString(_, _))
 		.WillRepeatedly(DoAll(SetArgReferee<1>(""),Return(true)));
 
-	EXPECT_CALL(*_cm1, serialize(_))
+	EXPECT_CALL(*cm1, serialize(_))
 		.WillRepeatedly(Return(cm1_node));
 
 	//-------
@@ -136,23 +135,22 @@ TEST(HybridAutomaton, Serialization) {
 	ha.addControlMode(cm1);
 
 	// this will be the node "generated" by the tree
-	MockDescriptionTreeNode* _ha_node = new MockDescriptionTreeNode;
-	DescriptionTreeNode::Ptr ha_node(_ha_node);
+	MockDescriptionTreeNode::Ptr ha_node(new MockDescriptionTreeNode);
 
-	EXPECT_CALL(*_tree, createNode("HybridAutomaton"))
+	EXPECT_CALL(*tree, createNode("HybridAutomaton"))
 		.WillOnce(Return(ha_node));
 
 	// asserts on what serialization of HA will do
 	// -> child node
-	EXPECT_CALL(*_ha_node, addChildNode(cm1_node))
+	EXPECT_CALL(*ha_node, addChildNode(boost::dynamic_pointer_cast<DescriptionTreeNode>(cm1_node)))
 		.WillOnce(Return());
 	// -> some properties (don't care)
-	EXPECT_CALL(*_ha_node, setAttributeString(_,_))
+	EXPECT_CALL(*ha_node, setAttributeString(_,_))
 		.Times(AtLeast(0));
 
 	//MockDescriptionTreeNode* _ha_node = new MockDescriptionTreeNode;
 	//DescriptionTreeNode::Ptr ha_node(_ha_node);
-	//EXPECT_CALL(*_ha_node, getAttributeString(std::string("name"), _))
+	//EXPECT_CALL(*ha_node, getAttributeString(std::string("name"), _))
 	//	.WillOnce(DoAll(SetArgReferee<1>("myHA"),Return(true)));
 
 	DescriptionTreeNode::Ptr ha_serialized;
@@ -195,73 +193,59 @@ TEST(HybridAutomaton, DeserializationOnlyControlMode) {
 	DescriptionTreeNode::ConstNodeList cset_list;
 	DescriptionTreeNode::ConstNodeList ctrl_list;
 
-	ha::MockDescriptionTree* _tree;
-	ha::DescriptionTree::Ptr tree;
-
-	ha::MockDescriptionTreeNode* _cm1_node;
-	ha::DescriptionTreeNode::Ptr cm1_node;
-
-	ha::MockDescriptionTreeNode* _cset1_node;
-	ha::DescriptionTreeNode::Ptr cset1_node;
-
-	ha::MockDescriptionTreeNode* _ctrl_node;
-	ha::DescriptionTreeNode::Ptr ctrl_node;
-
-	ha::MockDescriptionTreeNode* _ha_node;
-	ha::DescriptionTreeNode::Ptr ha_node;
+	ha::MockDescriptionTree::Ptr tree;
+	ha::MockDescriptionTreeNode::Ptr cm1_node;
+	ha::MockDescriptionTreeNode::Ptr cset1_node;
+	ha::MockDescriptionTreeNode::Ptr ctrl_node;
+	ha::MockDescriptionTreeNode::Ptr ha_node;
 
 	// --
-	_ctrl_node	= new MockDescriptionTreeNode;
-	ctrl_node.reset(_ctrl_node);
-	EXPECT_CALL(*_ctrl_node, getType())
+	ctrl_node.reset(new MockDescriptionTreeNode);
+	EXPECT_CALL(*ctrl_node, getType())
 		.WillRepeatedly(Return("Controller"));
-	EXPECT_CALL(*_ctrl_node, getAttributeString(std::string("name"), _))
+	EXPECT_CALL(*ctrl_node, getAttributeString(std::string("name"), _))
 		.WillRepeatedly(DoAll(SetArgReferee<1>("MyCtrl1"),Return(true)));
-	EXPECT_CALL(*_ctrl_node, getAttributeString(std::string("type"), _))
+	EXPECT_CALL(*ctrl_node, getAttributeString(std::string("type"), _))
 		.WillRepeatedly(DoAll(SetArgReferee<1>("DeserializationOnlyControlModeMockRegisteredController"),Return(true)));
 
 	ctrl_list.push_back(ctrl_node);
 
 	// --
-	_cset1_node = new MockDescriptionTreeNode;
-	cset1_node.reset(_cset1_node);
-	EXPECT_CALL(*_cset1_node, getType())
+	cset1_node.reset(new MockDescriptionTreeNode);
+	EXPECT_CALL(*cset1_node, getType())
 		.WillRepeatedly(Return("ControlSet"));
-	EXPECT_CALL(*_cset1_node, getAttributeString(std::string("name"), _))
+	EXPECT_CALL(*cset1_node, getAttributeString(std::string("name"), _))
 		.WillRepeatedly(DoAll(SetArgReferee<1>("CS1"),Return(true)));
-	EXPECT_CALL(*_cset1_node, getChildrenNodes(std::string("Controller"), _))
+	EXPECT_CALL(*cset1_node, getChildrenNodes(std::string("Controller"), _))
 		.WillRepeatedly(DoAll(SetArgReferee<1>(ctrl_list),Return(true)));
 
 	cset_list.push_back(cset1_node);
 
 	// --
 	// Mocked ControlMode nodes
-	_tree = new MockDescriptionTree;
-	tree.reset(_tree);
+	tree.reset(new MockDescriptionTree);
 
-	_cm1_node = new MockDescriptionTreeNode;
-	cm1_node.reset(_cm1_node);
-	EXPECT_CALL(*_cm1_node, getType())
+	cm1_node.reset(new MockDescriptionTreeNode);
+	EXPECT_CALL(*cm1_node, getType())
 		.WillRepeatedly(Return("ControlMode"));
-	EXPECT_CALL(*_cm1_node, getAttributeString(std::string("name"), _))
+	EXPECT_CALL(*cm1_node, getAttributeString(std::string("name"), _))
 		.WillRepeatedly(DoAll(SetArgReferee<1>("CM1"),Return(true)));
-	EXPECT_CALL(*_cm1_node, getChildrenNodes(std::string("ControlSet"), _))
+	EXPECT_CALL(*cm1_node, getChildrenNodes(std::string("ControlSet"), _))
 		.WillRepeatedly(DoAll(SetArgReferee<1>(cset_list),Return(true)));
 
 	cm_list.push_back(cm1_node);
 
 	//----------
-	_ha_node = new MockDescriptionTreeNode;
-	ha_node.reset(_ha_node);
+	ha_node.reset(new MockDescriptionTreeNode);
 
-	EXPECT_CALL(*_ha_node, getType())
+	EXPECT_CALL(*ha_node, getType())
 		.WillRepeatedly(Return("HybridAutomaton"));
-	EXPECT_CALL(*_ha_node, getAttributeString(std::string("name"), _))
+	EXPECT_CALL(*ha_node, getAttributeString(std::string("name"), _))
 		.WillRepeatedly(DoAll(SetArgReferee<1>("MyHA"),Return(true)));
 	
-	EXPECT_CALL(*_ha_node, getChildrenNodes(std::string("ControlMode"), _))
+	EXPECT_CALL(*ha_node, getChildrenNodes(std::string("ControlMode"), _))
 		.WillRepeatedly(DoAll(SetArgReferee<1>(cm_list),Return(true)));
-	EXPECT_CALL(*_ha_node, getChildrenNodes(std::string("ControlSwitch"), _))
+	EXPECT_CALL(*ha_node, getChildrenNodes(std::string("ControlSwitch"), _))
 		.WillRepeatedly(DoAll(SetArgReferee<1>(DescriptionTreeNode::ConstNodeList()),Return(true)));
 
 }
@@ -273,90 +257,82 @@ class HybridAutomatonDeserializationTest : public ::testing::Test {
 protected:
 	virtual void SetUp() {
 		// Mocked ControlMode nodes
-		_tree = new MockDescriptionTree;
-		tree.reset(_tree);
+		tree.reset(new MockDescriptionTree);
 
 		// --
-		_ctrl_node	= new MockDescriptionTreeNode;
-		ctrl_node.reset(_ctrl_node);
-		EXPECT_CALL(*_ctrl_node, getType())
+		ctrl_node.reset(new MockDescriptionTreeNode);
+		EXPECT_CALL(*ctrl_node, getType())
 			.WillRepeatedly(Return("Controller"));
-		EXPECT_CALL(*_ctrl_node, getAttributeString(std::string("name"), _))
+		EXPECT_CALL(*ctrl_node, getAttributeString(std::string("name"), _))
 			.WillRepeatedly(DoAll(SetArgReferee<1>("MyCtrl1"),Return(true)));
-		EXPECT_CALL(*_ctrl_node, getAttributeString(std::string("type"), _))
+		EXPECT_CALL(*ctrl_node, getAttributeString(std::string("type"), _))
 			.WillRepeatedly(DoAll(SetArgReferee<1>("DeserializationOnlyControlModeMockRegisteredController"),Return(true)));
 		ctrl_list.push_back(ctrl_node);
 
 		// --
-		_cset1_node = new MockDescriptionTreeNode;
-		cset1_node.reset(_cset1_node);
-		EXPECT_CALL(*_cset1_node, getType())
+		cset1_node.reset(new MockDescriptionTreeNode);
+		EXPECT_CALL(*cset1_node, getType())
 			.WillRepeatedly(Return("ControlSet"));
-		EXPECT_CALL(*_cset1_node, getAttributeString(std::string("name"), _))
+		EXPECT_CALL(*cset1_node, getAttributeString(std::string("name"), _))
 			.WillRepeatedly(DoAll(SetArgReferee<1>("CS1"),Return(true)));
-		EXPECT_CALL(*_cset1_node, getChildrenNodes(std::string("Controller"), _))
+		EXPECT_CALL(*cset1_node, getChildrenNodes(std::string("Controller"), _))
 			.WillRepeatedly(DoAll(SetArgReferee<1>(ctrl_list),Return(true)));
 		cset_list.push_back(cset1_node);
 
 		// --
-		_cm1_node = new MockDescriptionTreeNode;
-		cm1_node.reset(_cm1_node);
-		EXPECT_CALL(*_cm1_node, getType())
+		cm1_node.reset(new MockDescriptionTreeNode);
+		EXPECT_CALL(*cm1_node, getType())
 			.WillRepeatedly(Return("ControlMode"));
-		EXPECT_CALL(*_cm1_node, getAttributeString(std::string("name"), _))
+		EXPECT_CALL(*cm1_node, getAttributeString(std::string("name"), _))
 			.WillRepeatedly(DoAll(SetArgReferee<1>("CM1"),Return(true)));
-		EXPECT_CALL(*_cm1_node, getChildrenNodes(std::string("ControlSet"), _))
+		EXPECT_CALL(*cm1_node, getChildrenNodes(std::string("ControlSet"), _))
 			.WillRepeatedly(DoAll(SetArgReferee<1>(cset_list),Return(true)));
 
-		_cm2_node = new MockDescriptionTreeNode;
-		cm2_node.reset(_cm2_node);
-		EXPECT_CALL(*_cm2_node, getType())
+		cm2_node.reset(new MockDescriptionTreeNode);
+		EXPECT_CALL(*cm2_node, getType())
 			.WillRepeatedly(Return("ControlMode"));
-		EXPECT_CALL(*_cm2_node, getAttributeString(std::string("name"), _))
+		EXPECT_CALL(*cm2_node, getAttributeString(std::string("name"), _))
 			.WillRepeatedly(DoAll(SetArgReferee<1>("CM2"),Return(true)));
-		EXPECT_CALL(*_cm1_node, getChildrenNodes(std::string("ControlSet"), _))
+		EXPECT_CALL(*cm1_node, getChildrenNodes(std::string("ControlSet"), _))
 			.WillRepeatedly(DoAll(SetArgReferee<1>(cset_list),Return(true)));
 
 		cm_list.push_back(cm1_node);
 		cm_list.push_back(cm2_node);
 
 		// --
-		_cs_node = new MockDescriptionTreeNode;
-		cs_node.reset(_cs_node);
-		EXPECT_CALL(*_cs_node, getType())
+		cs_node.reset(new MockDescriptionTreeNode);
+		EXPECT_CALL(*cs_node, getType())
 			.WillRepeatedly(Return("ControlSwitch"));
-		EXPECT_CALL(*_cs_node, getAttributeString(std::string("name"), _))
+		EXPECT_CALL(*cs_node, getAttributeString(std::string("name"), _))
 			.WillRepeatedly(DoAll(SetArgReferee<1>(""),Return(true)));
 
 		cs_list.push_back(cs_node);
 
 		// --
-		_js_node = new MockDescriptionTreeNode;
-		js_node.reset(_js_node);
-		EXPECT_CALL(*_js_node, getType())
+		js_node.reset(new MockDescriptionTreeNode);
+		EXPECT_CALL(*js_node, getType())
 			.WillRepeatedly(Return("JumpCondition"));
-		EXPECT_CALL(*_js_node, getAttributeString(std::string("name"), _))
+		EXPECT_CALL(*js_node, getAttributeString(std::string("name"), _))
 			.WillRepeatedly(DoAll(SetArgReferee<1>(""),Return(true)));
-		EXPECT_CALL(*_js_node, getAttributeString(std::string("type"), _))
+		EXPECT_CALL(*js_node, getAttributeString(std::string("type"), _))
 			.WillRepeatedly(DoAll(SetArgReferee<1>("JumpCondition"),Return(true)));
 
 		js_list.push_back(js_node);
 
 		//----------
-		_ha_node = new MockDescriptionTreeNode;
-		ha_node.reset(_ha_node);
+		ha_node.reset(new MockDescriptionTreeNode);
 
-		EXPECT_CALL(*_ha_node, getType())
+		EXPECT_CALL(*ha_node, getType())
 			.WillRepeatedly(Return("HybridAutomaton"));
-		EXPECT_CALL(*_ha_node, getAttributeString(std::string("name"), _))
+		EXPECT_CALL(*ha_node, getAttributeString(std::string("name"), _))
 			.WillRepeatedly(DoAll(SetArgReferee<1>("MyHA"),Return(true)));
 		
-		EXPECT_CALL(*_ha_node, getChildrenNodes(std::string("ControlMode"), _))
+		EXPECT_CALL(*ha_node, getChildrenNodes(std::string("ControlMode"), _))
 			.WillRepeatedly(DoAll(SetArgReferee<1>(cm_list),Return(true)));
-		EXPECT_CALL(*_ha_node, getChildrenNodes(std::string("ControlSwitch"), _))
+		EXPECT_CALL(*ha_node, getChildrenNodes(std::string("ControlSwitch"), _))
 			.WillRepeatedly(DoAll(SetArgReferee<1>(cs_list),Return(true)));
 
-		EXPECT_CALL(*_cs_node, getChildrenNodes(std::string("JumpCondition"), _))
+		EXPECT_CALL(*cs_node, getChildrenNodes(std::string("JumpCondition"), _))
 			.WillRepeatedly(DoAll(SetArgReferee<1>(js_list),Return(true)));
 	}
 
@@ -373,30 +349,15 @@ protected:
 	DescriptionTreeNode::ConstNodeList cs_list;
 	DescriptionTreeNode::ConstNodeList js_list;
 
-	ha::MockDescriptionTree* _tree;
 	ha::DescriptionTree::Ptr tree;
 
-	ha::MockDescriptionTreeNode* _cm1_node;
 	ha::DescriptionTreeNode::Ptr cm1_node;
-
-	ha::MockDescriptionTreeNode* _cm2_node;
 	ha::DescriptionTreeNode::Ptr cm2_node;
-
-	ha::MockDescriptionTreeNode* _cset1_node;
 	ha::DescriptionTreeNode::Ptr cset1_node;
-
-	ha::MockDescriptionTreeNode* _ctrl_node;
 	ha::DescriptionTreeNode::Ptr ctrl_node;
-
-	ha::MockDescriptionTreeNode* _ha_node;
 	ha::DescriptionTreeNode::Ptr ha_node;
-
-	ha::MockDescriptionTreeNode* _cs_node;
 	ha::DescriptionTreeNode::Ptr cs_node;
-
-	ha::MockDescriptionTreeNode* _js_node;
 	ha::DescriptionTreeNode::Ptr js_node;
-
 
 };
 
@@ -406,9 +367,9 @@ TEST_F(HybridAutomatonDeserializationTest, DeserializationSuccessful) {
 	using namespace std;
 
 	// Mocked ControlSwitch node
-	EXPECT_CALL(*_cs_node, getAttributeString(std::string("source"), _))
+	EXPECT_CALL(*cs_node, getAttributeString(std::string("source"), _))
 		.WillRepeatedly(DoAll(SetArgReferee<1>("CM1"),Return(true)));
-	EXPECT_CALL(*_cs_node, getAttributeString(std::string("target"), _))
+	EXPECT_CALL(*cs_node, getAttributeString(std::string("target"), _))
 		.WillRepeatedly(DoAll(SetArgReferee<1>("CM2"),Return(true)));
 
 	// this will be the node "generated" by the tree

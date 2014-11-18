@@ -9,6 +9,9 @@ namespace ha {
 	class MockDescriptionTree : public DescriptionTree {
 
 	public:
+		typedef boost::shared_ptr<MockDescriptionTree> Ptr;
+		typedef boost::shared_ptr<const MockDescriptionTree> ConstPtr;
+
 		MOCK_METHOD0(getRootNode, DescriptionTreeNode::Ptr () );
 		MOCK_METHOD1(setRootNode, void (const DescriptionTreeNode::Ptr& root_node) );
 
@@ -21,6 +24,9 @@ namespace ha {
 		*/
 
 	};
+
+	typedef boost::shared_ptr<MockDescriptionTree> MockDescriptionTreePtr;
+	typedef boost::shared_ptr<const MockDescriptionTree> MockDescriptionTreeConstPtr;
 
 }
 

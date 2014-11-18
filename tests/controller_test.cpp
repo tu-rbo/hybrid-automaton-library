@@ -48,8 +48,7 @@ TEST(Controller, SuccessfulRegistration) {
 	EXPECT_TRUE(HybridAutomaton::isControllerRegistered(ctrlType));
 
 	// create a MockDescriptionTreeNode object
-	MockDescriptionTreeNode* mockedNode = new MockDescriptionTreeNode;
-	DescriptionTreeNode::Ptr mockedNodePtr(mockedNode);
+	MockDescriptionTreeNode::Ptr mockedNode(new MockDescriptionTreeNode);
 
 	EXPECT_CALL(*mockedNode, getType())
 		.Times(2) // once in registration, once in deserialization
@@ -72,7 +71,7 @@ TEST(Controller, SuccessfulRegistration) {
 	// (google mock somewhat does not like to use EXPECT_CALL with
 	// shared pointers)
 
-	Controller::Ptr c = HybridAutomaton::createController(mockedNodePtr, emptySystem);
+	Controller::Ptr c = HybridAutomaton::createController(mockedNode, emptySystem);
 	EXPECT_FALSE(c.get() == NULL);
 
 	HybridAutomaton::unregisterController(ctrlType);
@@ -90,21 +89,15 @@ TEST(Controller, UnsuccessfulRegistration) {
 	std::string fantasyCtrlType("FantasyNonRegisteredController");
 
 	// create a MockDescriptionTreeNode object
-	MockDescriptionTreeNode* mockedNode = new MockDescriptionTreeNode;
+	MockDescriptionTreeNode::Ptr mockedNode(new MockDescriptionTreeNode);
 
 	EXPECT_CALL(*mockedNode, getType())
 		.Times(1) // only once in deserialization
 		.WillOnce(Return("Controller"));
 
-	// wrap mockedNode into a smart pointer to pass to 
-	// HybridAutomaton::createController.
-	// (google mock somewhat does not like to use EXPECT_CALL with
-	// shared pointers)
-	DescriptionTreeNode::Ptr mockedNodePtr(mockedNode);
-
 	// create controller should throw an exception because
 	// FantasyNonRegisteredController was not registered
-	ASSERT_ANY_THROW( HybridAutomaton::createController(mockedNodePtr, emptySystem));
+	ASSERT_ANY_THROW( HybridAutomaton::createController(mockedNode, emptySystem));
 }
 
 
@@ -136,30 +129,31 @@ TEST(Controller, Serialization) {
 
 	string ctrlType("CSMockSerializableController");
 
-	/*
 	// Controller to be serialized
-	Controller * _ctrl = new Controller;
-	Controller::Ptr ctrl(_ctrl);
-	_ctrl->setType(ctrlType);
-	_ctrl->setName("myCtrl");
+	Controller::Ptr ctrl(new Controller);
+	ctrl->setType(ctrlType);
+	ctrl->setName("myCtrl");
 
-	MockDescriptionTree* _desc_tree = new MockDescriptionTree;
-	DescriptionTree::Ptr desc_tree(_desc_tree);
+	MockDescriptionTree::Ptr tree(new MockDescriptionTree);
 
 	// Mocked description returned by controller
-	MockDescriptionTreeNode* _ctrl_node = new MockDescriptionTreeNode;
-	DescriptionTreeNode::Ptr ctrl_node(_ctrl_node);
+	MockDescriptionTreeNode::Ptr ctrl_node(new MockDescriptionTreeNode);
 
-	EXPECT_CALL(*_ctrl_node, getType()).WillOnce(Return("JointController"));
+	EXPECT_CALL(*ctrl_node, getType()).WillRepeatedly(Return("Controller"));
+	EXPECT_CALL(*ctrl_node, getAttributeString(_, _))
+		.WillRepeatedly(Return(false));
+	EXPECT_CALL(*ctrl_node, getAttributeString(std::string("type"), _))
+		.WillRepeatedly(DoAll(SetArgReferee<1>("myCtrl"),Return(true)));
+	EXPECT_CALL(*ctrl_node, getAttributeString(std::string("name"), _))
+		.WillRepeatedly(DoAll(SetArgReferee<1>(ctrlType),Return(true)));
 
-	////EXPECT_CALL(*_ctrl_node, getAttribute<string>(std::string("name"), _))
-	////	.WillOnce(DoAll(SetArgReferee<1>("myCtrl"),Return(true)));
+	EXPECT_CALL(*tree, createNode("Controller"))
+		.WillOnce(Return(ctrl_node));
 
-	ctrl_node = ctrl->serialize(desc_tree);
+	ctrl->serialize(tree);
 
 	HybridAutomaton::unregisterController(ctrlType);
 	EXPECT_FALSE(HybridAutomaton::isControllerRegistered(ctrlType));
-	*/
 }
 
 

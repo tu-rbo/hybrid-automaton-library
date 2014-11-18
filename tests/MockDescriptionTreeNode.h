@@ -7,6 +7,9 @@ namespace ha {
 
 	class MockDescriptionTreeNode : public DescriptionTreeNode {
 	public:
+		typedef boost::shared_ptr<MockDescriptionTreeNode> Ptr;
+		typedef boost::shared_ptr<const MockDescriptionTreeNode> ConstPtr;
+
 		MOCK_CONST_METHOD0(getType, const std::string () );
 		MOCK_CONST_METHOD2(getAttributeString, bool (const std::string& field_name, std::string& field_value) );
 		MOCK_CONST_METHOD2(getChildrenNodes, bool (const std::string& type, ConstNodeList& children) );
@@ -23,6 +26,8 @@ namespace ha {
 			return new MockDescriptionTreeNode();
 		}
 	};
+	typedef boost::shared_ptr<MockDescriptionTreeNode> MockDescriptionTreeNodePtr;
+	typedef boost::shared_ptr<const MockDescriptionTreeNode> MockDescriptionTreeNodeConstPtr;
 
 }
 

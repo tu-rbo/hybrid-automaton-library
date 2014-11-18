@@ -142,7 +142,7 @@ TEST(ControlSet, Serialization) {
 	std::string ctrlType2("MockSerializableController2");
 
 	// (mocked) controller to be serialized
-	ControlSetSerialization1::MockSerializableController * _ctrl1 = new ControlSetSerialization1::MockSerializableController;
+	ControlSetSerialization1::MockSerializableController * _ctrl1 = ;
 	Controller::Ptr ctrl1(_ctrl1);
 	_ctrl1->setType(ctrlType1);
 	_ctrl1->setName("myCtrl1");
