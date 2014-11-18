@@ -238,7 +238,8 @@ namespace ha {
 			_current_control_mode->deactivate();
 		_current_control_mode = _graph[control_mode];
 
-		_activateCurrentControlMode(0.0);
+		// FIXME comment by Sebastian: I think it is a bad idea to activate the current control mode after setting it!
+		//_activateCurrentControlMode(0.0);
 	}
 
 	ControlMode::Ptr HybridAutomaton::getCurrentControlMode() const {

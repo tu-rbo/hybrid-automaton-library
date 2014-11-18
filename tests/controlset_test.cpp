@@ -22,6 +22,11 @@ public:
 
 	MOCK_METHOD0(step, void());
 
+	void _addController(const ha::Controller::Ptr&) {
+		// nothing
+		// we have to override this otherwise a not implemented exception is thrown
+	}
+
 	HA_CONTROLSET_INSTANCE(node, system, ha) {
 		return ControlSet::Ptr(new MockRegisteredControlSet);
 	}
@@ -38,6 +43,7 @@ using namespace ha;
 using ::testing::Return;
 using ::testing::DoAll;
 using ::testing::SetArgReferee;
+using ::testing::AtLeast;
 using ::testing::_;
 
 
@@ -84,6 +90,9 @@ TEST(ControlSet, UnsuccessfulRegistration) {
 
 	// create a MockDescriptionTreeNode object
 	MockDescriptionTreeNode* mockedNode = new MockDescriptionTreeNode;
+
+	EXPECT_CALL(*mockedNode, getAttributeString(_, _))
+		.Times(AtLeast(1)); // type only
 
 	EXPECT_CALL(*mockedNode, getType())
 		.Times(1) // only once in deserialization

@@ -10,6 +10,7 @@
 
 // ----------------------------------
 // create some controller which registers itself
+namespace ControllerTest {
 class MockRegisteredController : public ha::Controller {
 public:
 	MockRegisteredController() : ha::Controller() {
@@ -25,6 +26,7 @@ public:
 HA_CONTROLLER_REGISTER("MockRegisteredController", MockRegisteredController)
 // Attention: Only use this controller in ONE test and de-register 
 // in this test. Otherwise you might have weird side effects with other tests
+}
 
 //=========================================
 
@@ -91,6 +93,9 @@ TEST(Controller, UnsuccessfulRegistration) {
 	// create a MockDescriptionTreeNode object
 	MockDescriptionTreeNode::Ptr mockedNode(new MockDescriptionTreeNode);
 
+	EXPECT_CALL(*mockedNode, getAttributeString(_, _))
+		.Times(AtLeast(1)); // type only
+
 	EXPECT_CALL(*mockedNode, getType())
 		.Times(1) // only once in deserialization
 		.WillOnce(Return("Controller"));
@@ -139,6 +144,9 @@ TEST(Controller, Serialization) {
 	// Mocked description returned by controller
 	MockDescriptionTreeNode::Ptr ctrl_node(new MockDescriptionTreeNode);
 
+	EXPECT_CALL(*ctrl_node, setAttributeString(_, _))
+		.Times(AtLeast(2)); // name & type (we don't care about parameters yet here)
+
 	EXPECT_CALL(*ctrl_node, getType()).WillRepeatedly(Return("Controller"));
 	EXPECT_CALL(*ctrl_node, getAttributeString(_, _))
 		.WillRepeatedly(Return(false));
@@ -155,5 +163,3 @@ TEST(Controller, Serialization) {
 	HybridAutomaton::unregisterController(ctrlType);
 	EXPECT_FALSE(HybridAutomaton::isControllerRegistered(ctrlType));
 }
-
-

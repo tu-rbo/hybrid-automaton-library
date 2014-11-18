@@ -26,9 +26,8 @@ namespace ha {
 		HA_THROW_ERROR("ControlSet.step", "Not implemented");
 	}
 
-	void ControlSet::_addController(const Controller::Ptr& cntrl) {
-		// nothing
-		// THIS SHOULD BE OVERLOADED!
+	void ControlSet::_addController(const Controller::Ptr&) {
+		// This can be implemented if desired
 	}
 
 	DescriptionTreeNode::Ptr ControlSet::serialize(const DescriptionTree::ConstPtr& factory) const {
@@ -60,6 +59,14 @@ namespace ha {
 		tree->getAttribute<std::string>("name", _name, "");
 
 		// deserialize controllers
+		DescriptionTreeNode::ConstNodeList ctrl_nodes;
+		tree->getChildrenNodes("Controller", ctrl_nodes);
+
+		DescriptionTreeNode::ConstNodeList::const_iterator it;
+		for (it = ctrl_nodes.begin(); it != ctrl_nodes.end(); ++it) {
+			Controller::Ptr ctrl =  HybridAutomaton::createController(*it, system, ha);
+			this->appendController(ctrl);
+		}
 
 		// TODO more properties
 	}
@@ -90,7 +97,7 @@ namespace ha {
 		}
 
 		this->_controllers[name] = controller;
-		_addController(controller); // call user defined overloaded method
+		this->_addController(controller); // call user defined overloaded method
 	}
 
 	/*
