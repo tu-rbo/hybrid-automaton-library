@@ -172,6 +172,8 @@ namespace ha {
 
 		virtual Controller::Ptr getControllerByName(const std::string& control_mode_name, const std::string& controller_name);
 
+		virtual ControlMode::Ptr getControlModeByName(const std::string& control_mode_name);
+
 		HybridAutomatonPtr clone() const {
 			return HybridAutomatonPtr(_doClone());
 		}

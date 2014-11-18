@@ -260,11 +260,21 @@ namespace ha {
 		return !(::boost::vertex_by_label(control_mode, _graph) == GraphTraits::null_vertex());
 	}
 
+	ControlMode::Ptr HybridAutomaton::getControlModeByName(const std::string& control_mode_name) {
+		// FIXME make const -> depends on existsControlMode
+		if (!existsControlMode(control_mode_name))
+			HA_THROW_ERROR("HybridAutomaton.getControllerByName", "Control mode " << control_mode_name << " does not exist");
+		
+		return _graph[control_mode_name];
+	}
+
 	Controller::Ptr HybridAutomaton::getControllerByName(const std::string& control_mode_name, const std::string& controller_name) {
 		// FIXME make const -> depends on existsControlMode
-
-		// TODO
-		return Controller::Ptr();
+		if (!existsControlMode(control_mode_name))
+			HA_THROW_ERROR("HybridAutomaton.getControllerByName", "Control mode " << control_mode_name << " does not exist");
+		
+		ControlMode::Ptr cm = _graph[control_mode_name];
+		return cm->getControllerByName(controller_name);
 	}
 
 
