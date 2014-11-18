@@ -41,11 +41,24 @@ namespace ha {
     }
 
 	virtual DescriptionTreeNode::Ptr serialize(const DescriptionTree::ConstPtr& factory) const { return DescriptionTreeNode::Ptr(); };
-	virtual void deserialize(const DescriptionTreeNode::ConstPtr& tree, const System::ConstPtr& system) {};
+
+	/**
+	 * @brief Deserialization for JumpConditions
+	 *
+	 * Do not request the hybrid automaton by calling getHybridAutomaton()!
+	 * It is not guaranteed to be set before calling deserialize.
+	 * 
+	 * The same holds true for _control_switch
+	 * If you need to access object from the graph structure, store the
+	 * names of the entities in a string member and query them in the
+	 * activate() method of your entity.
+	 *   
+	 */
+	virtual void deserialize(const DescriptionTreeNode::ConstPtr& tree, const System::ConstPtr& system, const HybridAutomaton* ha) {};
 
     protected:
 
-    virtual JumpCondition* _doClone() const
+		virtual JumpCondition* _doClone() const
     {
       return (new JumpCondition(*this));
     }

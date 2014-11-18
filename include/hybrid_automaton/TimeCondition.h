@@ -31,7 +31,7 @@ namespace ha {
     virtual bool isActive() const;
 
 	virtual DescriptionTreeNode::Ptr serialize(const DescriptionTree::ConstPtr& factory) const;
-	virtual void deserialize(const DescriptionTreeNode::ConstPtr& tree, const System::ConstPtr& system);
+	virtual void deserialize(const DescriptionTreeNode::ConstPtr& tree, const System::ConstPtr& system, const HybridAutomaton* ha);
 
 	void setDuration(double duration);
 	double getDuration() const;

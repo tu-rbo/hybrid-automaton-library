@@ -45,7 +45,7 @@ namespace ha {
 		return tree;
 	}
 
-	void ControlSet::deserialize(const DescriptionTreeNode::ConstPtr& tree, const System::ConstPtr& system) {
+	void ControlSet::deserialize(const DescriptionTreeNode::ConstPtr& tree, const System::ConstPtr& system, const HybridAutomaton* ha) {
 		if (tree->getType() != "ControlSet") {
 			std::stringstream ss;
 			ss << "[ControlSet::deserialize] DescriptionTreeNode must have type 'ControlSet', not '" << tree->getType() << "'!";
@@ -67,12 +67,6 @@ namespace ha {
 		// TODO more properties
 	}
 
-	void ControlSet::setHybridAutomaton(const HybridAutomaton* ha) {
-		Serializable::setHybridAutomaton(ha);
-		std::map<std::string, Controller::Ptr>::iterator it;
-		for (it = _controllers.begin(); it != _controllers.end(); ++it)
-			it->second->setHybridAutomaton(ha);
-	}
 	void ControlSet::setType(const std::string& new_type) {
 		this->_type = new_type;
 	}

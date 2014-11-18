@@ -20,7 +20,7 @@ namespace ha {
 		return tree_node;
 	}
 	
-	void ControlMode::deserialize(const DescriptionTreeNode::ConstPtr& tree, const System::ConstPtr& system) {
+	void ControlMode::deserialize(const DescriptionTreeNode::ConstPtr& tree, const System::ConstPtr& system, const HybridAutomaton* ha) {
 		if (tree->getType() != "ControlMode") {
 			std::stringstream ss;
 			ss << "[ControlMode::deserialize] DescriptionTreeNode must have type 'ControlMode', not '" << tree->getType() << "'!";
@@ -41,8 +41,7 @@ namespace ha {
 		}
 
 		DescriptionTreeNode::Ptr first = * (control_set.begin());
-		this->_control_set = HybridAutomaton::createControlSet( first, system);
-		this->_control_set->setHybridAutomaton(this->getHybridAutomaton());
+		this->_control_set = HybridAutomaton::createControlSet(first, system, ha);
 
 	}
 

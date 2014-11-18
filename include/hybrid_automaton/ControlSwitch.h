@@ -38,17 +38,12 @@ namespace ha {
 	virtual const std::vector<JumpConditionPtr>& getJumpConditions();
 
 	virtual DescriptionTreeNode::Ptr serialize(const DescriptionTree::ConstPtr& factory) const;
-	virtual void deserialize(const DescriptionTreeNode::ConstPtr& tree, const System::ConstPtr& system);
+	virtual void deserialize(const DescriptionTreeNode::ConstPtr& tree, const System::ConstPtr& system, const HybridAutomaton* ha);
 
 	virtual void setSourceControlModeName(const std::string& source);
 	virtual const std::string getSourceControlModeName() const;
 	virtual void setTargetControlModeName(const std::string& target);
 	virtual const std::string getTargetControlModeName() const;
-
-	virtual void setSourceControlMode(const ControlMode::ConstPtr& source);
-	virtual ControlMode::ConstPtr getSourceControlMode() const;
-	virtual void setTargetControlMode(const ControlMode::ConstPtr& target);
-	virtual ControlMode::ConstPtr getTargetControlMode() const;
 
 	virtual void setName(const std::string& name);
 	virtual const std::string getName() const;
@@ -58,9 +53,6 @@ namespace ha {
 
 	std::string _source_control_mode_name;
 	std::string _target_control_mode_name;
-
-	ControlMode::ConstPtr _source_control_mode;
-	ControlMode::ConstPtr _target_control_mode;
 
 	std::string _name;
 

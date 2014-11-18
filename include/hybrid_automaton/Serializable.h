@@ -11,25 +11,23 @@ namespace ha {
 
 class Serializable {
 public:
-	Serializable() : _ha(NULL) {}
 
 	virtual DescriptionTreeNode::Ptr serialize(const DescriptionTree::ConstPtr& factory) const = 0;
-	virtual void deserialize(const DescriptionTreeNode::ConstPtr& tree, const System::ConstPtr& system) = 0;
 
-	// Comment by Sebastian: It would be cleaner to put these two methods into a separate interface
-	// but since our Serializable interface is only used in the ha package it is Ok for now
-	virtual void setHybridAutomaton(const HybridAutomaton* ha) {
-		_ha = ha;
-	}
-	const HybridAutomaton* getHybridAutomaton() const {
-		return _ha;
-	}
-
-private:
 	/**
-	 * Only accessible via getter and setter
+	 * @brief Deserialization method
+	 *
+	 * Important things to know when implementing deserialize:
+	 * Do not request the hybrid automaton by calling getHybridAutomaton()!
+	 * It is not guaranteed to be set before calling deserialize.
+	 * 
+	 * If you need to access object from the graph structure, store the
+	 * names of the entities in a string member and query them in the
+	 * activate() method of your entity.
+	 *   
 	 */
-	const HybridAutomaton* _ha;
+	virtual void deserialize(const DescriptionTreeNode::ConstPtr& tree, const System::ConstPtr& system, const HybridAutomaton* ha) = 0;
+
 };
 
 }

@@ -39,7 +39,7 @@ DescriptionTreeNode::Ptr Controller::serialize(const DescriptionTree::ConstPtr& 
 	return tree;
 }
 
-void Controller::deserialize(const DescriptionTreeNode::ConstPtr& tree, const System::ConstPtr& system) 
+void Controller::deserialize(const DescriptionTreeNode::ConstPtr& tree, const System::ConstPtr& system, const HybridAutomaton* ha) 
 {
 	if (tree->getType() != "Controller") {
 		std::stringstream ss;

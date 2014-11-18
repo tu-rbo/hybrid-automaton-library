@@ -60,21 +60,6 @@ namespace ha {
 		return _target_control_mode_name;
 	}
 
-	void ControlSwitch::setSourceControlMode(const ControlMode::ConstPtr& source) {
-		_source_control_mode = source;
-		_source_control_mode_name = source->getName();
-	}
-	ControlMode::ConstPtr ControlSwitch::getSourceControlMode() const {
-		return _source_control_mode;
-	}
-	void ControlSwitch::setTargetControlMode(const ControlMode::ConstPtr& target) {
-		_target_control_mode = target;
-		_target_control_mode_name = target->getName();
-	}
-	ControlMode::ConstPtr ControlSwitch::getTargetControlMode() const {
-		return _target_control_mode;
-	}
-
 	DescriptionTreeNode::Ptr ControlSwitch::serialize(const DescriptionTree::ConstPtr& factory) const {
 		DescriptionTreeNode::Ptr tree_node = factory->createNode("ControlSwitch");
 		tree_node->setAttribute<std::string>(std::string("name"), this->getName());
@@ -89,7 +74,7 @@ namespace ha {
 		return tree_node;
 	}
 	
-	void ControlSwitch::deserialize(const DescriptionTreeNode::ConstPtr& tree, const System::ConstPtr& system) {
+	void ControlSwitch::deserialize(const DescriptionTreeNode::ConstPtr& tree, const System::ConstPtr& system, const HybridAutomaton* ha) {
 		if (tree->getType() != "ControlSwitch") {
 			std::stringstream ss;
 			ss << "[ControlSwitch::deserialize] DescriptionTreeNode must have type 'ControlSwitch', not '" << tree->getType() << "'!";
@@ -117,7 +102,7 @@ namespace ha {
 		DescriptionTreeNode::ConstNodeList::iterator js_it;
 		for (js_it = jump_conditions.begin(); js_it != jump_conditions.end(); ++js_it) {
 			JumpCondition::Ptr js(new JumpCondition);
-			js->deserialize(*js_it, system);
+			js->deserialize(*js_it, system, ha);
 			this->add(js);
 		}
 	}

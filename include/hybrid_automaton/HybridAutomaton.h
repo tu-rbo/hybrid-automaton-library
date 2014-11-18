@@ -36,8 +36,8 @@ namespace ha {
 		typedef boost::shared_ptr<HybridAutomaton> Ptr;
 		typedef boost::shared_ptr<const HybridAutomaton> ConstPtr;
 
-		typedef ::ha::Controller::Ptr (*ControllerCreator) (const ::ha::DescriptionTreeNode::ConstPtr, const ::ha::System::ConstPtr);
-		typedef ::ha::ControlSet::Ptr (*ControlSetCreator) (const ::ha::DescriptionTreeNode::ConstPtr, const ::ha::System::ConstPtr);
+		typedef ::ha::Controller::Ptr (*ControllerCreator) (const ::ha::DescriptionTreeNode::ConstPtr, const ::ha::System::ConstPtr, const HybridAutomaton*);
+		typedef ::ha::ControlSet::Ptr (*ControlSetCreator) (const ::ha::DescriptionTreeNode::ConstPtr, const ::ha::System::ConstPtr, const HybridAutomaton*);
 
 		// a directed labeled graph based on an adjacency list
 		typedef ::boost::labeled_graph< boost::adjacency_list< boost::vecS, boost::vecS, boost::directedS, ControlMode::Ptr, ControlSwitch::Ptr >, std::string > Graph;
@@ -83,14 +83,14 @@ namespace ha {
 		 *
 		 * In order to work you must register your controller properly
 		 */
-		static Controller::Ptr createController(const DescriptionTreeNode::ConstPtr& node, const System::ConstPtr& system);
+		static Controller::Ptr createController(const DescriptionTreeNode::ConstPtr& node, const System::ConstPtr& system, const HybridAutomaton* ha);
 
 		/** 
 		 * @brief Instantiate a control set of given type 
 		 *
 		 * In order to work you must register your control set properly
 		 */
-		static ControlSet::Ptr createControlSet(const DescriptionTreeNode::ConstPtr& node, const System::ConstPtr& system);
+		static ControlSet::Ptr createControlSet(const DescriptionTreeNode::ConstPtr& node, const System::ConstPtr& system, const HybridAutomaton* ha);
 
 		/**
 		 * @brief Register a controller with the hybrid automaton
@@ -162,9 +162,15 @@ namespace ha {
 		ControlMode::Ptr getCurrentControlMode() const;
 
 		virtual DescriptionTreeNode::Ptr serialize(const DescriptionTree::ConstPtr& factory) const;
-		virtual void deserialize(const DescriptionTreeNode::ConstPtr& tree, const System::ConstPtr& system);
+
+		virtual void deserialize(const DescriptionTreeNode::ConstPtr& tree, const System::ConstPtr& system) {
+			this->deserialize(tree, system, this);
+		}
+		virtual void deserialize(const DescriptionTreeNode::ConstPtr& tree, const System::ConstPtr& system, const HybridAutomaton* ha);
 
 		virtual bool existsControlMode(const std::string& control_mode);
+
+		virtual Controller::Ptr getControllerByName(const std::string& control_mode_name, const std::string& controller_name);
 
 		HybridAutomatonPtr clone() const {
 			return HybridAutomatonPtr(_doClone());

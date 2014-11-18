@@ -35,7 +35,7 @@ namespace ha {
 
 		virtual DescriptionTreeNode::Ptr serialize(const DescriptionTree::ConstPtr& factory) const;
 
-		virtual void deserialize(const DescriptionTreeNode::ConstPtr& tree, const System::ConstPtr& system);
+		virtual void deserialize(const DescriptionTreeNode::ConstPtr& tree, const System::ConstPtr& system, const HybridAutomaton* ha);
 
 		ControlSetPtr clone() const {
 			return ControlSetPtr(_doClone());
@@ -55,8 +55,6 @@ namespace ha {
 		virtual const std::string getName() const;
 
 		virtual Controller::Ptr getControllerByName(const std::string& name) const; 
-
-		virtual void setHybridAutomaton(const HybridAutomaton* ha);
 
 	protected:
 		virtual ControlSet* _doClone() const {

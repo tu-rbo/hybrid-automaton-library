@@ -167,12 +167,8 @@ public:
 	//MOCK_METHOD0(deserialize, void (const DescriptionTreeNode::ConstPtr& tree) );
 	MOCK_CONST_METHOD0(getName, std::string () );
 
-	HA_CONTROLLER_INSTANCE(node, system) {
+	HA_CONTROLLER_INSTANCE(node, system, ha) {
 		Controller::Ptr ctrl(new MockRegisteredController);
-		//EXPECT_CALL(*ctrl, getType())
-		//	.WillRepeatedly(Return("DeserializationOnlyControlModeMockRegisteredController"));
-		//EXPECT_CALL(*ctrl, getName())
-		//	.WillRepeatedly(Return("MyCtrl1"));
 		return ctrl;
 	}
 };

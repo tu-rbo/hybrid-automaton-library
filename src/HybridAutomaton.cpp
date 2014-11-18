@@ -24,7 +24,7 @@ namespace ha {
 		controller_type_map.erase(it);
 	}
 
-	Controller::Ptr HybridAutomaton::createController(const DescriptionTreeNode::ConstPtr& node, const System::ConstPtr& system) {
+	Controller::Ptr HybridAutomaton::createController(const DescriptionTreeNode::ConstPtr& node, const System::ConstPtr& system, const HybridAutomaton* ha) {
 		if (node->getType() != "Controller") {
 			std::stringstream ss;
 			ss << "[HybridAutomaton::createController] DescriptionTreeNode must have type 'Controller', not '" << node->getType() << "'!";
@@ -43,7 +43,7 @@ namespace ha {
 			ss << "[HybridAutomaton::createController] Controller type not registered: " << ctrl_type;
 			throw ss.str();
 		}
-		return (*(it->second))(node, system);
+		return (*(it->second))(node, system, ha);
 	}
 
 	void HybridAutomaton::registerControlSet(const std::string& ctrl_type, ControlSetCreator cc) {
@@ -57,7 +57,7 @@ namespace ha {
 		return ( controlset_type_map.find(ctrl_type) != controlset_type_map.end() );
 	}
 
-	ControlSet::Ptr HybridAutomaton::createControlSet(const DescriptionTreeNode::ConstPtr& node, const System::ConstPtr& system) {
+	ControlSet::Ptr HybridAutomaton::createControlSet(const DescriptionTreeNode::ConstPtr& node, const System::ConstPtr& system, const HybridAutomaton* ha) {
 		if (node->getType() != "ControlSet") {
 			std::stringstream ss;
 			ss << "[HybridAutomaton::createControlSet] DescriptionTreeNode must have type 'ControlSet', not '" << node->getType() << "'!";
@@ -76,7 +76,7 @@ namespace ha {
 			ss << "[HybridAutomaton::createControlSet] ControlSet type not registered: " << ctrl_type;
 			throw ss.str();
 		}
-		return (*(it->second))(node, system);
+		return (*(it->second))(node, system, ha);
 	}
 
 	void HybridAutomaton::unregisterControlSet(const std::string& ctrl_type) {
@@ -157,7 +157,7 @@ namespace ha {
 		return tree_node;
 	}
 
-	void HybridAutomaton::deserialize(const DescriptionTreeNode::ConstPtr& tree, const System::ConstPtr& system){
+	void HybridAutomaton::deserialize(const DescriptionTreeNode::ConstPtr& tree, const System::ConstPtr& system, const HybridAutomaton* ha){
 		if (tree->getType() != "HybridAutomaton") {
 			std::stringstream ss;
 			ss << "[HybridAutomaton::deserialize] DescriptionTreeNode must have type 'HybridAutomaton', not '" << tree->getType() << "'!";
@@ -177,21 +177,17 @@ namespace ha {
 		DescriptionTreeNode::ConstNodeList::iterator cm_it;
 		for (cm_it = control_modes.begin(); cm_it != control_modes.end(); ++cm_it) {
 			ControlMode::Ptr cm(new ControlMode);
-			cm->setHybridAutomaton(this);
-			cm->deserialize(*cm_it, system);
+			cm->deserialize(*cm_it, system, this);
 			this->addControlMode(cm);
 		}
 
 		// control switches
-		// it is important that they are deserialized *after* the controllers
-		// because some of them might link to controllers
 		DescriptionTreeNode::ConstNodeList control_switches;
 		tree->getChildrenNodes("ControlSwitch", control_switches);
 		DescriptionTreeNode::ConstNodeList::iterator cs_it;
 		for (cs_it = control_switches.begin(); cs_it != control_switches.end(); ++cs_it) {
 			ControlSwitch::Ptr cs(new ControlSwitch);
-			cs->setHybridAutomaton(this);
-			cs->deserialize(*cs_it, system);
+			cs->deserialize(*cs_it, system, this);
 			
 			// check if source and target are in graph
 			if (!existsControlMode(cs->getSourceControlModeName()))
@@ -201,9 +197,6 @@ namespace ha {
 
 			this->addControlSwitch(cs->getSourceControlModeName(),  
 				cs, cs->getTargetControlModeName());
-
-			cs->setSourceControlMode(_graph[cs->getSourceControlModeName()]);
-			cs->setTargetControlMode(_graph[cs->getTargetControlModeName()]);
 		}
 	}
 
@@ -275,5 +268,11 @@ namespace ha {
 		// FIXME cannot make this method const because of vertex_by_label
 		return !(::boost::vertex_by_label(control_mode, _graph) == GraphTraits::null_vertex());
 	}
+
+	Controller::Ptr HybridAutomaton::getControllerByName(const std::string& control_mode_name, const std::string& controller_name) {
+		// TODO
+		return Controller::Ptr();
+	}
+
 
 }
