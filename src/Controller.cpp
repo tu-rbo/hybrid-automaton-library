@@ -1,5 +1,6 @@
 #include "hybrid_automaton/Controller.h"
 #include "hybrid_automaton/HybridAutomaton.h"
+#include "hybrid_automaton/error_handling.h"
 
 namespace ha {
 
@@ -39,20 +40,16 @@ DescriptionTreeNode::Ptr Controller::serialize(const DescriptionTree::ConstPtr& 
 	return tree;
 }
 
-void Controller::deserialize(const DescriptionTreeNode::ConstPtr& tree, const System::ConstPtr& system) 
+void Controller::deserialize(const DescriptionTreeNode::ConstPtr& tree, const System::ConstPtr& system, const HybridAutomaton* ha) 
 {
 	if (tree->getType() != "Controller") {
-		std::stringstream ss;
-		ss << "[Controller::deserialize] DescriptionTreeNode must have type 'Controller', not '" << tree->getType() << "'!";
-		throw ss.str();
+		HA_THROW_ERROR("Controller.deserialize", "DescriptionTreeNode must have type 'Controller', not '" << tree->getType() << "'!");
 	}
 	tree->getAttribute<std::string>("type", _type, "");
 
 	if (_type == "" || !HybridAutomaton::isControllerRegistered(_type)) {
-		std::stringstream ss;
-		ss << "[Controller::deserialize] Controller type '" << _type << "' "
-		   << "invalid - empty or not registered with HybridAutomaton!";
-		throw ss.str();
+		HA_THROW_ERROR("Controller.deserialize", "Controller type '" << _type << "' "
+		   << "invalid - empty or not registered with HybridAutomaton!");
 	}
 
 	tree->getAttribute<std::string>("name", _name, "");

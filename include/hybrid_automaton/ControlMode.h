@@ -3,12 +3,15 @@
 
 #include "hybrid_automaton/ControlSet.h"
 #include "hybrid_automaton/Serializable.h"
+#include "hybrid_automaton/error_handling.h"
 
 #include <boost/shared_ptr.hpp>
 
 #include <Eigen/Dense>
 
 namespace ha {
+
+	class HybridAutomaton;
 
 	class ControlMode;
 	typedef boost::shared_ptr<ControlMode> ControlModePtr;
@@ -28,21 +31,21 @@ namespace ha {
 			if (_control_set)
 				_control_set->activate();
 			else
-				throw std::string("[ControlMode::activate] No control set defined.");
+				HA_THROW_ERROR("ControlSet.activate", "No control set defined.");
 		}
 
 		virtual void deactivate() {
 			if (_control_set)
 				_control_set->deactivate();
 			else
-				throw std::string("[ControlMode::deactivate] No control set defined.");
+				HA_THROW_ERROR("ControlSet.deactivate", "No control set defined.");
 		}
 
 		virtual ::Eigen::MatrixXd step(const double& t) {
 			if (_control_set)
 				return _control_set->step(t);
 			else
-				throw std::string("[ControlMode::step] No control set defined.");
+				HA_THROW_ERROR("ControlSet.step", "No control set defined.");
 		}
 
 		virtual void setControlSet(const ControlSet::Ptr control_set) {
@@ -53,8 +56,12 @@ namespace ha {
 			return _control_set;
 		}    
 
+		virtual Controller::Ptr getControllerByName(const std::string& name) const {
+			return _control_set->getControllerByName(name);
+		}    
+
 		virtual DescriptionTreeNode::Ptr serialize(const DescriptionTree::ConstPtr& factory) const;
-		virtual void deserialize(const DescriptionTreeNode::ConstPtr& tree, const System::ConstPtr& system);
+		virtual void deserialize(const DescriptionTreeNode::ConstPtr& tree, const System::ConstPtr& system, const HybridAutomaton* ha);
 
 		ControlModePtr clone() const {
 			return ControlModePtr(_doClone());

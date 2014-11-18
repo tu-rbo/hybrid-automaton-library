@@ -15,9 +15,9 @@ public:
 	MockRegisteredController() : ha::Controller() {
 	}
 
-	HA_CONTROLLER_INSTANCE(node, system) {
+	HA_CONTROLLER_INSTANCE(node, system, ha) {
 		Controller::Ptr ctrl(new MockRegisteredController);
-		ctrl->deserialize(node, system);
+		ctrl->deserialize(node, system, ha);
 		return ctrl;
 	}
 };
@@ -71,7 +71,7 @@ TEST(Controller, SuccessfulRegistration) {
 	// (google mock somewhat does not like to use EXPECT_CALL with
 	// shared pointers)
 
-	Controller::Ptr c = HybridAutomaton::createController(mockedNode, emptySystem);
+	Controller::Ptr c = HybridAutomaton::createController(mockedNode, emptySystem, NULL);
 	EXPECT_FALSE(c.get() == NULL);
 
 	HybridAutomaton::unregisterController(ctrlType);
@@ -97,7 +97,7 @@ TEST(Controller, UnsuccessfulRegistration) {
 
 	// create controller should throw an exception because
 	// FantasyNonRegisteredController was not registered
-	ASSERT_ANY_THROW( HybridAutomaton::createController(mockedNode, emptySystem));
+	ASSERT_ANY_THROW( HybridAutomaton::createController(mockedNode, emptySystem, NULL));
 }
 
 
@@ -110,9 +110,9 @@ public:
 	CSMockSerializableController() : ha::Controller() {
 	}
 
-	HA_CONTROLLER_INSTANCE(node, system) {
+	HA_CONTROLLER_INSTANCE(node, system, ha) {
 		Controller::Ptr ctrl(new CSMockSerializableController);
-		ctrl->deserialize(node, system);
+		ctrl->deserialize(node, system, ha);
 		return ctrl;
 	}
 };
