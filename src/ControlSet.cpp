@@ -75,7 +75,7 @@ namespace ha {
 		this->_type = new_type;
 	}
 
-	const std::string& ControlSet::getType() const {
+	const std::string ControlSet::getType() const {
 		return this->_type;
 	}
 

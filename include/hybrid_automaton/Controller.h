@@ -146,7 +146,7 @@ namespace ha {
 
 		virtual void setName(const std::string& new_name);
 
-		virtual std::string getType() const;
+		virtual const std::string getType() const;
 
 		virtual void setType(const std::string& new_type);
 

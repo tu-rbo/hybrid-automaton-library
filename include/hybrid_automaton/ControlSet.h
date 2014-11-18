@@ -43,7 +43,7 @@ namespace ha {
 
 		virtual void setType(const std::string& new_type);
 
-		virtual const std::string& getType() const;
+		virtual const std::string getType() const;
 
 		void appendController(const Controller::Ptr& controller);
 
