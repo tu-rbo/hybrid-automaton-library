@@ -397,7 +397,6 @@ TEST_F(HybridAutomatonDeserializationTest, DeserializationSuccessful) {
 	
 }
 
-/*
 TEST_F(HybridAutomatonDeserializationTest, DeserializationUnsuccessful1) {
 	using namespace ha;
 	using namespace std;
@@ -417,7 +416,7 @@ TEST_F(HybridAutomatonDeserializationTest, DeserializationUnsuccessful1) {
 	
 }
 
-TEST_F(HybridAutomatonDeserializationTest, DeserializationUnsuccessful1) {
+TEST_F(HybridAutomatonDeserializationTest, DeserializationUnsuccessful2) {
 	using namespace ha;
 	using namespace std;
 
@@ -436,4 +435,3 @@ TEST_F(HybridAutomatonDeserializationTest, DeserializationUnsuccessful1) {
 	ASSERT_ANY_THROW(ha.deserialize(ha_node, System::Ptr()));
 	
 }
-*/

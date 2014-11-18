@@ -188,7 +188,13 @@ namespace ha {
 		for (cs_it = control_switches.begin(); cs_it != control_switches.end(); ++cs_it) {
 			ControlSwitch::Ptr cs(new ControlSwitch);
 			cs->deserialize(*cs_it, system);
-			// TODO check if source and target are in graph
+			
+			// check if source and target are in graph
+			if (!existsControlMode(cs->getSourceControlMode()))
+				throw std::string("[HybridAutomaton::deserialize] ERROR: Control mode '") + cs->getSourceControlMode() + "' does not exist! Cannot set source control mode.";	
+			if (!existsControlMode(cs->getTargetControlMode()))
+				throw std::string("[HybridAutomaton::deserialize] ERROR: Control mode '") + cs->getTargetControlMode() + "' does not exist! Cannot set target control mode.";	
+
 			this->addControlSwitch(cs->getSourceControlMode(),  
 				cs, cs->getTargetControlMode());
 		}
@@ -233,8 +239,9 @@ namespace ha {
 		} 
 		*/
 
+		//if (!existsControlMode(control_mode))
 		if (::boost::vertex_by_label(control_mode, _graph) == GraphTraits::null_vertex())
-			throw std::string("ERROR: Control mode '") + control_mode + "' does not exist! Cannot set current control mode.";
+			throw std::string("[HybridAutomaton::setCurrentControlMode] ERROR: Control mode '") + control_mode + "' does not exist! Cannot set current control mode.";
 
 		if (_current_control_mode != NULL)
 			_current_control_mode->deactivate();
@@ -255,6 +262,11 @@ namespace ha {
 		for(; out_edges.first != out_edges.second; ++out_edges.first) {
 			_graph[*out_edges.first]->activate(t);
 		}
+	}
+
+	bool HybridAutomaton::existsControlMode(const std::string& control_mode)  {
+		// FIXME cannot make this method const because of vertex_by_label
+		return !(::boost::vertex_by_label(control_mode, _graph) == GraphTraits::null_vertex());
 	}
 
 }

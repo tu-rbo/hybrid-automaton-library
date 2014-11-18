@@ -164,6 +164,8 @@ namespace ha {
 		virtual DescriptionTreeNode::Ptr serialize(const DescriptionTree::ConstPtr& factory) const;
 		virtual void deserialize(const DescriptionTreeNode::ConstPtr& tree, const System::ConstPtr& system);
 
+		virtual bool existsControlMode(const std::string& control_mode);
+
 		HybridAutomatonPtr clone() const {
 			return HybridAutomatonPtr(_doClone());
 		}
