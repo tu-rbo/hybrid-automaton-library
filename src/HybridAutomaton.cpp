@@ -177,28 +177,33 @@ namespace ha {
 		DescriptionTreeNode::ConstNodeList::iterator cm_it;
 		for (cm_it = control_modes.begin(); cm_it != control_modes.end(); ++cm_it) {
 			ControlMode::Ptr cm(new ControlMode);
-			//cm->setHybridAutomaton((const HybridAutomaton*) this);
 			cm->setHybridAutomaton(this);
 			cm->deserialize(*cm_it, system);
 			this->addControlMode(cm);
 		}
 
 		// control switches
+		// it is important that they are deserialized *after* the controllers
+		// because some of them might link to controllers
 		DescriptionTreeNode::ConstNodeList control_switches;
 		tree->getChildrenNodes("ControlSwitch", control_switches);
 		DescriptionTreeNode::ConstNodeList::iterator cs_it;
 		for (cs_it = control_switches.begin(); cs_it != control_switches.end(); ++cs_it) {
 			ControlSwitch::Ptr cs(new ControlSwitch);
+			cs->setHybridAutomaton(this);
 			cs->deserialize(*cs_it, system);
 			
 			// check if source and target are in graph
-			if (!existsControlMode(cs->getSourceControlMode()))
-				throw std::string("[HybridAutomaton::deserialize] ERROR: Control mode '") + cs->getSourceControlMode() + "' does not exist! Cannot set source control mode.";	
-			if (!existsControlMode(cs->getTargetControlMode()))
-				throw std::string("[HybridAutomaton::deserialize] ERROR: Control mode '") + cs->getTargetControlMode() + "' does not exist! Cannot set target control mode.";	
+			if (!existsControlMode(cs->getSourceControlModeName()))
+				throw std::string("[HybridAutomaton::deserialize] ERROR: Control mode '") + cs->getSourceControlModeName() + "' does not exist! Cannot set source control mode.";	
+			if (!existsControlMode(cs->getTargetControlModeName()))
+				throw std::string("[HybridAutomaton::deserialize] ERROR: Control mode '") + cs->getTargetControlModeName() + "' does not exist! Cannot set target control mode.";	
 
-			this->addControlSwitch(cs->getSourceControlMode(),  
-				cs, cs->getTargetControlMode());
+			this->addControlSwitch(cs->getSourceControlModeName(),  
+				cs, cs->getTargetControlModeName());
+
+			cs->setSourceControlMode(_graph[cs->getSourceControlModeName()]);
+			cs->setTargetControlMode(_graph[cs->getTargetControlModeName()]);
 		}
 	}
 

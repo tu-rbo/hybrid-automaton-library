@@ -55,6 +55,10 @@ namespace ha {
 			return _control_set;
 		}    
 
+		virtual Controller::Ptr getControllerByName(const std::string& name) const {
+			return _control_set->getControllerByName(name);
+		}    
+
 		virtual DescriptionTreeNode::Ptr serialize(const DescriptionTree::ConstPtr& factory) const;
 		virtual void deserialize(const DescriptionTreeNode::ConstPtr& tree, const System::ConstPtr& system);
 

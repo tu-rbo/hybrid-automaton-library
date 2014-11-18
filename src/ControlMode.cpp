@@ -42,6 +42,7 @@ namespace ha {
 
 		DescriptionTreeNode::Ptr first = * (control_set.begin());
 		this->_control_set = HybridAutomaton::createControlSet( first, system);
+		this->_control_set->setHybridAutomaton(this->getHybridAutomaton());
 
 	}
 

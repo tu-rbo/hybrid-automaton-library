@@ -45,26 +45,41 @@ namespace ha {
 		return _name;
 	}
 
-	void ControlSwitch::setSourceControlMode(const std::string& source) {
-		_source_control_mode = source;
+	void ControlSwitch::setSourceControlModeName(const std::string& source) {
+		_source_control_mode_name = source;
 	}
 	
-	const std::string ControlSwitch::getSourceControlMode() const {
-		return _source_control_mode;
+	const std::string ControlSwitch::getSourceControlModeName() const {
+		return _source_control_mode_name;
 	}
 
-	void ControlSwitch::setTargetControlMode(const std::string& target) {
-		_target_control_mode = target;
+	void ControlSwitch::setTargetControlModeName(const std::string& target) {
+		_target_control_mode_name = target;
 	}
-	const std::string ControlSwitch::getTargetControlMode() const {
+	const std::string ControlSwitch::getTargetControlModeName() const {
+		return _target_control_mode_name;
+	}
+
+	void ControlSwitch::setSourceControlMode(const ControlMode::ConstPtr& source) {
+		_source_control_mode = source;
+		_source_control_mode_name = source->getName();
+	}
+	ControlMode::ConstPtr ControlSwitch::getSourceControlMode() const {
+		return _source_control_mode;
+	}
+	void ControlSwitch::setTargetControlMode(const ControlMode::ConstPtr& target) {
+		_target_control_mode = target;
+		_target_control_mode_name = target->getName();
+	}
+	ControlMode::ConstPtr ControlSwitch::getTargetControlMode() const {
 		return _target_control_mode;
 	}
 
 	DescriptionTreeNode::Ptr ControlSwitch::serialize(const DescriptionTree::ConstPtr& factory) const {
 		DescriptionTreeNode::Ptr tree_node = factory->createNode("ControlSwitch");
 		tree_node->setAttribute<std::string>(std::string("name"), this->getName());
-		tree_node->setAttribute<std::string>(std::string("source"), this->getSourceControlMode());
-		tree_node->setAttribute<std::string>(std::string("target"), this->getTargetControlMode());
+		tree_node->setAttribute<std::string>(std::string("source"), this->getSourceControlModeName());
+		tree_node->setAttribute<std::string>(std::string("target"), this->getTargetControlModeName());
 		
 		for (std::vector<JumpConditionPtr>::const_iterator it = _jump_conditions.begin(); it != _jump_conditions.end(); ++it) {
 			DescriptionTreeNode::Ptr jc_node = factory->createNode("JumpCondition");
@@ -82,13 +97,13 @@ namespace ha {
 		}
 
 		tree->getAttribute<std::string>("name", _name, "");
-		tree->getAttribute<std::string>("source", _source_control_mode, "");
-		tree->getAttribute<std::string>("target", _target_control_mode, "");
+		tree->getAttribute<std::string>("source", _source_control_mode_name, "");
+		tree->getAttribute<std::string>("target", _target_control_mode_name, "");
 		
-		if (_source_control_mode == "") {
+		if (_source_control_mode_name == "") {
 			throw "[ControlSwitch::deserialize] source must not be empty!";
 		}
-		if (_target_control_mode == "") {
+		if (_target_control_mode_name == "") {
 			throw "[ControlSwitch::deserialize] target must not be empty!";
 		}
 
