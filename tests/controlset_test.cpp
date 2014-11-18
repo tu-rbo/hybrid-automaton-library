@@ -22,7 +22,7 @@ public:
 
 	MOCK_METHOD0(step, void());
 
-	HA_CONTROLSET_INSTANCE(node, system) {
+	HA_CONTROLSET_INSTANCE(node, system, ha) {
 		return ControlSet::Ptr(new MockRegisteredControlSet);
 	}
 
@@ -65,7 +65,7 @@ TEST(ControlSet, SuccessfulRegistration) {
 	// shared pointers)
 	DescriptionTreeNode::Ptr mockedNodePtr(mockedNode);
 
-	ControlSet::Ptr c = HybridAutomaton::createControlSet(mockedNodePtr, emptySystem);
+	ControlSet::Ptr c = HybridAutomaton::createControlSet(mockedNodePtr, emptySystem, NULL);
 	EXPECT_FALSE(c.get() == NULL);
 	
 	HybridAutomaton::unregisterControlSet(ctrlName1);
@@ -97,7 +97,7 @@ TEST(ControlSet, UnsuccessfulRegistration) {
 
 	// create controller should throw an exception because
 	// FantasyNonRegisteredController was not registered
-	ASSERT_ANY_THROW( HybridAutomaton::createControlSet(mockedNodePtr, emptySystem));
+	ASSERT_ANY_THROW( HybridAutomaton::createControlSet(mockedNodePtr, emptySystem, NULL));
 
 }
 
@@ -111,7 +111,7 @@ class MockSerializableController : public ha::Controller {
 		MOCK_CONST_METHOD1(serialize, DescriptionTreeNode::Ptr (const DescriptionTree::ConstPtr& factory) );
 		MOCK_CONST_METHOD1(deserialize, void (const ha::DescriptionTreeNode::ConstPtr& tree) );
 
-		HA_CONTROLLER_INSTANCE(node, system) {
+		HA_CONTROLLER_INSTANCE(node, system, ha) {
 			return Controller::Ptr(new MockSerializableController);
 		}
 };
@@ -126,7 +126,7 @@ class MockSerializableController : public ha::Controller {
 		MOCK_CONST_METHOD1(serialize, DescriptionTreeNode::Ptr (const DescriptionTree::ConstPtr& factory) );
 		MOCK_CONST_METHOD1(deserialize, void (const ha::DescriptionTreeNode::ConstPtr& tree) );
 
-		HA_CONTROLLER_INSTANCE(node, system) {
+		HA_CONTROLLER_INSTANCE(node, system, ha) {
 			return Controller::Ptr(new MockSerializableController);
 		}
 };

@@ -9,6 +9,7 @@
 #include "hybrid_automaton/Serializable.h"
 #include "hybrid_automaton/System.h"
 #include "hybrid_automaton/HybridAutomatonRegistration.h"
+#include "hybrid_automaton/error_handling.h"
 
 #include <boost/shared_ptr.hpp>
 #include <Eigen/Dense>
@@ -44,7 +45,7 @@ namespace ha {
 		* @brief Activate the controller for execution
 	    */
 		virtual void activate() {
-			throw "not implemented";
+			HA_THROW_ERROR("Controller.activate", "not implemented");
 		}
 
 		/*!
@@ -64,7 +65,7 @@ namespace ha {
 		* Separate items with the '|' character.
 		*/
 		virtual ::Eigen::MatrixXd step(const double& t) {
-			throw "not implemented";
+			HA_THROW_ERROR("Controller.step", "not implemented");
 		}
 
 		/*!
@@ -105,7 +106,7 @@ namespace ha {
 		* \see
 		* Separate items with the '|' character.
 		*/
-		virtual void deserialize(const DescriptionTreeNode::ConstPtr& tree, const System::ConstPtr& system);
+		virtual void deserialize(const DescriptionTreeNode::ConstPtr& tree, const System::ConstPtr& system, const HybridAutomaton* ha);
 
 		/*!
 		* \brief

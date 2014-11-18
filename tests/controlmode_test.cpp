@@ -22,7 +22,7 @@ class MockSerializableControlSet : public ha::ControlSet {
 		MOCK_CONST_METHOD1(serialize, DescriptionTreeNode::Ptr (const DescriptionTree::ConstPtr& factory) );
 		MOCK_CONST_METHOD1(deserialize, void (const ha::DescriptionTreeNode::ConstPtr& tree) );
 
-		HA_CONTROLSET_INSTANCE(node, system) {
+		HA_CONTROLSET_INSTANCE(node, system, ha) {
 			return ControlSet::Ptr(new MockSerializableControlSet);
 		}
 };

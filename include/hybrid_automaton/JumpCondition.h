@@ -2,6 +2,7 @@
 #define HYBRID_AUTOMATON_JUMP_CONDITION_H
 
 #include "hybrid_automaton/Serializable.h"
+#include "hybrid_automaton/error_handling.h"
 
 #include <boost/shared_ptr.hpp>
 
@@ -25,27 +26,40 @@ namespace ha {
     }
 
 	virtual void activate(const double& t) {
-		throw "not implemented";
+		HA_THROW_ERROR("JumpCondition.activate", "not implemented");
 	}
 
 	virtual void deactivate() {
-		throw "not implemented";
+		HA_THROW_ERROR("JumpCondition.deactivate", "not implemented");
 	}
 
 	virtual void step(const double& t) {
-		throw "not implemented";
+		HA_THROW_ERROR("JumpCondition.step", "not implemented");
 	}
 
     virtual bool isActive() const {
-        throw "not implemented";
+		HA_THROW_ERROR("JumpCondition.isActive", "not implemented");
     }
 
 	virtual DescriptionTreeNode::Ptr serialize(const DescriptionTree::ConstPtr& factory) const { return DescriptionTreeNode::Ptr(); };
-	virtual void deserialize(const DescriptionTreeNode::ConstPtr& tree, const System::ConstPtr& system) {};
+
+	/**
+	 * @brief Deserialization for JumpConditions
+	 *
+	 * Do not request the hybrid automaton by calling getHybridAutomaton()!
+	 * It is not guaranteed to be set before calling deserialize.
+	 * 
+	 * The same holds true for _control_switch
+	 * If you need to access object from the graph structure, store the
+	 * names of the entities in a string member and query them in the
+	 * activate() method of your entity.
+	 *   
+	 */
+	virtual void deserialize(const DescriptionTreeNode::ConstPtr& tree, const System::ConstPtr& system, const HybridAutomaton* ha) {};
 
     protected:
 
-    virtual JumpCondition* _doClone() const
+		virtual JumpCondition* _doClone() const
     {
       return (new JumpCondition(*this));
     }

@@ -9,7 +9,7 @@
 
 #include <Eigen/Dense>
 
-#include <vector>
+#include <map>
 
 namespace ha {
 
@@ -35,7 +35,7 @@ namespace ha {
 
 		virtual DescriptionTreeNode::Ptr serialize(const DescriptionTree::ConstPtr& factory) const;
 
-		virtual void deserialize(const DescriptionTreeNode::ConstPtr& tree, const System::ConstPtr& system);
+		virtual void deserialize(const DescriptionTreeNode::ConstPtr& tree, const System::ConstPtr& system, const HybridAutomaton* ha);
 
 		ControlSetPtr clone() const {
 			return ControlSetPtr(_doClone());
@@ -47,12 +47,14 @@ namespace ha {
 
 		void appendController(const Controller::Ptr& controller);
 
-		virtual const std::vector<Controller::Ptr>& getControllers() const;
+		// what is this method for?
+		//virtual const std::vector<Controller::Ptr>& getControllers() const;
 
 		virtual void setName(const std::string& new_name);
 
 		virtual const std::string getName() const;
 
+		virtual Controller::Ptr getControllerByName(const std::string& name) const; 
 
 	protected:
 		virtual ControlSet* _doClone() const {
@@ -64,7 +66,7 @@ namespace ha {
 	protected:
 		std::string						_name;
 		std::string						_type;
-		std::vector<Controller::Ptr>	_controllers;
+		std::map<std::string, Controller::Ptr>	_controllers;
 	};
 
 }

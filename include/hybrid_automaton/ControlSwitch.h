@@ -6,6 +6,7 @@
 #include <vector>
 
 #include "hybrid_automaton/JumpCondition.h" 
+#include "hybrid_automaton/ControlMode.h" 
 #include "hybrid_automaton/Serializable.h"
 
 namespace ha {
@@ -37,13 +38,12 @@ namespace ha {
 	virtual const std::vector<JumpConditionPtr>& getJumpConditions();
 
 	virtual DescriptionTreeNode::Ptr serialize(const DescriptionTree::ConstPtr& factory) const;
-	virtual void deserialize(const DescriptionTreeNode::ConstPtr& tree, const System::ConstPtr& system);
+	virtual void deserialize(const DescriptionTreeNode::ConstPtr& tree, const System::ConstPtr& system, const HybridAutomaton* ha);
 
-	virtual void setSourceControlMode(const std::string& source);
-	virtual const std::string getSourceControlMode() const;
-
-	virtual void setTargetControlMode(const std::string& source);
-	virtual const std::string getTargetControlMode() const;
+	virtual void setSourceControlModeName(const std::string& source);
+	virtual const std::string getSourceControlModeName() const;
+	virtual void setTargetControlModeName(const std::string& target);
+	virtual const std::string getTargetControlModeName() const;
 
 	virtual void setName(const std::string& name);
 	virtual const std::string getName() const;
@@ -51,8 +51,8 @@ namespace ha {
   protected:
     std::vector<JumpConditionPtr> _jump_conditions;
 
-	std::string _source_control_mode;
-	std::string _target_control_mode;
+	std::string _source_control_mode_name;
+	std::string _target_control_mode_name;
 
 	std::string _name;
 

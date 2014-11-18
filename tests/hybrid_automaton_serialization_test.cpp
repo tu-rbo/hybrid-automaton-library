@@ -167,12 +167,8 @@ public:
 	//MOCK_METHOD0(deserialize, void (const DescriptionTreeNode::ConstPtr& tree) );
 	MOCK_CONST_METHOD0(getName, std::string () );
 
-	HA_CONTROLLER_INSTANCE(node, system) {
+	HA_CONTROLLER_INSTANCE(node, system, ha) {
 		Controller::Ptr ctrl(new MockRegisteredController);
-		//EXPECT_CALL(*ctrl, getType())
-		//	.WillRepeatedly(Return("DeserializationOnlyControlModeMockRegisteredController"));
-		//EXPECT_CALL(*ctrl, getName())
-		//	.WillRepeatedly(Return("MyCtrl1"));
 		return ctrl;
 	}
 };
@@ -249,7 +245,7 @@ TEST(HybridAutomaton, DeserializationOnlyControlMode) {
 // =============================================================
 
 namespace DeserializationControlSet {
-
+	
 class MockRegisteredControlSet : public ha::ControlSet {
 public:
 	MockRegisteredControlSet() : ha::ControlSet() {
@@ -257,8 +253,9 @@ public:
 
 	//MOCK_METHOD0(deserialize, void (const DescriptionTreeNode::ConstPtr& tree) );
 	MOCK_CONST_METHOD0(getName, const std::string () );
+	MOCK_CONST_METHOD1(getControllerByName, Controller::Ptr (const std::string& name) );
 
-	HA_CONTROLSET_INSTANCE(node, system) {
+	HA_CONTROLSET_INSTANCE(node, system, ha) {
 		ControlSet::Ptr ctrlSet(new MockRegisteredControlSet);
 		return ctrlSet;
 	}
@@ -395,6 +392,42 @@ TEST_F(HybridAutomatonDeserializationTest, DeserializationSuccessful) {
 	HybridAutomaton ha;
 	ha.deserialize(ha_node, System::Ptr());
 	
+}
+
+
+TEST_F(HybridAutomatonDeserializationTest, GetControlModeAndGetController) {
+	using namespace ha;
+	using namespace std;
+
+	// Mocked ControlSwitch node
+	EXPECT_CALL(*cs_node, getAttributeString(std::string("source"), _))
+		.WillRepeatedly(DoAll(SetArgReferee<1>("CM1"),Return(true)));
+	EXPECT_CALL(*cs_node, getAttributeString(std::string("target"), _))
+		.WillRepeatedly(DoAll(SetArgReferee<1>("CM2"),Return(true)));
+
+	// this will be the node "generated" by the tree
+	HybridAutomaton ha;
+	
+	ha.deserialize(ha_node, System::Ptr());
+
+	ControlMode::Ptr cm = ha.getControlModeByName("CM1");
+	ASSERT_TRUE(cm);
+
+	DeserializationControlSet::MockRegisteredControlSet* mockCm
+		= dynamic_cast <DeserializationControlSet::MockRegisteredControlSet*>(cm->getControlSet().get());
+	ASSERT_TRUE(mockCm != NULL);
+	
+	Controller::Ptr c(new Controller);
+	c->setName("MockedControl");
+	c->setType("MockedControl");
+
+	EXPECT_CALL(*mockCm, getControllerByName(std::string("MyCtrl1")))
+		.WillOnce(Return(c));
+
+	Controller::Ptr cret = ha.getControllerByName("CM1", "MyCtrl1");
+	EXPECT_TRUE(c);
+	EXPECT_EQ("MockedControl", cret->getName());
+	EXPECT_EQ("MockedControl", cret->getType());
 }
 
 TEST_F(HybridAutomatonDeserializationTest, DeserializationUnsuccessful1) {

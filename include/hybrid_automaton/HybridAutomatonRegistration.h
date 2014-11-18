@@ -18,10 +18,10 @@
 //
 // Example:
 //   public:
-//   HA_CONTROLLER_INSTANCE(node, system) {
+//   HA_CONTROLLER_INSTANCE(node, system, ha) {
 //		YourController::Ptr mc(new YourController);
 //		mc->setSystem(system);
-//		mc->deserialize(node, system);
+//		mc->deserialize(node, system, ha);
 //		return mc;
 //   }
 //
@@ -32,14 +32,14 @@
 // deserializing a HybridAutomaton.
 //
 // @see HA_CONTROLLER_REGISTER
-#define HA_CONTROLLER_INSTANCE(NODE_NAME, SYSTEM_NAME) \
+#define HA_CONTROLLER_INSTANCE(NODE_NAME, SYSTEM_NAME, HA_NAME) \
 	class Initializer {\
 	public:\
 	Initializer();\
 	};\
 	static Initializer initializer;\
 	virtual std::string getType() const;\
-	static Controller::Ptr instance(const ::ha::DescriptionTreeNode::ConstPtr NODE_NAME, const ::ha::System::ConstPtr SYSTEM_NAME)
+	static Controller::Ptr instance(const ::ha::DescriptionTreeNode::ConstPtr NODE_NAME, const ::ha::System::ConstPtr SYSTEM_NAME, const ::ha::HybridAutomaton* HA_NAME)
 
 // Registration method for registering your controller with the HybridAutomaton.
 //
@@ -74,10 +74,10 @@
 //
 // Example:
 //   public:
-//   HA_CONTROLSET_INSTANCE(node, system) {
+//   HA_CONTROLSET_INSTANCE(node, system, ha) {
 //		YourControlSet::Ptr mc(new YourControlSet);
 //		mc->setSystem(system);
-//		mc->deserialize(node, system);
+//		mc->deserialize(node, system, ha);
 //		return mc;
 //   }
 //
@@ -86,13 +86,13 @@
 //
 // Internally, this factory method will be called by HybridAutomaton when
 // deserializing a HybridAutomaton.
-#define HA_CONTROLSET_INSTANCE(NODE_NAME, SYSTEM_NAME) \
+#define HA_CONTROLSET_INSTANCE(NODE_NAME, SYSTEM_NAME, HA_NAME) \
 	class Initializer {\
 	public:\
 	Initializer();\
 	};\
 	static Initializer initializer;\
-	static ControlSet::Ptr instance(const ::ha::DescriptionTreeNode::ConstPtr NODE_NAME, const ::ha::System::ConstPtr SYSTEM_NAME)
+	static ControlSet::Ptr instance(const ::ha::DescriptionTreeNode::ConstPtr NODE_NAME, const ::ha::System::ConstPtr SYSTEM_NAME, const ::ha::HybridAutomaton* HA_NAME)
 //	virtual std::string getType() const;\
 
 // Registration method for registering your control set with the HybridAutomaton.

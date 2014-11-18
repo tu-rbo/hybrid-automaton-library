@@ -1,4 +1,6 @@
 #include "hybrid_automaton/DescriptionTreeXML.h"
+#include "hybrid_automaton/error_handling.h"
+
 namespace ha {
 
 	DescriptionTreeXML::DescriptionTreeXML():
@@ -31,7 +33,7 @@ namespace ha {
 		{
 			std::cout << "ERROR CODE: " <<  _tinyxml_document->ErrorId() << std::endl;
 			std::cout << _tinyxml_document->ErrorDesc() << std::endl;
-			throw std::string("[DescriptionTreeXML::initTree] ERROR: Parsing the xml document.");
+			HA_THROW_ERROR("DescriptionTreeXML.initTree", "Parsing the xml document.");
 			return false;
 		}
 		
@@ -40,7 +42,7 @@ namespace ha {
 		
 		// Check if the HybridAutomaton element was found
 		if (this->_root_node == NULL) {
-			throw std::string("[DescriptionTreeXML::initTree] ERROR: undefined");
+			HA_THROW_ERROR("DescriptionTreeXML.initTree", "undefined");
 			return false;
 		}
 		return true;
