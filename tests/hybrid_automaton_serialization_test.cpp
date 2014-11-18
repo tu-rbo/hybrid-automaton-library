@@ -28,7 +28,7 @@ TEST(HybridAutomatonSerialization, setAttributeVector) {
 		3.,
 		4.,
 		5.;
-	std::string goal_exp = "1\n2\n3\n4\n5";
+	std::string goal_exp = "[5,1]1;2;3;4;5";
 
 	EXPECT_CALL(mock_dtn, setAttributeString(std::string("goal"), goal_exp));
 
@@ -41,7 +41,7 @@ TEST(HybridAutomatonSerialization, getAttributeVector) {
 	MockDescriptionTreeNode mock_dtn;
 
 
-	std::string goal_exp = "1\n2\n3\n4\n5";
+	std::string goal_exp = "[5,1]1;2;3;4;5";
 	EXPECT_CALL(mock_dtn, getAttributeString(std::string("goal"), _)).WillOnce(DoAll(SetArgReferee<1>(goal_exp), Return(true)));
 
 	::Eigen::MatrixXd goal_result(1,1);
@@ -65,7 +65,7 @@ TEST(HybridAutomatonSerialization, setAttributeMatrix) {
 
 	::Eigen::MatrixXd goal(5,2);
 	goal << 1.,2.,3.,4.,5, 6.,7.,8.,9.,10.;
-	std::string goal_exp = " 1  2\n 3  4\n 5  6\n 7  8\n 9 10";
+	std::string goal_exp = "[5,2]1,2;3,4;5,6;7,8;9,10";
 
 	EXPECT_CALL(mock_dtn, setAttributeString(std::string("goal"), goal_exp));
 
@@ -78,7 +78,7 @@ TEST(HybridAutomatonSerialization, getAttributeMatrix) {
 	MockDescriptionTreeNode mock_dtn;
 
 
-	std::string goal_exp = "1 2\n3 4\n5 6\n7 8\n9 10";
+	std::string goal_exp = "[5,2]1,2;3,4;5,6;7,8;9,10";
 	EXPECT_CALL(mock_dtn, getAttributeString(std::string("goal"), _)).WillOnce(DoAll(SetArgReferee<1>(goal_exp), Return(true)));
 
 	::Eigen::MatrixXd goal_result(1,1);

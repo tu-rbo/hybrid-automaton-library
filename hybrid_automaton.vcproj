@@ -183,6 +183,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\HybridAutomatonOStringStream.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\TimeCondition.cpp"
 				>
 			</File>
@@ -226,6 +230,10 @@
 			</File>
 			<File
 				RelativePath=".\include\hybrid_automaton\HybridAutomaton.h"
+				>
+			</File>
+			<File
+				RelativePath=".\include\hybrid_automaton\HybridAutomatonOStringStream.h"
 				>
 			</File>
 			<File
