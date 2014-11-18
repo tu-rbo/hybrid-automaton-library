@@ -24,7 +24,7 @@ namespace ha {
 		controller_type_map.erase(it);
 	}
 
-	Controller::Ptr HybridAutomaton::createController(DescriptionTreeNode::Ptr node, System::Ptr system) {
+	Controller::Ptr HybridAutomaton::createController(const DescriptionTreeNode::ConstPtr& node, const System::ConstPtr& system) {
 		if (node->getType() != "Controller") {
 			std::stringstream ss;
 			ss << "[HybridAutomaton::createController] DescriptionTreeNode must have type 'Controller', not '" << node->getType() << "'!";
@@ -57,7 +57,7 @@ namespace ha {
 		return ( controlset_type_map.find(ctrl_type) != controlset_type_map.end() );
 	}
 
-	ControlSet::Ptr HybridAutomaton::createControlSet(DescriptionTreeNode::Ptr node, System::Ptr system) {
+	ControlSet::Ptr HybridAutomaton::createControlSet(const DescriptionTreeNode::ConstPtr& node, const System::ConstPtr& system) {
 		if (node->getType() != "ControlSet") {
 			std::stringstream ss;
 			ss << "[HybridAutomaton::createControlSet] DescriptionTreeNode must have type 'ControlSet', not '" << node->getType() << "'!";
@@ -157,7 +157,7 @@ namespace ha {
 		return tree_node;
 	}
 
-	void HybridAutomaton::deserialize(const DescriptionTreeNode::ConstPtr& tree){
+	void HybridAutomaton::deserialize(const DescriptionTreeNode::ConstPtr& tree, const System::ConstPtr& system){
 		if (tree->getType() != "HybridAutomaton") {
 			std::stringstream ss;
 			ss << "[HybridAutomaton::deserialize] DescriptionTreeNode must have type 'HybridAutomaton', not '" << tree->getType() << "'!";
@@ -177,7 +177,7 @@ namespace ha {
 		DescriptionTreeNode::ConstNodeList::iterator cm_it;
 		for (cm_it = control_modes.begin(); cm_it != control_modes.end(); ++cm_it) {
 			ControlMode::Ptr cm(new ControlMode);
-			cm->deserialize(*cm_it);
+			cm->deserialize(*cm_it, system);
 			this->addControlMode(cm);
 		}
 
@@ -187,7 +187,7 @@ namespace ha {
 		DescriptionTreeNode::ConstNodeList::iterator cs_it;
 		for (cs_it = control_switches.begin(); cs_it != control_switches.end(); ++cs_it) {
 			ControlSwitch::Ptr cs(new ControlSwitch);
-			cs->deserialize(*cs_it);
+			cs->deserialize(*cs_it, system);
 			// TODO check if source and target are in graph
 			this->addControlSwitch(cs->getSourceControlMode(),  
 				cs, cs->getTargetControlMode());

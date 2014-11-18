@@ -35,7 +35,7 @@ namespace ha {
 		return DescriptionTreeNode::Ptr();
 	}
 	
-	void TimeCondition::deserialize(const DescriptionTreeNode::ConstPtr& tree) {
+	void TimeCondition::deserialize(const DescriptionTreeNode::ConstPtr& tree, const System::ConstPtr& system) {
 		// TODO
 	}
 

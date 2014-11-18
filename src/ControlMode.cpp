@@ -20,7 +20,7 @@ namespace ha {
 		return tree_node;
 	}
 	
-	void ControlMode::deserialize(const DescriptionTreeNode::ConstPtr& tree) {
+	void ControlMode::deserialize(const DescriptionTreeNode::ConstPtr& tree, const System::ConstPtr& system) {
 		if (tree->getType() != "ControlMode") {
 			std::stringstream ss;
 			ss << "[ControlMode::deserialize] DescriptionTreeNode must have type 'ControlMode', not '" << tree->getType() << "'!";
@@ -40,8 +40,6 @@ namespace ha {
 			throw "[ControlMode::deserialize] Too many (>1) control sets found!";
 		}
 
-		// TODO pass System!
-		System::Ptr system; // FIXME
 		DescriptionTreeNode::Ptr first = * (control_set.begin());
 		this->_control_set = HybridAutomaton::createControlSet( first, system);
 

@@ -54,7 +54,7 @@ namespace ha {
 		}    
 
 		virtual DescriptionTreeNode::Ptr serialize(const DescriptionTree::ConstPtr& factory) const;
-		virtual void deserialize(const DescriptionTreeNode::ConstPtr& tree);
+		virtual void deserialize(const DescriptionTreeNode::ConstPtr& tree, const System::ConstPtr& system);
 
 		ControlModePtr clone() const {
 			return ControlModePtr(_doClone());

@@ -7,6 +7,7 @@ namespace ha {
 
 	class System;
 	typedef boost::shared_ptr<System> SystemPtr;
+	typedef boost::shared_ptr<const System> SystemConstPtr;
 
 	class System {
 
@@ -14,6 +15,7 @@ namespace ha {
 
 	public:
 		typedef boost::shared_ptr<System> Ptr;
+		typedef boost::shared_ptr<const System> ConstPtr;
 
 		System() {
 		}

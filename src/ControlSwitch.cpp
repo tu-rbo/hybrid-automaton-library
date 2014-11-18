@@ -74,7 +74,7 @@ namespace ha {
 		return tree_node;
 	}
 	
-	void ControlSwitch::deserialize(const DescriptionTreeNode::ConstPtr& tree) {
+	void ControlSwitch::deserialize(const DescriptionTreeNode::ConstPtr& tree, const System::ConstPtr& system) {
 		if (tree->getType() != "ControlSwitch") {
 			std::stringstream ss;
 			ss << "[ControlSwitch::deserialize] DescriptionTreeNode must have type 'ControlSwitch', not '" << tree->getType() << "'!";
@@ -102,7 +102,7 @@ namespace ha {
 		DescriptionTreeNode::ConstNodeList::iterator js_it;
 		for (js_it = jump_conditions.begin(); js_it != jump_conditions.end(); ++js_it) {
 			JumpCondition::Ptr js(new JumpCondition);
-			js->deserialize(*js_it);
+			js->deserialize(*js_it, system);
 			this->add(js);
 		}
 	}

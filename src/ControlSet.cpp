@@ -44,7 +44,7 @@ namespace ha {
 		return tree;
 	}
 
-	void ControlSet::deserialize(const DescriptionTreeNode::ConstPtr& tree) {
+	void ControlSet::deserialize(const DescriptionTreeNode::ConstPtr& tree, const System::ConstPtr& system) {
 		if (tree->getType() != "ControlSet") {
 			std::stringstream ss;
 			ss << "[ControlSet::deserialize] DescriptionTreeNode must have type 'ControlSet', not '" << tree->getType() << "'!";

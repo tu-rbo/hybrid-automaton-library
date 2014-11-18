@@ -393,6 +393,47 @@ TEST_F(HybridAutomatonDeserializationTest, DeserializationSuccessful) {
 
 	// this will be the node "generated" by the tree
 	HybridAutomaton ha;
-	ha.deserialize(ha_node);
+	ha.deserialize(ha_node, System::Ptr());
 	
 }
+
+/*
+TEST_F(HybridAutomatonDeserializationTest, DeserializationUnsuccessful1) {
+	using namespace ha;
+	using namespace std;
+
+	// Mocked ControlSwitch node
+	EXPECT_CALL(*cs_node, getAttributeString(std::string("source"), _))
+		.WillRepeatedly(DoAll(SetArgReferee<1>("CM1"),Return(true)));
+
+	// setting inexistent target
+	EXPECT_CALL(*cs_node, getAttributeString(std::string("target"), _))
+		.WillRepeatedly(DoAll(SetArgReferee<1>("Fantasia"),Return(true)));
+
+	// this will be the node "generated" by the tree
+	HybridAutomaton ha;
+	
+	ASSERT_ANY_THROW(ha.deserialize(ha_node, System::Ptr()));
+	
+}
+
+TEST_F(HybridAutomatonDeserializationTest, DeserializationUnsuccessful1) {
+	using namespace ha;
+	using namespace std;
+
+	// Mocked ControlSwitch node
+	// setting inexistent target
+	EXPECT_CALL(*cs_node, getAttributeString(std::string("source"), _))
+		.WillRepeatedly(DoAll(SetArgReferee<1>("Fantasia"),Return(true)));
+
+	// setting inexistent target
+	EXPECT_CALL(*cs_node, getAttributeString(std::string("target"), _))
+		.WillRepeatedly(DoAll(SetArgReferee<1>("CM2"),Return(true)));
+
+	// this will be the node "generated" by the tree
+	HybridAutomaton ha;
+	
+	ASSERT_ANY_THROW(ha.deserialize(ha_node, System::Ptr()));
+	
+}
+*/

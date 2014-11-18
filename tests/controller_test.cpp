@@ -17,7 +17,7 @@ public:
 
 	HA_CONTROLLER_INSTANCE(node, system) {
 		Controller::Ptr ctrl(new MockRegisteredController);
-		ctrl->deserialize(node);
+		ctrl->deserialize(node, system);
 		return ctrl;
 	}
 };
@@ -112,7 +112,7 @@ public:
 
 	HA_CONTROLLER_INSTANCE(node, system) {
 		Controller::Ptr ctrl(new CSMockSerializableController);
-		ctrl->deserialize(node);
+		ctrl->deserialize(node, system);
 		return ctrl;
 	}
 };

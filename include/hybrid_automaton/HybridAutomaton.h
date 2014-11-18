@@ -36,8 +36,8 @@ namespace ha {
 		typedef boost::shared_ptr<HybridAutomaton> Ptr;
 		typedef boost::shared_ptr<const HybridAutomaton> ConstPtr;
 
-		typedef ::ha::Controller::Ptr (*ControllerCreator) (::ha::DescriptionTreeNode::Ptr, ::ha::System::Ptr);
-		typedef ::ha::ControlSet::Ptr (*ControlSetCreator) (::ha::DescriptionTreeNode::Ptr, ::ha::System::Ptr);
+		typedef ::ha::Controller::Ptr (*ControllerCreator) (const ::ha::DescriptionTreeNode::ConstPtr, const ::ha::System::ConstPtr);
+		typedef ::ha::ControlSet::Ptr (*ControlSetCreator) (const ::ha::DescriptionTreeNode::ConstPtr, const ::ha::System::ConstPtr);
 
 		// a directed labeled graph based on an adjacency list
 		typedef ::boost::labeled_graph< boost::adjacency_list< boost::vecS, boost::vecS, boost::directedS, ControlMode::Ptr, ControlSwitch::Ptr >, std::string > Graph;
@@ -83,14 +83,14 @@ namespace ha {
 		 *
 		 * In order to work you must register your controller properly
 		 */
-		static Controller::Ptr createController(DescriptionTreeNode::Ptr node, System::Ptr system);
+		static Controller::Ptr createController(const DescriptionTreeNode::ConstPtr& node, const System::ConstPtr& system);
 
 		/** 
 		 * @brief Instantiate a control set of given type 
 		 *
 		 * In order to work you must register your control set properly
 		 */
-		static ControlSet::Ptr createControlSet(DescriptionTreeNode::Ptr node, System::Ptr system);
+		static ControlSet::Ptr createControlSet(const DescriptionTreeNode::ConstPtr& node, const System::ConstPtr& system);
 
 		/**
 		 * @brief Register a controller with the hybrid automaton
@@ -162,7 +162,7 @@ namespace ha {
 		ControlMode::Ptr getCurrentControlMode() const;
 
 		virtual DescriptionTreeNode::Ptr serialize(const DescriptionTree::ConstPtr& factory) const;
-		virtual void deserialize(const DescriptionTreeNode::ConstPtr& tree);
+		virtual void deserialize(const DescriptionTreeNode::ConstPtr& tree, const System::ConstPtr& system);
 
 		HybridAutomatonPtr clone() const {
 			return HybridAutomatonPtr(_doClone());

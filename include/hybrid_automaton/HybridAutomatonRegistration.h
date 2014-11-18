@@ -21,7 +21,7 @@
 //   HA_CONTROLLER_INSTANCE(node, system) {
 //		YourController::Ptr mc(new YourController);
 //		mc->setSystem(system);
-//		mc->deserialize(node);
+//		mc->deserialize(node, system);
 //		return mc;
 //   }
 //
@@ -39,7 +39,7 @@
 	};\
 	static Initializer initializer;\
 	virtual std::string getType() const;\
-	static Controller::Ptr instance(::ha::DescriptionTreeNode::Ptr NODE_NAME, ::ha::System::Ptr SYSTEM_NAME)
+	static Controller::Ptr instance(const ::ha::DescriptionTreeNode::ConstPtr NODE_NAME, const ::ha::System::ConstPtr SYSTEM_NAME)
 
 // Registration method for registering your controller with the HybridAutomaton.
 //
@@ -77,7 +77,7 @@
 //   HA_CONTROLSET_INSTANCE(node, system) {
 //		YourControlSet::Ptr mc(new YourControlSet);
 //		mc->setSystem(system);
-//		mc->deserialize(node);
+//		mc->deserialize(node, system);
 //		return mc;
 //   }
 //
@@ -92,7 +92,7 @@
 	Initializer();\
 	};\
 	static Initializer initializer;\
-	static ControlSet::Ptr instance(::ha::DescriptionTreeNode::Ptr NODE_NAME, ::ha::System::Ptr SYSTEM_NAME)
+	static ControlSet::Ptr instance(const ::ha::DescriptionTreeNode::ConstPtr NODE_NAME, const ::ha::System::ConstPtr SYSTEM_NAME)
 //	virtual std::string getType() const;\
 
 // Registration method for registering your control set with the HybridAutomaton.

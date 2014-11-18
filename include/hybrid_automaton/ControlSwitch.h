@@ -37,7 +37,7 @@ namespace ha {
 	virtual const std::vector<JumpConditionPtr>& getJumpConditions();
 
 	virtual DescriptionTreeNode::Ptr serialize(const DescriptionTree::ConstPtr& factory) const;
-	virtual void deserialize(const DescriptionTreeNode::ConstPtr& tree);
+	virtual void deserialize(const DescriptionTreeNode::ConstPtr& tree, const System::ConstPtr& system);
 
 	virtual void setSourceControlMode(const std::string& source);
 	virtual const std::string getSourceControlMode() const;

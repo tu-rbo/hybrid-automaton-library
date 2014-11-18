@@ -39,7 +39,7 @@ DescriptionTreeNode::Ptr Controller::serialize(const DescriptionTree::ConstPtr& 
 	return tree;
 }
 
-void Controller::deserialize(const DescriptionTreeNode::ConstPtr& tree) 
+void Controller::deserialize(const DescriptionTreeNode::ConstPtr& tree, const System::ConstPtr& system) 
 {
 	if (tree->getType() != "Controller") {
 		std::stringstream ss;

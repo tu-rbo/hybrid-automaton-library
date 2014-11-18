@@ -105,7 +105,7 @@ namespace ha {
 		* \see
 		* Separate items with the '|' character.
 		*/
-		virtual void deserialize(const DescriptionTreeNode::ConstPtr& tree);
+		virtual void deserialize(const DescriptionTreeNode::ConstPtr& tree, const System::ConstPtr& system);
 
 		/*!
 		* \brief
