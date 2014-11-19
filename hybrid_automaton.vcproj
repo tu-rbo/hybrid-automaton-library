@@ -245,6 +245,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\include\hybrid_automaton\ForceCondition.h"
+				>
+			</File>
+			<File
 				RelativePath=".\include\hybrid_automaton\HybridAutomaton.h"
 				>
 			</File>
@@ -258,6 +262,10 @@
 			</File>
 			<File
 				RelativePath=".\include\hybrid_automaton\JumpCondition.h"
+				>
+			</File>
+			<File
+				RelativePath=".\include\hybrid_automaton\Sensor.h"
 				>
 			</File>
 			<File
