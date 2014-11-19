@@ -24,7 +24,6 @@ namespace ha {
 		}
 
 		virtual ::Eigen::MatrixXd getConfiguration() const = 0;
-		virtual ::Eigen::MatrixXd getEEFrame() const = 0;
 		virtual int getDof() const = 0;
 		virtual ::Eigen::MatrixXd getForceTorqueMeasurement() const = 0;
 		virtual ::Eigen::MatrixXd getCurrentTime() const = 0;
