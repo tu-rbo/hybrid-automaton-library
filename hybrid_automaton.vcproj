@@ -191,6 +191,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\JumpCondition.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\TimeCondition.cpp"
 				>
 			</File>

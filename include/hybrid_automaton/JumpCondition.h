@@ -19,9 +19,14 @@ namespace ha {
 
 		typedef boost::shared_ptr<JumpCondition> Ptr;
 
-		JumpCondition(){};
+		JumpCondition();
 
-		virtual ~JumpCondition() {};
+		virtual ~JumpCondition();
+
+		/*!
+		* Copy constructor
+		*/
+		JumpCondition(const JumpCondition& jc);
 
 		JumpConditionPtr clone() const
 		{
@@ -29,53 +34,41 @@ namespace ha {
 		};
 
 		virtual void activate(const double& t) {
-		HA_THROW_ERROR("JumpCondition.activate", "not implemented");
+			HA_THROW_ERROR("JumpCondition.activate", "not implemented");
 		};
 
 		virtual void deactivate() {
-		HA_THROW_ERROR("JumpCondition.deactivate", "not implemented");
+			HA_THROW_ERROR("JumpCondition.deactivate", "not implemented");
 		};
 
 		virtual void step(const double& t) {
-		HA_THROW_ERROR("JumpCondition.step", "not implemented");
+			HA_THROW_ERROR("JumpCondition.step", "not implemented");
 		};
 
 		virtual bool isActive() const {
-		HA_THROW_ERROR("JumpCondition.isActive", "not implemented");
+			HA_THROW_ERROR("JumpCondition.isActive", "not implemented");
 		};
 
-		virtual void setControllerGoal(const Controller* controller){_controller = controller;};
-		virtual void setConstantGoal(const ::Eigen::MatrixXd goal){_goal = goal;};
+		virtual void setControllerGoal(const Controller* controller);
+		virtual void setConstantGoal(const ::Eigen::MatrixXd goal);
 
-		virtual ::Eigen::MatrixXd getGoal() const	
-		{
-			if(_controller)
-				return _controller->getGoal();
-			else
-				return _goal;
-		};
+		virtual ::Eigen::MatrixXd JumpCondition::getGoal() const;
 
-		virtual DescriptionTreeNode::Ptr serialize(const DescriptionTree::ConstPtr& factory) const { return DescriptionTreeNode::Ptr(); };
+		virtual std::string getType() const;
 
-	/**
-	 * @brief Deserialization for JumpConditions
-	 *
-	 * Do not request the hybrid automaton by calling getHybridAutomaton()!
-	 * It is not guaranteed to be set before calling deserialize.
-	 * 
-	 * The same holds true for _control_switch
-	 * If you need to access object from the graph structure, store the
-	 * names of the entities in a string member and query them in the
-	 * activate() method of your entity.
-	 *   
-	 */
-	virtual void deserialize(const DescriptionTreeNode::ConstPtr& tree, const System::ConstPtr& system, const HybridAutomaton* ha) {};
+		virtual void setType(const std::string& new_type);
+
+		virtual DescriptionTreeNode::Ptr serialize(const DescriptionTree::ConstPtr& factory) const;
+
+		virtual void deserialize(const DescriptionTreeNode::ConstPtr& tree, const System::ConstPtr& system, const HybridAutomaton* ha);
 
 	protected:
 		System::ConstPtr _system;
 
+		std::string		  _type;
+		
 		const Controller* _controller;
-		::Eigen::MatrixXd _goal;
+		boost::shared_ptr<const ::Eigen::MatrixXd> _goal;
 
 		virtual JumpCondition* _doClone() const
 		{

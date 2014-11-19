@@ -29,7 +29,7 @@ namespace ha {
 	void ConfigurationConvergenceCondition::setEpsilon(::Eigen::MatrixXd epsilon)
 	{
 		if(epsilon.rows() != 1 || epsilon.cols() != _system->getDof())
-			HA_THROW_ERROR("ConfigurationConvergenceCondition::setEpsilon", "Wrong dimensions: "); 
+			HA_THROW_ERROR("ConfigurationConvergenceCondition::setEpsilon", "Wrong dimensions of epsilon"); 
 		_epsilon = epsilon;
 	}
 
