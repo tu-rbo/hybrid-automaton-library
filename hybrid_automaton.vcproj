@@ -151,6 +151,10 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
+				RelativePath=".\src\ClockSensor.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\ConfigurationConvergenceCondition.cpp"
 				>
 			</File>
@@ -187,6 +191,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\FramePoseSensor.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\HybridAutomaton.cpp"
 				>
 			</File>
@@ -200,10 +208,6 @@
 			</File>
 			<File
 				RelativePath=".\src\JumpCondition.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\src\TimeCondition.cpp"
 				>
 			</File>
 		</Filter>
@@ -294,10 +298,6 @@
 			</File>
 			<File
 				RelativePath=".\include\hybrid_automaton\System.h"
-				>
-			</File>
-			<File
-				RelativePath=".\include\hybrid_automaton\TimeCondition.h"
 				>
 			</File>
 		</Filter>
