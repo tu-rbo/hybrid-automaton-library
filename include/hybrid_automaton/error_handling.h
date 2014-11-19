@@ -12,6 +12,7 @@
 #define HA_THROW_ERROR(logger_name, args)\
 { std::ostringstream __os__;\
 __os__ << HA_STREAM(logger_name, args, "ERROR") << std::endl;\
+std::cerr << __os__.str() << std::endl;\
 throw __os__.str(); }
 
 #endif

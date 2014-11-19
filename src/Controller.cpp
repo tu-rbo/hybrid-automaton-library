@@ -23,6 +23,7 @@ Controller::Controller(const ha::Controller &controller)
 	this->_goal = controller._goal;
 	this->_kp = controller._kp;
 	this->_kv = controller._kv;
+	this->_completion_time = controller._completion_time;
 	this->_name = controller._name;
 }
 
@@ -36,6 +37,12 @@ DescriptionTreeNode::Ptr Controller::serialize(const DescriptionTree::ConstPtr& 
 	tree->setAttribute<Eigen::MatrixXd>(std::string("goal"), this->_goal);
 	tree->setAttribute<Eigen::MatrixXd>(std::string("kp"), this->_kp);
 	tree->setAttribute<Eigen::MatrixXd>(std::string("kv"), this->_kv);
+	tree->setAttribute<double>(std::string("completion_time"), this->_completion_time);
+
+	std::map<std::string, std::string>::const_iterator it;
+	for (it = this->_additional_arguments.begin(); it != this->_additional_arguments.end(); ++it) {
+		tree->setAttribute(it->first, it->second);
+	}
 
 	return tree;
 }
@@ -56,20 +63,13 @@ void Controller::deserialize(const DescriptionTreeNode::ConstPtr& tree, const Sy
 	// TODO register object with HybridAutomaton / check that it is unique!
 
 	// FIXME nicer error handling, sir?
-	if(!tree->getAttribute<Eigen::MatrixXd>(std::string("goal"), this->_goal))
-	{
-		std::cout << "error" <<std::endl;
-	}
+	tree->getAttribute<Eigen::MatrixXd>(std::string("goal"), this->_goal);
+	tree->getAttribute<Eigen::MatrixXd>(std::string("kp"), this->_kp);
+	tree->getAttribute<Eigen::MatrixXd>(std::string("kv"), this->_kv);
+	tree->getAttribute<double>(std::string("completion_time"), this->_completion_time, 0.);
 
-	if(!tree->getAttribute<Eigen::MatrixXd>(std::string("kp"), this->_kp))
-	{
-		std::cout << "error" <<std::endl;
-	}
-
-	if(!tree->getAttribute<Eigen::MatrixXd>(std::string("kv"), this->_kv))
-	{
-		std::cout << "error" <<std::endl;
-	}
+	// write all arguments into "_additional_arguments" field
+	tree->getAllAttributes(_additional_arguments);
 }
 
 int Controller::getDimensionality() const
@@ -105,6 +105,15 @@ Eigen::MatrixXd Controller::getKv() const
 void Controller::setKv(const Eigen::MatrixXd& new_kv)
 {
 	this->_kv = new_kv;
+}
+
+void Controller::setCompletionTime(const double& t)
+{
+	this->_completion_time = t;
+}
+double Controller::getCompletionTime() const 
+{
+	return this->_completion_time;
 }
 
 std::string Controller::getName() const

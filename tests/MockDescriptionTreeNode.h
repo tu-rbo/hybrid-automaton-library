@@ -14,6 +14,7 @@ namespace ha {
 		MOCK_CONST_METHOD2(getAttributeString, bool (const std::string& field_name, std::string& field_value) );
 		MOCK_CONST_METHOD2(getChildrenNodes, bool (const std::string& type, ConstNodeList& children) );
 		MOCK_CONST_METHOD1(getChildrenNodes, bool (ConstNodeList& children) );
+		MOCK_CONST_METHOD1(getAllAttributes, void (std::map<std::string, std::string> & attrs) );
 
 		MOCK_METHOD2(setAttributeString, void (const std::string& field_name, const std::string& field_value) );
 		MOCK_METHOD1(addChildNode, void (const DescriptionTreeNode::Ptr& child) );
