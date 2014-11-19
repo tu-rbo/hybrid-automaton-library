@@ -237,7 +237,7 @@
 				>
 			</File>
 			<File
-				RelativePath=".\error_handling.h"
+				RelativePath=".\include\hybrid_automaton\error_handling.h"
 				>
 			</File>
 			<File

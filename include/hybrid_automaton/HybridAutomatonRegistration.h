@@ -90,6 +90,7 @@
 	class Initializer {\
 	public:\
 	Initializer();\
+	static void ping() {};\
 	};\
 	static Initializer initializer;\
 	virtual const std::string getType() const;\
