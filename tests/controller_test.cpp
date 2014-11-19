@@ -68,6 +68,9 @@ TEST(Controller, SuccessfulRegistration) {
 		.Times(AtLeast(1))
 		.WillRepeatedly(DoAll(SetArgReferee<1>(ctrlName),Return(true)));
 
+	EXPECT_CALL(*mockedNode, getAllAttributes(_))
+		.Times(AtLeast(1));
+
 	// wrap mockedNode into a smart pointer to pass to 
 	// HybridAutomaton::createController.
 	// (google mock somewhat does not like to use EXPECT_CALL with
@@ -128,16 +131,24 @@ HA_CONTROLLER_REGISTER("CSMockSerializableController", CSMockSerializableControl
 
 }
 
+void _fillMap(std::map<std::string, std::string> & add_args) {
+	add_args["extra_arg"] = "extra_val";
+}
+
 TEST(Controller, Serialization) {
 	using namespace ha;
 	using namespace std;
 
 	string ctrlType("CSMockSerializableController");
 
+	std::map<std::string, std::string> add_args;
+	_fillMap(add_args);
+
 	// Controller to be serialized
 	Controller::Ptr ctrl(new Controller);
 	ctrl->setType(ctrlType);
 	ctrl->setName("myCtrl");
+	ctrl->setArgument("extra_arg", add_args["extra_arg"]);
 
 	MockDescriptionTree::Ptr tree(new MockDescriptionTree);
 
@@ -145,21 +156,56 @@ TEST(Controller, Serialization) {
 	MockDescriptionTreeNode::Ptr ctrl_node(new MockDescriptionTreeNode);
 
 	EXPECT_CALL(*ctrl_node, setAttributeString(_, _))
-		.Times(AtLeast(2)); // name & type (we don't care about parameters yet here)
+		.Times(AtLeast(0)); // we don't care about parameters yet here
+	EXPECT_CALL(*ctrl_node, setAttributeString("name", "myCtrl"))
+		.Times(1);
+	EXPECT_CALL(*ctrl_node, setAttributeString("extra_arg", add_args["extra_arg"]))
+		.Times(1);
 
+	EXPECT_CALL(*tree, createNode("Controller"))
+		.Times(1)
+		.WillOnce(Return(ctrl_node));
+
+	ctrl->serialize(tree);
+}
+
+TEST(Controller, Deserialization) {
+	using ::testing::Invoke;
+
+	string ctrlType("CSMockSerializableController");
+
+	std::map<std::string, std::string> add_args;
+	_fillMap(add_args);
+
+	// Controller to be serialized
+	MockDescriptionTree::Ptr tree(new MockDescriptionTree);
+
+	// Mocked description returned by controller
+	MockDescriptionTreeNode::Ptr ctrl_node(new MockDescriptionTreeNode);
+
+	// deserialization - who calls all these methods?!
 	EXPECT_CALL(*ctrl_node, getType()).WillRepeatedly(Return("Controller"));
 	EXPECT_CALL(*ctrl_node, getAttributeString(_, _))
 		.WillRepeatedly(Return(false));
 	EXPECT_CALL(*ctrl_node, getAttributeString(std::string("type"), _))
-		.WillRepeatedly(DoAll(SetArgReferee<1>("myCtrl"),Return(true)));
-	EXPECT_CALL(*ctrl_node, getAttributeString(std::string("name"), _))
 		.WillRepeatedly(DoAll(SetArgReferee<1>(ctrlType),Return(true)));
+	EXPECT_CALL(*ctrl_node, getAttributeString(std::string("name"), _))
+		.WillRepeatedly(DoAll(SetArgReferee<1>("myCtrl"),Return(true)));
+	EXPECT_CALL(*ctrl_node, getAllAttributes(_))
+		.WillOnce(Invoke(_fillMap));
 
-	EXPECT_CALL(*tree, createNode("Controller"))
-		.WillOnce(Return(ctrl_node));
+	Controller::Ptr ctrl(new Controller);
 
-	ctrl->serialize(tree);
+	ctrl->deserialize(ctrl_node, System::Ptr(), NULL);
+
+	EXPECT_EQ("myCtrl", ctrl->getName());
+	EXPECT_EQ(ctrlType, ctrl->getType());
+
+	std::string val;
+	ctrl->getArgument("extra_arg", val);
+	EXPECT_EQ(add_args["extra_arg"], val);
 
 	HybridAutomaton::unregisterController(ctrlType);
 	EXPECT_FALSE(HybridAutomaton::isControllerRegistered(ctrlType));
+
 }
