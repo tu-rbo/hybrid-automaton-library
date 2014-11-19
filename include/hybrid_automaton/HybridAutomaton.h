@@ -168,11 +168,11 @@ namespace ha {
 		}
 		virtual void deserialize(const DescriptionTreeNode::ConstPtr& tree, const System::ConstPtr& system, const HybridAutomaton* ha);
 
-		virtual bool existsControlMode(const std::string& control_mode);
+		virtual bool existsControlMode(const std::string& control_mode) const;
 
-		virtual Controller::Ptr getControllerByName(const std::string& control_mode_name, const std::string& controller_name);
+		virtual Controller::Ptr getControllerByName(const std::string& control_mode_name, const std::string& controller_name) const;
 
-		virtual ControlMode::Ptr getControlModeByName(const std::string& control_mode_name);
+		virtual ControlMode::Ptr getControlModeByName(const std::string& control_mode_name) const;
 
 		HybridAutomatonPtr clone() const {
 			return HybridAutomatonPtr(_doClone());

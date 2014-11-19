@@ -250,10 +250,12 @@ protected:
 		js_node.reset(new MockDescriptionTreeNode);
 		EXPECT_CALL(*js_node, getType())
 			.WillRepeatedly(Return("JumpCondition"));
-		EXPECT_CALL(*js_node, getAttributeString(std::string("name"), _))
-			.WillRepeatedly(DoAll(SetArgReferee<1>(""),Return(true)));
+		EXPECT_CALL(*js_node, getAttributeString(std::string("controller"), _))
+			.WillRepeatedly(Return(false));
+		EXPECT_CALL(*js_node, getAttributeString(std::string("goal"), _))
+			.WillRepeatedly(Return(false));
 		EXPECT_CALL(*js_node, getAttributeString(std::string("type"), _))
-			.WillRepeatedly(DoAll(SetArgReferee<1>("JumpCondition"),Return(true)));
+			.WillRepeatedly(DoAll(SetArgReferee<1>("ConfigurationConvergenceCondition"),Return(true)));
 
 		js_list.push_back(js_node);
 
@@ -331,6 +333,9 @@ TEST_F(HybridAutomatonDeserializationTest, GetControlModeAndGetController) {
 	HybridAutomaton ha;
 	
 	ha.deserialize(ha_node, System::Ptr());
+
+	ASSERT_TRUE(ha.existsControlMode("CM1"));
+	ASSERT_FALSE(ha.existsControlMode("notCM1"));
 
 	ControlMode::Ptr cm = ha.getControlModeByName("CM1");
 	ASSERT_TRUE(cm);
