@@ -55,12 +55,12 @@ namespace ha {
 		virtual void deserialize(const DescriptionTreeNode::ConstPtr& tree, const System::ConstPtr& system, const HybridAutomaton* ha);
 
 	protected:
-		System::ConstPtr _system;
-				
+
+		//TODO enum CONST, CONTROLLER, ROSTOPIC
 		const Controller* _controller;
 		boost::shared_ptr<const ::Eigen::MatrixXd> _goal;
 
-		boost::shared_ptr<const ha::Sensor> _sensor;
+		Sensor::ConstPtr _sensor;
 
 		Norm	_normType;
 

@@ -82,16 +82,16 @@ namespace ha {
 				}
 				break;
 			case ROTATION:
-				HA_THROW_ERROR("JumpCondition._computeNorm", "Not Implemented");
+				HA_THROW_ERROR("JumpCondition._computeNorm", "Not Implemented: ROTATION");
 				break;
 			case TRANSFORM:
-				HA_THROW_ERROR("JumpCondition._computeNorm", "Not Implemented");
+				HA_THROW_ERROR("JumpCondition._computeNorm", "Not Implemented: TRANSFORM");
 				break;
 			default:
-				HA_THROW_ERROR("JumpCondition._computeNorm", "Not Implemented");
+				HA_THROW_ERROR("JumpCondition._computeNorm", "Not Implemented: unknown norm");
 		}
 
-			return ret;
+		return ret;
 	}
 
 	void JumpCondition::setControllerGoal(const Controller* controller)
@@ -131,12 +131,14 @@ namespace ha {
 			HA_THROW_ERROR("JumpCondition.deserialize", "JumpCondition must have type 'JumpCondition', not '" << tree->getType() << "'!");
 		}
 
-		//TODO!!!
-		//if (_type == "" || !HybridAutomaton::isJumpConditionRegistered(_type)) {
-		//	HA_THROW_ERROR("JumpCondition.deserialize", "JumpCondition type '" << _type << "' "
-		//	   << "invalid - empty or not registered with HybridAutomaton!");
-		//}
+		//////////////////////////////
+		////SENSORS///////////////////
+		//////////////////////////////
+		//TODO
 
+		//////////////////////////////
+		////GOALS/////////////////////
+		//////////////////////////////
 		Eigen::MatrixXd goal;
 		if(tree->getAttribute<Eigen::MatrixXd>(std::string("goal"), goal))
 		{
@@ -151,6 +153,13 @@ namespace ha {
 			//Now match name to controller
 			Controller::Ptr ctrl = ha->getControllerByName(controllerName, modeName);
 		}
+
+		//////////////////////////////
+		////PARAMETERS////////////////
+		//////////////////////////////
+		Eigen::MatrixXd defaultWeights = _sensor->getCurrentValue();
+		defaultWeights.setConstant(1);
+		tree->getAttribute<Eigen::MatrixXd>("weights", _weights, defaultWeights);
 
 	}
 }
