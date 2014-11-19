@@ -11,6 +11,8 @@
 #include "hybrid_automaton/HybridAutomatonRegistration.h"
 #include "hybrid_automaton/error_handling.h"
 
+#include "hybrid_automaton/HybridAutomatonOStringStream.h"
+
 #include <boost/shared_ptr.hpp>
 #include <Eigen/Dense>
 
@@ -128,29 +130,77 @@ namespace ha {
 			return ControllerPtr(_doClone());
 		}
 
+		/**
+		 * @deprecated
+		 */
 		virtual int getDimensionality() const;
 
 		virtual Eigen::MatrixXd getGoal() const;
-
 		virtual void setGoal(const Eigen::MatrixXd& new_goal);
 
 		virtual Eigen::MatrixXd getKp() const;
-
 		virtual void setKp(const Eigen::MatrixXd& new_kp);
 
 		virtual Eigen::MatrixXd getKv() const;
-
 		virtual void setKv(const Eigen::MatrixXd& new_kv);
 
-		virtual std::string getName() const;
+		/**
+		 * @brief Completion time to reach goal
+		 *
+		 * Optional attribute, e.g. makes sense for interpolated
+		 * controllers/
+		 */
+		virtual void setCompletionTime(const double& t);
+		virtual double getCompletionTime() const;
 
+		virtual std::string getName() const;
 		virtual void setName(const std::string& new_name);
 
 		virtual const std::string getType() const;
-
 		virtual void setType(const std::string& new_type);
 
+		/**
+		 * @brief Pass any additional argument for your controller
+		 */
+		template <typename T> void setArgument(const std::string& field_name, const T& field_value)
+		{
+			ha_ostringstream ha_oss;
+			ha_oss << field_value;
+			this->setArgumentString(field_name, ha_oss.str());
+		}
+
+		template <typename T> bool getArgument(const std::string& field_name, T& return_value) const
+		{
+			std::string val;
+			bool ret = this->getArgumentString(field_name, val);
+			if (ret)
+			{
+				std::istringstream ss(val);
+				ss >> return_value;
+				return true;
+			}
+			else
+			{
+				return false;
+			}
+		}
+
 	protected:
+
+		virtual void setArgumentString(const std::string& name, const std::string& value)
+		{
+			this->_additional_arguments[name] = value;
+		}
+
+		virtual bool getArgumentString(const std::string& name, std::string& value) const 
+		{
+			std::map<std::string, std::string>::const_iterator it;
+			it = this->_additional_arguments.find(name);
+			if (it == this->_additional_arguments.end())
+				return false;
+			value = it->second;
+			return true;
+		}
 
 		/*!
 		* \brief
@@ -176,8 +226,11 @@ namespace ha {
 		Eigen::MatrixXd		_goal;
 		Eigen::MatrixXd		_kp;
 		Eigen::MatrixXd		_kv;
+		double				_completion_time;
 		std::string			_name;
 		std::string			_type;
+
+		std::map<std::string, std::string> _additional_arguments;
 	};
 
 }
