@@ -75,7 +75,9 @@ namespace ha {
 		//Downcast
 		DescriptionTreeNodeXML::Ptr childXMLNode = boost::dynamic_pointer_cast<DescriptionTreeNodeXML>(child);
 
-		_tinyxml_node->InsertEndChild(*(childXMLNode->_tinyxml_node));
+		_tinyxml_node->LinkEndChild(childXMLNode->_tinyxml_node);
+		
+		//childXMLNode->_tinyxml_node = _tinyxml_node->LastChild()->;
 	}
 
 	void DescriptionTreeNodeXML::getAllAttributes(std::map<std::string, std::string> & attrs) const {
