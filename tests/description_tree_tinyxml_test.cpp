@@ -117,7 +117,6 @@ TEST(TestDescriptionTreeToXMLString, Positive)
 	rootNode->addChildNode(firstNode);
 	secondNode->setAttribute<std::string>("param", "value");
 	
-
 	::Eigen::MatrixXd eigen_vector(5,1);
 	eigen_vector << 1.8673, 2., 3., 4., 5.;
 	secondNode->setAttribute<::Eigen::MatrixXd>("vector", eigen_vector);
@@ -128,8 +127,11 @@ TEST(TestDescriptionTreeToXMLString, Positive)
 
 	rootNode->addChildNode(secondNode);
 
+	//New test: change vlaue after insertion
+	secondNode->setAttribute<std::string>("param2", "value2");
+
 	std::string outString = tree->writeTreeXML();
-	std::cout << outString << std::endl;
+	//std::cout << outString << std::endl;
 
 	//Now parse again and compare 
 	DescriptionTreeXML::Ptr tree2(new DescriptionTreeXML());
@@ -149,6 +151,9 @@ TEST(TestDescriptionTreeToXMLString, Positive)
 	std::string ret;
 	EXPECT_TRUE(it->get()->getAttribute<std::string>("param", ret));
 	EXPECT_EQ(ret, "value");
+	
+	EXPECT_TRUE(it->get()->getAttribute<std::string>("param2", ret));
+	EXPECT_EQ(ret, "value2");
 
 	::Eigen::MatrixXd result(0,0);
 	EXPECT_TRUE(it->get()->getAttribute<::Eigen::MatrixXd>("vector", result));
