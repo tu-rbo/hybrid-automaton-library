@@ -21,6 +21,8 @@ namespace ha {
 
 		enum Norm {L1, L2, L_INF, ROTATION, TRANSFORM}; 
 
+		enum GoalSource {CONSTANT, CONTROLLER, ROSTOPIC}; 
+
 		typedef boost::shared_ptr<JumpCondition> Ptr;
 
 		JumpCondition();
@@ -47,28 +49,38 @@ namespace ha {
 
 		virtual void setControllerGoal(const Controller* controller);
 		virtual void setConstantGoal(const ::Eigen::MatrixXd goal);
+		// TODO
+		//virtual void setROSTopicGoal(std::string rosTopicName);
 
 		virtual ::Eigen::MatrixXd JumpCondition::getGoal() const;
+
+		virtual void setSensor(const Sensor::Ptr sensor);
+		virtual Sensor::ConstPtr getSensor() const;
+
+		virtual void setNorm(Norm normType, ::Eigen::MatrixXd weights = ::Eigen::MatrixXd());
+		virtual Norm getNormType() const;
+		virtual ::Eigen::MatrixXd getNormWeights() const;
+
+		virtual void setEpsilon(double epsilon);
+		virtual double getEpsilon() const;
 
 		virtual DescriptionTreeNode::Ptr serialize(const DescriptionTree::ConstPtr& factory) const;
 
 		virtual void deserialize(const DescriptionTreeNode::ConstPtr& tree, const System::ConstPtr& system, const HybridAutomaton* ha);
 
 	protected:
-		System::ConstPtr _system;
-				
-		const Controller* _controller;
-		boost::shared_ptr<const ::Eigen::MatrixXd> _goal;
 
-		boost::shared_ptr<const ha::Sensor> _sensor;
+		GoalSource	_goalSource;
+		::Eigen::MatrixXd _goal;
+		const Controller* _controller;
+
+		Sensor::ConstPtr _sensor;
 
 		Norm	_normType;
-
-		::Eigen::MatrixXd _weights;
-
+		::Eigen::MatrixXd _normWeights;
 		double _epsilon;
 
-		double _computeNorm(::Eigen::MatrixXd x, ::Eigen::MatrixXd y) const;
+		double _computeMetric(::Eigen::MatrixXd x, ::Eigen::MatrixXd y) const;
 
 		virtual JumpCondition* _doClone() const
 		{

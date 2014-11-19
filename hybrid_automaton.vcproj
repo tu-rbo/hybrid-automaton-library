@@ -155,10 +155,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\src\ConfigurationConvergenceCondition.cpp"
-				>
-			</File>
-			<File
 				RelativePath=".\src\Controller.cpp"
 				>
 			</File>
@@ -218,10 +214,6 @@
 			>
 			<File
 				RelativePath=".\include\hybrid_automaton\ClockSensor.h"
-				>
-			</File>
-			<File
-				RelativePath=".\include\hybrid_automaton\ConfigurationConvergenceCondition.h"
 				>
 			</File>
 			<File
