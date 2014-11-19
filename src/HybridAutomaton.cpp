@@ -256,12 +256,13 @@ namespace ha {
 		}
 	}
 
-	bool HybridAutomaton::existsControlMode(const std::string& control_mode)  {
+	bool HybridAutomaton::existsControlMode(const std::string& control_mode) const {
 		// FIXME cannot make this method const because of vertex_by_label
-		return !(::boost::vertex_by_label(control_mode, _graph) == GraphTraits::null_vertex());
+		//_graph.vertex(control_mode);
+		return !(_graph.vertex(control_mode) == GraphTraits::null_vertex());
 	}
 
-	ControlMode::Ptr HybridAutomaton::getControlModeByName(const std::string& control_mode_name) {
+	ControlMode::Ptr HybridAutomaton::getControlModeByName(const std::string& control_mode_name) const{
 		// FIXME make const -> depends on existsControlMode
 		if (!existsControlMode(control_mode_name))
 			HA_THROW_ERROR("HybridAutomaton.getControllerByName", "Control mode " << control_mode_name << " does not exist");
@@ -269,7 +270,7 @@ namespace ha {
 		return _graph[control_mode_name];
 	}
 
-	Controller::Ptr HybridAutomaton::getControllerByName(const std::string& control_mode_name, const std::string& controller_name) {
+	Controller::Ptr HybridAutomaton::getControllerByName(const std::string& control_mode_name, const std::string& controller_name) const {
 		// FIXME make const -> depends on existsControlMode
 		if (!existsControlMode(control_mode_name))
 			HA_THROW_ERROR("HybridAutomaton.getControllerByName", "Control mode " << control_mode_name << " does not exist");

@@ -332,6 +332,9 @@ TEST_F(HybridAutomatonDeserializationTest, GetControlModeAndGetController) {
 	
 	ha.deserialize(ha_node, System::Ptr());
 
+	ASSERT_TRUE(ha.existsControlMode("CM1"));
+	ASSERT_FALSE(ha.existsControlMode("notCM1"));
+
 	ControlMode::Ptr cm = ha.getControlModeByName("CM1");
 	ASSERT_TRUE(cm);
 
