@@ -151,6 +151,10 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
+				RelativePath=".\src\ClockSensor.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\Controller.cpp"
 				>
 			</File>
@@ -179,6 +183,14 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\ForceTorqueSensor.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\FramePoseSensor.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\HybridAutomaton.cpp"
 				>
 			</File>
@@ -187,11 +199,11 @@
 				>
 			</File>
 			<File
-				RelativePath=".\src\JumpCondition.cpp"
+				RelativePath=".\src\JointConfigurationSensor.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\src\TimeCondition.cpp"
+				RelativePath=".\src\JumpCondition.cpp"
 				>
 			</File>
 		</Filter>
@@ -200,6 +212,10 @@
 			Filter="h;hpp;hxx;hm;inl;inc;xsd"
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
+			<File
+				RelativePath=".\include\hybrid_automaton\ClockSensor.h"
+				>
+			</File>
 			<File
 				RelativePath=".\include\hybrid_automaton\Controller.h"
 				>
@@ -237,7 +253,11 @@
 				>
 			</File>
 			<File
-				RelativePath=".\include\hybrid_automaton\ForceCondition.h"
+				RelativePath=".\include\hybrid_automaton\ForceTorqueSensor.h"
+				>
+			</File>
+			<File
+				RelativePath=".\include\hybrid_automaton\FramePoseSensor.h"
 				>
 			</File>
 			<File
@@ -250,6 +270,10 @@
 			</File>
 			<File
 				RelativePath=".\include\hybrid_automaton\HybridAutomatonRegistration.h"
+				>
+			</File>
+			<File
+				RelativePath=".\include\hybrid_automaton\JointConfigurationSensor.h"
 				>
 			</File>
 			<File
@@ -266,10 +290,6 @@
 			</File>
 			<File
 				RelativePath=".\include\hybrid_automaton\System.h"
-				>
-			</File>
-			<File
-				RelativePath=".\include\hybrid_automaton\TimeCondition.h"
 				>
 			</File>
 		</Filter>
