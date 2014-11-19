@@ -183,11 +183,19 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\ForceTorqueSensor.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\HybridAutomaton.cpp"
 				>
 			</File>
 			<File
 				RelativePath=".\src\HybridAutomatonOStringStream.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\JointConfigurationSensor.cpp"
 				>
 			</File>
 			<File
@@ -204,6 +212,10 @@
 			Filter="h;hpp;hxx;hm;inl;inc;xsd"
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
+			<File
+				RelativePath=".\include\hybrid_automaton\ClockSensor.h"
+				>
+			</File>
 			<File
 				RelativePath=".\include\hybrid_automaton\ConfigurationConvergenceCondition.h"
 				>
@@ -245,7 +257,11 @@
 				>
 			</File>
 			<File
-				RelativePath=".\include\hybrid_automaton\ForceCondition.h"
+				RelativePath=".\include\hybrid_automaton\ForceTorqueSensor.h"
+				>
+			</File>
+			<File
+				RelativePath=".\include\hybrid_automaton\FramePoseSensor.h"
 				>
 			</File>
 			<File
@@ -258,6 +274,10 @@
 			</File>
 			<File
 				RelativePath=".\include\hybrid_automaton\HybridAutomatonRegistration.h"
+				>
+			</File>
+			<File
+				RelativePath=".\include\hybrid_automaton\JointConfigurationSensor.h"
 				>
 			</File>
 			<File
