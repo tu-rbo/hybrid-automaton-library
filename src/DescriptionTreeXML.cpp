@@ -11,6 +11,12 @@ namespace ha {
 
 		this->_tinyxml_document->LinkEndChild(this->_root_node->getXMLNode());
 	}
+		
+	DescriptionTreeXML::DescriptionTreeXML(const std::string& input)
+		: _tinyxml_document(new TiXmlDocument())
+	{
+		this->initTree(input);
+	}
 
 	DescriptionTreeXML::~DescriptionTreeXML()
 	{

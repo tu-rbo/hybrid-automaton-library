@@ -6,6 +6,15 @@
 #include <sstream>
 
 namespace ha {
+	
+	HybridAutomaton::HybridAutomaton()
+		: _active(false)
+	{
+	}
+
+	HybridAutomaton::~HybridAutomaton()
+	{
+	}
 
 	void HybridAutomaton::registerController(const std::string& ctrl_type, ControllerCreator cc) {
 		std::map<std::string, HybridAutomaton::ControllerCreator>& controller_type_map = getControllerTypeMap();
@@ -203,9 +212,8 @@ namespace ha {
 		if (!_current_control_mode) {
 			HA_THROW_ERROR("HybridAutomaton.activate", "No current control mode defined!");
 		}
-		_active = true;
-
 		_activateCurrentControlMode(t);
+		_active = true;
 	}
 
 	void HybridAutomaton::deactivate() {

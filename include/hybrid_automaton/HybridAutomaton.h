@@ -78,6 +78,9 @@ namespace ha {
 		}
 
 	public:
+		HybridAutomaton();
+		virtual ~HybridAutomaton();
+
 		/** 
 		 * @brief Instantiate a controller of given type 
 		 *
