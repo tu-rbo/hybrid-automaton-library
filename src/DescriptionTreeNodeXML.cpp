@@ -79,8 +79,14 @@ namespace ha {
 	}
 
 	void DescriptionTreeNodeXML::getAllAttributes(std::map<std::string, std::string> & attrs) const {
-		// TODO
 		attrs.clear();
+
+		const TiXmlAttribute *ptr = _tinyxml_node->FirstAttribute();
+		while(ptr != NULL)
+		{
+			attrs.insert(std::pair<std::string, std::string>(ptr->Name(), ptr->Value()));
+			ptr = ptr->Next();
+		}	
 	}
 
 	TiXmlElement* DescriptionTreeNodeXML::getXMLNode() const

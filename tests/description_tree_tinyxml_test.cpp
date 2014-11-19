@@ -67,6 +67,11 @@ TEST(TestDescriptionTreeStructure, Positive) {
 	daughterNode->setAttribute<std::string>("name", "lucifer");
 	EXPECT_TRUE(daughterNode->getAttribute<std::string>("name", daughtersname));
 	EXPECT_EQ(daughtersname, "lucifer");
+
+	std::map<std::string, std::string> map;
+	daughterNode->getAllAttributes(map);
+	EXPECT_EQ("lucifer", map["name"]);
+	EXPECT_EQ(1, map.size());
 }
 
 //This test tests deparsing and reading out an xml string
