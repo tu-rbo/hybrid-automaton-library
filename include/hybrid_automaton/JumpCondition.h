@@ -4,7 +4,9 @@
 #include "hybrid_automaton/Serializable.h"
 #include "hybrid_automaton/error_handling.h"
 
+#include "hybrid_automaton/Sensor.h"
 #include "hybrid_automaton/Controller.h"
+
 
 #include <boost/shared_ptr.hpp>
 
@@ -16,6 +18,8 @@ namespace ha {
 	class JumpCondition : public Serializable
 	{
 	public:
+
+		enum Norm {L1, L2, L_INF, ROTATION, TRANSFORM}; 
 
 		typedef boost::shared_ptr<JumpCondition> Ptr;
 
@@ -33,30 +37,18 @@ namespace ha {
 			return (JumpConditionPtr(_doClone()));
 		};
 
-		virtual void activate(const double& t) {
-			HA_THROW_ERROR("JumpCondition.activate", "not implemented");
-		};
+		virtual void activate(const double& t);
 
-		virtual void deactivate() {
-			HA_THROW_ERROR("JumpCondition.deactivate", "not implemented");
-		};
+		virtual void deactivate();
 
-		virtual void step(const double& t) {
-			HA_THROW_ERROR("JumpCondition.step", "not implemented");
-		};
+		virtual void step(const double& t);
 
-		virtual bool isActive() const {
-			HA_THROW_ERROR("JumpCondition.isActive", "not implemented");
-		};
+		virtual bool isActive() const;
 
 		virtual void setControllerGoal(const Controller* controller);
 		virtual void setConstantGoal(const ::Eigen::MatrixXd goal);
 
 		virtual ::Eigen::MatrixXd JumpCondition::getGoal() const;
-
-		virtual std::string getType() const;
-
-		virtual void setType(const std::string& new_type);
 
 		virtual DescriptionTreeNode::Ptr serialize(const DescriptionTree::ConstPtr& factory) const;
 
@@ -64,11 +56,19 @@ namespace ha {
 
 	protected:
 		System::ConstPtr _system;
-
-		std::string		  _type;
-		
+				
 		const Controller* _controller;
 		boost::shared_ptr<const ::Eigen::MatrixXd> _goal;
+
+		boost::shared_ptr<const ha::Sensor> _sensor;
+
+		Norm	_normType;
+
+		::Eigen::MatrixXd _weights;
+
+		double _epsilon;
+
+		double _computeNorm(::Eigen::MatrixXd x, ::Eigen::MatrixXd y) const;
 
 		virtual JumpCondition* _doClone() const
 		{

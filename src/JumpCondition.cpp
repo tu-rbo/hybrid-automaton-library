@@ -5,8 +5,7 @@ namespace ha {
 
 	JumpCondition::JumpCondition():
 		//_goal(),
-		_controller(NULL),
-		_type("")
+		_controller(NULL)
 	{
 
 	}
@@ -20,7 +19,79 @@ namespace ha {
 	{
 		this->_goal = jc._goal;
 		this->_controller = jc._controller;
-		this->_type = jc._type;
+	}
+
+	void JumpCondition::activate(const double& t) 
+	{
+	}
+
+	void JumpCondition::deactivate() 
+	{
+	}
+
+	void JumpCondition::step(const double& t) 
+	{
+	}
+
+	bool JumpCondition::isActive() const 
+	{
+		::Eigen::MatrixXd current = this->_sensor->getCurrentValue();
+		::Eigen::MatrixXd desired = this->getGoal();
+
+		if(desired.rows() != current.rows() || desired.cols() != current.cols())
+		{
+			HA_THROW_ERROR("JumpCondition.isActive", "Dimension mismatch in sensor and goal - sensor: "
+			<<current.rows()<<"x"<<current.cols()<<", current: "<<desired.rows()<<"x"<<desired.cols()<<"!");
+		}
+		 
+		return (this->_computeNorm(current, desired) <_epsilon);
+	}
+
+	double JumpCondition::_computeNorm(::Eigen::MatrixXd x, ::Eigen::MatrixXd y) const
+	{
+		double ret = 0;
+		switch(_normType) {
+			case L1: 
+				for(int i = 0; i<x.rows(); i++)
+				{
+					for(int j = 0; j<y.cols(); j++)
+					{ 
+						ret += _weights(i,j) * fabs(x(i,j) - y(i,j));
+					}
+				}
+				break;
+			
+			case L2: 
+				for(int i = 0; i<x.rows(); i++)
+				{
+					for(int j = 0; j<y.cols(); j++)
+					{
+						ret += _weights(i,j) * pow(fabs(x(i,j) - y(i,j)),2);
+					}
+				}
+				ret = sqrt(ret);
+				break;
+
+			case L_INF: 
+				for(int i = 0; i<x.rows(); i++)
+				{
+					for(int j = 0; j<y.cols(); j++)
+					{
+						ret = std::max(ret, _weights(i,j) * fabs(x(i,j) - y(i,j)));
+					}
+				}
+				break;
+			case ROTATION:
+				HA_THROW_ERROR("JumpCondition._computeNorm", "Not Implemented");
+				break;
+			case TRANSFORM:
+				HA_THROW_ERROR("JumpCondition._computeNorm", "Not Implemented");
+				break;
+			default:
+				HA_THROW_ERROR("JumpCondition._computeNorm", "Not Implemented");
+		}
+
+			return ret;
 	}
 
 	void JumpCondition::setControllerGoal(const Controller* controller)
@@ -41,21 +112,9 @@ namespace ha {
 			return *(_goal.get());
 	}
 
-	std::string JumpCondition::getType() const
-	{
-		return this->_type;
-	}
-
-	void JumpCondition::setType(const std::string& new_type)
-	{
-		this->_type = new_type;
-	}
-
 	DescriptionTreeNode::Ptr JumpCondition::serialize(const DescriptionTree::ConstPtr& factory) const 
 	{ 
 		DescriptionTreeNode::Ptr tree = factory->createNode("JumpCondition");
-
-		tree->setAttribute<std::string>(std::string("type"), this->getType());
 
 		if(this->_controller)
 			tree->setAttribute<std::string>(std::string("controller"), this->_controller->getName());
@@ -71,8 +130,6 @@ namespace ha {
 		if (tree->getType() != "JumpCondition") {
 			HA_THROW_ERROR("JumpCondition.deserialize", "JumpCondition must have type 'JumpCondition', not '" << tree->getType() << "'!");
 		}
-
-		tree->getAttribute<std::string>("type", _type, "");
 
 		//TODO!!!
 		//if (_type == "" || !HybridAutomaton::isJumpConditionRegistered(_type)) {

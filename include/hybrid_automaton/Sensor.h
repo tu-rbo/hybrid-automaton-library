@@ -1,5 +1,5 @@
-#ifndef HYBRID_AUTOMATON_JUMP_CONDITION_H
-#define HYBRID_AUTOMATON_JUMP_CONDITION_H
+#ifndef HYBRID_AUTOMATON_SENSOR_H
+#define HYBRID_AUTOMATON_SENSOR_H
 
 #include "hybrid_automaton/Serializable.h"
 #include "hybrid_automaton/error_handling.h"
@@ -24,7 +24,7 @@ namespace ha {
 
 		virtual ~Sensor();
 
-				/*!
+		/*!
 		* Copy constructor
 		*/
 		Sensor(const Sensor& ss);
@@ -34,15 +34,12 @@ namespace ha {
 			return (SensorPtr(_doClone()));
 		};
 
-		::Eigen::MatrixXd getCurrentValue() const = 0;
+		virtual ::Eigen::MatrixXd getCurrentValue() const = 0;
 
 	protected:
 		System::ConstPtr _system;
 
-		virtual Sensor* _doClone() const
-		{
-			return (new Sensor(*this));
-		}
+		virtual Sensor* _doClone() const = 0;
 
 	};
 
