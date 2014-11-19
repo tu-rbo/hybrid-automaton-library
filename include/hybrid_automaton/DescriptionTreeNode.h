@@ -13,12 +13,10 @@
 
 #include <boost/shared_ptr.hpp>
 
-// FIXME remove
-#include <iostream>
-
 #include <Eigen/Dense>
 
 #include <vector>
+#include <map>
 
 #include "hybrid_automaton/HybridAutomatonOStringStream.h"
 
@@ -115,6 +113,8 @@ namespace ha {
 		* @param field_name returns string value of field field_name in field_value
 		*/
 		virtual void addChildNode(const DescriptionTreeNode::Ptr& child) = 0;
+
+		virtual void getAllAttributes(std::map<std::string, std::string> & attrs) const = 0;
 
 		///////////////////////////////////////////////////////////////////////////////////////////////
 		//Implement these helper functions here (internally they will call getAttribute)

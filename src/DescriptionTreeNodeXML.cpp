@@ -78,6 +78,11 @@ namespace ha {
 		_tinyxml_node->InsertEndChild(*(childXMLNode->_tinyxml_node));
 	}
 
+	void DescriptionTreeNodeXML::getAllAttributes(std::map<std::string, std::string> & attrs) const {
+		// TODO
+		attrs.clear();
+	}
+
 	TiXmlElement* DescriptionTreeNodeXML::getXMLNode() const
 	{
 		return this->_tinyxml_node;

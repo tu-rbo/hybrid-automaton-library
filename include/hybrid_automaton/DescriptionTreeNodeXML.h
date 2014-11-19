@@ -81,6 +81,8 @@ namespace ha {
 		*/
 		virtual void addChildNode(const DescriptionTreeNode::Ptr& child);
 
+		virtual void getAllAttributes(std::map<std::string, std::string> & attrs) const;
+
 		TiXmlElement* getXMLNode() const;
 
 	protected:
