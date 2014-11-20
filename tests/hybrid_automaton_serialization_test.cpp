@@ -255,8 +255,12 @@ protected:
 			.WillRepeatedly(Return(false));
 		EXPECT_CALL(*js_node, getAttributeString(std::string("goal"), _))
 			.WillRepeatedly(Return(false));
-		//EXPECT_CALL(*js_node, getAttributeString(std::string("type"), _))
-		//	.WillRepeatedly(DoAll(SetArgReferee<1>("ConfigurationConvergenceCondition"),Return(true)));
+		EXPECT_CALL(*js_node, getAttributeString(std::string("normType"), _))
+			.WillRepeatedly(Return(false));
+		EXPECT_CALL(*js_node, getAttributeString(std::string("epsilon"), _))
+			.WillRepeatedly(Return(false));
+		EXPECT_CALL(*js_node, getAttributeString(std::string("normWeights"), _))
+			.WillRepeatedly(Return(false));
 
 		js_list.push_back(js_node);
 
