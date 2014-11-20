@@ -175,7 +175,7 @@ public:
 
 	//MOCK_METHOD0(deserialize, void (const DescriptionTreeNode::ConstPtr& tree) );
 	MOCK_CONST_METHOD0(getName, const std::string () );
-	MOCK_CONST_METHOD1(getControllerByName, Controller::Ptr (const std::string& name) );
+	MOCK_CONST_METHOD1(getControllerByName, Controller::ConstPtr (const std::string& name) );
 
 	HA_CONTROLSET_INSTANCE(node, system, ha) {
 		ControlSet::Ptr ctrlSet(new MockRegisteredControlSet);
@@ -337,7 +337,7 @@ TEST_F(HybridAutomatonDeserializationTest, GetControlModeAndGetController) {
 	ASSERT_TRUE(ha.existsControlMode("CM1"));
 	ASSERT_FALSE(ha.existsControlMode("notCM1"));
 
-	ControlMode::Ptr cm = ha.getControlModeByName("CM1");
+	ControlMode::ConstPtr cm = ha.getControlModeByName("CM1");
 	ASSERT_TRUE(cm);
 
 	DeserializationControlSet::MockRegisteredControlSet* mockCm
@@ -351,7 +351,7 @@ TEST_F(HybridAutomatonDeserializationTest, GetControlModeAndGetController) {
 	EXPECT_CALL(*mockCm, getControllerByName(std::string("MyCtrl1")))
 		.WillOnce(Return(c));
 
-	Controller::Ptr cret = ha.getControllerByName("CM1", "MyCtrl1");
+	Controller::ConstPtr cret = ha.getControllerByName("CM1", "MyCtrl1");
 	EXPECT_TRUE(c);
 	EXPECT_EQ("MockedControl", cret->getName());
 	EXPECT_EQ("MockedControl", cret->getType());

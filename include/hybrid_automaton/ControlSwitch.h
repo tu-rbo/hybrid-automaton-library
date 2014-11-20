@@ -10,14 +10,17 @@
 #include "hybrid_automaton/Serializable.h"
 
 namespace ha {
+  //class HybridAutomaton;
 
   class ControlSwitch;
   typedef boost::shared_ptr<ControlSwitch> ControlSwitchPtr;
+  typedef boost::shared_ptr<const ControlSwitch> ControlSwitchConstPtr;
 
   class ControlSwitch : public Serializable
   {
   public:
     typedef boost::shared_ptr<ControlSwitch> Ptr;
+	typedef boost::shared_ptr<const ControlSwitch> ConstPtr;
 
     ControlSwitch() {}
 
@@ -40,19 +43,18 @@ namespace ha {
 	virtual DescriptionTreeNode::Ptr serialize(const DescriptionTree::ConstPtr& factory) const;
 	virtual void deserialize(const DescriptionTreeNode::ConstPtr& tree, const System::ConstPtr& system, const HybridAutomaton* ha);
 
-	virtual void setSourceControlModeName(const std::string& source);
-	virtual const std::string getSourceControlModeName() const;
-	virtual void setTargetControlModeName(const std::string& target);
-	virtual const std::string getTargetControlModeName() const;
-
 	virtual void setName(const std::string& name);
 	virtual const std::string getName() const;
 
+	//Only call these functions when deserializing - afterwards they might be invalid!!
+	//If you want to access the real source mode call _hybrid_automaton->getSourceControlMode(this->getName())
+	virtual const std::string getSourceControlModeName() const;
+	virtual const std::string getTargetControlModeName() const;
+	virtual void setSourceControlModeName(const std::string& source);
+	virtual void setTargetControlModeName(const std::string& target);
+
   protected:
     std::vector<JumpConditionPtr> _jump_conditions;
-
-	std::string _source_control_mode_name;
-	std::string _target_control_mode_name;
 
 	std::string _name;
 
@@ -60,6 +62,13 @@ namespace ha {
     {
       return (new ControlSwitch(*this));
     }
+
+	//These variables are just used when deserializing! Do not use them
+	//anywhere else. They might be invalid!
+	std::string _source_control_mode_name;
+	std::string _target_control_mode_name;  
+
+	const HybridAutomaton* _hybrid_automaton;
   };
 
 }

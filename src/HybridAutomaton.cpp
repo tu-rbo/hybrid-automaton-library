@@ -143,13 +143,16 @@ namespace ha {
 
 	void HybridAutomaton::addControlSwitch(const std::string& source_mode, const ControlSwitch::Ptr& control_switch, const std::string& target_mode) 
 	{
-		boost::add_edge_by_label(source_mode, target_mode, control_switch, _graph);
+		SwitchHandle sh = boost::add_edge_by_label(source_mode, target_mode, control_switch, _graph).first;
+		_switchMap.insert(std::pair<std::string, SwitchHandle>(control_switch->getName(), sh));
 	}
 
 	void HybridAutomaton::addControlSwitchAndMode(const std::string& source_mode, const ControlSwitch::Ptr& control_switch, const ControlMode::Ptr& target_mode) 
 	{
-		boost::add_vertex(target_mode->getName(), target_mode, _graph);
-		boost::add_edge_by_label(source_mode, target_mode->getName(), control_switch, _graph);
+		addControlMode(target_mode);
+		addControlSwitch(source_mode, control_switch, target_mode->getName());
+		//boost::add_vertex(target_mode->getName(), target_mode, _graph);
+		//boost::add_edge_by_label(source_mode, target_mode->getName(), control_switch, _graph);
 	}
 
 	::Eigen::MatrixXd HybridAutomaton::step(const double& t) 
@@ -328,27 +331,52 @@ namespace ha {
 
 	bool HybridAutomaton::existsControlMode(const std::string& control_mode) const 
 	{
-		// FIXME cannot make this method const because of vertex_by_label
-		//_graph.vertex(control_mode);
 		return !(_graph.vertex(control_mode) == GraphTraits::null_vertex());
 	}
 
-	ControlMode::Ptr HybridAutomaton::getControlModeByName(const std::string& control_mode_name) const
+	bool HybridAutomaton::existsControlSwitch(const std::string& control_switch) const 
 	{
-		// FIXME make const -> depends on existsControlMode
+		return (_switchMap.find(control_switch) != _switchMap.end());
+	}
+
+	ControlMode::ConstPtr HybridAutomaton::getControlModeByName(const std::string& control_mode_name) const
+	{
 		if (!existsControlMode(control_mode_name))
-			HA_THROW_ERROR("HybridAutomaton.getControllerByName", "Control mode " << control_mode_name << " does not exist");
+			HA_THROW_ERROR("HybridAutomaton.getControlModeByName", "Control mode " << control_mode_name << " does not exist");
 
 		return _graph[control_mode_name];
 	}
 
-	Controller::Ptr HybridAutomaton::getControllerByName(const std::string& control_mode_name, const std::string& controller_name) const 
+	ControlSwitch::ConstPtr HybridAutomaton::getControlSwitchByName(const std::string& control_switch_name) const
 	{
-		// FIXME make const -> depends on existsControlMode
+		if (!existsControlSwitch(control_switch_name))
+			HA_THROW_ERROR("HybridAutomaton.getControlSwitchByName", "Control switch " << control_switch_name << " does not exist");
+		
+		SwitchHandle sh = _switchMap.find(control_switch_name)->second;
+		return _graph.graph()[sh];
+	}
+
+	Controller::ConstPtr HybridAutomaton::getControllerByName(const std::string& control_mode_name, const std::string& controller_name) const 
+	{
 		if (!existsControlMode(control_mode_name))
 			HA_THROW_ERROR("HybridAutomaton.getControllerByName", "Control mode " << control_mode_name << " does not exist");
 
 		ControlMode::Ptr cm = _graph[control_mode_name];
+
 		return cm->getControllerByName(controller_name);
+	}
+
+	ControlMode::ConstPtr HybridAutomaton::getSourceControlMode(const std::string& controlSwitch) const
+	{
+		SwitchHandle sh = _switchMap.find(controlSwitch)->second;
+		ModeHandle mh = ::boost::source(sh, _graph);
+		return _graph.graph()[mh];
+	}
+
+	ControlMode::ConstPtr HybridAutomaton::getTargetControlMode(const std::string& controlSwitch) const
+	{
+		SwitchHandle sh = _switchMap.find(controlSwitch)->second;
+		ModeHandle mh = ::boost::target(sh, _graph);
+		return _graph.graph()[mh];
 	}
 }

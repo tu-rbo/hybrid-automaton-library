@@ -56,7 +56,7 @@ namespace ha {
 			return _control_set;
 		}    
 
-		virtual Controller::Ptr getControllerByName(const std::string& name) const {
+		virtual Controller::ConstPtr getControllerByName(const std::string& name) const {
 			return _control_set->getControllerByName(name);
 		}    
 

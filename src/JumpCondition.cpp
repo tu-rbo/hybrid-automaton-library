@@ -259,7 +259,9 @@ namespace ha {
 			if(_sourceModeName == "")
 				HA_THROW_ERROR("JumpCondition.deserialize", "When deserializing a controller goal, you need to call JumpCondition::setSourceModeName() and pass the name of the mode this Jump Condition's Switch emanates from!!!");
 
-			Controller::Ptr ctrl = ha->getControllerByName(controllerName, _sourceModeName);
+			Controller::ConstPtr ctrl = ha->getControllerByName(_sourceModeName, controllerName);
+			//Todo error handling!
+
 			this->setControllerGoal(ctrl);
 		}
 

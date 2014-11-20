@@ -58,6 +58,9 @@ namespace ha {
 		Graph _graph;
 		ControlMode::Ptr _current_control_mode;
 
+		//Maps switch names to edges in the graph
+		std::map<std::string, SwitchHandle> _switchMap;
+
 		std::string _name;
 
 		bool _active;
@@ -186,10 +189,15 @@ namespace ha {
 		virtual void deserialize(const DescriptionTreeNode::ConstPtr& tree, const System::ConstPtr& system, const HybridAutomaton* ha);
 
 		virtual bool existsControlMode(const std::string& control_mode) const;
+		virtual	bool existsControlSwitch(const std::string& control_switch) const; 
 
-		virtual Controller::Ptr getControllerByName(const std::string& control_mode_name, const std::string& controller_name) const;
+		virtual Controller::ConstPtr getControllerByName(const std::string& control_mode_name, const std::string& controller_name) const;
 
-		virtual ControlMode::Ptr getControlModeByName(const std::string& control_mode_name) const;
+		virtual ControlMode::ConstPtr getControlModeByName(const std::string& control_mode_name) const;
+		virtual ControlSwitch::ConstPtr getControlSwitchByName(const std::string& control_switch_name) const;
+	
+		virtual ControlMode::ConstPtr getSourceControlMode(const std::string& controlSwitch) const;
+		virtual ControlMode::ConstPtr getTargetControlMode(const std::string& controlSwitch) const;
 
 		HybridAutomatonPtr clone() const {
 			return HybridAutomatonPtr(_doClone());
