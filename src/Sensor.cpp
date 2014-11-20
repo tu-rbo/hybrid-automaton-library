@@ -2,6 +2,21 @@
 
 namespace ha{
 
+	Sensor::Sensor()
+	{
+	}
+
+	Sensor::~Sensor()
+	{
+	}
+
+		/*!
+		* Copy constructor
+		*/
+	Sensor::Sensor(const Sensor& ss)
+	{
+	}
+
 	const std::string Sensor::getType() const
 	{
 		return this->_type;
