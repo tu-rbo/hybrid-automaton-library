@@ -151,10 +151,6 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
-				RelativePath=".\src\ClockSensor.cpp"
-				>
-			</File>
-			<File
 				RelativePath=".\src\Controller.cpp"
 				>
 			</File>
@@ -171,26 +167,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\src\DescriptionTreeNode.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\src\DescriptionTreeNodeXML.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\src\DescriptionTreeXML.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\src\ForceTorqueSensor.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\src\FramePoseSensor.cpp"
-				>
-			</File>
-			<File
 				RelativePath=".\src\HybridAutomaton.cpp"
 				>
 			</File>
@@ -199,23 +175,51 @@
 				>
 			</File>
 			<File
-				RelativePath=".\src\JointConfigurationSensor.cpp"
-				>
-			</File>
-			<File
 				RelativePath=".\src\JumpCondition.cpp"
 				>
 			</File>
+			<Filter
+				Name="Sensor"
+				>
+				<File
+					RelativePath=".\src\ClockSensor.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\src\ForceTorqueSensor.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\src\FramePoseSensor.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\src\JointConfigurationSensor.cpp"
+					>
+				</File>
+			</Filter>
+			<Filter
+				Name="Description"
+				>
+				<File
+					RelativePath=".\src\DescriptionTreeNode.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\src\DescriptionTreeNodeXML.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\src\DescriptionTreeXML.cpp"
+					>
+				</File>
+			</Filter>
 		</Filter>
 		<Filter
 			Name="Header Files"
 			Filter="h;hpp;hxx;hm;inl;inc;xsd"
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
-			<File
-				RelativePath=".\include\hybrid_automaton\ClockSensor.h"
-				>
-			</File>
 			<File
 				RelativePath=".\include\hybrid_automaton\Controller.h"
 				>
@@ -233,31 +237,7 @@
 				>
 			</File>
 			<File
-				RelativePath=".\include\hybrid_automaton\DescriptionTree.h"
-				>
-			</File>
-			<File
-				RelativePath=".\include\hybrid_automaton\DescriptionTreeNode.h"
-				>
-			</File>
-			<File
-				RelativePath=".\include\hybrid_automaton\DescriptionTreeNodeXML.h"
-				>
-			</File>
-			<File
-				RelativePath=".\include\hybrid_automaton\DescriptionTreeXML.h"
-				>
-			</File>
-			<File
 				RelativePath=".\include\hybrid_automaton\error_handling.h"
-				>
-			</File>
-			<File
-				RelativePath=".\include\hybrid_automaton\ForceTorqueSensor.h"
-				>
-			</File>
-			<File
-				RelativePath=".\include\hybrid_automaton\FramePoseSensor.h"
 				>
 			</File>
 			<File
@@ -273,15 +253,7 @@
 				>
 			</File>
 			<File
-				RelativePath=".\include\hybrid_automaton\JointConfigurationSensor.h"
-				>
-			</File>
-			<File
 				RelativePath=".\include\hybrid_automaton\JumpCondition.h"
-				>
-			</File>
-			<File
-				RelativePath=".\include\hybrid_automaton\Sensor.h"
 				>
 			</File>
 			<File
@@ -292,6 +264,50 @@
 				RelativePath=".\include\hybrid_automaton\System.h"
 				>
 			</File>
+			<Filter
+				Name="Sensor"
+				>
+				<File
+					RelativePath=".\include\hybrid_automaton\ClockSensor.h"
+					>
+				</File>
+				<File
+					RelativePath=".\include\hybrid_automaton\ForceTorqueSensor.h"
+					>
+				</File>
+				<File
+					RelativePath=".\include\hybrid_automaton\FramePoseSensor.h"
+					>
+				</File>
+				<File
+					RelativePath=".\include\hybrid_automaton\JointConfigurationSensor.h"
+					>
+				</File>
+				<File
+					RelativePath=".\include\hybrid_automaton\Sensor.h"
+					>
+				</File>
+			</Filter>
+			<Filter
+				Name="Description"
+				>
+				<File
+					RelativePath=".\include\hybrid_automaton\DescriptionTree.h"
+					>
+				</File>
+				<File
+					RelativePath=".\include\hybrid_automaton\DescriptionTreeNode.h"
+					>
+				</File>
+				<File
+					RelativePath=".\include\hybrid_automaton\DescriptionTreeNodeXML.h"
+					>
+				</File>
+				<File
+					RelativePath=".\include\hybrid_automaton\DescriptionTreeXML.h"
+					>
+				</File>
+			</Filter>
 		</Filter>
 		<Filter
 			Name="Resource Files"

@@ -79,6 +79,45 @@ namespace ha {
 		controlset_type_map.erase(it);
 	}
 
+	void HybridAutomaton::registerSensor(const std::string& sensor_type, SensorCreator sc)
+	{
+		std::map<std::string, HybridAutomaton::SensorCreator>& sensor_type_map = getSensorTypeMap();
+		assert ( sensor_type_map.find(sensor_type) == sensor_type_map.end() );
+		sensor_type_map[sensor_type] = sc;
+	}
+
+	bool HybridAutomaton::isSensorRegistered(const std::string& sensor_type)
+	{
+		std::map<std::string, HybridAutomaton::SensorCreator>& sensor_type_map = getSensorTypeMap();
+		return ( sensor_type_map.find(sensor_type) != sensor_type_map.end() );
+	}
+
+	void HybridAutomaton::unregisterSensor(const std::string& sensor_type)
+	{
+		std::map<std::string, HybridAutomaton::SensorCreator>& sensor_type_map = getSensorTypeMap();
+		std::map<std::string, HybridAutomaton::SensorCreator>::iterator it = sensor_type_map.find(sensor_type);
+		if (it == sensor_type_map.end()) return;
+		sensor_type_map.erase(it);
+	}
+
+	Sensor::Ptr HybridAutomaton::createSensor(const DescriptionTreeNode::ConstPtr& node, const System::ConstPtr& system, const HybridAutomaton* ha) {
+		if (node->getType() != "Sensor") {
+			HA_THROW_ERROR("HybridAutomaton.createSensor", "DescriptionTreeNode must have type 'Sensor', not '" << node->getType() << "'!");
+		}
+
+		std::string sensor_type;
+		if (!node->getAttribute<std::string>("type", sensor_type)) {
+			HA_THROW_ERROR("HybridAutomaton.createSensor", "Cannot get sensor type from node");
+		}
+
+		std::map<std::string, HybridAutomaton::SensorCreator>& sensor_type_map = getSensorTypeMap();
+		std::map<std::string, HybridAutomaton::SensorCreator>::iterator it = sensor_type_map.find(sensor_type);
+		if ( !isSensorRegistered(sensor_type) ) {
+			HA_THROW_ERROR("HybridAutomaton.createSensor", "Sensor type not registered: " << sensor_type);
+		}
+		return (*(it->second))(node, system, ha);
+	}
+
 
 	void HybridAutomaton::addControlMode(const ControlMode::Ptr& control_mode) {
 		boost::add_vertex(control_mode->getName(), control_mode, _graph);

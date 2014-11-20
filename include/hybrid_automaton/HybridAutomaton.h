@@ -38,6 +38,7 @@ namespace ha {
 
 		typedef ::ha::Controller::Ptr (*ControllerCreator) (const ::ha::DescriptionTreeNode::ConstPtr, const ::ha::System::ConstPtr, const HybridAutomaton*);
 		typedef ::ha::ControlSet::Ptr (*ControlSetCreator) (const ::ha::DescriptionTreeNode::ConstPtr, const ::ha::System::ConstPtr, const HybridAutomaton*);
+		typedef ::ha::Sensor::Ptr (*SensorCreator) (const ::ha::DescriptionTreeNode::ConstPtr, const ::ha::System::ConstPtr, const HybridAutomaton*);
 
 		// a directed labeled graph based on an adjacency list
 		typedef ::boost::labeled_graph< boost::adjacency_list< boost::vecS, boost::vecS, boost::directedS, ControlMode::Ptr, ControlSwitch::Ptr >, std::string > Graph;
@@ -76,6 +77,11 @@ namespace ha {
 			static std::map<std::string, ControlSetCreator> controlset_type_map;
 			return controlset_type_map; 
 		}
+		
+		static std::map<std::string, SensorCreator> & getSensorTypeMap() {
+			static std::map<std::string, SensorCreator> sensor_type_map;
+			return sensor_type_map; 
+		}
 
 	public:
 		/** 
@@ -91,6 +97,8 @@ namespace ha {
 		 * In order to work you must register your control set properly
 		 */
 		static ControlSet::Ptr createControlSet(const DescriptionTreeNode::ConstPtr& node, const System::ConstPtr& system, const HybridAutomaton* ha);
+
+		static Sensor::Ptr createSensor(const DescriptionTreeNode::ConstPtr& node, const System::ConstPtr& system, const HybridAutomaton* ha);
 
 		/**
 		 * @brief Register a controller with the hybrid automaton
@@ -141,6 +149,12 @@ namespace ha {
 		 * Usually you do not need that except for testing
 		 */
 		static void unregisterControlSet(const std::string& crtl_name);
+
+		static void registerSensor(const std::string& sensor_type, SensorCreator sc);
+
+		static bool isSensorRegistered(const std::string& sensor_type);
+
+		static void unregisterSensor(const std::string& sensor_type);
 
 		void addControlMode(const ControlMode::Ptr& control_mode);
 		void addControlSwitch(const std::string& source_mode, const ControlSwitch::Ptr& control_switch, const std::string& target_mode);
