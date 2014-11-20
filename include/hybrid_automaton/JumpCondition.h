@@ -80,7 +80,7 @@ namespace ha {
 		::Eigen::MatrixXd _normWeights;
 		double _epsilon;
 
-		double _computeMetric(::Eigen::MatrixXd x, ::Eigen::MatrixXd y) const;
+		double _computeMetric(const ::Eigen::MatrixXd& x, const ::Eigen::MatrixXd& y) const;
 
 		virtual JumpCondition* _doClone() const
 		{
