@@ -143,6 +143,7 @@ namespace ha {
 
 	void HybridAutomaton::addControlSwitch(const std::string& source_mode, const ControlSwitch::Ptr& control_switch, const std::string& target_mode) 
 	{
+		control_switch->setHybridAutomaton(this);
 		SwitchHandle sh = boost::add_edge_by_label(source_mode, target_mode, control_switch, _graph).first;
 		_switchMap.insert(std::pair<std::string, SwitchHandle>(control_switch->getName(), sh));
 	}
@@ -246,15 +247,23 @@ namespace ha {
 		for (cs_it = control_switches.begin(); cs_it != control_switches.end(); ++cs_it) 
 		{
 			ControlSwitch::Ptr cs(new ControlSwitch);
-			cs->deserialize(*cs_it, system, this);
+			std::string cs_name;
+			(*cs_it)->getAttribute<std::string>("name", cs_name, "");
+			cs->setName(cs_name);
 
 			// check if source and target are in graph
-			if (!existsControlMode(cs->getSourceControlModeName()))
-				HA_THROW_ERROR("HybridAutomaton.deserialize", "Control mode '" << cs->getSourceControlModeName() << "' does not exist! Cannot set source control mode.");	
-			if (!existsControlMode(cs->getTargetControlModeName()))
-				HA_THROW_ERROR("HybridAutomaton.deserialize", "Control mode '" << cs->getTargetControlModeName() << "' does not exist! Cannot set target control mode.");	
+			std::string source, target;
+			(*cs_it)->getAttribute<std::string>("source", source, "");
+			(*cs_it)->getAttribute<std::string>("target", target, "");
 
-			this->addControlSwitch(cs->getSourceControlModeName(), cs, cs->getTargetControlModeName());
+			if (!existsControlMode(source))
+				HA_THROW_ERROR("HybridAutomaton.deserialize", "Control mode '" << source << "' does not exist! Cannot set source control mode.");	
+			if (!existsControlMode(target))
+				HA_THROW_ERROR("HybridAutomaton.deserialize", "Control mode '" << target << "' does not exist! Cannot set target control mode.");	
+
+			this->addControlSwitch(source, cs, target);
+
+			cs->deserialize(*cs_it, system, this);
 		}
 		
 		std::string current_control_mode_name;

@@ -46,12 +46,7 @@ namespace ha {
 	virtual void setName(const std::string& name);
 	virtual const std::string getName() const;
 
-	//Only call these functions when deserializing - afterwards they might be invalid!!
-	//If you want to access the real source mode call _hybrid_automaton->getSourceControlMode(this->getName())
-	virtual const std::string getSourceControlModeName() const;
-	virtual const std::string getTargetControlModeName() const;
-	virtual void setSourceControlModeName(const std::string& source);
-	virtual void setTargetControlModeName(const std::string& target);
+	void setHybridAutomaton(const HybridAutomaton* hybrid_automaton);
 
   protected:
     std::vector<JumpConditionPtr> _jump_conditions;
@@ -65,8 +60,10 @@ namespace ha {
 
 	//These variables are just used when deserializing! Do not use them
 	//anywhere else. They might be invalid!
+	/*
 	std::string _source_control_mode_name;
 	std::string _target_control_mode_name;  
+	*/
 
 	const HybridAutomaton* _hybrid_automaton;
   };

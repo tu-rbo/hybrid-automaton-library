@@ -40,6 +40,8 @@ namespace ha {
 		virtual const std::string getType() const;
 		virtual void setType(const std::string& new_type);
 
+		virtual void setSystem(const System::ConstPtr& system);
+
 	protected:
 		System::ConstPtr _system;
 

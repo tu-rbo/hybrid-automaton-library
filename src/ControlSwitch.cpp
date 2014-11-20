@@ -53,35 +53,15 @@ namespace ha {
 		return _name;
 	}
 
-	void ControlSwitch::setSourceControlModeName(const std::string& source) 
-	{
-		_source_control_mode_name = source;
-	}
-	
-	const std::string ControlSwitch::getSourceControlModeName() const 
-	{
-		return _source_control_mode_name;
-	}
-
-	void ControlSwitch::setTargetControlModeName(const std::string& target) 
-	{
-		_target_control_mode_name = target;
-	}
-	const std::string ControlSwitch::getTargetControlModeName() const 
-	{
-		return _target_control_mode_name;
-	}
-
 	DescriptionTreeNode::Ptr ControlSwitch::serialize(const DescriptionTree::ConstPtr& factory) const 
 	{
 		DescriptionTreeNode::Ptr tree_node = factory->createNode("ControlSwitch");
 		tree_node->setAttribute<std::string>(std::string("name"), this->getName());
-		tree_node->setAttribute<std::string>(std::string("source"), this->getSourceControlModeName());
-		tree_node->setAttribute<std::string>(std::string("target"), this->getTargetControlModeName());
+		tree_node->setAttribute<std::string>(std::string("source"), _hybrid_automaton->getSourceControlMode(this->_name)->getName());
+		tree_node->setAttribute<std::string>(std::string("target"), _hybrid_automaton->getTargetControlMode(this->_name)->getName());
 		
 		for (std::vector<JumpConditionPtr>::const_iterator it = _jump_conditions.begin(); it != _jump_conditions.end(); ++it) {
-			DescriptionTreeNode::Ptr jc_node = factory->createNode("JumpCondition");
-			tree_node->addChildNode(jc_node);
+			tree_node->addChildNode((*it)->serialize(factory));
 		}
 
 		return tree_node;
@@ -94,15 +74,6 @@ namespace ha {
 		}
 
 		tree->getAttribute<std::string>("name", _name, "");
-		tree->getAttribute<std::string>("source", _source_control_mode_name, "");
-		tree->getAttribute<std::string>("target", _target_control_mode_name, "");
-		
-		if (_source_control_mode_name == "") {
-			HA_THROW_ERROR("ControlSwitch.deserialize", "Source must not be empty!");
-		}
-		if (_target_control_mode_name == "") {
-			HA_THROW_ERROR("ControlSwitch.deserialize", "Target must not be empty!");
-		}
 
 		DescriptionTreeNode::ConstNodeList jump_conditions;
 		tree->getChildrenNodes("JumpCondition", jump_conditions);
@@ -116,11 +87,22 @@ namespace ha {
 			JumpCondition::Ptr js(new JumpCondition);
 
 			//We need to set the controller pointer before calling deserialize!
-			js->setSourceModeName(_source_control_mode_name);
+			std::string source_control_mode_name;
+			tree->getAttribute<std::string>("source", source_control_mode_name, "");
+
+			if (source_control_mode_name == "")
+			{
+				HA_THROW_ERROR("ControlSwitch.deserialize", "Source control mode of control switch '" << _name << "' is empty.");
+			}
+
+			js->setSourceModeName(source_control_mode_name);
 			js->deserialize(*js_it, system, ha);
 			this->add(js);
 		}
+	}
 
-		_hybrid_automaton = ha;
+	void ControlSwitch::setHybridAutomaton(const HybridAutomaton* hybrid_automaton)
+	{
+		_hybrid_automaton = hybrid_automaton;
 	}
 }

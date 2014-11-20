@@ -26,4 +26,9 @@ namespace ha{
 	{
 		this->_type = new_type;
 	}
+
+	void Sensor::setSystem(const System::ConstPtr& system)
+	{
+		this->_system = system;
+	}
 }
