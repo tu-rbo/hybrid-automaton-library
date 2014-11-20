@@ -51,6 +51,13 @@ namespace ha {
 		}
 
 		/*!
+		* @brief Deactivate the controller for execution
+	    */
+		virtual void deactivate() {
+			HA_THROW_ERROR("Controller.deactivate", "not implemented");
+		}
+
+		/*!
 		* \brief
 		* Step function
 		* 
