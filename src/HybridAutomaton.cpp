@@ -6,7 +6,7 @@
 #include <sstream>
 
 namespace ha {
-	
+
 	HybridAutomaton::HybridAutomaton()
 		: _active(false)
 	{
@@ -16,25 +16,29 @@ namespace ha {
 	{
 	}
 
-	void HybridAutomaton::registerController(const std::string& ctrl_type, ControllerCreator cc) {
+	void HybridAutomaton::registerController(const std::string& ctrl_type, ControllerCreator cc) 
+	{
 		std::map<std::string, HybridAutomaton::ControllerCreator>& controller_type_map = getControllerTypeMap();
 		assert ( controller_type_map.find(ctrl_type) == controller_type_map.end() );
 		controller_type_map[ctrl_type] = cc;
 	}
 
-	bool HybridAutomaton::isControllerRegistered(const std::string& ctrl_type) {
+	bool HybridAutomaton::isControllerRegistered(const std::string& ctrl_type) 
+	{
 		std::map<std::string, HybridAutomaton::ControllerCreator>& controller_type_map = getControllerTypeMap();
 		return ( controller_type_map.find(ctrl_type) != controller_type_map.end() );
 	}
 
-	void HybridAutomaton::unregisterController(const std::string& ctrl_type) {
+	void HybridAutomaton::unregisterController(const std::string& ctrl_type) 
+	{
 		std::map<std::string, HybridAutomaton::ControllerCreator>& controller_type_map = getControllerTypeMap();
 		std::map<std::string, HybridAutomaton::ControllerCreator>::iterator it = controller_type_map.find(ctrl_type);
 		if (it == controller_type_map.end()) return;
 		controller_type_map.erase(it);
 	}
 
-	Controller::Ptr HybridAutomaton::createController(const DescriptionTreeNode::ConstPtr& node, const System::ConstPtr& system, const HybridAutomaton* ha) {
+	Controller::Ptr HybridAutomaton::createController(const DescriptionTreeNode::ConstPtr& node, const System::ConstPtr& system, const HybridAutomaton* ha) 
+	{
 		if (node->getType() != "Controller") {
 			HA_THROW_ERROR("HybridAutomaton.createController", "DescriptionTreeNode must have type 'Controller', not '" << node->getType() << "'!");
 		}
@@ -52,18 +56,21 @@ namespace ha {
 		return (*(it->second))(node, system, ha);
 	}
 
-	void HybridAutomaton::registerControlSet(const std::string& ctrl_type, ControlSetCreator cc) {
+	void HybridAutomaton::registerControlSet(const std::string& ctrl_type, ControlSetCreator cc) 
+	{
 		std::map<std::string, HybridAutomaton::ControlSetCreator>& controlset_type_map = getControlSetTypeMap();
 		assert ( controlset_type_map.find(ctrl_type) == controlset_type_map.end() );
 		controlset_type_map[ctrl_type] = cc;
 	}
 
-	bool HybridAutomaton::isControlSetRegistered(const std::string& ctrl_type) {
+	bool HybridAutomaton::isControlSetRegistered(const std::string& ctrl_type) 
+	{
 		std::map<std::string, HybridAutomaton::ControlSetCreator>& controlset_type_map = getControlSetTypeMap();
 		return ( controlset_type_map.find(ctrl_type) != controlset_type_map.end() );
 	}
 
-	ControlSet::Ptr HybridAutomaton::createControlSet(const DescriptionTreeNode::ConstPtr& node, const System::ConstPtr& system, const HybridAutomaton* ha) {
+	ControlSet::Ptr HybridAutomaton::createControlSet(const DescriptionTreeNode::ConstPtr& node, const System::ConstPtr& system, const HybridAutomaton* ha) 
+	{
 		if (node->getType() != "ControlSet") {
 			HA_THROW_ERROR("HybridAutomaton.createControlSet", "DescriptionTreeNode must have type 'ControlSet', not '" << node->getType() << "'!");
 		}
@@ -109,7 +116,8 @@ namespace ha {
 		sensor_type_map.erase(it);
 	}
 
-	Sensor::Ptr HybridAutomaton::createSensor(const DescriptionTreeNode::ConstPtr& node, const System::ConstPtr& system, const HybridAutomaton* ha) {
+	Sensor::Ptr HybridAutomaton::createSensor(const DescriptionTreeNode::ConstPtr& node, const System::ConstPtr& system, const HybridAutomaton* ha) 
+	{
 		if (node->getType() != "Sensor") {
 			HA_THROW_ERROR("HybridAutomaton.createSensor", "DescriptionTreeNode must have type 'Sensor', not '" << node->getType() << "'!");
 		}
@@ -128,20 +136,24 @@ namespace ha {
 	}
 
 
-	void HybridAutomaton::addControlMode(const ControlMode::Ptr& control_mode) {
+	void HybridAutomaton::addControlMode(const ControlMode::Ptr& control_mode) 
+	{
 		boost::add_vertex(control_mode->getName(), control_mode, _graph);
 	}
 
-	void HybridAutomaton::addControlSwitch(const std::string& source_mode, const ControlSwitch::Ptr& control_switch, const std::string& target_mode) {
+	void HybridAutomaton::addControlSwitch(const std::string& source_mode, const ControlSwitch::Ptr& control_switch, const std::string& target_mode) 
+	{
 		boost::add_edge_by_label(source_mode, target_mode, control_switch, _graph);
 	}
 
-	void HybridAutomaton::addControlSwitchAndMode(const std::string& source_mode, const ControlSwitch::Ptr& control_switch, const ControlMode::Ptr& target_mode) {
+	void HybridAutomaton::addControlSwitchAndMode(const std::string& source_mode, const ControlSwitch::Ptr& control_switch, const ControlMode::Ptr& target_mode) 
+	{
 		boost::add_vertex(target_mode->getName(), target_mode, _graph);
 		boost::add_edge_by_label(source_mode, target_mode->getName(), control_switch, _graph);
 	}
-	
-	::Eigen::MatrixXd HybridAutomaton::step(const double& t) {
+
+	::Eigen::MatrixXd HybridAutomaton::step(const double& t) 
+	{
 		if (_active)
 		{
 			// check if any out-going jump condition is true
@@ -159,7 +171,7 @@ namespace ha {
 
 					_current_control_mode->deactivate();
 					_current_control_mode = _graph.graph()[mode_handle];
-					
+
 					_activateCurrentControlMode(t);
 
 					// CE: We still need to encapsulate this functionality:
@@ -176,7 +188,8 @@ namespace ha {
 	}
 
 
-	DescriptionTreeNode::Ptr HybridAutomaton::serialize(const DescriptionTree::ConstPtr& factory) const {
+	DescriptionTreeNode::Ptr HybridAutomaton::serialize(const DescriptionTree::ConstPtr& factory) const 
+	{
 		DescriptionTreeNode::Ptr tree_node = factory->createNode("HybridAutomaton");
 		tree_node->setAttribute<std::string>(std::string("name"), this->getName());
 
@@ -198,23 +211,26 @@ namespace ha {
 		return tree_node;
 	}
 
-	void HybridAutomaton::deserialize(const DescriptionTreeNode::ConstPtr& tree, const System::ConstPtr& system, const HybridAutomaton* ha){
+	void HybridAutomaton::deserialize(const DescriptionTreeNode::ConstPtr& tree, const System::ConstPtr& system, const HybridAutomaton* ha)
+	{
 		if (tree->getType() != "HybridAutomaton") {
 			HA_THROW_ERROR("HybridAutomaton.deserialize", "DescriptionTreeNode must have type 'HybridAutomaton', not '" << tree->getType() << "'!");
 		}
 
 		tree->getAttribute<std::string>("name", _name);
- 
+
 		// control modes
 		DescriptionTreeNode::ConstNodeList control_modes;
 		tree->getChildrenNodes("ControlMode", control_modes);
 
-		if (control_modes.empty()) {
+		if (control_modes.empty()) 
+		{
 			HA_THROW_ERROR("HybridAutomaton.deserialize", "No control modes found!");
 		}
 
 		DescriptionTreeNode::ConstNodeList::iterator cm_it;
-		for (cm_it = control_modes.begin(); cm_it != control_modes.end(); ++cm_it) {
+		for (cm_it = control_modes.begin(); cm_it != control_modes.end(); ++cm_it) 
+		{
 			ControlMode::Ptr cm(new ControlMode);
 			cm->deserialize(*cm_it, system, this);
 			this->addControlMode(cm);
@@ -224,30 +240,33 @@ namespace ha {
 		DescriptionTreeNode::ConstNodeList control_switches;
 		tree->getChildrenNodes("ControlSwitch", control_switches);
 		DescriptionTreeNode::ConstNodeList::iterator cs_it;
-		for (cs_it = control_switches.begin(); cs_it != control_switches.end(); ++cs_it) {
+		for (cs_it = control_switches.begin(); cs_it != control_switches.end(); ++cs_it) 
+		{
 			ControlSwitch::Ptr cs(new ControlSwitch);
 			cs->deserialize(*cs_it, system, this);
-			
+
 			// check if source and target are in graph
 			if (!existsControlMode(cs->getSourceControlModeName()))
 				HA_THROW_ERROR("HybridAutomaton.deserialize", "Control mode '" << cs->getSourceControlModeName() << "' does not exist! Cannot set source control mode.");	
 			if (!existsControlMode(cs->getTargetControlModeName()))
 				HA_THROW_ERROR("HybridAutomaton.deserialize", "Control mode '" << cs->getTargetControlModeName() << "' does not exist! Cannot set target control mode.");	
 
-			this->addControlSwitch(cs->getSourceControlModeName(),  
-				cs, cs->getTargetControlModeName());
+			this->addControlSwitch(cs->getSourceControlModeName(), cs, cs->getTargetControlModeName());
 		}
 	}
 
-	void HybridAutomaton::setName(const std::string& name) {
+	void HybridAutomaton::setName(const std::string& name) 
+	{
 		_name = name;
 	}
 
-	const std::string HybridAutomaton::getName() const {
+	const std::string HybridAutomaton::getName() const 
+	{
 		return _name;
 	}
 
-	void HybridAutomaton::activate(const double& t) {
+	void HybridAutomaton::activate(const double& t) 
+	{
 		if (!_current_control_mode) {
 			HA_THROW_ERROR("HybridAutomaton.activate", "No current control mode defined!");
 		}
@@ -255,7 +274,8 @@ namespace ha {
 		_active = true;
 	}
 
-	void HybridAutomaton::deactivate() {
+	void HybridAutomaton::deactivate() 
+	{
 		if (_current_control_mode)
 			_current_control_mode->deactivate();
 		_active = false;
@@ -267,7 +287,8 @@ namespace ha {
 		}
 	}
 
-	void HybridAutomaton::setCurrentControlMode(const std::string& control_mode) {
+	void HybridAutomaton::setCurrentControlMode(const std::string& control_mode) 
+	{
 		/* useful code
 		typedef Graph::vertex_iterator VertexIter; 
 		VertexIter vertexIter, vertexEnd; 
@@ -289,11 +310,13 @@ namespace ha {
 		//_activateCurrentControlMode(0.0);
 	}
 
-	ControlMode::Ptr HybridAutomaton::getCurrentControlMode() const {
+	ControlMode::Ptr HybridAutomaton::getCurrentControlMode() const 
+	{
 		return _current_control_mode;
 	}
 
-	void HybridAutomaton::_activateCurrentControlMode(const double& t) {
+	void HybridAutomaton::_activateCurrentControlMode(const double& t) 
+	{
 		_current_control_mode->activate();
 
 		// activate all outgoing edges
@@ -303,28 +326,29 @@ namespace ha {
 		}
 	}
 
-	bool HybridAutomaton::existsControlMode(const std::string& control_mode) const {
+	bool HybridAutomaton::existsControlMode(const std::string& control_mode) const 
+	{
 		// FIXME cannot make this method const because of vertex_by_label
 		//_graph.vertex(control_mode);
 		return !(_graph.vertex(control_mode) == GraphTraits::null_vertex());
 	}
 
-	ControlMode::Ptr HybridAutomaton::getControlModeByName(const std::string& control_mode_name) const{
+	ControlMode::Ptr HybridAutomaton::getControlModeByName(const std::string& control_mode_name) const
+	{
 		// FIXME make const -> depends on existsControlMode
 		if (!existsControlMode(control_mode_name))
 			HA_THROW_ERROR("HybridAutomaton.getControllerByName", "Control mode " << control_mode_name << " does not exist");
-		
+
 		return _graph[control_mode_name];
 	}
 
-	Controller::Ptr HybridAutomaton::getControllerByName(const std::string& control_mode_name, const std::string& controller_name) const {
+	Controller::Ptr HybridAutomaton::getControllerByName(const std::string& control_mode_name, const std::string& controller_name) const 
+	{
 		// FIXME make const -> depends on existsControlMode
 		if (!existsControlMode(control_mode_name))
 			HA_THROW_ERROR("HybridAutomaton.getControllerByName", "Control mode " << control_mode_name << " does not exist");
-		
+
 		ControlMode::Ptr cm = _graph[control_mode_name];
 		return cm->getControllerByName(controller_name);
 	}
-
-
 }

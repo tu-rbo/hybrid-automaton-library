@@ -11,7 +11,8 @@ namespace ha {
 		return _jump_conditions;
 	}
 
-	bool ControlSwitch::isActive() const {
+	bool ControlSwitch::isActive() const 
+	{
 		for (std::vector<JumpConditionPtr>::const_iterator it = _jump_conditions.begin(); it != _jump_conditions.end(); ++it) {
 			if (!(*it)->isActive())
 				return false;
@@ -19,48 +20,59 @@ namespace ha {
 		return true;
 	}
 
-	void ControlSwitch::activate(const double& t) {
+	void ControlSwitch::activate(const double& t) 
+	{
 		for (std::vector<JumpConditionPtr>::const_iterator it = _jump_conditions.begin(); it != _jump_conditions.end(); ++it) {
 			(*it)->activate(t);
 		}
 	}
 
-	void ControlSwitch::deactivate() {
+	void ControlSwitch::deactivate() 
+	{
 		for (std::vector<JumpConditionPtr>::const_iterator it = _jump_conditions.begin(); it != _jump_conditions.end(); ++it) {
 			(*it)->deactivate();
 		}
 	}
 
-	void ControlSwitch::step(const double& t) {
-		for (std::vector<JumpConditionPtr>::const_iterator it = _jump_conditions.begin(); it != _jump_conditions.end(); ++it) {
+	void ControlSwitch::step(const double& t) 
+	{
+		for (std::vector<JumpConditionPtr>::const_iterator it = _jump_conditions.begin(); it != _jump_conditions.end(); ++it) 
+		{
 			(*it)->step(t);
 		}
 	}
 
-	void ControlSwitch::setName(const std::string& name) {
+	void ControlSwitch::setName(const std::string& name) 
+	{
 		_name = name;
 	}
 
-	const std::string ControlSwitch::getName() const {
+	const std::string ControlSwitch::getName() const 
+	{
 		return _name;
 	}
 
-	void ControlSwitch::setSourceControlModeName(const std::string& source) {
+	void ControlSwitch::setSourceControlModeName(const std::string& source) 
+	{
 		_source_control_mode_name = source;
 	}
 	
-	const std::string ControlSwitch::getSourceControlModeName() const {
+	const std::string ControlSwitch::getSourceControlModeName() const 
+	{
 		return _source_control_mode_name;
 	}
 
-	void ControlSwitch::setTargetControlModeName(const std::string& target) {
+	void ControlSwitch::setTargetControlModeName(const std::string& target) 
+	{
 		_target_control_mode_name = target;
 	}
-	const std::string ControlSwitch::getTargetControlModeName() const {
+	const std::string ControlSwitch::getTargetControlModeName() const 
+	{
 		return _target_control_mode_name;
 	}
 
-	DescriptionTreeNode::Ptr ControlSwitch::serialize(const DescriptionTree::ConstPtr& factory) const {
+	DescriptionTreeNode::Ptr ControlSwitch::serialize(const DescriptionTree::ConstPtr& factory) const 
+	{
 		DescriptionTreeNode::Ptr tree_node = factory->createNode("ControlSwitch");
 		tree_node->setAttribute<std::string>(std::string("name"), this->getName());
 		tree_node->setAttribute<std::string>(std::string("source"), this->getSourceControlModeName());
@@ -74,7 +86,8 @@ namespace ha {
 		return tree_node;
 	}
 	
-	void ControlSwitch::deserialize(const DescriptionTreeNode::ConstPtr& tree, const System::ConstPtr& system, const HybridAutomaton* ha) {
+	void ControlSwitch::deserialize(const DescriptionTreeNode::ConstPtr& tree, const System::ConstPtr& system, const HybridAutomaton* ha) 
+	{
 		if (tree->getType() != "ControlSwitch") {
 			HA_THROW_ERROR("ControlSwitch.deserialize", "DescriptionTreeNode must have type 'ControlSwitch', not '" << tree->getType() << "'!");
 		}
@@ -104,5 +117,4 @@ namespace ha {
 			this->add(js);
 		}
 	}
-
 }
