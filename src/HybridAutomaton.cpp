@@ -253,6 +253,14 @@ namespace ha {
 
 			this->addControlSwitch(cs->getSourceControlModeName(), cs, cs->getTargetControlModeName());
 		}
+		
+		std::string current_control_mode_name;
+		if (tree->getAttribute<std::string>("current_control_mode", current_control_mode_name))
+		{
+			this->setCurrentControlMode(current_control_mode_name);
+		}
+		else
+			HA_THROW_ERROR("HybridAutomaton.deserialize", "Control mode '" << current_control_mode_name << "' does not exist! Cannot set current control mode.");	
 	}
 
 	void HybridAutomaton::setName(const std::string& name) 
@@ -305,9 +313,6 @@ namespace ha {
 		if (_current_control_mode != NULL)
 			_current_control_mode->deactivate();
 		_current_control_mode = _graph[control_mode];
-
-		// FIXME comment by Sebastian: I think it is a bad idea to activate the current control mode after setting it!
-		//_activateCurrentControlMode(0.0);
 	}
 
 	ControlMode::Ptr HybridAutomaton::getCurrentControlMode() const 
