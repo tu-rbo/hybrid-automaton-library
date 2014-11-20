@@ -2,6 +2,7 @@
 
 namespace ha
 {
+	HA_SENSOR_REGISTER("ForceTorqueSensor", ForceTorqueSensor);
 
 	::Eigen::MatrixXd ForceTorqueSensor::getCurrentValue() const
 	{

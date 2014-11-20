@@ -23,9 +23,8 @@ namespace ha {
 		virtual ~System() {
 		}
 
-		virtual ::Eigen::MatrixXd getConfiguration() const = 0;
-		virtual ::Eigen::MatrixXd getEEFrame() const = 0;
 		virtual int getDof() const = 0;
+		virtual ::Eigen::MatrixXd getConfiguration() const = 0;
 		virtual ::Eigen::MatrixXd getForceTorqueMeasurement() const = 0;
 		virtual ::Eigen::MatrixXd getCurrentTime() const = 0;
 		virtual ::Eigen::MatrixXd getFramePose(const std::string& frame_id) const = 0;

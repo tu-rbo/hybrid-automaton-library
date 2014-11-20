@@ -54,7 +54,7 @@ namespace ha {
 		return (this->_computeMetric(current, desired) <_epsilon);
 	}
 
-	double JumpCondition::_computeMetric(::Eigen::MatrixXd x, ::Eigen::MatrixXd y) const
+	double JumpCondition::_computeMetric(const ::Eigen::MatrixXd& x, const ::Eigen::MatrixXd& y) const
 	{
 		double ret = 0;
 		switch(_normType) {
