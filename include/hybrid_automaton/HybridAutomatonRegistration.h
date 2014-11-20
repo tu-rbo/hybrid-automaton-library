@@ -121,8 +121,10 @@
 	};\
 	static Initializer initializer;\
 	virtual const std::string getType() const;\
+	static std::string type();\
 	static Sensor::Ptr instance(const ::ha::DescriptionTreeNode::ConstPtr NODE_NAME, const ::ha::System::ConstPtr SYSTEM_NAME, const ::ha::HybridAutomaton* HA_NAME)
 
 #define HA_SENSOR_REGISTER(STR, NAME) NAME::Initializer initializer;\
 	NAME::Initializer::Initializer() { ha::HybridAutomaton::registerSensor(STR, &NAME::instance); }\
-	const std::string NAME::getType() const { return STR; }
+	const std::string NAME::getType() const { return STR; }\
+	std::string NAME::type() { return STR; }
