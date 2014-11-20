@@ -27,6 +27,7 @@ namespace ha {
 
 	public:		
 		DescriptionTreeXML();
+		DescriptionTreeXML(const std::string& input);
 
 		virtual ~DescriptionTreeXML();
 

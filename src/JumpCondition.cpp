@@ -4,8 +4,10 @@
 namespace ha {
 
 	JumpCondition::JumpCondition():
-		//_goal(),
-		_controller(NULL)
+		_goalSource(CONSTANT),
+		_controller(NULL),
+		_normType(L1),
+		_epsilon(0.0)
 	{
 
 	}
@@ -17,8 +19,13 @@ namespace ha {
 
 	JumpCondition::JumpCondition(const ha::JumpCondition &jc)
 	{
+		this->_goalSource = jc._goalSource;
 		this->_goal = jc._goal;
 		this->_controller = jc._controller;
+		this->_sensor = jc._sensor;
+		this->_normType = jc._normType;
+		this->_normWeights = jc._normWeights;
+		this->_epsilon = jc._epsilon;
 	}
 
 	void JumpCondition::activate(const double& t) 
@@ -44,10 +51,10 @@ namespace ha {
 			<<current.rows()<<"x"<<current.cols()<<", current: "<<desired.rows()<<"x"<<desired.cols()<<"!");
 		}
 		 
-		return (this->_computeNorm(current, desired) <_epsilon);
+		return (this->_computeMetric(current, desired) <_epsilon);
 	}
 
-	double JumpCondition::_computeNorm(::Eigen::MatrixXd x, ::Eigen::MatrixXd y) const
+	double JumpCondition::_computeMetric(::Eigen::MatrixXd x, ::Eigen::MatrixXd y) const
 	{
 		double ret = 0;
 		switch(_normType) {
@@ -56,7 +63,7 @@ namespace ha {
 				{
 					for(int j = 0; j<y.cols(); j++)
 					{ 
-						ret += _weights(i,j) * fabs(x(i,j) - y(i,j));
+						ret += _normWeights(i,j) * fabs(x(i,j) - y(i,j));
 					}
 				}
 				break;
@@ -66,7 +73,7 @@ namespace ha {
 				{
 					for(int j = 0; j<y.cols(); j++)
 					{
-						ret += _weights(i,j) * pow(fabs(x(i,j) - y(i,j)),2);
+						ret += _normWeights(i,j) * pow(fabs(x(i,j) - y(i,j)),2);
 					}
 				}
 				ret = sqrt(ret);
@@ -77,18 +84,18 @@ namespace ha {
 				{
 					for(int j = 0; j<y.cols(); j++)
 					{
-						ret = std::max(ret, _weights(i,j) * fabs(x(i,j) - y(i,j)));
+						ret = std::max(ret, _normWeights(i,j) * fabs(x(i,j) - y(i,j)));
 					}
 				}
 				break;
 			case ROTATION:
-				HA_THROW_ERROR("JumpCondition._computeNorm", "Not Implemented: ROTATION");
+				HA_THROW_ERROR("JumpCondition._computeMetric", "Not Implemented: ROTATION");
 				break;
 			case TRANSFORM:
-				HA_THROW_ERROR("JumpCondition._computeNorm", "Not Implemented: TRANSFORM");
+				HA_THROW_ERROR("JumpCondition._computeMetric", "Not Implemented: TRANSFORM");
 				break;
 			default:
-				HA_THROW_ERROR("JumpCondition._computeNorm", "Not Implemented: unknown norm");
+				HA_THROW_ERROR("JumpCondition._computeMetric", "Not Implemented: unknown norm");
 		}
 
 		return ret;
@@ -96,31 +103,118 @@ namespace ha {
 
 	void JumpCondition::setControllerGoal(const Controller* controller)
 	{
+		_goalSource = CONTROLLER;
 		_controller = controller;
 	}
 
 	void JumpCondition::setConstantGoal(const ::Eigen::MatrixXd goal)
 	{
-		_goal.reset<const ::Eigen::MatrixXd>(&goal);
+		_goalSource = CONSTANT;
+		_goal = goal;
 	}
 
 	::Eigen::MatrixXd JumpCondition::getGoal() const	
 	{
-		if(_controller)
-			return _controller->getGoal();
+		switch(_goalSource) {
+			case CONSTANT: 
+				return _goal;
+			
+			case CONTROLLER: 
+				return _controller->getGoal();
+
+			case ROSTOPIC: 				
+				HA_THROW_ERROR("JumpCondition::getGoal", "Not Implemented: ROSTOPIC");
+				break;
+
+			default:
+				HA_THROW_ERROR("JumpCondition::getGoal", "Not Implemented: unknown goal source");
+		}
+
+		return ::Eigen::MatrixXd();
+	}
+	
+	void JumpCondition::setSensor(const Sensor::Ptr sensor) 
+	{
+		_sensor = sensor;
+	}
+
+	Sensor::ConstPtr JumpCondition::getSensor() const 
+	{
+		return _sensor;
+	} 
+
+	void JumpCondition::setNorm(Norm normType, ::Eigen::MatrixXd weights)
+	{
+		_normType = normType;
+
+		
+		if(weights.rows() == 0)
+		{ //Default weights = 1 for every entry
+			//query sensor (just to get the dimensions for the weights)
+			_normWeights = _sensor->getCurrentValue();
+			
+			//Default weighting: 1 for every entry
+			_normWeights.setConstant(1);
+		}
 		else
-			return *(_goal.get());
+		{
+			_normWeights = weights;
+		}
+
+
+	}
+	
+	JumpCondition::Norm JumpCondition::getNormType() const
+	{
+		return _normType;
+	}
+
+	::Eigen::MatrixXd JumpCondition::getNormWeights() const
+	{
+		return _normWeights;
+	}
+
+	void JumpCondition::setEpsilon(double epsilon)
+	{
+		_epsilon = epsilon;
+	}
+
+	double JumpCondition::getEpsilon() const
+	{
+		return _epsilon;
 	}
 
 	DescriptionTreeNode::Ptr JumpCondition::serialize(const DescriptionTree::ConstPtr& factory) const 
 	{ 
 		DescriptionTreeNode::Ptr tree = factory->createNode("JumpCondition");
 
-		if(this->_controller)
-			tree->setAttribute<std::string>(std::string("controller"), this->_controller->getName());
-		
-		if(this->_goal)
-			tree->setAttribute<Eigen::MatrixXd>(std::string("goal"), *(this->_goal.get()));
+		switch(_goalSource) {
+			case CONSTANT: 
+				tree->setAttribute<Eigen::MatrixXd>(std::string("goal"), _goal);
+				break;
+			
+			case CONTROLLER: 
+				tree->setAttribute<std::string>(std::string("controller"), this->_controller->getName());
+				break;
+			
+			case ROSTOPIC: 				
+				HA_THROW_ERROR("JumpCondition::serialize", "Not Implemented: ROSTOPIC");
+				break;
+
+			default:
+				HA_THROW_ERROR("JumpCondition::serialize", "Not Implemented: unknown goal source");
+		}
+
+		tree->setAttribute<int>(std::string("normType"), this->_normType);
+		if(this->_normWeights.rows() > 0){
+			tree->setAttribute<::Eigen::MatrixXd>(std::string("normWeights"), this->_normWeights);
+		}
+		tree->setAttribute<double>(std::string("epsilon"), this->_epsilon);
+
+		if (!this->_sensor) {
+			HA_THROW_ERROR("ControlMode.serialize", "Sensor is null!");
+		}
+		tree->addChildNode(this->_sensor->serialize(factory));
 
 		return tree;
 	}
@@ -157,9 +251,13 @@ namespace ha {
 		//////////////////////////////
 		////PARAMETERS////////////////
 		//////////////////////////////
+
+		//query sensor (just to get the dimensions for the weights)
 		Eigen::MatrixXd defaultWeights = _sensor->getCurrentValue();
+		
+		//Default weighting: 1 for every entry
 		defaultWeights.setConstant(1);
-		tree->getAttribute<Eigen::MatrixXd>("weights", _weights, defaultWeights);
+		tree->getAttribute<Eigen::MatrixXd>("normWeights", _normWeights, defaultWeights);
 
 	}
 }
