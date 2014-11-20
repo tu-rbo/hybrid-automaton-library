@@ -1,4 +1,5 @@
 #include "hybrid_automaton/ControlSwitch.h"
+#include "hybrid_automaton/HybridAutomaton.h"
 
 namespace ha {
 	void ControlSwitch::add(const JumpConditionPtr& jump_condition)
@@ -113,8 +114,13 @@ namespace ha {
 		DescriptionTreeNode::ConstNodeList::iterator js_it;
 		for (js_it = jump_conditions.begin(); js_it != jump_conditions.end(); ++js_it) {
 			JumpCondition::Ptr js(new JumpCondition);
+
+			//We need to set the controller pointer before calling deserialize!
+			js->setSourceModeName(_source_control_mode_name);
 			js->deserialize(*js_it, system, ha);
 			this->add(js);
 		}
+
+		_hybrid_automaton = ha;
 	}
 }

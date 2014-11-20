@@ -7,6 +7,7 @@
 #include "hybrid_automaton/DescriptionTreeNode.h"
 #include "hybrid_automaton/tests/MockDescriptionTree.h"
 #include "hybrid_automaton/tests/MockDescriptionTreeNode.h"
+#include "hybrid_automaton/JointConfigurationSensor.h"
 
 using ::testing::Return;
 using ::testing::DoAll;
@@ -175,7 +176,7 @@ public:
 
 	//MOCK_METHOD0(deserialize, void (const DescriptionTreeNode::ConstPtr& tree) );
 	MOCK_CONST_METHOD0(getName, const std::string () );
-	MOCK_CONST_METHOD1(getControllerByName, Controller::Ptr (const std::string& name) );
+	MOCK_CONST_METHOD1(getControllerByName, Controller::ConstPtr (const std::string& name) );
 
 	HA_CONTROLSET_INSTANCE(node, system, ha) {
 		ControlSet::Ptr ctrlSet(new MockRegisteredControlSet);
@@ -254,10 +255,24 @@ protected:
 			.WillRepeatedly(Return(false));
 		EXPECT_CALL(*js_node, getAttributeString(std::string("goal"), _))
 			.WillRepeatedly(Return(false));
-		EXPECT_CALL(*js_node, getAttributeString(std::string("type"), _))
-			.WillRepeatedly(DoAll(SetArgReferee<1>("ConfigurationConvergenceCondition"),Return(true)));
+		EXPECT_CALL(*js_node, getAttributeString(std::string("normType"), _))
+			.WillRepeatedly(Return(false));
+		EXPECT_CALL(*js_node, getAttributeString(std::string("epsilon"), _))
+			.WillRepeatedly(Return(false));
+		EXPECT_CALL(*js_node, getAttributeString(std::string("normWeights"), _))
+			.WillRepeatedly(Return(false));
 
 		js_list.push_back(js_node);
+
+		JointConfigurationSensor jcs; // to enable registration
+
+		ss_node.reset(new MockDescriptionTreeNode);
+		EXPECT_CALL(*ss_node, getType())
+			.WillRepeatedly(Return("Sensor"));
+		EXPECT_CALL(*ss_node, getAttributeString(std::string("type"), _))
+			.WillRepeatedly(DoAll(SetArgReferee<1>("JointConfigurationSensor"),Return(true)));
+		ss_list.push_back(ss_node);
+
 
 		//----------
 		ha_node.reset(new MockDescriptionTreeNode);
@@ -274,6 +289,9 @@ protected:
 
 		EXPECT_CALL(*cs_node, getChildrenNodes(std::string("JumpCondition"), _))
 			.WillRepeatedly(DoAll(SetArgReferee<1>(js_list),Return(true)));
+
+		EXPECT_CALL(*js_node, getChildrenNodes(std::string("Sensor"), _))
+			.WillRepeatedly(DoAll(SetArgReferee<1>(ss_list),Return(true)));
 	}
 
 	virtual void TearDown() {
@@ -281,6 +299,7 @@ protected:
 		cs_list.clear();
 		cs_list.clear();
 		ctrl_list.clear();
+		ss_list.clear();
 	}
 
 	MockDescriptionTreeNode::ConstNodeList cm_list;
@@ -288,6 +307,7 @@ protected:
 	MockDescriptionTreeNode::ConstNodeList cset_list;
 	MockDescriptionTreeNode::ConstNodeList cs_list;
 	MockDescriptionTreeNode::ConstNodeList js_list;
+	MockDescriptionTreeNode::ConstNodeList ss_list;
 
 	MockDescriptionTree::Ptr tree;
 
@@ -298,6 +318,7 @@ protected:
 	MockDescriptionTreeNode::Ptr ha_node;
 	MockDescriptionTreeNode::Ptr cs_node;
 	MockDescriptionTreeNode::Ptr js_node;
+	MockDescriptionTreeNode::Ptr ss_node;
 
 };
 
@@ -337,7 +358,7 @@ TEST_F(HybridAutomatonDeserializationTest, GetControlModeAndGetController) {
 	ASSERT_TRUE(ha.existsControlMode("CM1"));
 	ASSERT_FALSE(ha.existsControlMode("notCM1"));
 
-	ControlMode::Ptr cm = ha.getControlModeByName("CM1");
+	ControlMode::ConstPtr cm = ha.getControlModeByName("CM1");
 	ASSERT_TRUE(cm);
 
 	DeserializationControlSet::MockRegisteredControlSet* mockCm
@@ -351,7 +372,7 @@ TEST_F(HybridAutomatonDeserializationTest, GetControlModeAndGetController) {
 	EXPECT_CALL(*mockCm, getControllerByName(std::string("MyCtrl1")))
 		.WillOnce(Return(c));
 
-	Controller::Ptr cret = ha.getControllerByName("CM1", "MyCtrl1");
+	Controller::ConstPtr cret = ha.getControllerByName("CM1", "MyCtrl1");
 	EXPECT_TRUE(c);
 	EXPECT_EQ("MockedControl", cret->getName());
 	EXPECT_EQ("MockedControl", cret->getType());

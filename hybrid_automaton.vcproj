@@ -197,6 +197,10 @@
 					RelativePath=".\src\JointConfigurationSensor.cpp"
 					>
 				</File>
+				<File
+					RelativePath=".\src\Sensor.cpp"
+					>
+				</File>
 			</Filter>
 			<Filter
 				Name="Description"

@@ -54,7 +54,7 @@ namespace ha {
 
 		virtual const std::string getName() const;
 
-		virtual Controller::Ptr getControllerByName(const std::string& name) const; 
+		virtual Controller::ConstPtr getControllerByName(const std::string& name) const; 
 
 	protected:
 		virtual ControlSet* _doClone() const {

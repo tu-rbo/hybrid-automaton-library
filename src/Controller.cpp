@@ -4,135 +4,135 @@
 
 namespace ha {
 
-Controller::Controller():
-_goal(),
-_kp(),
-_kv(),
-_name("default")
-{
+	Controller::Controller()
+		:_goal(),
+		_kp(),
+		_kv(),
+		_name("default")
+	{
 
-}
-
-Controller::~Controller()
-{
-
-}
-
-Controller::Controller(const ha::Controller &controller)
-{
-	this->_goal = controller._goal;
-	this->_kp = controller._kp;
-	this->_kv = controller._kv;
-	this->_completion_time = controller._completion_time;
-	this->_name = controller._name;
-}
-
-DescriptionTreeNode::Ptr Controller::serialize(const DescriptionTree::ConstPtr& factory) const 
-{
-	DescriptionTreeNode::Ptr tree = factory->createNode("Controller");
-
-	tree->setAttribute<std::string>(std::string("type"), this->getType());
-	tree->setAttribute<std::string>(std::string("name"), this->getName());
-
-	tree->setAttribute<Eigen::MatrixXd>(std::string("goal"), this->_goal);
-	tree->setAttribute<Eigen::MatrixXd>(std::string("kp"), this->_kp);
-	tree->setAttribute<Eigen::MatrixXd>(std::string("kv"), this->_kv);
-	tree->setAttribute<double>(std::string("completion_time"), this->_completion_time);
-
-	std::map<std::string, std::string>::const_iterator it;
-	for (it = this->_additional_arguments.begin(); it != this->_additional_arguments.end(); ++it) {
-		tree->setAttribute(it->first, it->second);
 	}
 
-	return tree;
-}
+	Controller::~Controller()
+	{
 
-void Controller::deserialize(const DescriptionTreeNode::ConstPtr& tree, const System::ConstPtr& system, const HybridAutomaton* ha) 
-{
-	if (tree->getType() != "Controller") {
-		HA_THROW_ERROR("Controller.deserialize", "DescriptionTreeNode must have type 'Controller', not '" << tree->getType() << "'!");
-	}
-	tree->getAttribute<std::string>("type", _type, "");
-
-	if (_type == "" || !HybridAutomaton::isControllerRegistered(_type)) {
-		HA_THROW_ERROR("Controller.deserialize", "Controller type '" << _type << "' "
-		   << "invalid - empty or not registered with HybridAutomaton!");
 	}
 
-	tree->getAttribute<std::string>("name", _name, "");
-	// TODO register object with HybridAutomaton / check that it is unique!
+	Controller::Controller(const ha::Controller &controller)
+	{
+		this->_goal = controller._goal;
+		this->_kp = controller._kp;
+		this->_kv = controller._kv;
+		this->_completion_time = controller._completion_time;
+		this->_name = controller._name;
+	}
 
-	// FIXME nicer error handling, sir?
-	tree->getAttribute<Eigen::MatrixXd>(std::string("goal"), this->_goal);
-	tree->getAttribute<Eigen::MatrixXd>(std::string("kp"), this->_kp);
-	tree->getAttribute<Eigen::MatrixXd>(std::string("kv"), this->_kv);
-	tree->getAttribute<double>(std::string("completion_time"), this->_completion_time, 0.);
+	DescriptionTreeNode::Ptr Controller::serialize(const DescriptionTree::ConstPtr& factory) const 
+	{
+		DescriptionTreeNode::Ptr tree = factory->createNode("Controller");
 
-	// write all arguments into "_additional_arguments" field
-	tree->getAllAttributes(_additional_arguments);
-}
+		tree->setAttribute<std::string>(std::string("type"), this->getType());
+		tree->setAttribute<std::string>(std::string("name"), this->getName());
 
-int Controller::getDimensionality() const
-{
-	return -1;
-}
+		tree->setAttribute<Eigen::MatrixXd>(std::string("goal"), this->_goal);
+		tree->setAttribute<Eigen::MatrixXd>(std::string("kp"), this->_kp);
+		tree->setAttribute<Eigen::MatrixXd>(std::string("kv"), this->_kv);
+		tree->setAttribute<double>(std::string("completion_time"), this->_completion_time);
 
-Eigen::MatrixXd Controller::getGoal() const
-{
-	return this->_goal;
-}
+		std::map<std::string, std::string>::const_iterator it;
+		for (it = this->_additional_arguments.begin(); it != this->_additional_arguments.end(); ++it) {
+			tree->setAttribute(it->first, it->second);
+		}
 
-void Controller::setGoal(const Eigen::MatrixXd& new_goal)
-{
-	this->_goal = new_goal;
-}
+		return tree;
+	}
 
-Eigen::MatrixXd Controller::getKp() const
-{
-	return this->_kp;
-}
+	void Controller::deserialize(const DescriptionTreeNode::ConstPtr& tree, const System::ConstPtr& system, const HybridAutomaton* ha) 
+	{
+		if (tree->getType() != "Controller") {
+			HA_THROW_ERROR("Controller.deserialize", "DescriptionTreeNode must have type 'Controller', not '" << tree->getType() << "'!");
+		}
+		tree->getAttribute<std::string>("type", _type, "");
 
-void Controller::setKp(const Eigen::MatrixXd& new_kp)
-{
-	this->_kp = new_kp;
-}
+		if (_type == "" || !HybridAutomaton::isControllerRegistered(_type)) {
+			HA_THROW_ERROR("Controller.deserialize", "Controller type '" << _type << "' "
+				<< "invalid - empty or not registered with HybridAutomaton!");
+		}
 
-Eigen::MatrixXd Controller::getKv() const
-{
-	return this->_kv;
-}
+		tree->getAttribute<std::string>("name", _name, "");
+		// TODO register object with HybridAutomaton / check that it is unique!
 
-void Controller::setKv(const Eigen::MatrixXd& new_kv)
-{
-	this->_kv = new_kv;
-}
+		// FIXME nicer error handling, sir?
+		tree->getAttribute<Eigen::MatrixXd>(std::string("goal"), this->_goal);
+		tree->getAttribute<Eigen::MatrixXd>(std::string("kp"), this->_kp);
+		tree->getAttribute<Eigen::MatrixXd>(std::string("kv"), this->_kv);
+		tree->getAttribute<double>(std::string("completion_time"), this->_completion_time, 0.);
 
-void Controller::setCompletionTime(const double& t)
-{
-	this->_completion_time = t;
-}
-double Controller::getCompletionTime() const 
-{
-	return this->_completion_time;
-}
+		// write all arguments into "_additional_arguments" field
+		tree->getAllAttributes(_additional_arguments);
+	}
 
-std::string Controller::getName() const
-{
-	return this->_name;
-}
+	int Controller::getDimensionality() const
+	{
+		return -1;
+	}
 
-void Controller::setName(const std::string& new_name)
-{
-	this->_name = new_name;
-}
+	Eigen::MatrixXd Controller::getGoal() const
+	{
+		return this->_goal;
+	}
 
-const std::string Controller::getType() const
-{
-	return this->_type;
-}
+	void Controller::setGoal(const Eigen::MatrixXd& new_goal)
+	{
+		this->_goal = new_goal;
+	}
 
-void Controller::setType(const std::string& new_type)
-{
-	this->_type = new_type;
-}
+	Eigen::MatrixXd Controller::getKp() const
+	{
+		return this->_kp;
+	}
+
+	void Controller::setKp(const Eigen::MatrixXd& new_kp)
+	{
+		this->_kp = new_kp;
+	}
+
+	Eigen::MatrixXd Controller::getKv() const
+	{
+		return this->_kv;
+	}
+
+	void Controller::setKv(const Eigen::MatrixXd& new_kv)
+	{
+		this->_kv = new_kv;
+	}
+
+	void Controller::setCompletionTime(const double& t)
+	{
+		this->_completion_time = t;
+	}
+	double Controller::getCompletionTime() const 
+	{
+		return this->_completion_time;
+	}
+
+	std::string Controller::getName() const
+	{
+		return this->_name;
+	}
+
+	void Controller::setName(const std::string& new_name)
+	{
+		this->_name = new_name;
+	}
+
+	const std::string Controller::getType() const
+	{
+		return this->_type;
+	}
+
+	void Controller::setType(const std::string& new_type)
+	{
+		this->_type = new_type;
+	}
 }

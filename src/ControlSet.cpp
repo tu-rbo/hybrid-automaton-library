@@ -107,7 +107,7 @@ namespace ha {
 	}
 	*/
 
-	Controller::Ptr ControlSet::getControllerByName(const std::string& name) const {
+	Controller::ConstPtr ControlSet::getControllerByName(const std::string& name) const {
 		std::map<std::string, Controller::Ptr>::const_iterator it = _controllers.find(name);
 		if (it == _controllers.end()) {
 			throw std::string("[ControlSet.getControllerByName] cannot find controller ") + name;
