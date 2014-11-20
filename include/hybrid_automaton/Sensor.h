@@ -37,10 +37,15 @@ namespace ha {
 
 		virtual ::Eigen::MatrixXd getCurrentValue() const = 0;
 
+		virtual const std::string getType() const;
+		virtual void setType(const std::string& new_type);
+
 	protected:
 		System::ConstPtr _system;
 
 		virtual Sensor* _doClone() const = 0;
+
+		std::string _type;
 
 	};
 
