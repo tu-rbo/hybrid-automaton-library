@@ -19,7 +19,9 @@ namespace ha {
 	{
 	public:
 
-		enum Norm {L1, L2, L_INF, ROTATION, TRANSFORM}; 
+		//Enum for the number of norms - NUM_NORMS is for counting 
+		//and should always be kept at last position, even if you add norms.
+		enum Norm {L1, L2, L_INF, ROTATION, TRANSFORM, NUM_NORMS}; 
 
 		enum GoalSource {CONSTANT, CONTROLLER, ROSTOPIC}; 
 
@@ -47,7 +49,7 @@ namespace ha {
 
 		virtual bool isActive() const;
 
-		virtual void setControllerGoal(const Controller* controller);
+		virtual void setControllerGoal(const Controller::ConstPtr& controller);
 		virtual void setConstantGoal(const ::Eigen::MatrixXd goal);
 		// TODO
 		//virtual void setROSTopicGoal(std::string rosTopicName);
@@ -64,6 +66,8 @@ namespace ha {
 		virtual void setEpsilon(double epsilon);
 		virtual double getEpsilon() const;
 
+		virtual void setSourceModeName(const std::string& sourceModeName);
+
 		virtual DescriptionTreeNode::Ptr serialize(const DescriptionTree::ConstPtr& factory) const;
 
 		virtual void deserialize(const DescriptionTreeNode::ConstPtr& tree, const System::ConstPtr& system, const HybridAutomaton* ha);
@@ -72,13 +76,17 @@ namespace ha {
 
 		GoalSource	_goalSource;
 		::Eigen::MatrixXd _goal;
-		const Controller* _controller;
+		Controller::ConstPtr _controller;
 
 		Sensor::ConstPtr _sensor;
 
 		Norm	_normType;
 		::Eigen::MatrixXd _normWeights;
 		double _epsilon;
+
+		//The name of the mode this JumpCondition's edge emanates from.
+		//Needed for deserialization
+		std::string _sourceModeName;
 
 		double _computeMetric(const ::Eigen::MatrixXd& x, const ::Eigen::MatrixXd& y) const;
 

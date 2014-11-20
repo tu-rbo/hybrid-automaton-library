@@ -5,7 +5,6 @@ namespace ha {
 
 	JumpCondition::JumpCondition():
 		_goalSource(CONSTANT),
-		_controller(NULL),
 		_normType(L1),
 		_epsilon(0.0)
 	{
@@ -56,6 +55,18 @@ namespace ha {
 
 	double JumpCondition::_computeMetric(const ::Eigen::MatrixXd& x, const ::Eigen::MatrixXd& y) const
 	{
+		//First check if weights are given - otherwise use default weights (=1.0)
+		::Eigen::MatrixXd weights;
+		if(_normWeights.rows() == 0)
+		{
+			weights.resize(x.rows(), x.cols());
+			weights.setConstant(1.0);
+		}
+		else
+		{
+			weights = _normWeights;
+		}
+		
 		double ret = 0;
 		switch(_normType) {
 			case L1: 
@@ -63,7 +74,7 @@ namespace ha {
 				{
 					for(int j = 0; j<y.cols(); j++)
 					{ 
-						ret += _normWeights(i,j) * fabs(x(i,j) - y(i,j));
+						ret += weights(i,j) * fabs(x(i,j) - y(i,j));
 					}
 				}
 				break;
@@ -73,7 +84,7 @@ namespace ha {
 				{
 					for(int j = 0; j<y.cols(); j++)
 					{
-						ret += _normWeights(i,j) * pow(fabs(x(i,j) - y(i,j)),2);
+						ret += weights(i,j) * pow(fabs(x(i,j) - y(i,j)),2);
 					}
 				}
 				ret = sqrt(ret);
@@ -84,7 +95,7 @@ namespace ha {
 				{
 					for(int j = 0; j<y.cols(); j++)
 					{
-						ret = std::max(ret, _normWeights(i,j) * fabs(x(i,j) - y(i,j)));
+						ret = std::max(ret, weights(i,j) * fabs(x(i,j) - y(i,j)));
 					}
 				}
 				break;
@@ -101,7 +112,7 @@ namespace ha {
 		return ret;
 	}
 
-	void JumpCondition::setControllerGoal(const Controller* controller)
+	void JumpCondition::setControllerGoal(const Controller::ConstPtr& controller)
 	{
 		_goalSource = CONTROLLER;
 		_controller = controller;
@@ -146,22 +157,7 @@ namespace ha {
 	void JumpCondition::setNorm(Norm normType, ::Eigen::MatrixXd weights)
 	{
 		_normType = normType;
-
-		
-		if(weights.rows() == 0)
-		{ //Default weights = 1 for every entry
-			//query sensor (just to get the dimensions for the weights)
-			_normWeights = _sensor->getCurrentValue();
-			
-			//Default weighting: 1 for every entry
-			_normWeights.setConstant(1);
-		}
-		else
-		{
-			_normWeights = weights;
-		}
-
-
+		_normWeights = weights;
 	}
 	
 	JumpCondition::Norm JumpCondition::getNormType() const
@@ -182,6 +178,11 @@ namespace ha {
 	double JumpCondition::getEpsilon() const
 	{
 		return _epsilon;
+	}
+
+	void JumpCondition::setSourceModeName(const std::string& sourceModeName)
+	{
+		_sourceModeName = sourceModeName;
 	}
 
 	DescriptionTreeNode::Ptr JumpCondition::serialize(const DescriptionTree::ConstPtr& factory) const 
@@ -228,7 +229,19 @@ namespace ha {
 		//////////////////////////////
 		////SENSORS///////////////////
 		//////////////////////////////
-		//TODO
+		DescriptionTreeNode::ConstNodeList sensorList;
+		tree->getChildrenNodes("Sensor", sensorList);
+
+		if (sensorList.empty()) {
+			HA_THROW_ERROR("JumpCondition.deserialize", "No Sensor found!");
+		}
+
+		if (sensorList.size() > 1) {
+			HA_THROW_ERROR("JumpCondition.deserialize", "Too many (>1) sensors found!");
+		}
+
+		DescriptionTreeNode::Ptr first = * (sensorList.begin());
+		this->_sensor = HybridAutomaton::createSensor(first, system, ha);
 
 		//////////////////////////////
 		////GOALS/////////////////////
@@ -242,22 +255,29 @@ namespace ha {
 		std::string controllerName;
 		if(tree->getAttribute<std::string>(std::string("controller"), controllerName))
 		{
-			std::string modeName;
-
 			//Now match name to controller
-			Controller::Ptr ctrl = ha->getControllerByName(controllerName, modeName);
+			if(_sourceModeName == "")
+				HA_THROW_ERROR("JumpCondition.deserialize", "When deserializing a controller goal, you need to call JumpCondition::setSourceModeName() and pass the name of the mode this Jump Condition's Switch emanates from!!!");
+
+			Controller::Ptr ctrl = ha->getControllerByName(controllerName, _sourceModeName);
+			this->setControllerGoal(ctrl);
 		}
 
 		//////////////////////////////
 		////PARAMETERS////////////////
 		//////////////////////////////
+		tree->getAttribute<Eigen::MatrixXd>("normWeights", _normWeights);
+		tree->getAttribute<double>("epsilon", _epsilon, 0.0);
 
-		//query sensor (just to get the dimensions for the weights)
-		Eigen::MatrixXd defaultWeights = _sensor->getCurrentValue();
-		
-		//Default weighting: 1 for every entry
-		defaultWeights.setConstant(1);
-		tree->getAttribute<Eigen::MatrixXd>("normWeights", _normWeights, defaultWeights);
+		int normType = -1;
+		if(tree->getAttribute<int>("normType", normType))
+		{
+			if(normType < 0 || normType >= NUM_NORMS)
+				HA_THROW_ERROR("JumpCondition.deserialize", "Unknown normType "<<normType);
+
+			//Cast int to enum
+			_normType = static_cast<Norm> (normType);	
+		};
 
 	}
 }
