@@ -71,8 +71,8 @@ namespace ha {
 		typedef boost::shared_ptr<DescriptionTreeNode> Ptr;
 		typedef boost::shared_ptr<const DescriptionTreeNode> ConstPtr;
 
-		typedef std::list<const DescriptionTreeNode::Ptr> ConstNodeList;
-		typedef std::list<const DescriptionTreeNode::Ptr>::const_iterator ConstNodeListIterator;
+		typedef std::list<DescriptionTreeNode::ConstPtr> ConstNodeList;
+		typedef std::list<DescriptionTreeNode::ConstPtr>::const_iterator ConstNodeListIterator;
 
 
 		DescriptionTreeNode();

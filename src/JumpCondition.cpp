@@ -240,7 +240,7 @@ namespace ha {
 			HA_THROW_ERROR("JumpCondition.deserialize", "Too many (>1) sensors found!");
 		}
 
-		DescriptionTreeNode::Ptr first = * (sensorList.begin());
+		DescriptionTreeNode::ConstPtr first = * (sensorList.begin());
 		this->_sensor = HybridAutomaton::createSensor(first, system, ha);
 
 		//////////////////////////////

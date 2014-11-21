@@ -39,7 +39,7 @@ namespace ha {
 			HA_THROW_ERROR("ControlMode.deserialize", "Too many (>1) control sets found!");
 		}
 
-		DescriptionTreeNode::Ptr first = * (control_set.begin());
+		DescriptionTreeNode::ConstPtr first = * (control_set.begin());
 		this->_control_set = HybridAutomaton::createControlSet(first, system, ha);
 
 	}
