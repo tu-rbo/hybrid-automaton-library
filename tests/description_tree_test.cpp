@@ -4,7 +4,7 @@
 #include <string>
 
 #include "hybrid_automaton/DescriptionTreeNode.h"
-#include "hybrid_automaton/tests/MockDescriptionTreeNode.h"
+#include "tests/MockDescriptionTreeNode.h"
 
 using ::testing::Return;
 using ::testing::DoAll;

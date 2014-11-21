@@ -1,5 +1,3 @@
-include_directories(${hybrid_automaton_SOURCE_DIR}/include)
-link_directories(${hybrid_automaton_SOURCE_DIR}/include/hybrid_automaton)
 
 set (HA_CORE_SOURCES
     "HybridAutomaton.cpp"

@@ -3,8 +3,8 @@
 
 #include "hybrid_automaton/HybridAutomaton.h"
 
-#include "hybrid_automaton/tests/MockDescriptionTree.h"
-#include "hybrid_automaton/tests/MockDescriptionTreeNode.h"
+#include "tests/MockDescriptionTree.h"
+#include "tests/MockDescriptionTreeNode.h"
 
 #include "hybrid_automaton/Controller.h"
 #include "hybrid_automaton/ControlSet.h"
