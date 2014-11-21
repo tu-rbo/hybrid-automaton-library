@@ -208,7 +208,7 @@ namespace ha {
 
 		tree->setAttribute<int>(std::string("normType"), this->_normType);
 		if(this->_normWeights.rows() > 0){
-			tree->setAttribute<::Eigen::MatrixXd>(std::string("normWeights"), this->_normWeights);
+			tree->setAttribute< ::Eigen::MatrixXd>(std::string("normWeights"), this->_normWeights);
 		}
 		tree->setAttribute<double>(std::string("epsilon"), this->_epsilon);
 
