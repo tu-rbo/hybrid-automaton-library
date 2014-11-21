@@ -281,6 +281,8 @@ protected:
 			.WillRepeatedly(Return("HybridAutomaton"));
 		EXPECT_CALL(*ha_node, getAttributeString(std::string("name"), _))
 			.WillRepeatedly(DoAll(SetArgReferee<1>("MyHA"),Return(true)));
+		EXPECT_CALL(*ha_node, getAttributeString(std::string("current_control_mode"), _))
+			.WillRepeatedly(DoAll(SetArgReferee<1>("CM1"),Return(true)));
 		
 		EXPECT_CALL(*ha_node, getChildrenNodes(std::string("ControlMode"), _))
 			.WillRepeatedly(DoAll(SetArgReferee<1>(cm_list),Return(true)));
