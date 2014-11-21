@@ -54,7 +54,7 @@ namespace ha {
 		// TODO
 		//virtual void setROSTopicGoal(std::string rosTopicName);
 
-		virtual ::Eigen::MatrixXd JumpCondition::getGoal() const;
+		virtual ::Eigen::MatrixXd getGoal() const;
 
 		virtual void setSensor(const Sensor::Ptr sensor);
 		virtual Sensor::ConstPtr getSensor() const;

@@ -32,7 +32,6 @@ namespace ha {
 	class HybridAutomaton : public Serializable {
 
 	public:
-		class HybridAutomaton;
 		typedef boost::shared_ptr<HybridAutomaton> Ptr;
 		typedef boost::shared_ptr<const HybridAutomaton> ConstPtr;
 
