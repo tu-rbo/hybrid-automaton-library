@@ -50,29 +50,29 @@ include_directories(${EIGEN3_INCLUDE_DIR} )
 
 # Collect sources into the variable HA_SOURCES 
 set (HA_CORE_HEADERS
-    ${PROJECT_SOURCE_DIR}"/include/hybrid_automaton/HybridAutomaton.h"
-	${PROJECT_SOURCE_DIR}"/include/hybrid_automaton/HybridAutomatonOStringStream.h"
-	${PROJECT_SOURCE_DIR}"/include/hybrid_automaton/HybridAutomatonRegistration.h"
-	${PROJECT_SOURCE_DIR}"/include/hybrid_automaton/ControlMode.h"
-	${PROJECT_SOURCE_DIR}"/include/hybrid_automaton/ControlSwitch.h"
-	${PROJECT_SOURCE_DIR}"/include/hybrid_automaton/ControlSet.h"
-	${PROJECT_SOURCE_DIR}"/include/hybrid_automaton/Controller.h"
-	${PROJECT_SOURCE_DIR}"/include/hybrid_automaton/JumpCondition.h"
-	${PROJECT_SOURCE_DIR}"/include/hybrid_automaton/System.h"
-	${PROJECT_SOURCE_DIR}"/include/hybrid_automaton/Serializable.h")
+    "${PROJECT_SOURCE_DIR}/include/hybrid_automaton/HybridAutomaton.h"
+	"${PROJECT_SOURCE_DIR}/include/hybrid_automaton/HybridAutomatonOStringStream.h"
+	"${PROJECT_SOURCE_DIR}/include/hybrid_automaton/HybridAutomatonRegistration.h"
+	"${PROJECT_SOURCE_DIR}/include/hybrid_automaton/ControlMode.h"
+	"${PROJECT_SOURCE_DIR}/include/hybrid_automaton/ControlSwitch.h"
+	"${PROJECT_SOURCE_DIR}/include/hybrid_automaton/ControlSet.h"
+	"${PROJECT_SOURCE_DIR}/include/hybrid_automaton/Controller.h"
+	"${PROJECT_SOURCE_DIR}/include/hybrid_automaton/JumpCondition.h"
+	"${PROJECT_SOURCE_DIR}/include/hybrid_automaton/System.h"
+	"${PROJECT_SOURCE_DIR}/include/hybrid_automaton/Serializable.h")
 
 set (HA_SENSOR_HEADERS
-	${PROJECT_SOURCE_DIR}"/include/hybrid_automaton/Sensor.h"
-	${PROJECT_SOURCE_DIR}"/include/hybrid_automaton/ClockSensor.h"
-	${PROJECT_SOURCE_DIR}"/include/hybrid_automaton/ForceTorqueSensor.h"
-	${PROJECT_SOURCE_DIR}"/include/hybrid_automaton/FramePoseSensor.h"
-	${PROJECT_SOURCE_DIR}"/include/hybrid_automaton/JointConfigurationSensor.h")
+	"${PROJECT_SOURCE_DIR}/include/hybrid_automaton/Sensor.h"
+	"${PROJECT_SOURCE_DIR}/include/hybrid_automaton/ClockSensor.h"
+	"${PROJECT_SOURCE_DIR}/include/hybrid_automaton/ForceTorqueSensor.h"
+	"${PROJECT_SOURCE_DIR}/include/hybrid_automaton/FramePoseSensor.h"
+	"${PROJECT_SOURCE_DIR}/include/hybrid_automaton/JointConfigurationSensor.h")
 
 set (HA_DESCRIPTION_HEADERS
-	${PROJECT_SOURCE_DIR}"/include/hybrid_automaton/DescriptionTree.h"
-	${PROJECT_SOURCE_DIR}"/include/hybrid_automaton/DescriptionTreeNode.h"
-	${PROJECT_SOURCE_DIR}"/include/hybrid_automaton/DescriptionTreeXML.h"
-	${PROJECT_SOURCE_DIR}"/include/hybrid_automaton/DescriptionTreeNodeXML.h")
+	"${PROJECT_SOURCE_DIR}/include/hybrid_automaton/DescriptionTree.h"
+	"${PROJECT_SOURCE_DIR}/include/hybrid_automaton/DescriptionTreeNode.h"
+	"${PROJECT_SOURCE_DIR}/include/hybrid_automaton/DescriptionTreeXML.h"
+	"${PROJECT_SOURCE_DIR}/include/hybrid_automaton/DescriptionTreeNodeXML.h")
 
 subdirs(src)
 
