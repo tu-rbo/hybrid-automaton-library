@@ -1,12 +1,8 @@
 # Finding GTest
+# We set GTEST_ROOT manually because we need the specific version that we include in the thirdparty folder
+message ("Gtest must be the version included in HA thirdparty. Searching for GTest in GTEST_ROOT=${PROJECT_SOURCE_DIR}/../thirdparty/gmock-1.7.0/gtest/")
+set (GTEST_ROOT "${PROJECT_SOURCE_DIR}/../thirdparty/gmock-1.7.0/gtest/")
 find_package(GTest)
-	
-# If we are building on windows visual studio and we did't find GTest, we try setting GTEST_ROOT manually
-if(NOT GTEST_FOUND AND MSVC)
-	message ("Gtest not found automatically. Retrying using GTEST_ROOT=${PROJECT_SOURCE_DIR}/../thirdparty/gtest/")
-	set (GTEST_ROOT "${PROJECT_SOURCE_DIR}/../thirdparty/gtest/")
-	find_package(GTest)
-endif()
 	
 if(NOT GTEST_FOUND)
 	message (FATAL_ERROR "Gtest not found!")
@@ -16,14 +12,10 @@ else()
 endif()
 	
 # Finding GMock
+# We set GMOCK_ROOT manually because we need the specific version that we include in the thirdparty folder
+message ("GMock must be the version included in HA thirdparty. Searching for GMock in GMOCK_ROOT=${PROJECT_SOURCE_DIR}/../thirdparty/gmock-1.7.0/")
+set (GMOCK_ROOT "${PROJECT_SOURCE_DIR}/../thirdparty/gmock-1.7.0/")
 find_package(GMock)
-
-# If we are building on windows visual studio and we didn't find GMock, we try setting GMOCK_ROOT manually
-if(NOT GMOCK_FOUND AND MSVC)
-	message ("GMock not found automatically. Retrying using GMOCK_ROOT=${PROJECT_SOURCE_DIR}/../thirdparty/gmock/")
-	set (GMOCK_ROOT "${PROJECT_SOURCE_DIR}/../thirdparty/gmock/")
-	find_package(GMock)
-endif()
 
 if(NOT GMOCK_FOUND)
 	message (FATAL_ERROR "GMock not found!!")
