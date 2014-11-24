@@ -49,7 +49,7 @@ if(NOT Boost_FOUND)
 	message (FATAL_ERROR "Boost not found!!")
 else()
 	message ("Boost found with root directory BOOST_ROOT=${BOOST_ROOT}")
-	include_directories(${BOOST_INCLUDE_DIRS})
+	include_directories(${Boost_INCLUDE_DIR})
 	include_directories(${BOOST_ROOT} )
 endif()
 

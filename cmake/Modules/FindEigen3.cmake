@@ -61,11 +61,33 @@ if (EIGEN3_INCLUDE_DIR)
 
 else (EIGEN3_INCLUDE_DIR)
 
+	file(
+		GLOB
+		EIGEN_INCLUDE_HINTS
+		$ENV{EIGENDIR}/include/eigen3
+		$ENV{EIGENDIR}/include
+		$ENV{EIGENDIR}
+		$ENV{HOME}/include
+		/usr/local/include/eigen3
+		/usr/local/include/eigen*
+		/usr/local/include
+		/usr/include/eigen3
+		/usr/include/eigen*
+		/usr/include
+		/opt/local/include/eigen*
+		$ENV{ProgramW6432}/eigen*/include/eigen3
+		$ENV{ProgramFiles}/eigen*/include/eigen3
+		$ENV{ProgramW6432}/eigen*
+		$ENV{ProgramFiles}/eigen*
+	)
+
   find_path(EIGEN3_INCLUDE_DIR NAMES signature_of_eigen3_matrix_library
       PATHS
       ${CMAKE_INSTALL_PREFIX}/include
       ${EIGEN_DIR}
       PATH_SUFFIXES eigen3 eigen
+	  HINTS
+	  ${EIGEN_INCLUDE_HINTS}
     )
 
   if(EIGEN3_INCLUDE_DIR)
