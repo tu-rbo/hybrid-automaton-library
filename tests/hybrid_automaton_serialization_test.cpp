@@ -5,8 +5,8 @@
 
 #include "hybrid_automaton/HybridAutomaton.h"
 #include "hybrid_automaton/DescriptionTreeNode.h"
-#include "hybrid_automaton/tests/MockDescriptionTree.h"
-#include "hybrid_automaton/tests/MockDescriptionTreeNode.h"
+#include "tests/MockDescriptionTree.h"
+#include "tests/MockDescriptionTreeNode.h"
 #include "hybrid_automaton/JointConfigurationSensor.h"
 
 using ::testing::Return;

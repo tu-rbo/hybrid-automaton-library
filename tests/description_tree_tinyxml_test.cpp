@@ -59,7 +59,8 @@ TEST(TestDescriptionTreeStructure, Positive) {
 	daughterNode->setAttribute<std::string>("name", "lucy");
 	std::string daughtersname;
 	EXPECT_TRUE(daughterNode->getAttribute<std::string>("name", daughtersname));
-	EXPECT_FALSE(daughterNode->getAttribute<std::string>("beer", std::string("Lucy is too young too drink!")));
+	std::string beer_str("Lucy is too young too drink!");
+	EXPECT_FALSE(daughterNode->getAttribute<std::string>("beer", beer_str));
 
 	EXPECT_EQ(daughtersname, "lucy");
 

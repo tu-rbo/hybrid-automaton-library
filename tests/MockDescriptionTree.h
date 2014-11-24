@@ -2,7 +2,7 @@
 #define HYBRID_AUTOMATON_TESTS_MOCK_DESCRIPTION_TREE_H_
 
 #include "hybrid_automaton/DescriptionTree.h"
-#include "hybrid_automaton/tests/MockDescriptionTreeNode.h"
+#include "tests/MockDescriptionTreeNode.h"
 
 namespace ha {
 
