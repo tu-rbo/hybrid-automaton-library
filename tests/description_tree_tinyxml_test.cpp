@@ -120,11 +120,11 @@ TEST(TestDescriptionTreeToXMLString, Positive)
 	
 	::Eigen::MatrixXd eigen_vector(5,1);
 	eigen_vector << 1.8673, 2., 3., 4., 5.;
-	secondNode->setAttribute<::Eigen::MatrixXd>("vector", eigen_vector);
+	secondNode->setAttribute< ::Eigen::MatrixXd>("vector", eigen_vector);
 
 	::Eigen::MatrixXd eigen_matrix(5,2);
 	eigen_matrix << 1., 2., 3., 4., 5., 6., 7., 8., 9., 10.;
-	secondNode->setAttribute<::Eigen::MatrixXd>("matrix", eigen_matrix);
+	secondNode->setAttribute< ::Eigen::MatrixXd>("matrix", eigen_matrix);
 
 	rootNode->addChildNode(secondNode);
 
@@ -157,10 +157,10 @@ TEST(TestDescriptionTreeToXMLString, Positive)
 	EXPECT_EQ(ret, "value2");
 
 	::Eigen::MatrixXd result(0,0);
-	EXPECT_TRUE(it->get()->getAttribute<::Eigen::MatrixXd>("vector", result));
+	EXPECT_TRUE(it->get()->getAttribute< ::Eigen::MatrixXd>("vector", result));
 	EXPECT_EQ(eigen_vector, result);
 	
-	EXPECT_TRUE(it->get()->getAttribute<::Eigen::MatrixXd>("matrix", result));
+	EXPECT_TRUE(it->get()->getAttribute< ::Eigen::MatrixXd>("matrix", result));
 	EXPECT_EQ(eigen_matrix, result);
 
 
