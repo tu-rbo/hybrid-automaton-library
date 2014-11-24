@@ -1,6 +1,8 @@
 include_directories(${hybrid_automaton_SOURCE_DIR}/tests)
 link_directories(${hybrid_automaton_SOURCE_DIR}/lib)
 
+find_package(Threads)
+
 set (HA_TESTS_SOURCES
     "controller_test.cpp"
     "controlmode_test.cpp"
@@ -20,7 +22,9 @@ set (HA_TESTS_HEADERS
 	
 add_executable(hybrid_automaton_tests ${HA_TESTS_SOURCES} ${HA_TESTS_HEADERS} )
 
-target_link_libraries(hybrid_automaton_tests ${TinyXML_LIBRARIES} 
+target_link_libraries(hybrid_automaton_tests 
+			${CMAKE_THREAD_LIBS_INIT}
+			${TinyXML_LIBRARIES} 
 			${Boost_LIBRARIES} 
 			${Eigen3_LIBRARIES} 
 			${GMOCK_LIBRARIES} 
