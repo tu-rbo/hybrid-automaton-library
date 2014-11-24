@@ -9,56 +9,13 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${PROJECT_SOURCE_DIR}/cmake/Modules/
 
 option(UNIT_TESTS "Build all tests." OFF)
 
-if(NOT UNIT_TESTS)
-	message ("Compiling without unit tests (default behavior). Set UNIT_TESTS to true in cmake if you want to have them.")
-else()
-	message ("Compiling with unit tests. Set UNIT_TESTS to false in cmake if you dont want to have them")
-	find_package(GTest)
-	if(NOT GTEST_FOUND)
-		message ("Gtest not found automatically. Retrying using GTEST_ROOT=${PROJECT_SOURCE_DIR}/../thirdparty/gtest/")
-		set (GTEST_ROOT "${PROJECT_SOURCE_DIR}/../thirdparty/gtest/")
-		find_package(GTest)
-		if(NOT GTEST_FOUND)
-			message ("Gtest not found!!")
-		else()
-		    message ("Gtest found in GTEST_ROOT=${PROJECT_SOURCE_DIR}/../thirdparty/gtest/")
-		endif()
-	else()
-		message ("Gtest found")
-	endif()
-	
-	if(GTEST_FOUND)
-		include_directories(${GTEST_INCLUDE_DIRS})
-	endif()
-	
-	
-	find_package(GMock)
-	if(NOT GMOCK_FOUND)
-		message ("GMock not found automatically. Retrying using GMOCK_ROOT=${PROJECT_SOURCE_DIR}/../thirdparty/gmock/")
-		set (GMOCK_ROOT "${PROJECT_SOURCE_DIR}/../thirdparty/gmock/")
-		find_package(GMock)
-		if(NOT GMOCK_FOUND)
-			message ("GMock not found!!")
-		else()
-		    message ("GMock found in GMOCK_ROOT=${PROJECT_SOURCE_DIR}/../thirdparty/gmock/")
-		endif()
-	else()
-		message ("GMock found")
-	endif()
-	
-	if(GMOCK_FOUND)
-		include_directories(${GMOCK_INCLUDE_DIRS})
-	endif()
-	
-endif()
-
-# Just in case we want to do fancy things for windows vs linux
+# If you want to do special things on linux
 if(CMAKE_COMPILER_IS_GNUCXX)
 #	add_definitions(-Wall -ansi -Wno-deprecated -pthread)
 endif()
 
+# If you want to do special things on windows
 if(MSVC)
-#vc 2012 fix for vararg templates
 #    set(MSVC_COMPILER_DEFS "-D_VARIADIC_MAX=10")
 endif() 
 
@@ -67,30 +24,47 @@ endif()
 # defined projects like INSTALL.vcproj and ZERO_CHECK.vcproj
 set_property (GLOBAL PROPERTY USE_FOLDERS ON)
 
-#find_package(Boost REQUIRED COMPONENTS signals thread)
-
-SET (BOOST_ROOT "C:/Program Files/boost/boost_1_57_0")
-SET (EIGEN_DIR "C:/Program Files/eigen/eigen-eigen-1306d75b4a21")
-
 find_package(TinyXML)
+if(NOT TinyXML_FOUND AND MSVC)
+	message ("TinyXML not found automatically. Retrying using TinyXML_ROOT_DIR=${PROJECT_SOURCE_DIR}/../thirdparty/tinyxml/")
+	set (TinyXML_ROOT_DIR "${PROJECT_SOURCE_DIR}/../thirdparty/tinyxml/")
+	find_package(TinyXML)
+endif()
+
 if(NOT TinyXML_FOUND)
-	message ("TinyXML not found!!")
+	message (FATAL_ERROR "TinyXML not found!!")
 else()
-	message ("TinyXML found")
+	message ("TinyXML found with include directories TinyXML_INCLUDE_DIRS=${TinyXML_INCLUDE_DIRS}")
+	include_directories(${TinyXML_INCLUDE_DIRS})
 endif()
 
 find_package(Boost)
+if(NOT Boost_FOUND AND MSVC)
+	message ("Boost not found automatically. Retrying using BOOST_ROOT=C:/Program Files/boost/boost_1_57_0")
+	set (BOOST_ROOT "C:/Program Files/boost/boost_1_57_0")
+	find_package(Boost)
+endif()
+	
 if(NOT Boost_FOUND)
-	message ("Boost not found!!")
+	message (FATAL_ERROR "Boost not found!!")
 else()
-	message ("Boost found")
+	message ("Boost found with root directory BOOST_ROOT=${BOOST_ROOT}")
+	include_directories(${BOOST_INCLUDE_DIRS})
+	include_directories(${BOOST_ROOT} )
 endif()
 
 find_package(Eigen3)
+if(NOT EIGEN3_FOUND AND MSVC)
+	message ("Eigen not found automatically. Retrying using EIGEN_DIR=C:/Program Files/eigen/eigen-eigen-1306d75b4a21")
+	set (EIGEN_DIR "C:/Program Files/eigen/eigen-eigen-1306d75b4a21")
+	find_package(Eigen3)
+endif()
+
 if(NOT EIGEN3_FOUND)
-	message ("Eigen not found!!")
+	message (FATAL_ERROR "Eigen not found!!")
 else()
-	message ("Eigen found")
+	message ("Eigen found with include directories EIGEN3_INCLUDE_DIR=${EIGEN3_INCLUDE_DIR}")
+	include_directories(${EIGEN3_INCLUDE_DIR} )
 endif()
 
 # Set compiler flags and options. 
@@ -103,9 +77,6 @@ endif()
 
 include_directories(${PROJECT_SOURCE_DIR})
 include_directories(${PROJECT_SOURCE_DIR}/include)
-include_directories(${BOOST_ROOT} )
-include_directories(${EIGEN3_INCLUDE_DIR} )
-include_directories(${TinyXML_INCLUDE_DIRS})
 
 # Collect sources into the variable HA_SOURCES 
 set (HA_CORE_HEADERS
@@ -136,7 +107,10 @@ set (HA_DESCRIPTION_HEADERS
 subdirs(src)
 
 if(UNIT_TESTS)
+	message ("Compiling with unit tests. Set UNIT_TESTS to false in cmake if you dont want to include them in the build.")
     enable_testing()
 	subdirs(tests)
+else()
+	message ("Compiling without unit tests (default behavior). Set UNIT_TESTS to true in cmake if you want to include them in the build.")
 endif()
 
