@@ -59,7 +59,7 @@ TEST(DescriptionTree, setAttributeVector) {
 
 	EXPECT_CALL(mock_dtn, setAttributeString(std::string("goal"), goal_exp));
 
-	mock_dtn.setAttribute<::Eigen::MatrixXd>("goal", goal);
+	mock_dtn.setAttribute< ::Eigen::MatrixXd>("goal", goal);
 }
 
 TEST(DescriptionTree, getAttributeVector) {
@@ -73,7 +73,7 @@ TEST(DescriptionTree, getAttributeVector) {
 
 	::Eigen::MatrixXd goal_result(1,1);
 	goal_result << 1.;
-	mock_dtn.getAttribute<::Eigen::MatrixXd>("goal", goal_result);
+	mock_dtn.getAttribute< ::Eigen::MatrixXd>("goal", goal_result);
 
 	::Eigen::MatrixXd goal_true(5,1);
 	goal_true << 1., 2., 3., 4., 5.;
@@ -96,7 +96,7 @@ TEST(DescriptionTree, setAttributeMatrix) {
 
 	EXPECT_CALL(mock_dtn, setAttributeString(std::string("goal"), goal_exp));
 
-	mock_dtn.setAttribute<::Eigen::MatrixXd>("goal", goal);
+	mock_dtn.setAttribute< ::Eigen::MatrixXd>("goal", goal);
 }
 
 TEST(DescriptionTree, getAttributeMatrix) {
@@ -110,7 +110,7 @@ TEST(DescriptionTree, getAttributeMatrix) {
 
 	::Eigen::MatrixXd goal_result(1,1);
 	goal_result << 1.;
-	mock_dtn.getAttribute<::Eigen::MatrixXd>("goal", goal_result);
+	mock_dtn.getAttribute< ::Eigen::MatrixXd>("goal", goal_result);
 
 	::Eigen::MatrixXd goal_true(5,2);
 	goal_true << 1.,2.,3.,4.,5, 6.,7.,8.,9.,10.;
