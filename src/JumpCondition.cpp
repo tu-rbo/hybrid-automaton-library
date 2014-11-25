@@ -50,7 +50,7 @@ namespace ha {
 			<<current.rows()<<"x"<<current.cols()<<", current: "<<desired.rows()<<"x"<<desired.cols()<<"!");
 		}
 		 
-		return (this->_computeMetric(current, desired) <_epsilon);
+		return (this->_computeMetric(current, desired) <= _epsilon);
 	}
 
 	double JumpCondition::_computeMetric(const ::Eigen::MatrixXd& x, const ::Eigen::MatrixXd& y) const

@@ -32,8 +32,6 @@ TEST(JumpCondition, Serialization) {
 	using namespace ha;
 	using namespace std;
 
-	string ctrlSetType("MockSerializableControlSet");
-
 	//-------
 	// Serialized and deserialized sensor
 
@@ -101,3 +99,69 @@ TEST(JumpCondition, Serialization) {
 	DescriptionTreeNode::Ptr jc_serialized;
 	jc_serialized = jc1->serialize(tree);
 }
+
+TEST(JumpCondition, Activation) {
+	using namespace ha;
+	using namespace std;
+
+	//-------
+	// Serialized and deserialized sensor
+
+	JumpConditionSerialization1::MockSystem* _ms = new JumpConditionSerialization1::MockSystem();
+	System::ConstPtr ms(_ms);
+
+	JointConfigurationSensor* _js_s = new JointConfigurationSensor();
+	JointConfigurationSensor::Ptr js_s(_js_s);	
+	js_s->setSystem(ms);
+
+	JumpCondition* _jc1 = new JumpCondition;
+	JumpCondition::Ptr jc1(_jc1);	
+	jc1->setSensor(js_s);
+
+	//The sensor reading of the system - we will mock it as constant
+	::Eigen::MatrixXd sensorMat(3,1);
+	sensorMat<<1.0,1.0,1.0;
+	EXPECT_CALL(*_ms, getConfiguration())
+		.WillRepeatedly(Return(sensorMat));
+
+	/////////////////////////////////////////////////
+	//test 1: invalid dimensions
+
+	//The goal of the system - we will change it in this test
+	::Eigen::MatrixXd goalMat(2,1);
+	goalMat<<1.0,2.0;
+	jc1->setConstantGoal(goalMat);
+	
+	EXPECT_ANY_THROW(jc1->isActive());
+
+	goalMat.resize(1,3);
+	goalMat<<1.0,2.0,3.0;
+	jc1->setConstantGoal(goalMat);
+	EXPECT_ANY_THROW(jc1->isActive());
+
+	/////////////////////////////////////////////////
+	//test 2: Norms
+	jc1->setNorm(JumpCondition::L1);		
+	jc1->setEpsilon(0.1);
+
+	goalMat.resize(3,1);
+	
+	goalMat<<1.1,1.0,1.01;
+	jc1->setConstantGoal(goalMat);
+	EXPECT_FALSE(jc1->isActive());
+		
+	goalMat<<1.08,1.0,1.01;
+	jc1->setConstantGoal(goalMat);
+	EXPECT_TRUE(jc1->isActive());
+
+	//L_INF
+	jc1->setNorm(JumpCondition::L_INF);
+	goalMat<<1.11,1.0,1.0;
+	jc1->setConstantGoal(goalMat);
+	EXPECT_FALSE(jc1->isActive());
+		
+	goalMat<<1.09,1.09,1.09;
+	jc1->setConstantGoal(goalMat);
+	EXPECT_TRUE(jc1->isActive());
+}
+
