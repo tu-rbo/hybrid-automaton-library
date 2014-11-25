@@ -16,7 +16,8 @@ endif()
 
 # If you want to do special things on windows
 if(MSVC)
-#    set(MSVC_COMPILER_DEFS "-D_VARIADIC_MAX=10")
+    set(MSVC_COMPILER_DEFS "/MP")
+	add_definitions(/MP)
 endif() 
 
 # Turn on the ability to create folders to organize projects (.vcproj)
@@ -104,7 +105,50 @@ set (HA_DESCRIPTION_HEADERS
 	"${PROJECT_SOURCE_DIR}/include/hybrid_automaton/DescriptionTreeXML.h"
 	"${PROJECT_SOURCE_DIR}/include/hybrid_automaton/DescriptionTreeNodeXML.h")
 
-subdirs(src)
+
+set (HA_CORE_SOURCES
+    "${PROJECT_SOURCE_DIR}/src/HybridAutomaton.cpp"
+    "${PROJECT_SOURCE_DIR}/src/HybridAutomatonOStringStream.cpp"
+    "${PROJECT_SOURCE_DIR}/src/ControlMode.cpp"
+    "${PROJECT_SOURCE_DIR}/src/ControlSwitch.cpp"
+    "${PROJECT_SOURCE_DIR}/src/ControlSet.cpp"
+    "${PROJECT_SOURCE_DIR}/src/Controller.cpp"
+    "${PROJECT_SOURCE_DIR}/src/JumpCondition.cpp")
+
+set (HA_DESCRIPTION_SOURCES
+    "${PROJECT_SOURCE_DIR}/src/DescriptionTreeNode.cpp"
+    "${PROJECT_SOURCE_DIR}/src/DescriptionTreeXML.cpp"
+    "${PROJECT_SOURCE_DIR}/src/DescriptionTreeNodeXML.cpp")
+
+set (HA_SENSOR_SOURCES
+    "${PROJECT_SOURCE_DIR}/src/Sensor.cpp"
+    "${PROJECT_SOURCE_DIR}/src/ClockSensor.cpp"
+    "${PROJECT_SOURCE_DIR}/src/ForceTorqueSensor.cpp"
+    "${PROJECT_SOURCE_DIR}/src/FramePoseSensor.cpp"
+    "${PROJECT_SOURCE_DIR}/src/JointConfigurationSensor.cpp")
+	
+source_group("Header Files" FILES ${HA_CORE_HEADERS})
+
+source_group("Header Files\\Description" FILES ${HA_DESCRIPTION_HEADERS})
+
+source_group("Header Files\\Sensor" FILES ${HA_SENSOR_HEADERS})
+
+source_group("Source Files" FILES ${HA_CORE_SOURCES})
+
+source_group("Source Files\\Description" FILES ${HA_DESCRIPTION_SOURCES})
+
+source_group("Source Files\\Sensor" FILES ${HA_SENSOR_SOURCES})
+	
+add_library(hybrid_automaton STATIC ${HA_CORE_SOURCES} 
+                        ${HA_DESCRIPTION_SOURCES} 
+                        ${HA_SENSOR_SOURCES} 
+						${HA_CORE_HEADERS} 
+                        ${HA_DESCRIPTION_HEADERS} 
+                        ${HA_SENSOR_HEADERS})
+						
+target_link_libraries(hybrid_automaton ${TinyXML_LIBRARIES} ${Boost_LIBRARIES} ${Eigen3_LIBRARIES})
+
+#subdirs(src)
 
 if(UNIT_TESTS)
 	message ("Compiling with unit tests. Set UNIT_TESTS to false in cmake if you dont want to include them in the build.")

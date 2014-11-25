@@ -60,11 +60,15 @@ target_link_libraries(hybrid_automaton_tests
 			${TinyXML_LIBRARIES} 
 			${Boost_LIBRARIES} 
 			${Eigen3_LIBRARIES} 
-			${GMOCK_LIBRARIES} 
-			${GMOCK_MAIN_LIBRARIES}
-			${GTEST_LIBRARIES} 
-			${GTEST_MAIN_LIBRARIES}
-			hybrid_automaton)
+			)
+			
+target_link_libraries(hybrid_automaton_tests 
+			debug ${GTEST_LIBRARY_DEBUG} optimized ${GTEST_LIBRARY}
+			debug ${GTEST_MAIN_LIBRARY_DEBUG} optimized ${GTEST_MAIN_LIBRARY}
+			debug ${GMOCK_LIBRARY_DEBUG} optimized ${GMOCK_LIBRARY}
+			debug ${GMOCK_MAIN_LIBRARY_DEBUG} optimized ${GMOCK_MAIN_LIBRARY}
+			)
+target_link_libraries(hybrid_automaton_tests hybrid_automaton)
 	
 source_group("Header Files" FILES ${HA_TESTS_HEADERS})
 
