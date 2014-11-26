@@ -50,7 +50,7 @@ namespace ha {
 			<<current.rows()<<"x"<<current.cols()<<", current: "<<desired.rows()<<"x"<<desired.cols()<<"!");
 		}
 		 
-		return (this->_computeMetric(current, desired) <_epsilon);
+		return (this->_computeMetric(current, desired) <= _epsilon);
 	}
 
 	double JumpCondition::_computeMetric(const ::Eigen::MatrixXd& x, const ::Eigen::MatrixXd& y) const
@@ -213,7 +213,7 @@ namespace ha {
 		tree->setAttribute<double>(std::string("epsilon"), this->_epsilon);
 
 		if (!this->_sensor) {
-			HA_THROW_ERROR("ControlMode.serialize", "Sensor is null!");
+			HA_THROW_ERROR("JumpCondition::serialize", "All JumpConditions need to have a sensor!");
 		}
 		tree->addChildNode(this->_sensor->serialize(factory));
 
