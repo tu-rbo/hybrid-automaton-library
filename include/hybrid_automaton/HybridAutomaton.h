@@ -1,73 +1,213 @@
-#ifndef HYBRID_AUTOMATON_
-#define HYBRID_AUTOMATON_
+#ifndef HYBRID_AUTOMATON_HYBRID_AUTOMATON_H_
+#define HYBRID_AUTOMATON_HYBRID_AUTOMATON_H_
 
-#include "graph/include/MDP.h"
-#include "graph/include/MDPNode.h"
-#include "graph/include/MDPEdge.h"
-#include "Milestone.h"
-#include "MotionBehaviour.h"
+#include "hybrid_automaton/Controller.h"
+#include "hybrid_automaton/ControlMode.h"
+#include "hybrid_automaton/ControlSwitch.h"
+#include "hybrid_automaton/Serializable.h"
 
-/**
-* HybridAutomaton class. 
-* @brief Class extending DiGraph. It defines the types for the template to be Milestone and MotionBehaviour. Adds the required parser/deparser functionalities.
-*/
-class HybridAutomaton : public MDP
-{
-public:
+#include "hybrid_automaton/System.h"
+#include "hybrid_automaton/DescriptionTreeNode.h"
 
-	/**
-	* Constructor. Creates an empty graph.
-	*/
-	HybridAutomaton();
+#include <string>
+#include <map>
+#include <assert.h>
+#include <iostream>
 
-	/**
-	* Destructor.
-	*/
-	virtual ~HybridAutomaton();
+#include <boost/shared_ptr.hpp>
+#include <boost/graph/adjacency_list.hpp>
+#include <boost/graph/labeled_graph.hpp>
 
-	/**
-	* Return a pointer to the first Milestone.
-	*/
-	Milestone* getStartNode() const;
+#include <Eigen/Dense>
+
+namespace ha {
+
+	class HybridAutomaton;
+	typedef boost::shared_ptr<HybridAutomaton> HybridAutomatonPtr;
+	typedef boost::shared_ptr<const HybridAutomaton> HybridAutomatonConstPtr;
 
 	/**
-	* Set the pointer to the first Milestone.
-	* @param nodeID Pointer to the first Milestone.
-	*/
-	void setStartNode(Milestone* nodeID);
+	 * @brief Hybrid Automaton implementation and interface
+	 */
+	class HybridAutomaton : public Serializable {
 
-	/**
-	* Return the pointer of a specific Milestone or NULL if it doesn't exist.
-	* @param name Name of the Milestone.
-	*/
-	Milestone* getMilestoneByName(const std::string& name) const;
+	public:
+		typedef boost::shared_ptr<HybridAutomaton> Ptr;
+		typedef boost::shared_ptr<const HybridAutomaton> ConstPtr;
 
-	/**
-	* Return a string with XML format with all required parameters of the HybridAutomaton to recreate it 
-	* in the other side of a network connection.
-	* Note: It uses tinyXML library to create the string with XML format.
-	*/
-	virtual std::string toStringXML() const;
+		typedef ::ha::Controller::Ptr (*ControllerCreator) (const ::ha::DescriptionTreeNode::ConstPtr, const ::ha::System::ConstPtr, const HybridAutomaton*);
+		typedef ::ha::ControlSet::Ptr (*ControlSetCreator) (const ::ha::DescriptionTreeNode::ConstPtr, const ::ha::System::ConstPtr, const HybridAutomaton*);
+		typedef ::ha::Sensor::Ptr (*SensorCreator) (const ::ha::DescriptionTreeNode::ConstPtr, const ::ha::System::ConstPtr, const HybridAutomaton*);
 
-	/**
-	* REPLACE the current values of the HybridAutomaton with the values contained in a string with XML format.
-	* @param xmlString String with XML format containing the new values for the HybridAutomaton.
-	* @param robot Pointer to the rxSystem, used to create the rxControllers.
-	* @param dT Interval to be used by all the controllers in this HybridSystem
-	* Note: It uses tinyXML library to read the string with XML format.
-	*/
-	//virtual void fromStringXML(const std::string& xml_string, rxSystem* robot, double dT);
+		// a directed labeled graph based on an adjacency list
+		typedef ::boost::labeled_graph< boost::adjacency_list< boost::vecS, boost::vecS, boost::directedS, ControlMode::Ptr, ControlSwitch::Ptr >, std::string > Graph;
 
-private:
-	Milestone* start_node_id_;	// Pointer to the first Milestone (if exists). 
-	// CAREFUL! This pointer is the same as the stored in the vector of Milestones. Don't modify/delete it!
-};
+		//Handle objects for vertices and edges of the graph structure - you can obtain the 
+		//Modes and Switches by calling Graph[Handle]
+		typedef ::boost::graph_traits< Graph >::vertex_descriptor ModeHandle;
+		typedef ::boost::graph_traits< Graph >::edge_descriptor SwitchHandle;
+		typedef ::boost::graph_traits< Graph > GraphTraits;
 
-/**
-* Creates an ostream with the data and parameters of a HybridAutomaton.
-* @param out Object to add the data and be returned.
-* @param hybrid_system HybridAutomaton to be parsed.
-*/
-ostream& operator<<(ostream & out, const HybridAutomaton & hybrid_system);
+		//Iterators
+		typedef ::boost::graph_traits< Graph >::vertex_iterator ModeIterator;
+		typedef ::boost::graph_traits< Graph >::edge_iterator SwitchIterator;
+		typedef ::boost::graph_traits< Graph >::out_edge_iterator OutEdgeIterator;
+
+	protected:
+		Graph _graph;
+		ControlMode::Ptr _current_control_mode;
+
+		//Maps switch names to edges in the graph
+		std::map<std::string, SwitchHandle> _switchMap;
+
+		std::string _name;
+
+		bool _active;
+
+		// helper function -- not virtual!
+		void _activateCurrentControlMode(const double& t);
+
+	private:  
+
+		// see http://stackoverflow.com/questions/8057682/accessing-a-static-map-from-a-static-member-function-segmentation-fault-c
+		static std::map<std::string, ControllerCreator> & getControllerTypeMap() {
+			static std::map<std::string, ControllerCreator> controller_type_map;
+			return controller_type_map; 
+		}
+
+		static std::map<std::string, ControlSetCreator> & getControlSetTypeMap() {
+			static std::map<std::string, ControlSetCreator> controlset_type_map;
+			return controlset_type_map; 
+		}
+		
+		static std::map<std::string, SensorCreator> & getSensorTypeMap() {
+			static std::map<std::string, SensorCreator> sensor_type_map;
+			return sensor_type_map; 
+		}
+
+	public:
+		HybridAutomaton();
+		virtual ~HybridAutomaton();
+
+		/** 
+		 * @brief Instantiate a controller of given type 
+		 *
+		 * In order to work you must register your controller properly
+		 */
+		static Controller::Ptr createController(const DescriptionTreeNode::ConstPtr& node, const System::ConstPtr& system, const HybridAutomaton* ha);
+
+		/** 
+		 * @brief Instantiate a control set of given type 
+		 *
+		 * In order to work you must register your control set properly
+		 */
+		static ControlSet::Ptr createControlSet(const DescriptionTreeNode::ConstPtr& node, const System::ConstPtr& system, const HybridAutomaton* ha);
+
+		static Sensor::Ptr createSensor(const DescriptionTreeNode::ConstPtr& node, const System::ConstPtr& system, const HybridAutomaton* ha);
+
+		/**
+		 * @brief Register a controller with the hybrid automaton
+		 *
+		 * Do not call this function yourself but rather use the macros:
+		 *  HA_RLAB_CONTROLLER_REGISTER_HEADER()
+		 *		-> to your header file
+		 *  HA_RLAB_CONTROLLER_REGISTER_CPP("YourController", YourController)
+		 *      -> to your cpp file
+		 *
+		 * @see hybrid_automaton/hybrid_automaton_registration.h
+		 */
+		static void registerController(const std::string& crtl_type, ControllerCreator cc);
+
+		/**
+		 * @brief Check whether a controller with given type is registered
+		 */
+		static bool isControllerRegistered(const std::string& crtl_type);
+
+		/**
+		 * @brief Unregister a controller with the hybrid automaton
+		 *
+		 * Usually you do not need that except for testing
+		 */
+		static void unregisterController(const std::string& crtl_type);
+
+		/**
+		 * @brief Register a control set with the hybrid automaton
+		 *
+		 * Do not call this function yourself but rather use the macros:
+		 *  HA_RLAB_CONTROLSET_REGISTER_HEADER()
+		 *		-> to your header file
+		 *  HA_RLAB_CONTROLSET_REGISTER_CPP("YourControlSet", YourControlSet)
+		 *      -> to your cpp file
+	     *
+		 * @see hybrid_automaton/hybrid_automaton_registration.h
+		 */
+		static void registerControlSet(const std::string& crtl_name, ControlSetCreator cc);
+
+		/**
+		 * @brief Check whether a control set with given type is registered
+		 */
+		static bool isControlSetRegistered(const std::string& crtl_type);
+
+		/**
+		 * @brief Unregister a control set with the hybrid automaton
+		 *
+		 * Usually you do not need that except for testing
+		 */
+		static void unregisterControlSet(const std::string& crtl_name);
+
+		static void registerSensor(const std::string& sensor_type, SensorCreator sc);
+
+		static bool isSensorRegistered(const std::string& sensor_type);
+
+		static void unregisterSensor(const std::string& sensor_type);
+
+		void addControlMode(const ControlMode::Ptr& control_mode);
+		void addControlSwitch(const std::string& source_mode, const ControlSwitch::Ptr& control_switch, const std::string& target_mode);
+		void addControlSwitchAndMode(const std::string& source_mode, const ControlSwitch::Ptr& control_switch, const ControlMode::Ptr& target_mode);
+
+		::Eigen::MatrixXd step(const double& t);
+
+		void setName(const std::string& name);
+		const std::string getName() const;
+
+		virtual bool isActive() const {
+			return _active;
+		}
+
+		void activate(const double& t);
+		void deactivate();
+
+		void setCurrentControlMode(const std::string& control_mode);
+		ControlMode::Ptr getCurrentControlMode() const;
+
+		virtual DescriptionTreeNode::Ptr serialize(const DescriptionTree::ConstPtr& factory) const;
+
+		virtual void deserialize(const DescriptionTreeNode::ConstPtr& tree, const System::ConstPtr& system) {
+			this->deserialize(tree, system, this);
+		}
+		virtual void deserialize(const DescriptionTreeNode::ConstPtr& tree, const System::ConstPtr& system, const HybridAutomaton* ha);
+
+		virtual bool existsControlMode(const std::string& control_mode) const;
+		virtual	bool existsControlSwitch(const std::string& control_switch) const; 
+
+		virtual Controller::ConstPtr getControllerByName(const std::string& control_mode_name, const std::string& controller_name) const;
+
+		virtual ControlMode::ConstPtr getControlModeByName(const std::string& control_mode_name) const;
+		virtual ControlSwitch::ConstPtr getControlSwitchByName(const std::string& control_switch_name) const;
+	
+		virtual ControlMode::ConstPtr getSourceControlMode(const std::string& controlSwitch) const;
+		virtual ControlMode::ConstPtr getTargetControlMode(const std::string& controlSwitch) const;
+
+		HybridAutomatonPtr clone() const {
+			return HybridAutomatonPtr(_doClone());
+		}
+
+	protected:
+		virtual HybridAutomaton* _doClone() const {
+			return new HybridAutomaton(*this);
+		}
+	};
+
+}
 
 #endif
