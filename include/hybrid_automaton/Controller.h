@@ -46,15 +46,15 @@ namespace ha {
 		/*!
 		* @brief Activate the controller for execution
 	    */
-		virtual void activate() {
-			HA_THROW_ERROR("Controller.activate", "not implemented");
+		virtual void initialize() {
+			HA_THROW_ERROR("Controller.initialize", "not implemented");
 		}
 
 		/*!
 		* @brief Deactivate the controller for execution
 	    */
-		virtual void deactivate() {
-			HA_THROW_ERROR("Controller.deactivate", "not implemented");
+		virtual void terminate() {
+			HA_THROW_ERROR("Controller.terminate", "not implemented");
 		}
 
 		/*!

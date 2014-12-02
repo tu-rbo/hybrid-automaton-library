@@ -174,8 +174,8 @@ namespace ha {
 			return _active;
 		}
 
-		void activate(const double& t);
-		void deactivate();
+		void initialize(const double& t);
+		void terminate();
 
 		void setCurrentControlMode(const std::string& control_mode);
 		ControlMode::Ptr getCurrentControlMode() const;

@@ -14,12 +14,12 @@ namespace ha {
 		this->_controllers = cs._controllers;
 	}
 
-	void ControlSet::activate() {
-		HA_THROW_ERROR("ControlSet.activate", "Not implemented");
+	void ControlSet::initialize() {
+		HA_THROW_ERROR("ControlSet.initialize", "Not implemented");
 	}
 
-	void ControlSet::deactivate() {
-		HA_THROW_ERROR("ControlSet.deactivate", "Not implemented");
+	void ControlSet::terminate() {
+		HA_THROW_ERROR("ControlSet.terminate", "Not implemented");
 	}
 
 	::Eigen::MatrixXd ControlSet::step(const double& t) {

@@ -27,18 +27,18 @@ namespace ha {
 
 		virtual ~ControlMode() {}
 
-		virtual void activate() {
+		virtual void initialize() {
 			if (_control_set)
-				_control_set->activate();
+				_control_set->initialize();
 			else
-				HA_THROW_ERROR("ControlSet.activate", "No control set defined.");
+				HA_THROW_ERROR("ControlSet.initialize", "No control set defined.");
 		}
 
-		virtual void deactivate() {
+		virtual void terminate() {
 			if (_control_set)
-				_control_set->deactivate();
+				_control_set->terminate();
 			else
-				HA_THROW_ERROR("ControlSet.deactivate", "No control set defined.");
+				HA_THROW_ERROR("ControlSet.terminate", "No control set defined.");
 		}
 
 		virtual ::Eigen::MatrixXd step(const double& t) {

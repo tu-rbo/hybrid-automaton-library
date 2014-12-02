@@ -16,8 +16,8 @@ class TestControlMode : public ha::ControlMode {
 
   public:
 	TestControlMode(const std::string& s): ha::ControlMode(s) {};
-	virtual void activate() {};
-	virtual void deactivate() {};
+	virtual void initialize() {};
+	virtual void terminate() {};
 	virtual ::Eigen::MatrixXd step(const double& t)	{ return ::Eigen::MatrixXd(0,0); }
 };
 
@@ -64,16 +64,16 @@ TEST_F(HybridAutomatonTest, setCurrentControlMode) {
 
 TEST_F(HybridAutomatonTest, activate) {
 	// should throw an exception because no current control mode is defined
-	EXPECT_ANY_THROW(hybrid_automaton.activate(0.0));
+	EXPECT_ANY_THROW(hybrid_automaton.initialize(0.0));
 	
 	EXPECT_NO_THROW(hybrid_automaton.setCurrentControlMode("m1"));
 
-	EXPECT_NO_THROW(hybrid_automaton.activate(0.0));
+	EXPECT_NO_THROW(hybrid_automaton.initialize(0.0));
 }
 
 TEST_F(HybridAutomatonTest, step) {
 	ASSERT_NO_THROW(hybrid_automaton.setCurrentControlMode("m1"));
-	ASSERT_NO_THROW(hybrid_automaton.activate(0.0));
+	ASSERT_NO_THROW(hybrid_automaton.initialize(0.0));
 
 	::Eigen::MatrixXd expected_result(0,0);
 	ASSERT_TRUE(expected_result == hybrid_automaton.step(0.0));
@@ -85,7 +85,7 @@ TEST_F(HybridAutomatonTest, step) {
 //	s1->add(time_switch);
 //
 //	ASSERT_NO_THROW(hybrid_automaton.setCurrentControlMode("m1"));
-//	ASSERT_NO_THROW(hybrid_automaton.activate(0.0));
+//	ASSERT_NO_THROW(hybrid_automaton.initialize(0.0));
 //
 //	double time = 0.0;
 //	while (time <= 2.0) {
