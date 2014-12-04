@@ -11,9 +11,6 @@
 #include "hybrid_automaton/DescriptionTree.h"
 #include "hybrid_automaton/DescriptionTreeNodeXML.h"
 
-// FIXME remove
-#include <iostream>
-
 namespace ha {
 
 	class DescriptionTreeXML;

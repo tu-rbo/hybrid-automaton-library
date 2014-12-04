@@ -17,7 +17,17 @@ namespace ha {
 	typedef boost::shared_ptr<ControlMode> ControlModePtr;
 	typedef boost::shared_ptr<const ControlMode> ControlModeConstPtr;
 
-	class ControlMode : public Serializable {
+
+    /**
+     * @brief Control mode
+     *
+     * A control mode is a node in the hybrid automaton graph. It contains
+     * a ControlSet which again contains a set of controllers.
+     *
+     * @see ControlSet
+     * @see Controller
+     */
+    class ControlMode : public Serializable {
 	public:
 		typedef boost::shared_ptr<ControlMode> Ptr;
 		typedef boost::shared_ptr<const ControlMode> ConstPtr;

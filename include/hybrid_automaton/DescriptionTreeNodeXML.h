@@ -39,23 +39,8 @@ namespace ha {
 		}
 
 
-		/*!
-		 * \brief
-		 * Copy constructor
-		 * 
-		 * \param dtn
-		 * Description of parameter dtn.
-		 * 
-		 * \throws Nothing
-		 * Description of criteria for throwing this exception.
-		 * 
-		 * Write detailed description for DescriptionTreeNodeXML here.
-		 * 
-		 * \remarks
-		 * Write remarks for DescriptionTreeNodeXML here.
-		 * 
-		 * \see
-		 * Separate items with the '|' character.
+		/**
+         * @brief Copy constructor
 		 */
 		DescriptionTreeNodeXML(const DescriptionTreeNodeXML& dtn);
 

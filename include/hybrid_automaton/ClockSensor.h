@@ -28,7 +28,7 @@ namespace ha {
 		ClockSensorPtr clone() const
 		{
 			return (ClockSensorPtr(_doClone()));
-		};
+        }
 
 		virtual ::Eigen::MatrixXd getCurrentValue() const;
 

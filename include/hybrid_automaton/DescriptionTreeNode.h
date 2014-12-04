@@ -1,4 +1,4 @@
-/*!
+/**
 * DescriptionTreeNode.h
 * 
 * Copyright (c) 2014 by RBO TU Berlin
@@ -52,8 +52,8 @@ std::istringstream& operator>>(std::istringstream& iss, Eigen::MatrixXd& matrix)
 	typedef boost::shared_ptr<DescriptionTreeNode> DescriptionTreeNodePtr;
 	typedef boost::shared_ptr<const DescriptionTreeNode> DescriptionTreeNodeConstPtr;
 
-	/*!
-	* \brief
+	/**
+	* @brief
 	* General interface for a hierarchical, text based description object.
 	* 
 	* Code against this interface to integrate your xml, yaml, whatever - based description of

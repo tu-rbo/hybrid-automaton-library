@@ -1,4 +1,4 @@
-/*!
+/**
 * <File comment goes here!!>
 * 
 * Copyright (c) 200x by <your name/ organization here>
@@ -28,110 +28,54 @@ namespace ha {
 		typedef boost::shared_ptr<Controller> Ptr;
 		typedef boost::shared_ptr<const Controller> ConstPtr;
 
-		/*!
+        /**
 		* Constructor
 		*/
 		Controller();
 
-		/*!
+        /**
 		* Destructor
 		*/
 		virtual ~Controller();
 
-		/*!
+        /**
 		* Copy constructor
 		*/
 		Controller(const Controller& controller);
 
-		/*!
+        /**
 		* @brief Activate the controller for execution
 	    */
 		virtual void initialize() {
 			HA_THROW_ERROR("Controller.initialize", "not implemented");
 		}
 
-		/*!
+        /**
 		* @brief Deactivate the controller for execution
 	    */
 		virtual void terminate() {
 			HA_THROW_ERROR("Controller.terminate", "not implemented");
 		}
 
-		/*!
-		* \brief
-		* Step function
-		* 
-		* 
-		* \throws <exception class>
-		* Description of criteria for throwing this exception.
-		* 
-		* Write detailed description for deserialize here.
-		* 
-		* \remarks
-		* Write remarks for deserialize here.
-		* 
-		* \see
-		* Separate items with the '|' character.
+        /**
+        * @brief Step function
 		*/
 		virtual ::Eigen::MatrixXd step(const double& t) {
 			HA_THROW_ERROR("Controller.step", "not implemented");
 		}
 
-		/*!
-		* \brief
-		* Write brief comment for deserialize here.
-		* 
-		* \param tree
-		* Description of parameter tree.
-		* 
-		* \throws <exception class>
-		* Description of criteria for throwing this exception.
-		* 
-		* Write detailed description for deserialize here.
-		* 
-		* \remarks
-		* Write remarks for deserialize here.
-		* 
-		* \see
-		* Separate items with the '|' character.
+        /**
+        * @brief Serialize
 		*/
 		virtual DescriptionTreeNode::Ptr serialize(const DescriptionTree::ConstPtr& factory) const;
 
-		/*!
-		* \brief
-		* Write brief comment for deserialize here.
-		* 
-		* \param tree
-		* Description of parameter tree.
-		* 
-		* \throws <exception class>
-		* Description of criteria for throwing this exception.
-		* 
-		* Write detailed description for deserialize here.
-		* 
-		* \remarks
-		* Write remarks for deserialize here.
-		* 
-		* \see
-		* Separate items with the '|' character.
+        /**
+        * @brief Deserialize
 		*/
 		virtual void deserialize(const DescriptionTreeNode::ConstPtr& tree, const System::ConstPtr& system, const HybridAutomaton* ha);
 
-		/*!
-		* \brief
-		* Clone function
-		* 
-		* 
-		* \throws <exception class>
-		* Description of criteria for throwing this exception.
-		* 
-		* Write detailed description for deserialize here.
-		* 
-		* \remarks
-		* Write remarks for deserialize here.
-		* 
-		* \see
-		* Separate items with the '|' character.
+        /**
+        * @brief Clone function
 		*/
 		ControllerPtr clone() const {
 			return ControllerPtr(_doClone());
@@ -210,19 +154,8 @@ namespace ha {
 			return true;
 		}
 
-		/*!
-		* \brief
-		* 
-		* \throws <exception class>
-		* Description of criteria for throwing this exception.
-		* 
-		* Write detailed description for deserialize here.
-		* 
-		* \remarks
-		* Write remarks for deserialize here.
-		* 
-		* \see
-		* Separate items with the '|' character.
+        /**
+        * @brief
 		*/
 		virtual Controller* _doClone() const {
 			return new Controller(*this);

@@ -10,7 +10,7 @@ namespace ha{
 	{
 	}
 
-		/*!
+		/**
 		* Copy constructor
 		*/
 	Sensor::Sensor(const Sensor& ss)

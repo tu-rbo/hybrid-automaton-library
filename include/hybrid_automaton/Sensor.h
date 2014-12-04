@@ -25,7 +25,7 @@ namespace ha {
 
 		virtual ~Sensor();
 
-		/*!
+		/**
 		* Copy constructor
 		*/
 		Sensor(const Sensor& ss);

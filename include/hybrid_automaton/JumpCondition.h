@@ -36,7 +36,7 @@ namespace ha {
 
 		virtual ~JumpCondition();
 
-		/*!
+        /**
 		* Copy constructor
 		*/
 		JumpCondition(const JumpCondition& jc);
