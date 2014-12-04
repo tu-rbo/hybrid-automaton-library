@@ -1,4 +1,3 @@
- * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 /**
  * @brief Macro for registering controllers with HybridAutomaton
  *
