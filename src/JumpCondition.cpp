@@ -27,11 +27,11 @@ namespace ha {
 		this->_epsilon = jc._epsilon;
 	}
 
-	void JumpCondition::activate(const double& t) 
+	void JumpCondition::initialize(const double& t) 
 	{
 	}
 
-	void JumpCondition::deactivate() 
+	void JumpCondition::terminate() 
 	{
 	}
 

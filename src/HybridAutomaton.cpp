@@ -173,7 +173,7 @@ namespace ha {
 					// switch to the next control mode
 					ModeHandle mode_handle = boost::target(switch_handle, _graph);
 
-					_current_control_mode->deactivate();
+					_current_control_mode->terminate();
 					_current_control_mode = _graph.graph()[mode_handle];
 
 					_activateCurrentControlMode(t);
@@ -285,25 +285,25 @@ namespace ha {
 		return _name;
 	}
 
-	void HybridAutomaton::activate(const double& t) 
+	void HybridAutomaton::initialize(const double& t) 
 	{
 		if (!_current_control_mode) {
-			HA_THROW_ERROR("HybridAutomaton.activate", "No current control mode defined!");
+			HA_THROW_ERROR("HybridAutomaton.initialize", "No current control mode defined!");
 		}
 		_activateCurrentControlMode(t);
 		_active = true;
 	}
 
-	void HybridAutomaton::deactivate() 
+	void HybridAutomaton::terminate() 
 	{
 		if (_current_control_mode)
-			_current_control_mode->deactivate();
+			_current_control_mode->terminate();
 		_active = false;
 
 		// deactivate all outgoing edges
 		::std::pair<OutEdgeIterator, OutEdgeIterator> out_edges = ::boost::out_edges(_graph.vertex(_current_control_mode->getName()), _graph);
 		for(; out_edges.first != out_edges.second; ++out_edges.first) {
-			_graph[*out_edges.first]->deactivate();
+			_graph[*out_edges.first]->terminate();
 		}
 	}
 
@@ -323,7 +323,7 @@ namespace ha {
 			HA_THROW_ERROR("HybridAutomaton.setCurrentControlMode", "Control mode '" << control_mode << "' does not exist! Cannot set current control mode.");
 
 		if (_current_control_mode != NULL)
-			_current_control_mode->deactivate();
+			_current_control_mode->terminate();
 		_current_control_mode = _graph[control_mode];
 	}
 
@@ -334,12 +334,12 @@ namespace ha {
 
 	void HybridAutomaton::_activateCurrentControlMode(const double& t) 
 	{
-		_current_control_mode->activate();
+		_current_control_mode->initialize();
 
-		// activate all outgoing edges
+		// initialize all outgoing edges
 		::std::pair<OutEdgeIterator, OutEdgeIterator> out_edges = ::boost::out_edges(_graph.vertex(_current_control_mode->getName()), _graph);
 		for(; out_edges.first != out_edges.second; ++out_edges.first) {
-			_graph[*out_edges.first]->activate(t);
+			_graph[*out_edges.first]->initialize(t);
 		}
 	}
 

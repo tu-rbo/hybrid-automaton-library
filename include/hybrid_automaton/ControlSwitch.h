@@ -31,8 +31,8 @@ namespace ha {
       return (ControlSwitchPtr(_doClone()));
     }
 
-	virtual void activate(const double& t);
-	virtual void deactivate();
+	virtual void initialize(const double& t);
+	virtual void terminate();
 
 	virtual void step(const double& t);
     virtual bool isActive() const;

@@ -46,9 +46,9 @@ namespace ha {
 			return (JumpConditionPtr(_doClone()));
 		};
 
-		virtual void activate(const double& t);
+		virtual void initialize(const double& t);
 
-		virtual void deactivate();
+		virtual void terminate();
 
 		virtual void step(const double& t);
 

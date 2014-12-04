@@ -46,15 +46,15 @@ namespace ha {
 		/*!
 		* @brief Activate the controller for execution
 	    */
-		virtual void activate() {
-			HA_THROW_ERROR("Controller.activate", "not implemented");
+		virtual void initialize() {
+			HA_THROW_ERROR("Controller.initialize", "not implemented");
 		}
 
 		/*!
 		* @brief Deactivate the controller for execution
 	    */
-		virtual void deactivate() {
-			HA_THROW_ERROR("Controller.deactivate", "not implemented");
+		virtual void terminate() {
+			HA_THROW_ERROR("Controller.terminate", "not implemented");
 		}
 
 		/*!
@@ -152,14 +152,15 @@ namespace ha {
 		virtual void setKv(const Eigen::MatrixXd& new_kv);
 
 		/**
-		 * @brief Completion time to reach goal
+		 * @brief Completion times to reach goal and intermediate points
 		 *
 		 * Optional attribute, e.g. makes sense for interpolated
 		 * controllers/
 		 */
-		virtual void setCompletionTime(const double& t);
-		virtual double getCompletionTime() const;
-
+		virtual void setCompletionTimes(const Eigen::MatrixXd& new_times);
+		virtual void setCompletionTime(const double& t); //for convenience - creates 1x1 matrix	
+		virtual Eigen::MatrixXd getCompletionTimes() const;
+		
 		virtual std::string getName() const;
 		virtual void setName(const std::string& new_name);
 
@@ -233,7 +234,7 @@ namespace ha {
 		Eigen::MatrixXd		_goal;
 		Eigen::MatrixXd		_kp;
 		Eigen::MatrixXd		_kv;
-		double				_completion_time;
+		Eigen::MatrixXd		_completion_times;
 		std::string			_name;
 		std::string			_type;
 

@@ -8,6 +8,7 @@ namespace ha {
 		:_goal(),
 		_kp(),
 		_kv(),
+		_completion_times(),
 		_name("default")
 	{
 
@@ -23,7 +24,7 @@ namespace ha {
 		this->_goal = controller._goal;
 		this->_kp = controller._kp;
 		this->_kv = controller._kv;
-		this->_completion_time = controller._completion_time;
+		this->_completion_times = controller._completion_times;
 		this->_name = controller._name;
 	}
 
@@ -37,7 +38,7 @@ namespace ha {
 		tree->setAttribute<Eigen::MatrixXd>(std::string("goal"), this->_goal);
 		tree->setAttribute<Eigen::MatrixXd>(std::string("kp"), this->_kp);
 		tree->setAttribute<Eigen::MatrixXd>(std::string("kv"), this->_kv);
-		tree->setAttribute<double>(std::string("completion_time"), this->_completion_time);
+		tree->setAttribute<Eigen::MatrixXd>(std::string("completion_times"), this->_completion_times);
 
 		std::map<std::string, std::string>::const_iterator it;
 		for (it = this->_additional_arguments.begin(); it != this->_additional_arguments.end(); ++it) {
@@ -66,7 +67,7 @@ namespace ha {
 		tree->getAttribute<Eigen::MatrixXd>(std::string("goal"), this->_goal);
 		tree->getAttribute<Eigen::MatrixXd>(std::string("kp"), this->_kp);
 		tree->getAttribute<Eigen::MatrixXd>(std::string("kv"), this->_kv);
-		tree->getAttribute<double>(std::string("completion_time"), this->_completion_time, 0.);
+		tree->getAttribute<Eigen::MatrixXd>(std::string("completion_times"), this->_completion_times);
 
 		// write all arguments into "_additional_arguments" field
 		tree->getAllAttributes(_additional_arguments);
@@ -109,11 +110,17 @@ namespace ha {
 
 	void Controller::setCompletionTime(const double& t)
 	{
-		this->_completion_time = t;
+		this->_completion_times.resize(1,1);
+		this->_completion_times(0) = t;
 	}
-	double Controller::getCompletionTime() const 
+	void Controller::setCompletionTimes(const Eigen::MatrixXd& new_times)
 	{
-		return this->_completion_time;
+		this->_completion_times = new_times;
+	}
+
+	Eigen::MatrixXd Controller::getCompletionTimes() const
+	{
+		return this->_completion_times;
 	}
 
 	std::string Controller::getName() const

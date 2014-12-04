@@ -21,17 +21,17 @@ namespace ha {
 		return true;
 	}
 
-	void ControlSwitch::activate(const double& t) 
+	void ControlSwitch::initialize(const double& t) 
 	{
 		for (std::vector<JumpConditionPtr>::const_iterator it = _jump_conditions.begin(); it != _jump_conditions.end(); ++it) {
-			(*it)->activate(t);
+			(*it)->initialize(t);
 		}
 	}
 
-	void ControlSwitch::deactivate() 
+	void ControlSwitch::terminate() 
 	{
 		for (std::vector<JumpConditionPtr>::const_iterator it = _jump_conditions.begin(); it != _jump_conditions.end(); ++it) {
-			(*it)->deactivate();
+			(*it)->terminate();
 		}
 	}
 

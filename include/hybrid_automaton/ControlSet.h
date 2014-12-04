@@ -27,9 +27,9 @@ namespace ha {
 
 		ControlSet(const ControlSet& cs);
 
-		virtual void activate();
+		virtual void initialize();
 
-		virtual void deactivate();
+		virtual void terminate();
 
 		virtual ::Eigen::MatrixXd step(const double& t);
 
