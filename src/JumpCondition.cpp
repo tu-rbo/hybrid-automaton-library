@@ -37,6 +37,7 @@ namespace ha {
 
 	void JumpCondition::step(const double& t) 
 	{
+		this->_sensor->step(t);
 	}
 
 	bool JumpCondition::isActive() const 
@@ -122,6 +123,13 @@ namespace ha {
 	{
 		_goalSource = CONSTANT;
 		_goal = goal;
+	}
+
+	void JumpCondition::setConstantGoal(double goal)
+	{
+		_goalSource = CONSTANT;
+		_goal.resize(1,1);
+		_goal<<goal;
 	}
 
 	::Eigen::MatrixXd JumpCondition::getGoal() const	

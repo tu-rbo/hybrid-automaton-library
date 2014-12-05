@@ -31,4 +31,8 @@ namespace ha{
 	{
 		this->_system = system;
 	}
+
+	void Sensor::step(const double& t) 
+	{
+	}
 }
