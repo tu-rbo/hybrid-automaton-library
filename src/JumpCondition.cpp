@@ -29,10 +29,12 @@ namespace ha {
 
 	void JumpCondition::initialize(const double& t) 
 	{
+		this->_sensor->initialize(t); 
 	}
 
 	void JumpCondition::terminate() 
 	{
+		this->_sensor->terminate();
 	}
 
 	void JumpCondition::step(const double& t) 

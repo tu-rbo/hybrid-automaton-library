@@ -32,6 +32,7 @@ namespace ha {
 
 		virtual ::Eigen::MatrixXd getCurrentValue() const;
 
+		virtual void initialize(const double& t); 
 		virtual void step(const double& t);
 
 		virtual void resetTimer();

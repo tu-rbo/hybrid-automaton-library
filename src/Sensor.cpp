@@ -32,6 +32,14 @@ namespace ha{
 		this->_system = system;
 	}
 
+	void Sensor::initialize(const double& t) 
+	{
+	}
+
+	void Sensor::terminate() 
+	{
+	}
+
 	void Sensor::step(const double& t) 
 	{
 	}
