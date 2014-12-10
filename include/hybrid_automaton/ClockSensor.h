@@ -32,11 +32,15 @@ namespace ha {
 
 		virtual ::Eigen::MatrixXd getCurrentValue() const;
 
+		virtual void step(const double& t);
+
+		virtual void resetTimer();
+
 		virtual DescriptionTreeNode::Ptr serialize(const DescriptionTree::ConstPtr& factory) const;
 
 		virtual void deserialize(const DescriptionTreeNode::ConstPtr& tree, const System::ConstPtr& system, const HybridAutomaton* ha);
 
-				// required to enable deserialization of this sensor
+		// required to enable deserialization of this sensor
 		HA_SENSOR_INSTANCE(node, system, ha) {
 			Sensor::Ptr sensor(new ClockSensor());
 			sensor->deserialize(node, system, ha);
@@ -49,6 +53,16 @@ namespace ha {
 		{
 			return (new ClockSensor(*this));
 		}
+
+		/**
+		* The current time
+		*/
+		double _time;
+
+		/**
+		* The last time this sensor was resetted
+		*/
+		double _timerStart;
 
 	};
 

@@ -68,6 +68,8 @@ namespace ha {
 		 * This function sets the desired value of this condition to a constant value.
 		 */
 		virtual void setConstantGoal(const ::Eigen::MatrixXd goal);
+
+		virtual void setConstantGoal(double goal);
 		
 		
 		// TODO
@@ -123,7 +125,7 @@ namespace ha {
 		::Eigen::MatrixXd _goal;
 		Controller::ConstPtr _controller;
 
-		Sensor::ConstPtr _sensor;
+		Sensor::Ptr _sensor;
 
 		Norm	_normType;
 		::Eigen::MatrixXd _normWeights;

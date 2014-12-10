@@ -42,6 +42,8 @@ namespace ha {
 
 		virtual void setSystem(const System::ConstPtr& system);
 
+		virtual void step(const double& t);
+
 	protected:
 		System::ConstPtr _system;
 
