@@ -28,6 +28,12 @@ namespace ha
 		return ret;
 	}
 
+	void ClockSensor::initialize(const double& t) 
+	{
+		this->_time = t;
+		this->resetTimer();
+	}
+
 	void ClockSensor::step(const double& t) 
 	{
 		this->_time = t;
