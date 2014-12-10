@@ -59,7 +59,7 @@
  *   HA_CONTROLLER_REGISTER("JointController", rlabJointController)
  * @endcode
  */
-#define HA_CONTROLLER_REGISTER(STR, NAME) NAME::Initializer initializer;\
+#define HA_CONTROLLER_REGISTER(STR, NAME) NAME::Initializer NAME::initializer;\
 	NAME::Initializer::Initializer() { ::ha::HybridAutomaton::registerController(STR, &NAME::instance); }\
 	const std::string NAME::getType() const { return STR; }\
 	std::string NAME::type() { return STR; }
@@ -125,7 +125,7 @@
  *   HA_CONTROLSET_REGISTER("MyControlSet", rlabMyControlSet)
  * @endcode
  */
-#define HA_CONTROLSET_REGISTER(STR, NAME) NAME::Initializer initializer;\
+#define HA_CONTROLSET_REGISTER(STR, NAME) NAME::Initializer NAME::initializer;\
 	NAME::Initializer::Initializer() { ha::HybridAutomaton::registerControlSet(STR, &NAME::instance); }\
 	const std::string NAME::getType() const { return STR; }\
 	std::string NAME::type() { return STR; }
@@ -154,7 +154,7 @@
  * Invoke this in the cpp file of your sensor.
  *
  */
-#define HA_SENSOR_REGISTER(STR, NAME) NAME::Initializer initializer;\
+#define HA_SENSOR_REGISTER(STR, NAME) NAME::Initializer NAME::initializer;\
 	NAME::Initializer::Initializer() { ha::HybridAutomaton::registerSensor(STR, &NAME::instance); }\
 	const std::string NAME::getType() const { return STR; }\
 	std::string NAME::type() { return STR; }
