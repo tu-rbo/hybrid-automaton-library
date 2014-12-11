@@ -48,7 +48,7 @@ if(NOT TinyXML_ROOT_DIR)
 		set(TinyXML_ROOT_DIR "$ENV{TinyXML_ROOT_DIR}" CACHE PATH
 			"TinyXML base directory location (optional, used for nonstandard installation paths)")
 	else()
-		message ("TinyXML_ROOT_DIR NOT found as environmental variable. Please, set it and call CMake again")
+		message ("Environment variable TinyXML_ROOT_DIR is NOT set.")
 	endif()	  
 endif()
 
