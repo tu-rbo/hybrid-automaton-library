@@ -6,6 +6,7 @@ namespace ha {
 
 	Controller::Controller()
 		:_goal(),
+		_goal_is_relative(false),
 		_kp(),
 		_kv(),
 		_completion_times(),
@@ -22,6 +23,7 @@ namespace ha {
 	Controller::Controller(const ha::Controller &controller)
 	{
 		this->_goal = controller._goal;
+		this->_goal_is_relative = controller._goal_is_relative;		
 		this->_kp = controller._kp;
 		this->_kv = controller._kv;
 		this->_completion_times = controller._completion_times;
@@ -36,6 +38,7 @@ namespace ha {
 		tree->setAttribute<std::string>(std::string("name"), this->getName());
 
 		tree->setAttribute<Eigen::MatrixXd>(std::string("goal"), this->_goal);
+		tree->setAttribute<bool>(std::string("goal_is_relative"), this->_goal_is_relative);
 		tree->setAttribute<Eigen::MatrixXd>(std::string("kp"), this->_kp);
 		tree->setAttribute<Eigen::MatrixXd>(std::string("kv"), this->_kv);
 		tree->setAttribute<Eigen::MatrixXd>(std::string("completion_times"), this->_completion_times);
@@ -65,6 +68,7 @@ namespace ha {
 
 		// FIXME nicer error handling, sir?
 		tree->getAttribute<Eigen::MatrixXd>(std::string("goal"), this->_goal);
+		tree->getAttribute<bool>(std::string("goal_is_relative"), this->_goal_is_relative, false);
 		tree->getAttribute<Eigen::MatrixXd>(std::string("kp"), this->_kp);
 		tree->getAttribute<Eigen::MatrixXd>(std::string("kv"), this->_kv);
 		tree->getAttribute<Eigen::MatrixXd>(std::string("completion_times"), this->_completion_times);
@@ -85,7 +89,10 @@ namespace ha {
 
 	void Controller::setGoal(const Eigen::MatrixXd& new_goal)
 	{
-		this->_goal = new_goal;
+		if(this->_goal_is_relative)
+			this->_goal = this->relativeGoalToAbsolute(new_goal);
+		else
+			this->_goal = new_goal;
 	}
 
 	Eigen::MatrixXd Controller::getKp() const

@@ -78,6 +78,13 @@ namespace ha {
 		}
 
 		/*!
+		* @brief Transform a goal in relative coordinates into absolute coordinates.
+	    */
+		virtual ::Eigen::MatrixXd relativeGoalToAbsolute(const Eigen::MatrixXd& goalRel) const{
+			HA_THROW_ERROR("Controller.relativeGoalToAbsolute", "not implemented - You can not use a relative goal with this type of controller!");
+		}
+
+		/*!
 		* \brief
 		* Write brief comment for deserialize here.
 		* 
@@ -232,6 +239,7 @@ namespace ha {
 	protected:
 
 		Eigen::MatrixXd		_goal;
+		bool				_goal_is_relative;
 		Eigen::MatrixXd		_kp;
 		Eigen::MatrixXd		_kv;
 		Eigen::MatrixXd		_completion_times;
