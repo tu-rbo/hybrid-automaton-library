@@ -18,6 +18,7 @@ namespace ha {
 			if (!(*it)->isActive())
 				return false;
 		}
+		HA_INFO("ControlSwitch.isActive", "Jump condition: "<<this->getName());
 		return true;
 	}
 
