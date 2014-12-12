@@ -26,21 +26,24 @@ endif()
 set_property (GLOBAL PROPERTY USE_FOLDERS ON)
 
 find_package(TinyXML)
-if(NOT TinyXML_FOUND AND MSVC)
-	message ("TinyXML not found automatically. Retrying using TinyXML_ROOT_DIR=${PROJECT_SOURCE_DIR}/../thirdparty/tinyxml/")
+if(NOT TinyXML_FOUND)
+	#message ("TinyXML not found automatically. Retrying using TinyXML_ROOT_DIR=${PROJECT_SOURCE_DIR}/../thirdparty/tinyxml/")
 	set (TinyXML_ROOT_DIR "${PROJECT_SOURCE_DIR}/../thirdparty/tinyxml/")
 	find_package(TinyXML)
 endif()
 
 if(NOT TinyXML_FOUND)
 	message (FATAL_ERROR "TinyXML not found!!")
+	if (CMAKE_COMPILER_IS_GNUCXX)
+        message("Hint: Try to install package libtinyxml-dev or set -DTinyXML_ROOT_DIR=/path/to/custom/tinyxml")	
+    endif()
 else()
 	message ("TinyXML found with include directories TinyXML_INCLUDE_DIRS=${TinyXML_INCLUDE_DIRS}")
 	include_directories(${TinyXML_INCLUDE_DIRS})
 endif()
 
 find_package(Boost 1.47.0)
-if(NOT Boost_FOUND AND MSVC)
+if(NOT Boost_FOUND AND WIN32)
 	message ("Boost not found automatically. Retrying using BOOST_ROOT=C:/Program Files/boost/boost_1_57_0")
 	set (BOOST_ROOT "C:/Program Files/boost/boost_1_57_0")
 	find_package(Boost 1.47.0)
@@ -55,7 +58,7 @@ else()
 endif()
 
 find_package(Eigen3)
-if(NOT EIGEN3_FOUND AND MSVC)
+if(NOT EIGEN3_FOUND AND WIN32)
 	message ("Eigen not found automatically. Retrying using EIGEN_DIR=C:/Program Files/eigen/eigen-eigen-1306d75b4a21")
 	set (EIGEN_DIR "C:/Program Files/eigen/eigen-eigen-1306d75b4a21")
 	find_package(Eigen3)
@@ -63,10 +66,34 @@ endif()
 
 if(NOT EIGEN3_FOUND)
 	message (FATAL_ERROR "Eigen not found!!")
+    if (UNIX)
+        message("Hint: Try to install package libeigen3-dev or set -DEIGEN_DIR=/path/to/custom/libeigen3")	
+    endif()
 else()
 	message ("Eigen found with include directories EIGEN3_INCLUDE_DIR=${EIGEN3_INCLUDE_DIR}")
 	include_directories(${EIGEN3_INCLUDE_DIR} )
 endif()
+
+
+
+
+# code for compiling the doxygen documentation
+find_package(Doxygen)
+if(NOT DOXYGEN_FOUND)
+    message ("Doxygen not found. You will not be able to compile the documentation.")
+else()
+    message ("Doxygen found: ${DOXYGEN_EXECUTABLE}.")
+    message ("Hint: Use make doc to compile documentation.")
+    configure_file(${CMAKE_CURRENT_SOURCE_DIR}/docs/doxyfile.in ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile @ONLY)  #configure doxygen to build into the build directory
+    configure_file(${CMAKE_CURRENT_SOURCE_DIR}/docs/doxygen_redirect_html.in ${CMAKE_CURRENT_SOURCE_DIR}/documentation.html @ONLY) #create a nice redirection to the build directory so documentation is easy to find
+    add_custom_target(doc 
+        ${DOXYGEN_EXECUTABLE} ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile
+        COMMENT "Generating API documentation with Doxygen in ${CMAKE_CURRENT_BINARY_DIR}/html and ${CMAKE_CURRENT_BINARY_DIR}/latex" VERBATIM
+    )
+endif()
+
+
+
 
 # Set compiler flags and options. 
 # Here it is setting the Visual Studio warning level to 4
@@ -151,10 +178,13 @@ target_link_libraries(hybrid_automaton ${TinyXML_LIBRARIES} ${Boost_LIBRARIES} $
 #subdirs(src)
 
 if(UNIT_TESTS)
-	message ("Compiling with unit tests. Set UNIT_TESTS to false in cmake if you dont want to include them in the build.")
+	message ("Compilation of unit tests is ENABLED.")
+	message ("Hint: use -DUNIT_TESTS=false if if you dontwant them built.")
     enable_testing()
 	subdirs(tests)
 else()
-	message ("Compiling without unit tests (default behavior). Set UNIT_TESTS to true in cmake if you want to include them in the build.")
+	message ("Compilation of unit tests is disabled. (default behavior).")
+	message ("Hint: use -DUNIT_TESTS=true if you want them built.")
 endif()
+
 
