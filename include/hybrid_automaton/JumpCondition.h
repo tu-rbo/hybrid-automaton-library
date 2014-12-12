@@ -26,7 +26,8 @@ namespace ha {
 	{
 	public:
 
-		enum Norm {L1, L2, L_INF, ROTATION, TRANSFORM, NUM_NORMS}; 
+		// NUM_CRITERIA must be always the last value of the enum to know the number of elements it contains
+		enum JumpCriterion {NORM_L1, NORM_L2, NORM_L_INF, NORM_ROTATION, NORM_TRANSFORM, THRESH_UPPER_BOUND, THRESH_LOWER_BOUND, NUM_CRITERIA}; 
 
 		enum GoalSource {CONSTANT, CONTROLLER, ROSTOPIC}; 
 
@@ -70,6 +71,12 @@ namespace ha {
 		virtual void setConstantGoal(const ::Eigen::MatrixXd goal);
 
 		virtual void setConstantGoal(double goal);
+
+		virtual void setGoalRelative();
+
+		virtual void setGoalAbsolute();
+
+		virtual bool isGoalRelative() const;
 		
 		
 		// TODO
@@ -98,8 +105,8 @@ namespace ha {
 		 * Possible options are L1, L2, and L_infinity (maximum), angular distance between 
 		 * rotation matrices. The entries of the goals can be weighted differently.
 		 */
-		virtual void setNorm(Norm normType, ::Eigen::MatrixXd weights = ::Eigen::MatrixXd());
-		virtual Norm getNormType() const;
+		virtual void setJumpCriterion(JumpCriterion jump_criterion, ::Eigen::MatrixXd weights = ::Eigen::MatrixXd());
+		virtual JumpCriterion getJumpCriterion() const;
 		virtual ::Eigen::MatrixXd getNormWeights() const;
 
 		 /**
@@ -127,13 +134,15 @@ namespace ha {
 
 		Sensor::Ptr _sensor;
 
-		Norm	_normType;
+		JumpCriterion	_jump_criterion;
 		::Eigen::MatrixXd _normWeights;
 		double _epsilon;
 
 		//The name of the mode this JumpCondition's edge emanates from.
 		//Needed for deserialization
 		std::string _sourceModeName;
+
+		bool	_is_goal_relative;
 
 		double _computeMetric(const ::Eigen::MatrixXd& x, const ::Eigen::MatrixXd& y) const;
 

@@ -5,8 +5,9 @@ namespace ha {
 
 	JumpCondition::JumpCondition():
 		_goalSource(CONSTANT),
-		_normType(L1),
-		_epsilon(0.0)
+		_jump_criterion(NORM_L1),
+		_epsilon(0.0),
+		_is_goal_relative(false)
 	{
 
 	}
@@ -22,7 +23,7 @@ namespace ha {
 		this->_goal = jc._goal;
 		this->_controller = jc._controller;
 		this->_sensor = jc._sensor;
-		this->_normType = jc._normType;
+		this->_jump_criterion = jc._jump_criterion;
 		this->_normWeights = jc._normWeights;
 		this->_epsilon = jc._epsilon;
 	}
@@ -71,8 +72,8 @@ namespace ha {
 		}
 		
 		double ret = 0;
-		switch(_normType) {
-			case L1: 
+		switch(_jump_criterion) {
+			case NORM_L1: 
 				for(int i = 0; i<x.rows(); i++)
 				{
 					for(int j = 0; j<y.cols(); j++)
@@ -82,7 +83,7 @@ namespace ha {
 				}
 				break;
 			
-			case L2: 
+			case NORM_L2: 
 				for(int i = 0; i<x.rows(); i++)
 				{
 					for(int j = 0; j<y.cols(); j++)
@@ -93,7 +94,7 @@ namespace ha {
 				ret = sqrt(ret);
 				break;
 
-			case L_INF: 
+			case NORM_L_INF: 
 				for(int i = 0; i<x.rows(); i++)
 				{
 					for(int j = 0; j<y.cols(); j++)
@@ -102,14 +103,35 @@ namespace ha {
 					}
 				}
 				break;
-			case ROTATION:
+			case NORM_ROTATION:
 				HA_THROW_ERROR("JumpCondition._computeMetric", "Not Implemented: ROTATION");
 				break;
-			case TRANSFORM:
+			case NORM_TRANSFORM:
 				HA_THROW_ERROR("JumpCondition._computeMetric", "Not Implemented: TRANSFORM");
 				break;
+
+			case THRESH_UPPER_BOUND:
+				
+				for(int i = 0; i<x.rows(); i++)
+				{
+					for(int j = 0; j<y.cols(); j++)
+					{
+						ret = std::max(ret,weights(i,j)*(x(i,j) - y(i,j)));
+					}
+				}
+				break;
+
+			case THRESH_LOWER_BOUND:
+				for(int i = 0; i<x.rows(); i++)
+				{
+					for(int j = 0; j<y.cols(); j++)
+					{
+						ret = std::max(ret,weights(i,j)*(y(i,j) - x(i,j)));
+					}
+				}
+				break;
 			default:
-				HA_THROW_ERROR("JumpCondition._computeMetric", "Not Implemented: unknown norm");
+				HA_THROW_ERROR("JumpCondition._computeMetric", "Not Implemented: unknown jump criterion");
 		}
 
 		return ret;
@@ -164,15 +186,15 @@ namespace ha {
 		return _sensor;
 	} 
 
-	void JumpCondition::setNorm(Norm normType, ::Eigen::MatrixXd weights)
+	void JumpCondition::setJumpCriterion(JumpCriterion jump_criterion, ::Eigen::MatrixXd weights)
 	{
-		_normType = normType;
+		_jump_criterion = jump_criterion;
 		_normWeights = weights;
 	}
 	
-	JumpCondition::Norm JumpCondition::getNormType() const
+	JumpCondition::JumpCriterion JumpCondition::getJumpCriterion() const
 	{
-		return _normType;
+		return _jump_criterion;
 	}
 
 	::Eigen::MatrixXd JumpCondition::getNormWeights() const
@@ -216,7 +238,7 @@ namespace ha {
 				HA_THROW_ERROR("JumpCondition::serialize", "Not Implemented: unknown goal source");
 		}
 
-		tree->setAttribute<int>(std::string("normType"), this->_normType);
+		tree->setAttribute<int>(std::string("jumpCriterion"), this->_jump_criterion);
 		if(this->_normWeights.rows() > 0){
 			tree->setAttribute< ::Eigen::MatrixXd>(std::string("normWeights"), this->_normWeights);
 		}
@@ -225,6 +247,10 @@ namespace ha {
 		if (!this->_sensor) {
 			HA_THROW_ERROR("JumpCondition::serialize", "All JumpConditions need to have a sensor!");
 		}
+
+
+		tree->setAttribute<bool>(std::string("relativeGoal"), this->_is_goal_relative);
+
 		tree->addChildNode(this->_sensor->serialize(factory));
 
 		return tree;
@@ -281,15 +307,30 @@ namespace ha {
 		tree->getAttribute<Eigen::MatrixXd>("normWeights", _normWeights);
 		tree->getAttribute<double>("epsilon", _epsilon, 0.0);
 
-		int normType = -1;
-		if(tree->getAttribute<int>("normType", normType))
+		int jump_criterion = -1;
+		if(tree->getAttribute<int>("jumpCriterion", jump_criterion))
 		{
-			if(normType < 0 || normType >= NUM_NORMS)
-				HA_THROW_ERROR("JumpCondition.deserialize", "Unknown normType "<<normType);
+			if(jump_criterion < 0 || jump_criterion >= NUM_CRITERIA)
+				HA_THROW_ERROR("JumpCondition.deserialize", "Unknown jumpCriterion " << jump_criterion);
 
 			//Cast int to enum
-			_normType = static_cast<Norm> (normType);	
+			_jump_criterion = static_cast<JumpCriterion> (jump_criterion);	
 		};
 
+	}
+
+	void JumpCondition::setGoalRelative()
+	{
+		this->_is_goal_relative = true;
+	}
+
+	void JumpCondition::setGoalAbsolute()
+	{
+		this->_is_goal_relative = false;
+	}
+
+	bool JumpCondition::isGoalRelative() const
+	{
+		return this->_is_goal_relative;
 	}
 }
