@@ -141,7 +141,7 @@ TEST(JumpCondition, Activation) {
 
 	/////////////////////////////////////////////////
 	//test 2: Norms
-	jc1->setNorm(JumpCondition::L1);		
+	jc1->setJumpCriterion(JumpCondition::NORM_L1);		
 	jc1->setEpsilon(0.1);
 
 	goalMat.resize(3,1);
@@ -155,7 +155,7 @@ TEST(JumpCondition, Activation) {
 	EXPECT_TRUE(jc1->isActive());
 
 	//L_INF
-	jc1->setNorm(JumpCondition::L_INF);
+	jc1->setJumpCriterion(JumpCondition::NORM_L_INF);
 	goalMat<<1.11,1.0,1.0;
 	jc1->setConstantGoal(goalMat);
 	EXPECT_FALSE(jc1->isActive());

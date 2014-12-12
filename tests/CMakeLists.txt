@@ -36,6 +36,7 @@ set (HA_TESTS_SOURCES
     "controlmode_test.cpp"
     "controlset_test.cpp"
     "controlswitch_test.cpp"
+    "jumpcondition_test.cpp"
     "description_tree_test.cpp"
     "description_tree_tinyxml_test.cpp"
     "hybrid_automaton_serialization_test.cpp"

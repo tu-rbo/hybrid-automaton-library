@@ -255,7 +255,7 @@ protected:
 			.WillRepeatedly(Return(false));
 		EXPECT_CALL(*js_node, getAttributeString(std::string("goal"), _))
 			.WillRepeatedly(Return(false));
-		EXPECT_CALL(*js_node, getAttributeString(std::string("normType"), _))
+		EXPECT_CALL(*js_node, getAttributeString(std::string("jumpCriterion"), _))
 			.WillRepeatedly(Return(false));
 		EXPECT_CALL(*js_node, getAttributeString(std::string("epsilon"), _))
 			.WillRepeatedly(Return(false));
