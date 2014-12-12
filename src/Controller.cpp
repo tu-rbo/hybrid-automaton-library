@@ -89,10 +89,17 @@ namespace ha {
 
 	void Controller::setGoal(const Eigen::MatrixXd& new_goal)
 	{
-		if(this->_goal_is_relative)
-			this->_goal = this->relativeGoalToAbsolute(new_goal);
-		else
-			this->_goal = new_goal;
+		this->_goal = new_goal;
+	}
+
+	bool Controller::getGoalIsRelative() const
+	{
+		return _goal_is_relative;
+	}
+	
+	void Controller::setGoalIsRelative(bool is_goal_relative)
+	{
+		_goal_is_relative = is_goal_relative;
 	}
 
 	Eigen::MatrixXd Controller::getKp() const
