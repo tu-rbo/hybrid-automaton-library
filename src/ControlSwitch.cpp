@@ -18,6 +18,7 @@ namespace ha {
 			if (!(*it)->isActive())
 				return false;
 		}
+		HA_INFO("ControlSwitch::isActive", "Switch " << this->_name << " is active");
 		return true;
 	}
 

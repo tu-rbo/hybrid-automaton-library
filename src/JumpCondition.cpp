@@ -46,6 +46,7 @@ namespace ha {
 	bool JumpCondition::isActive() const 
 	{
 		::Eigen::MatrixXd current = this->_sensor->getCurrentValue();
+		::Eigen::MatrixXd initial = this->_sensor->getInitialValue();
 		::Eigen::MatrixXd desired = this->getGoal();
 
 		if(desired.rows() != current.rows() || desired.cols() != current.cols())
@@ -54,7 +55,15 @@ namespace ha {
 			<<current.rows()<<"x"<<current.cols()<<", current: "<<desired.rows()<<"x"<<desired.cols()<<"!");
 		}
 		 
-		return (this->_computeMetric(current, desired) <= _epsilon);
+		if(this->_is_goal_relative)
+		{
+			//std::cout << "current:" << current << std::endl;
+			//std::cout << "initial:" << initial << std::endl;
+			//std::cout << "desired:" << desired << std::endl;
+			return (this->_computeMetric(current-initial, desired) <= _epsilon);
+		}else{
+			return (this->_computeMetric(current, desired) <= _epsilon);
+		}
 	}
 
 	double JumpCondition::_computeMetric(const ::Eigen::MatrixXd& x, const ::Eigen::MatrixXd& y) const
@@ -116,7 +125,8 @@ namespace ha {
 				{
 					for(int j = 0; j<y.cols(); j++)
 					{
-						ret = std::max(ret,weights(i,j)*(x(i,j) - y(i,j)));
+						//std::cout << weights(i,j)*(y(i,j) - x(i,j)) << std::endl;
+						ret = std::max(ret,weights(i,j)*(y(i,j) - x(i,j)));
 					}
 				}
 				break;
@@ -126,7 +136,8 @@ namespace ha {
 				{
 					for(int j = 0; j<y.cols(); j++)
 					{
-						ret = std::max(ret,weights(i,j)*(y(i,j) - x(i,j)));
+						//std::cout << weights(i,j)*(x(i,j) - y(i,j)) << std::endl;
+						ret = std::max(ret,weights(i,j)*(x(i,j) - y(i,j)));
 					}
 				}
 				break;
@@ -242,6 +253,7 @@ namespace ha {
 		if(this->_normWeights.rows() > 0){
 			tree->setAttribute< ::Eigen::MatrixXd>(std::string("normWeights"), this->_normWeights);
 		}
+
 		tree->setAttribute<double>(std::string("epsilon"), this->_epsilon);
 
 		if (!this->_sensor) {
@@ -316,6 +328,8 @@ namespace ha {
 			//Cast int to enum
 			_jump_criterion = static_cast<JumpCriterion> (jump_criterion);	
 		};
+
+		tree->getAttribute<bool>("relativeGoal", _is_goal_relative);
 
 	}
 

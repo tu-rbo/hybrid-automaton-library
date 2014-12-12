@@ -3,6 +3,8 @@
 
 #include <boost/shared_ptr.hpp>
 
+#include <Eigen/Dense>
+
 namespace ha {
 
 	class System;

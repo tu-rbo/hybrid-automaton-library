@@ -19,7 +19,7 @@ namespace ha
 
 	::Eigen::MatrixXd ForceTorqueSensor::getCurrentValue() const
 	{
-		return this->_system->getForceTorqueMeasurement();
+		return _system->getForceTorqueMeasurement();
 	}
 
 	DescriptionTreeNode::Ptr ForceTorqueSensor::serialize(const DescriptionTree::ConstPtr& factory) const
@@ -42,5 +42,7 @@ namespace ha
 			HA_THROW_ERROR("ForceTorqueSensor.deserialize", "SensorType type '" << _type << "' "
 				<< "invalid - empty or not registered with HybridAutomaton!");
 		}
+
+		_system = system;
 	}
 }
