@@ -6,9 +6,11 @@ namespace ha {
 
 	Controller::Controller()
 		:_goal(),
+		_goal_is_relative(false),
 		_kp(),
 		_kv(),
 		_completion_times(),
+		_priority(0.0),
 		_name("default")
 	{
 
@@ -22,9 +24,11 @@ namespace ha {
 	Controller::Controller(const ha::Controller &controller)
 	{
 		this->_goal = controller._goal;
+		this->_goal_is_relative = controller._goal_is_relative;		
 		this->_kp = controller._kp;
 		this->_kv = controller._kv;
 		this->_completion_times = controller._completion_times;
+		this->_priority = controller._priority;
 		this->_name = controller._name;
 	}
 
@@ -36,9 +40,11 @@ namespace ha {
 		tree->setAttribute<std::string>(std::string("name"), this->getName());
 
 		tree->setAttribute<Eigen::MatrixXd>(std::string("goal"), this->_goal);
+		tree->setAttribute<bool>(std::string("goal_is_relative"), this->_goal_is_relative);
 		tree->setAttribute<Eigen::MatrixXd>(std::string("kp"), this->_kp);
 		tree->setAttribute<Eigen::MatrixXd>(std::string("kv"), this->_kv);
 		tree->setAttribute<Eigen::MatrixXd>(std::string("completion_times"), this->_completion_times);
+		tree->setAttribute<double>(std::string("priority"), this->_priority);
 
 		std::map<std::string, std::string>::const_iterator it;
 		for (it = this->_additional_arguments.begin(); it != this->_additional_arguments.end(); ++it) {
@@ -65,9 +71,12 @@ namespace ha {
 
 		// FIXME nicer error handling, sir?
 		tree->getAttribute<Eigen::MatrixXd>(std::string("goal"), this->_goal);
+		tree->getAttribute<bool>(std::string("goal_is_relative"), this->_goal_is_relative, false);
 		tree->getAttribute<Eigen::MatrixXd>(std::string("kp"), this->_kp);
 		tree->getAttribute<Eigen::MatrixXd>(std::string("kv"), this->_kv);
 		tree->getAttribute<Eigen::MatrixXd>(std::string("completion_times"), this->_completion_times);
+		
+		tree->getAttribute<double>(std::string("priority"), this->_priority, 0.0);
 
 		// write all arguments into "_additional_arguments" field
 		tree->getAllAttributes(_additional_arguments);
@@ -86,6 +95,16 @@ namespace ha {
 	void Controller::setGoal(const Eigen::MatrixXd& new_goal)
 	{
 		this->_goal = new_goal;
+	}
+
+	bool Controller::getGoalIsRelative() const
+	{
+		return _goal_is_relative;
+	}
+	
+	void Controller::setGoalIsRelative(bool is_goal_relative)
+	{
+		_goal_is_relative = is_goal_relative;
 	}
 
 	Eigen::MatrixXd Controller::getKp() const
@@ -121,6 +140,16 @@ namespace ha {
 	Eigen::MatrixXd Controller::getCompletionTimes() const
 	{
 		return this->_completion_times;
+	}
+
+	double Controller::getPriority() const
+	{
+		return _priority;
+	}
+	
+	void Controller::setPriority(double priority)
+	{
+		_priority = priority;
 	}
 
 	std::string Controller::getName() const

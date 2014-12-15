@@ -65,7 +65,13 @@ namespace ha {
 		}
 
         /**
-        * @brief Serialize
+		* @brief Transform a goal in relative coordinates into absolute coordinates.
+	    */
+		virtual ::Eigen::MatrixXd relativeGoalToAbsolute(const Eigen::MatrixXd& goalRel) const{
+			HA_THROW_ERROR("Controller.relativeGoalToAbsolute", "not implemented - You can not use a relative goal with this type of controller!: "<<this->_type);
+		}
+
+		/*!
 		*/
 		virtual DescriptionTreeNode::Ptr serialize(const DescriptionTree::ConstPtr& factory) const;
 
@@ -88,6 +94,9 @@ namespace ha {
 
 		virtual Eigen::MatrixXd getGoal() const;
 		virtual void setGoal(const Eigen::MatrixXd& new_goal);
+	
+		virtual bool getGoalIsRelative() const;
+		virtual void setGoalIsRelative(bool is_goal_relative);
 
 		virtual Eigen::MatrixXd getKp() const;
 		virtual void setKp(const Eigen::MatrixXd& new_kp);
@@ -104,6 +113,14 @@ namespace ha {
 		virtual void setCompletionTimes(const Eigen::MatrixXd& new_times);
 		virtual void setCompletionTime(const double& t); //for convenience - creates 1x1 matrix	
 		virtual Eigen::MatrixXd getCompletionTimes() const;
+
+		/**
+		 * @brief Priority of this controller in a ControlSet
+		 *
+		 * Optional attribute.
+		 */
+		virtual double getPriority() const;
+		virtual void setPriority(double priority);
 		
 		virtual std::string getName() const;
 		virtual void setName(const std::string& new_name);
@@ -165,9 +182,11 @@ namespace ha {
 	protected:
 
 		Eigen::MatrixXd		_goal;
+		bool				_goal_is_relative;
 		Eigen::MatrixXd		_kp;
 		Eigen::MatrixXd		_kv;
 		Eigen::MatrixXd		_completion_times;
+		double				_priority;
 		std::string			_name;
 		std::string			_type;
 
