@@ -170,6 +170,14 @@ namespace ha {
 		virtual void setCompletionTimes(const Eigen::MatrixXd& new_times);
 		virtual void setCompletionTime(const double& t); //for convenience - creates 1x1 matrix	
 		virtual Eigen::MatrixXd getCompletionTimes() const;
+
+		/**
+		 * @brief Priority of this controller in a ControlSet
+		 *
+		 * Optional attribute.
+		 */
+		virtual double getPriority() const;
+		virtual void setPriority(double priority);
 		
 		virtual std::string getName() const;
 		virtual void setName(const std::string& new_name);
@@ -246,6 +254,7 @@ namespace ha {
 		Eigen::MatrixXd		_kp;
 		Eigen::MatrixXd		_kv;
 		Eigen::MatrixXd		_completion_times;
+		double				_priority;
 		std::string			_name;
 		std::string			_type;
 

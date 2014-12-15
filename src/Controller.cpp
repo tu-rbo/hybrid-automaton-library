@@ -10,6 +10,7 @@ namespace ha {
 		_kp(),
 		_kv(),
 		_completion_times(),
+		_priority(0.0),
 		_name("default")
 	{
 
@@ -27,6 +28,7 @@ namespace ha {
 		this->_kp = controller._kp;
 		this->_kv = controller._kv;
 		this->_completion_times = controller._completion_times;
+		this->_priority = controller._priority;
 		this->_name = controller._name;
 	}
 
@@ -42,6 +44,7 @@ namespace ha {
 		tree->setAttribute<Eigen::MatrixXd>(std::string("kp"), this->_kp);
 		tree->setAttribute<Eigen::MatrixXd>(std::string("kv"), this->_kv);
 		tree->setAttribute<Eigen::MatrixXd>(std::string("completion_times"), this->_completion_times);
+		tree->setAttribute<double>(std::string("priority"), this->_priority);
 
 		std::map<std::string, std::string>::const_iterator it;
 		for (it = this->_additional_arguments.begin(); it != this->_additional_arguments.end(); ++it) {
@@ -72,6 +75,8 @@ namespace ha {
 		tree->getAttribute<Eigen::MatrixXd>(std::string("kp"), this->_kp);
 		tree->getAttribute<Eigen::MatrixXd>(std::string("kv"), this->_kv);
 		tree->getAttribute<Eigen::MatrixXd>(std::string("completion_times"), this->_completion_times);
+		
+		tree->getAttribute<double>(std::string("priority"), this->_priority, 0.0);
 
 		// write all arguments into "_additional_arguments" field
 		tree->getAllAttributes(_additional_arguments);
@@ -135,6 +140,16 @@ namespace ha {
 	Eigen::MatrixXd Controller::getCompletionTimes() const
 	{
 		return this->_completion_times;
+	}
+
+	double Controller::getPriority() const
+	{
+		return _priority;
+	}
+	
+	void Controller::setPriority(double priority)
+	{
+		_priority = priority;
 	}
 
 	std::string Controller::getName() const
