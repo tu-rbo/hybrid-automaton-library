@@ -139,8 +139,19 @@ TEST(JumpCondition, Activation) {
 	jc1->setConstantGoal(goalMat);
 	EXPECT_ANY_THROW(jc1->isActive());
 
+	//Also test for initialization	
+	goalMat.resize(3,1);
+	goalMat<<1.0,2.0,3.0;
+	jc1->setConstantGoal(goalMat);
+	EXPECT_ANY_THROW(jc1->isActive());
+
+	jc1->initialize(0.0);
+
 	/////////////////////////////////////////////////
 	//test 2: Norms
+
+	
+
 	jc1->setJumpCriterion(JumpCondition::NORM_L1);		
 	jc1->setEpsilon(0.1);
 

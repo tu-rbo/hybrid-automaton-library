@@ -261,6 +261,8 @@ protected:
 			.WillRepeatedly(Return(false));
 		EXPECT_CALL(*js_node, getAttributeString(std::string("norm_weights"), _))
 			.WillRepeatedly(Return(false));
+		EXPECT_CALL(*js_node, getAttributeString(std::string("goal_is_relative"), _))
+			.WillRepeatedly(Return(false));
 
 		js_list.push_back(js_node);
 
