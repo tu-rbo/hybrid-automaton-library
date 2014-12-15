@@ -24,6 +24,12 @@ namespace ha
 		return this->_system->getFramePose(this->_frame_id);
 	}
 
+	::Eigen::MatrixXd FramePoseSensor::getRelativeCurrentValue() const
+	{
+		//TODO!
+		HA_THROW_ERROR("Sensor::getRelativeCurrentValue()", "Not Implemented for FramePoseSensor");
+	}
+
 	DescriptionTreeNode::Ptr FramePoseSensor::serialize(const DescriptionTree::ConstPtr& factory) const
 	{
 		DescriptionTreeNode::Ptr tree = factory->createNode("Sensor");

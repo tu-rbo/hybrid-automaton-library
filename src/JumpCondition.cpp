@@ -24,7 +24,7 @@ namespace ha {
 		this->_controller = jc._controller;
 		this->_sensor = jc._sensor;
 		this->_jump_criterion = jc._jump_criterion;
-		this->_normWeights = jc._normWeights;
+		this->_norm_weights = jc._norm_weights;
 		this->_epsilon = jc._epsilon;
 	}
 
@@ -67,9 +67,9 @@ namespace ha {
 			//std::cout << "current:" << current << std::endl;
 			//std::cout << "initial:" << initial << std::endl;
 			//std::cout << "desired:" << desired << std::endl;
-			return (this->_computeMetric(current-initial, desired) <= _epsilon);
+			return (this->_computeMetric(this->_sensor->getRelativeCurrentValue(), desired) <= _epsilon);
 		}else{
-			return (this->_computeMetric(current, desired) <= _epsilon);
+			return (this->_computeMetric( this->_sensor->getCurrentValue(), desired) <= _epsilon);
 		}
 	}
 
@@ -77,14 +77,14 @@ namespace ha {
 	{
 		//First check if weights are given - otherwise use default weights (=1.0)
 		::Eigen::MatrixXd weights;
-		if(_normWeights.rows() == 0)
+		if(_norm_weights.rows() == 0)
 		{
 			weights.resize(x.rows(), x.cols());
 			weights.setConstant(1.0);
 		}
 		else
 		{
-			weights = _normWeights;
+			weights = _norm_weights;
 		}
 		
 		double ret = 0;
@@ -209,7 +209,7 @@ namespace ha {
 		if(weights.rows() == 0)
 			HA_INFO("JumpCondition::setJumpCriterion", "No value given for weights. Using default weights of 1.");
 		_jump_criterion = jump_criterion;
-		_normWeights = weights;
+		_norm_weights = weights;
 	}
 	
 	JumpCondition::JumpCriterion JumpCondition::getJumpCriterion() const
@@ -219,7 +219,7 @@ namespace ha {
 
 	::Eigen::MatrixXd JumpCondition::getNormWeights() const
 	{
-		return _normWeights;
+		return _norm_weights;
 	}
 
 	void JumpCondition::setEpsilon(double epsilon)
@@ -259,8 +259,8 @@ namespace ha {
 		}
 
 		tree->setAttribute<int>(std::string("jumpCriterion"), this->_jump_criterion);
-		if(this->_normWeights.rows() > 0){
-			tree->setAttribute< ::Eigen::MatrixXd>(std::string("normWeights"), this->_normWeights);
+		if(this->_norm_weights.rows() > 0){
+			tree->setAttribute< ::Eigen::MatrixXd>(std::string("norm_weights"), this->_norm_weights);
 		}
 
 		tree->setAttribute<double>(std::string("epsilon"), this->_epsilon);
@@ -270,7 +270,7 @@ namespace ha {
 		}
 
 
-		tree->setAttribute<bool>(std::string("relativeGoal"), this->_is_goal_relative);
+		tree->setAttribute<bool>(std::string("goal_is_relative"), this->_is_goal_relative);
 
 		tree->addChildNode(this->_sensor->serialize(factory));
 
@@ -325,11 +325,11 @@ namespace ha {
 		//////////////////////////////
 		////PARAMETERS////////////////
 		//////////////////////////////
-		tree->getAttribute<Eigen::MatrixXd>("normWeights", _normWeights);
+		tree->getAttribute<Eigen::MatrixXd>("norm_weights", _norm_weights);
 		tree->getAttribute<double>("epsilon", _epsilon, 0.0);
 
 		int jump_criterion = -1;
-		if(tree->getAttribute<int>("jumpCriterion", jump_criterion))
+		if(tree->getAttribute<int>("jump_criterion", jump_criterion))
 		{
 			if(jump_criterion < 0 || jump_criterion >= NUM_CRITERIA)
 				HA_THROW_ERROR("JumpCondition.deserialize", "Unknown jumpCriterion " << jump_criterion);
@@ -338,7 +338,7 @@ namespace ha {
 			_jump_criterion = static_cast<JumpCriterion> (jump_criterion);	
 		};
 
-		tree->getAttribute<bool>("relativeGoal", _is_goal_relative);
+		tree->getAttribute<bool>("goal_is_relative", _is_goal_relative);
 
 	}
 

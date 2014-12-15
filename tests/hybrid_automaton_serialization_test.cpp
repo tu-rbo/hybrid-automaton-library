@@ -255,11 +255,11 @@ protected:
 			.WillRepeatedly(Return(false));
 		EXPECT_CALL(*js_node, getAttributeString(std::string("goal"), _))
 			.WillRepeatedly(Return(false));
-		EXPECT_CALL(*js_node, getAttributeString(std::string("jumpCriterion"), _))
+		EXPECT_CALL(*js_node, getAttributeString(std::string("jump_criterion"), _))
 			.WillRepeatedly(Return(false));
 		EXPECT_CALL(*js_node, getAttributeString(std::string("epsilon"), _))
 			.WillRepeatedly(Return(false));
-		EXPECT_CALL(*js_node, getAttributeString(std::string("normWeights"), _))
+		EXPECT_CALL(*js_node, getAttributeString(std::string("norm_weights"), _))
 			.WillRepeatedly(Return(false));
 
 		js_list.push_back(js_node);

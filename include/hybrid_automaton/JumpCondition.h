@@ -135,7 +135,7 @@ namespace ha {
 		Sensor::Ptr _sensor;
 
 		JumpCriterion	_jump_criterion;
-		::Eigen::MatrixXd _normWeights;
+		::Eigen::MatrixXd _norm_weights;
 		double _epsilon;
 
 		//The name of the mode this JumpCondition's edge emanates from.
