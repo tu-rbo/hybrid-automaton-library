@@ -54,6 +54,13 @@ namespace ha {
 			HA_THROW_ERROR("JumpCondition.isActive", "Dimension mismatch in sensor and goal - sensor: "
 			<<current.rows()<<"x"<<current.cols()<<", current: "<<desired.rows()<<"x"<<desired.cols()<<"!");
 		}
+
+		
+		if(initial.rows() != current.rows() || initial.cols() != current.cols())
+		{
+			HA_THROW_ERROR("JumpCondition.isActive", "Dimension mismatch in initial and current sensor values: "
+			<<current.rows()<<"x"<<current.cols()<<", current: "<<initial.rows()<<"x"<<initial.cols()<<"!");
+		}
 		 
 		if(this->_is_goal_relative)
 		{
@@ -126,7 +133,7 @@ namespace ha {
 					for(int j = 0; j<y.cols(); j++)
 					{
 						//std::cout << weights(i,j)*(y(i,j) - x(i,j)) << std::endl;
-						ret = std::max(ret,weights(i,j)*(y(i,j) - x(i,j)));
+						ret = std::max(ret, weights(i,j)*(y(i,j) - x(i,j)));
 					}
 				}
 				break;
@@ -137,7 +144,7 @@ namespace ha {
 					for(int j = 0; j<y.cols(); j++)
 					{
 						//std::cout << weights(i,j)*(x(i,j) - y(i,j)) << std::endl;
-						ret = std::max(ret,weights(i,j)*(x(i,j) - y(i,j)));
+						ret = std::max(ret, weights(i,j)*(x(i,j) - y(i,j)));
 					}
 				}
 				break;
@@ -199,6 +206,8 @@ namespace ha {
 
 	void JumpCondition::setJumpCriterion(JumpCriterion jump_criterion, ::Eigen::MatrixXd weights)
 	{
+		if(weights.rows() == 0)
+			HA_INFO("JumpCondition::setJumpCriterion", "No value given for weights. Using default weights of 1.");
 		_jump_criterion = jump_criterion;
 		_normWeights = weights;
 	}
