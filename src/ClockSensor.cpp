@@ -5,8 +5,7 @@ namespace ha
 	HA_SENSOR_REGISTER("ClockSensor", ClockSensor);
 
 	ClockSensor::ClockSensor():
-	_time(0.0),
-		_timerStart(0.0)
+	_current_time(0.0)
 	{
 	}
 
@@ -16,33 +15,28 @@ namespace ha
 
 	ClockSensor::ClockSensor(const ClockSensor& ss)
 		:Sensor(ss),
-		_time(ss._time),
-		_timerStart(ss._timerStart)
+		_current_time(ss._current_time)
 	{
 	}
 
 	::Eigen::MatrixXd ClockSensor::getCurrentValue() const
 	{
 		::Eigen::MatrixXd ret(1,1);
-		ret<<this->_time - this->_timerStart;
+		ret<<this->_current_time;
 		return ret;
 	}
 
 	void ClockSensor::initialize(const double& t) 
 	{
-		this->_time = t;
-		this->resetTimer();
+		this->_current_time = t;
+		this->_initial_sensor_value = getCurrentValue();
 	}
 
 	void ClockSensor::step(const double& t) 
 	{
-		this->_time = t;
+		this->_current_time = t;
 	}
 
-	void ClockSensor::resetTimer() 
-	{
-		this->_timerStart = this->_time;
-	}
 
 	DescriptionTreeNode::Ptr ClockSensor::serialize(const DescriptionTree::ConstPtr& factory) const
 	{
@@ -66,9 +60,6 @@ namespace ha
 		}
 
 		_system = system;
-
-		//reset the internal timer to the current time.
-		resetTimer();
 	}
 
 }
