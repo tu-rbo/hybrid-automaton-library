@@ -75,6 +75,7 @@ else (EIGEN3_INCLUDE_DIR)
 		/usr/include/eigen*
 		/usr/include
 		/opt/local/include/eigen*
+		/local/eigen*
 		$ENV{ProgramW6432}/eigen*/include/eigen3
 		$ENV{ProgramFiles}/eigen*/include/eigen3
 		$ENV{ProgramW6432}/eigen*
