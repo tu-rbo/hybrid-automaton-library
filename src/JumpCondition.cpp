@@ -52,10 +52,12 @@ namespace ha {
 		if(desired.rows() != current.rows() || desired.cols() != current.cols())
 		{
 			HA_THROW_ERROR("JumpCondition.isActive", "Dimension mismatch in sensor and goal - sensor: "
-			<<current.rows()<<"x"<<current.cols()<<", current: "<<desired.rows()<<"x"<<desired.cols()<<"!");
+			<<current.rows()<<"x"<<current.cols()<<", current: "<<desired.rows()<<"x"<<desired.cols()<<"!"
+			<< " Sensor Type: " << this->_sensor->getType());
 		}
 
-		
+
+		 
 		if(initial.rows() != current.rows() || initial.cols() != current.cols())
 		{
 			HA_THROW_ERROR("JumpCondition.isActive", "Dimension mismatch in initial and current sensor values: "
@@ -64,9 +66,6 @@ namespace ha {
 		 
 		if(this->_is_goal_relative)
 		{
-			//std::cout << "current:" << current << std::endl;
-			//std::cout << "initial:" << initial << std::endl;
-			//std::cout << "desired:" << desired << std::endl;
 			return (this->_computeMetric(this->_sensor->getRelativeCurrentValue(), desired) <= _epsilon);
 		}else{
 			return (this->_computeMetric( this->_sensor->getCurrentValue(), desired) <= _epsilon);
@@ -132,7 +131,7 @@ namespace ha {
 				{
 					for(int j = 0; j<y.cols(); j++)
 					{
-						//std::cout << weights(i,j)*(y(i,j) - x(i,j)) << std::endl;
+						//std::cout << "upper bound" << weights(i,j)*(y(i,j) - x(i,j)) << std::endl;
 						ret = std::max(ret, weights(i,j)*(y(i,j) - x(i,j)));
 					}
 				}
@@ -258,7 +257,7 @@ namespace ha {
 				HA_THROW_ERROR("JumpCondition::serialize", "Not Implemented: unknown goal source");
 		}
 
-		tree->setAttribute<int>(std::string("jumpCriterion"), this->_jump_criterion);
+		tree->setAttribute<int>(std::string("jump_criterion"), this->_jump_criterion);
 		if(this->_norm_weights.rows() > 0){
 			tree->setAttribute< ::Eigen::MatrixXd>(std::string("norm_weights"), this->_norm_weights);
 		}
