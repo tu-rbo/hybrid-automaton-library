@@ -258,7 +258,7 @@ namespace ha {
 				HA_THROW_ERROR("JumpCondition::serialize", "Not Implemented: unknown goal source");
 		}
 
-		tree->setAttribute<int>(std::string("jumpCriterion"), this->_jump_criterion);
+		tree->setAttribute<int>(std::string("jump_criterion"), this->_jump_criterion);
 		if(this->_norm_weights.rows() > 0){
 			tree->setAttribute< ::Eigen::MatrixXd>(std::string("norm_weights"), this->_norm_weights);
 		}
@@ -303,13 +303,8 @@ namespace ha {
 		//////////////////////////////
 		////GOALS/////////////////////
 		//////////////////////////////
-		Eigen::MatrixXd goal;
-		if(tree->getAttribute<Eigen::MatrixXd>(std::string("goal"), goal))
-		{
-			this->setConstantGoal(goal);
-		}
-
 		std::string controllerName;
+		bool setController = false;
 		if(tree->getAttribute<std::string>(std::string("controller"), controllerName))
 		{
 			//Now match name to controller
@@ -317,16 +312,39 @@ namespace ha {
 				HA_THROW_ERROR("JumpCondition.deserialize", "When deserializing a controller goal, you need to call JumpCondition::setSourceModeName() and pass the name of the mode this Jump Condition's Switch emanates from!!!");
 
 			Controller::ConstPtr ctrl = ha->getControllerByName(_sourceModeName, controllerName);
-			//Todo error handling!
+			if(!ctrl)
+				HA_THROW_ERROR("JumpCondition.deserialize", "Controller "<<controllerName<<"not found in source control mode "<<_sourceModeName<<".");
 
+
+			setController = true;
 			this->setControllerGoal(ctrl);
 		}
+		
+		Eigen::MatrixXd goal;
+		if(tree->getAttribute<Eigen::MatrixXd>(std::string("goal"), goal))
+		{
+			if(setController)
+			{
+				HA_THROW_ERROR("JumpCondition.deserialize", "Use either \"controller\" OR \"goal\" parameter!");
+			}
+			
+			this->setConstantGoal(goal);
+		}
+		else
+		{
+			if(!setController)
+				HA_WARN("JumpCondition.deserialize", "No \"controller\" OR \"goal\" parameter given  in JumpCondition - using default values");
+		}
+
 
 		//////////////////////////////
 		////PARAMETERS////////////////
 		//////////////////////////////
-		tree->getAttribute<Eigen::MatrixXd>("norm_weights", _norm_weights);
-		tree->getAttribute<double>("epsilon", _epsilon, 0.0);
+		if(!tree->getAttribute<Eigen::MatrixXd>("norm_weights", _norm_weights))
+			HA_WARN("JumpCondition.deserialize", "No \"norm_weights\" parameter given in JumpCondition - using default values");
+		
+		if(!tree->getAttribute<double>("epsilon", _epsilon))
+			HA_WARN("JumpCondition.deserialize", "No \"epsilon\" parameter given in JumpCondition - using default values");
 
 		int jump_criterion = -1;
 		if(tree->getAttribute<int>("jump_criterion", jump_criterion))
@@ -336,9 +354,14 @@ namespace ha {
 
 			//Cast int to enum
 			_jump_criterion = static_cast<JumpCriterion> (jump_criterion);	
-		};
+		}
+		else
+		{
+			HA_WARN("JumpCondition.deserialize", "No \"jump_criterion\" parameter given in JumpCondition - using default values");
+		}
 
-		tree->getAttribute<bool>("goal_is_relative", _is_goal_relative);
+		if(!tree->getAttribute<bool>("goal_is_relative", _is_goal_relative))
+			HA_WARN("JumpCondition.deserialize", "No \"goal_is_relative\" parameter given in JumpCondition - using default values");
 
 	}
 

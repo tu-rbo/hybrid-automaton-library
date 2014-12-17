@@ -10,9 +10,9 @@ namespace ha{
 	{
 	}
 
-		/**
-		* Copy constructor
-		*/
+	/**
+	* Copy constructor
+	*/
 	Sensor::Sensor(const Sensor& ss):
 		_initial_sensor_value(ss._initial_sensor_value)
 	{

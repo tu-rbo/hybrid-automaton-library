@@ -66,17 +66,27 @@ namespace ha {
 				<< "invalid - empty or not registered with HybridAutomaton!");
 		}
 
-		tree->getAttribute<std::string>("name", _name, "");
+		if(!tree->getAttribute<std::string>("name", _name, ""))
+			HA_WARN("Controller.deserialize", "No \"name\" parameter given in Controller - using default value");
 		// TODO register object with HybridAutomaton / check that it is unique!
 
-		// FIXME nicer error handling, sir?
-		tree->getAttribute<Eigen::MatrixXd>(std::string("goal"), this->_goal);
-		tree->getAttribute<bool>(std::string("goal_is_relative"), this->_goal_is_relative, false);
-		tree->getAttribute<Eigen::MatrixXd>(std::string("kp"), this->_kp);
-		tree->getAttribute<Eigen::MatrixXd>(std::string("kv"), this->_kv);
-		tree->getAttribute<Eigen::MatrixXd>(std::string("completion_times"), this->_completion_times);
+		if(!tree->getAttribute<Eigen::MatrixXd>(std::string("goal"), this->_goal))
+			HA_WARN("Controller.deserialize", "No \"goal\" parameter given in Controller "<<_name<<" - using default value");
 		
-		tree->getAttribute<double>(std::string("priority"), this->_priority, 0.0);
+		if(!tree->getAttribute<bool>(std::string("goal_is_relative"), this->_goal_is_relative, false))
+			HA_WARN("Controller.deserialize", "No \"goal_is_relative\" parameter given in Controller "<<_name<<" - using default value");
+		
+		if(!tree->getAttribute<Eigen::MatrixXd>(std::string("kp"), this->_kp))
+			HA_WARN("Controller.deserialize", "No \"kp\" parameter given in Controller "<<_name<<" - using default value");
+		
+		if(!tree->getAttribute<Eigen::MatrixXd>(std::string("kv"), this->_kv))
+			HA_WARN("Controller.deserialize", "No \"kv\" parameter given in Controller "<<_name<<" - using default value");
+
+		if(!tree->getAttribute<Eigen::MatrixXd>(std::string("completion_times"), this->_completion_times))
+			HA_WARN("Controller.deserialize", "No \"completion_times\" parameter given in Controller "<<_name<<" - using default value");
+		
+		if(!tree->getAttribute<double>(std::string("priority"), this->_priority, 0.0))
+			HA_WARN("Controller.deserialize", "No \"priority\" parameter given in Controller "<<_name<<" - using default value");
 
 		// write all arguments into "_additional_arguments" field
 		tree->getAllAttributes(_additional_arguments);
