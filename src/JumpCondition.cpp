@@ -55,8 +55,6 @@ namespace ha {
 			<<current.rows()<<"x"<<current.cols()<<", current: "<<desired.rows()<<"x"<<desired.cols()<<"!"
 			<< " Sensor Type: " << this->_sensor->getType());
 		}
-
-
 		 
 		if(initial.rows() != current.rows() || initial.cols() != current.cols())
 		{
@@ -66,13 +64,13 @@ namespace ha {
 		 
 		if(this->_is_goal_relative)
 		{
-			return (this->_computeMetric(this->_sensor->getRelativeCurrentValue(), desired) <= _epsilon);
+			return (this->_computeJumpCriterion(this->_sensor->getRelativeCurrentValue(), desired) <= _epsilon);
 		}else{
-			return (this->_computeMetric( this->_sensor->getCurrentValue(), desired) <= _epsilon);
+			return (this->_computeJumpCriterion( this->_sensor->getCurrentValue(), desired) <= _epsilon);
 		}
 	}
 
-	double JumpCondition::_computeMetric(const ::Eigen::MatrixXd& x, const ::Eigen::MatrixXd& y) const
+	double JumpCondition::_computeJumpCriterion(const ::Eigen::MatrixXd& x, const ::Eigen::MatrixXd& y) const
 	{
 		//First check if weights are given - otherwise use default weights (=1.0)
 		::Eigen::MatrixXd weights;
@@ -119,10 +117,10 @@ namespace ha {
 				}
 				break;
 			case NORM_ROTATION:
-				HA_THROW_ERROR("JumpCondition._computeMetric", "Not Implemented: ROTATION");
+				HA_THROW_ERROR("JumpCondition._computeJumpCriterion", "Not Implemented: ROTATION");
 				break;
 			case NORM_TRANSFORM:
-				HA_THROW_ERROR("JumpCondition._computeMetric", "Not Implemented: TRANSFORM");
+				HA_THROW_ERROR("JumpCondition._computeJumpCriterion", "Not Implemented: TRANSFORM");
 				break;
 
 			case THRESH_UPPER_BOUND:
@@ -148,7 +146,7 @@ namespace ha {
 				}
 				break;
 			default:
-				HA_THROW_ERROR("JumpCondition._computeMetric", "Not Implemented: unknown jump criterion");
+				HA_THROW_ERROR("JumpCondition._computeJumpCriterion", "Not Implemented: unknown jump criterion");
 		}
 
 		return ret;
