@@ -150,9 +150,10 @@ TEST(JumpCondition, Activation) {
 	/////////////////////////////////////////////////
 	//test 2: Norms
 
-	
-
-	jc1->setJumpCriterion(JumpCondition::NORM_L1);		
+	//current sensor reading is (1.0,1.0,1.0)
+	::Eigen::MatrixXd weights(3,1);
+	weights<<1.0,1.0,1.0;
+	jc1->setJumpCriterion(JumpCondition::NORM_L1, weights);		
 	jc1->setEpsilon(0.1);
 
 	goalMat.resize(3,1);
@@ -166,7 +167,7 @@ TEST(JumpCondition, Activation) {
 	EXPECT_TRUE(jc1->isActive());
 
 	//L_INF
-	jc1->setJumpCriterion(JumpCondition::NORM_L_INF);
+	jc1->setJumpCriterion(JumpCondition::NORM_L_INF, weights);
 	goalMat<<1.11,1.0,1.0;
 	jc1->setConstantGoal(goalMat);
 	EXPECT_FALSE(jc1->isActive());
@@ -174,5 +175,39 @@ TEST(JumpCondition, Activation) {
 	goalMat<<1.09,1.09,1.09;
 	jc1->setConstantGoal(goalMat);
 	EXPECT_TRUE(jc1->isActive());
+
+	jc1->setEpsilon(0.0);
+
+	//upper bound
+	jc1->setJumpCriterion(JumpCondition::THRESH_UPPER_BOUND, weights);
+	goalMat<<0.9,1.1,0.9;
+	jc1->setConstantGoal(goalMat);
+	EXPECT_FALSE(jc1->isActive());
+		
+	goalMat<<0.9,0.9,0.9;
+	jc1->setConstantGoal(goalMat);
+	EXPECT_TRUE(jc1->isActive());
+
+	//lower bound
+	jc1->setJumpCriterion(JumpCondition::THRESH_LOWER_BOUND, weights);
+	goalMat<<0.9,1.1,1.1;
+	jc1->setConstantGoal(goalMat);
+	EXPECT_FALSE(jc1->isActive());
+		
+	goalMat<<1.1,1.1,1.1;
+	jc1->setConstantGoal(goalMat);
+	EXPECT_TRUE(jc1->isActive());
+
+	//Now with weights (first entry does not matter)
+	weights<<0.0,1.0,1.0;
+	jc1->setJumpCriterion(JumpCondition::THRESH_LOWER_BOUND, weights);
+	
+	goalMat<<0.9,1.1,1.1;
+	jc1->setConstantGoal(goalMat);
+	EXPECT_TRUE(jc1->isActive());
+
+	goalMat<<1.1,0.9,1.1;
+	jc1->setConstantGoal(goalMat);
+	EXPECT_FALSE(jc1->isActive());
 }
 
