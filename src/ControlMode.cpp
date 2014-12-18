@@ -26,7 +26,8 @@ namespace ha {
 			HA_THROW_ERROR("ControlMode.deserialize", "DescriptionTreeNode must have type 'ControlMode', not '" << tree->getType() << "'!");
 		}
 
-		tree->getAttribute<std::string>("name", _name);
+		if(!tree->getAttribute<std::string>("name", _name))
+			HA_WARN("ControlMode.deserialize", "No \"name\" parameter given in ControlMode - using default value");
 
 		DescriptionTreeNode::ConstNodeList control_set;
 		tree->getChildrenNodes("ControlSet", control_set);

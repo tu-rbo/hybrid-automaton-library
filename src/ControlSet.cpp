@@ -47,16 +47,17 @@ namespace ha {
 
 	void ControlSet::deserialize(const DescriptionTreeNode::ConstPtr& tree, const System::ConstPtr& system, const HybridAutomaton* ha) {
 		if (tree->getType() != "ControlSet") {
-			HA_THROW_ERROR("ControlSet.deserialize", "DescriptionTreeNode must have type 'ControlSet', not '" << tree->getType() << "'!");
+			HA_THROW_ERROR("ControlSet::.deserialize", "DescriptionTreeNode must have type 'ControlSet', not '" << tree->getType() << "'!");
 		}
 		tree->getAttribute<std::string>("type", _type, "");
 
 		if (_type == "" || !HybridAutomaton::isControlSetRegistered(_type)) {
-			HA_THROW_ERROR("ControlSet.deserialize", "ControlSet type '" << _type << "' "
+			HA_THROW_ERROR("ControlSet::deserialize", "ControlSet type '" << _type << "' "
 			   << "invalid - empty or not registered with HybridAutomaton!");
 		}
 
-		tree->getAttribute<std::string>("name", _name, "");
+		if(!tree->getAttribute<std::string>("name", _name, ""))
+			HA_WARN("ControlSet::deserialize", "No \"name\" parameter given in ControlSet - using default value");
 
 		// deserialize controllers
 		DescriptionTreeNode::ConstNodeList ctrl_nodes;
@@ -110,7 +111,8 @@ namespace ha {
 	Controller::ConstPtr ControlSet::getControllerByName(const std::string& name) const {
 		std::map<std::string, Controller::Ptr>::const_iterator it = _controllers.find(name);
 		if (it == _controllers.end()) {
-			throw std::string("[ControlSet.getControllerByName] cannot find controller ") + name;
+			//Controller not found
+			return Controller::ConstPtr();
 		}
 		return it->second;
 	}

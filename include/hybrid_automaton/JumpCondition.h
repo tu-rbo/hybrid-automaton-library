@@ -100,10 +100,16 @@ namespace ha {
 		virtual Sensor::ConstPtr getSensor() const;
 
 		/**
-		 * @brief Set a Norm to use for comparing current and desired goals
+		 * @brief Set a Criterion to use for comparing current and desired goals
 		 * 
-		 * Possible options are L1, L2, and L_infinity (maximum), angular distance between 
-		 * rotation matrices. The entries of the goals can be weighted differently.
+		 * The criterion can get active in these cases:
+		 *   a) ||current - goal||_N < epsilon (for a given norm N i.e. use NORM_L1 to sum up entries, or NORM_L_INF for maximal error)
+		 *   b) current > goal (for THRESH_UPPER)
+		 *   c) current < goal (for THRESH_LOWER)
+		 * Other are angular distance between two rotation matrices. 
+		 *
+		 * The entries of the goals can be weighted differently. 
+		 * i.e. if you do not care about a certain dimension, set the weight for this dimension to zero 
 		 */
 		virtual void setJumpCriterion(JumpCriterion jump_criterion, ::Eigen::MatrixXd weights = ::Eigen::MatrixXd());
 		virtual JumpCriterion getJumpCriterion() const;
@@ -144,7 +150,7 @@ namespace ha {
 
 		bool	_is_goal_relative;
 
-		double _computeMetric(const ::Eigen::MatrixXd& x, const ::Eigen::MatrixXd& y) const;
+		double _computeJumpCriterion(const ::Eigen::MatrixXd& x, const ::Eigen::MatrixXd& y) const;
 
 		virtual JumpCondition* _doClone() const
 		{
