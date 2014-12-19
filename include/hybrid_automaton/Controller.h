@@ -92,6 +92,8 @@ namespace ha {
 		 */
 		virtual int getDimensionality() const;
 
+		virtual void setSystem(const System::ConstPtr& system);
+
 		virtual Eigen::MatrixXd getGoal() const;
 		virtual void setGoal(const Eigen::MatrixXd& new_goal);
 	
@@ -114,6 +116,11 @@ namespace ha {
 		virtual void setCompletionTime(const double& t); //for convenience - creates 1x1 matrix	
 		virtual Eigen::MatrixXd getCompletionTimes() const;
 
+		virtual void setMaximumVelocity(const Eigen::MatrixXd& max_vel);
+		virtual	void setMaximumAcceleration(const Eigen::MatrixXd& max_acc);
+
+		virtual Eigen::MatrixXd	getMaximumVelocity() const;
+		virtual Eigen::MatrixXd	getMaximumAcceleration() const;
 		/**
 		 * @brief Priority of this controller in a ControlSet
 		 *
@@ -154,6 +161,16 @@ namespace ha {
 			}
 		}
 
+		/**
+		 * @brief Computes a default interpolation time for a trajectory from x0 to xf
+		 * under velocity and acceleration limits. Currrently assumes linear interpolation!
+		 * 
+	     * @return minimal interpolation time.
+		 */
+		virtual double computeInterpolationTime
+			(const Eigen::MatrixXd& x0, const Eigen::MatrixXd& xf,
+			const Eigen::MatrixXd& xdot0 = Eigen::MatrixXd(), const Eigen::MatrixXd& xdotf = Eigen::MatrixXd()) const;
+
 	protected:
 
 		virtual void setArgumentString(const std::string& name, const std::string& value)
@@ -180,12 +197,15 @@ namespace ha {
 
 		
 	protected:
+		System::ConstPtr _system;
 
 		Eigen::MatrixXd		_goal;
 		bool				_goal_is_relative;
 		Eigen::MatrixXd		_kp;
 		Eigen::MatrixXd		_kv;
 		Eigen::MatrixXd		_completion_times;
+		Eigen::MatrixXd		_v_max;
+		Eigen::MatrixXd		_a_max;
 		double				_priority;
 		std::string			_name;
 		std::string			_type;

@@ -209,3 +209,23 @@ TEST(Controller, Deserialization) {
 	EXPECT_FALSE(HybridAutomaton::isControllerRegistered(ctrlType));
 
 }
+
+TEST(Controller, ComputeInterpolationTime) {
+	Controller::Ptr ctrl(new Controller);
+	ctrl->setName("myCtrl");
+
+	Eigen::MatrixXd maxV(3,1);
+	maxV<<1.0, 0.5, 1.0;
+	ctrl->setMaximumVelocity(maxV);
+
+	Eigen::MatrixXd x0(3,1);
+	x0<<0.0, 2.0, -1.0;
+
+	Eigen::MatrixXd xf(3,1);
+	xf<<1.0, 1.0, -2.0;
+
+	double tf = ctrl->computeInterpolationTime(x0, xf);
+	EXPECT_DOUBLE_EQ(2.0, tf);
+
+
+}

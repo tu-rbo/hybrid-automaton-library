@@ -10,6 +10,8 @@ namespace ha {
 		_kp(),
 		_kv(),
 		_completion_times(),
+		_v_max(),
+		_a_max(),
 		_priority(0.0),
 		_name("default")
 	{
@@ -44,6 +46,8 @@ namespace ha {
 		tree->setAttribute<Eigen::MatrixXd>(std::string("kp"), this->_kp);
 		tree->setAttribute<Eigen::MatrixXd>(std::string("kv"), this->_kv);
 		tree->setAttribute<Eigen::MatrixXd>(std::string("completion_times"), this->_completion_times);
+		tree->setAttribute<Eigen::MatrixXd>(std::string("v_max"), this->_v_max);
+		tree->setAttribute<Eigen::MatrixXd>(std::string("a_max"), this->_a_max);
 		tree->setAttribute<double>(std::string("priority"), this->_priority);
 
 		std::map<std::string, std::string>::const_iterator it;
@@ -84,17 +88,31 @@ namespace ha {
 
 		if(!tree->getAttribute<Eigen::MatrixXd>(std::string("completion_times"), this->_completion_times))
 			HA_WARN("Controller.deserialize", "No \"completion_times\" parameter given in Controller "<<_name<<" - using default value");
+
+		//TODO: Read v_max and a_max from dml file
+		if(!tree->getAttribute<Eigen::MatrixXd>(std::string("completion_times"), this->_v_max))
+			HA_WARN("Controller.deserialize", "No \"v_max\" parameter given in Controller "<<_name<<" - using default value");
+
+		if(!tree->getAttribute<Eigen::MatrixXd>(std::string("completion_times"), this->_a_max))
+			HA_WARN("Controller.deserialize", "No \"a_max\" parameter given in Controller "<<_name<<" - using default value");
 		
 		if(!tree->getAttribute<double>(std::string("priority"), this->_priority, 0.0))
 			HA_WARN("Controller.deserialize", "No \"priority\" parameter given in Controller "<<_name<<" - using default value");
 
 		// write all arguments into "_additional_arguments" field
 		tree->getAllAttributes(_additional_arguments);
+
+		_system = system;
 	}
 
 	int Controller::getDimensionality() const
 	{
 		return -1;
+	}
+
+	void Controller::setSystem(const System::ConstPtr& system)
+	{
+		this->_system = system;
 	}
 
 	Eigen::MatrixXd Controller::getGoal() const
@@ -152,6 +170,26 @@ namespace ha {
 		return this->_completion_times;
 	}
 
+	void Controller::setMaximumVelocity(const Eigen::MatrixXd& max_vel)
+	{
+		_v_max = max_vel;
+	}
+
+	void Controller::setMaximumAcceleration(const Eigen::MatrixXd& max_acc)
+	{
+		_a_max = max_acc;
+	}
+
+	Eigen::MatrixXd	Controller::getMaximumVelocity() const
+	{
+		return _v_max;
+	}
+
+	Eigen::MatrixXd	Controller::getMaximumAcceleration() const
+	{
+		return _a_max;
+	}
+
 	double Controller::getPriority() const
 	{
 		return _priority;
@@ -180,5 +218,37 @@ namespace ha {
 	void Controller::setType(const std::string& new_type)
 	{
 		this->_type = new_type;
+	}
+
+	double Controller::computeInterpolationTime(const Eigen::MatrixXd& x0, const Eigen::MatrixXd& xf, const Eigen::MatrixXd& xdot0, const Eigen::MatrixXd& xdotf) const{
+		
+		//Currently returns only time for linear interpolation!
+		//TODO: cubic splines!
+		double tf = 0.0;
+
+		if(x0.rows() != xf.rows() || x0.cols() != xf.cols())
+		{
+			HA_THROW_ERROR("rlabController::computeInterpolationTime", "Dimension mismatch in x0 and xf!!");
+		}
+
+		if(x0.rows() != _v_max.rows() || x0.cols() != _v_max.cols())
+		{
+			HA_THROW_ERROR("rlabController::computeInterpolationTime", "Dimension mismatch in x0 and vmax!!");
+		}
+
+		if(_a_max.rows() != 0 || xdot0.rows() != 0 || xdotf.rows() != 0)
+		{
+			HA_WARN("rlabController::computeInterpolationTime", "maximal acceleration limits currently not supported!");
+		}
+
+		for(int i = 0; i < x0.rows(); i++)
+		{
+			for(int j = 0; j < x0.cols(); j++)
+			{
+				tf = std::max(tf,fabs(xf(i,j) - x0(i,j)) / _v_max(i,j));
+			}
+		}
+
+		return tf;
 	}
 }
