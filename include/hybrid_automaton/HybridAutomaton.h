@@ -40,7 +40,8 @@ namespace ha {
 		typedef ::ha::Sensor::Ptr (*SensorCreator) (const ::ha::DescriptionTreeNode::ConstPtr, const ::ha::System::ConstPtr, const HybridAutomaton*);
 
 		// a directed labeled graph based on an adjacency list
-		typedef ::boost::labeled_graph< boost::adjacency_list< boost::vecS, boost::vecS, boost::directedS, ControlMode::Ptr, ControlSwitch::Ptr >, std::string > Graph;
+        typedef ::boost::adjacency_list< boost::vecS, boost::vecS, boost::directedS, ControlMode::Ptr, ControlSwitch::Ptr > AdjacencyListGraph;
+        typedef ::boost::labeled_graph< AdjacencyListGraph, std::string > Graph;
 
 		//Handle objects for vertices and edges of the graph structure - you can obtain the 
 		//Modes and Switches by calling Graph[Handle]
@@ -54,7 +55,7 @@ namespace ha {
 		typedef ::boost::graph_traits< Graph >::out_edge_iterator OutEdgeIterator;
 
 	protected:
-		Graph _graph;
+        Graph _graph;
 		ControlMode::Ptr _current_control_mode;
 
 		//Maps switch names to edges in the graph
@@ -197,6 +198,8 @@ namespace ha {
 	
 		virtual ControlMode::ConstPtr getSourceControlMode(const std::string& controlSwitch) const;
 		virtual ControlMode::ConstPtr getTargetControlMode(const std::string& controlSwitch) const;
+
+        virtual void visualizeGraph(const std::string& filename);
 
 		HybridAutomatonPtr clone() const {
 			return HybridAutomatonPtr(_doClone());

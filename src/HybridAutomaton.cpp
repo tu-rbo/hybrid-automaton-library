@@ -3,6 +3,8 @@
 #include "hybrid_automaton/DescriptionTreeNode.h"
 #include "hybrid_automaton/error_handling.h"
 
+#include <boost/graph/graphviz.hpp>
+
 #include <sstream>
 
 namespace ha {
@@ -136,15 +138,21 @@ namespace ha {
 	}
 
 
-	void HybridAutomaton::addControlMode(const ControlMode::Ptr& control_mode) 
+    void HybridAutomaton::addControlMode(const ControlMode::Ptr& control_mode)
 	{
-		boost::add_vertex(control_mode->getName(), control_mode, _graph);
+        AdjacencyListGraph& g = _graph.graph();
+        ModeHandle mh = boost::add_vertex(control_mode->getName(), control_mode, _graph);
+        g[mh] = control_mode;
 	}
 
 	void HybridAutomaton::addControlSwitch(const std::string& source_mode, const ControlSwitch::Ptr& control_switch, const std::string& target_mode) 
 	{
-		control_switch->setHybridAutomaton(this);
-		SwitchHandle sh = boost::add_edge_by_label(source_mode, target_mode, control_switch, _graph).first;
+        control_switch->setHybridAutomaton(this);
+
+        AdjacencyListGraph& g = _graph.graph();
+        SwitchHandle sh = boost::add_edge_by_label(source_mode, target_mode, control_switch, _graph).first;
+        g[sh] = control_switch;
+
 		_switchMap.insert(std::pair<std::string, SwitchHandle>(control_switch->getName(), sh));
 	}
 
@@ -393,4 +401,81 @@ namespace ha {
 		ModeHandle mh = ::boost::target(sh, _graph);
 		return _graph.graph()[mh];
 	}
+
+//    template < class Name >
+//    class label_writer {
+//    public:
+//        //label_writer(Name _name) : name(_name) {}
+//        label_writer(Name _name) {}
+
+//        //void operator()(std::ostream& out, const VertexOrEdge& v) const {
+////        template
+//        void operator()(std::ostream& out, const ControlMode::Ptr& v) const {
+
+//        out << "[label=\"" << "hort" << "\"]";
+//    }
+////        private:
+////        Name name;
+//    };
+
+    template <class Graph>
+    struct vertex_writer {
+    private:
+        Graph _g;
+    public:
+        vertex_writer(Graph& g) : _g(g) {}
+
+        template <class V>
+        void operator()(std::ostream& out, const V& v) const {
+            ControlMode::Ptr cm = _g[v];
+            if (!cm) {
+                HA_ERROR("HybridAutomaton.visualizeGraph", "Unable to obtain ControlMode for vertex " << v << " - is your graph correct?");
+                return;
+            }
+            out << " [label=\"" << cm->getName() << "\"]";
+        }
+    };
+
+    template <class Graph>
+    struct edge_writer {
+    private:
+        Graph _g;
+    public:
+        edge_writer(Graph& g) : _g(g) {}
+
+        template <class E>
+        void operator()(std::ostream& out, const E& e) const {
+            ControlSwitch::Ptr cs = _g[e];
+            if (!cs) {
+                HA_ERROR("HybridAutomaton.visualizeGraph", "Unable to obtain ControlSwitch for vertex " << e << " - is your graph correct?");
+                return;
+            }
+            out << " [label=\"" << cs->getName() << "\"]";
+        }
+    };
+
+    template <class Graph>
+    struct graph_writer {
+    private:
+        Graph _g;
+    public:
+        graph_writer(Graph& g) : _g(g) {}
+
+        void operator()(std::ostream& out) const {
+            out << "edge[style=\"dotted\"];" << std::endl;
+        }
+    };
+
+    void HybridAutomaton::visualizeGraph(const std::string& filename) {
+        // write the dot file
+        std::ofstream dotfile (filename.c_str ());
+
+        AdjacencyListGraph& g = _graph.graph();
+
+        boost::write_graphviz( dotfile, this->_graph,
+                               vertex_writer<AdjacencyListGraph>(_graph.graph()),
+                               edge_writer<AdjacencyListGraph>(_graph.graph()),
+                               graph_writer<AdjacencyListGraph>(_graph.graph())
+                );
+    }
 }
