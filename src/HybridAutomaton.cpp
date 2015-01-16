@@ -443,9 +443,12 @@ namespace ha {
             if (cm == _current_cm)
                 out << "style=double;" << std::endl;
 
-            out << "label=\"" << cm->getName() << "\";" <<std::endl;
-            out << "color=blue;" <<std::endl;
             ControlSetPtr cs = cm->getControlSet();
+
+            out << "label=<" << cm->getName();
+            out << "<BR/>" << cs->getName() << " [" << cs->getType() << "]>;";
+            out << std::endl;
+            out << "color=blue;" <<std::endl;
             const std::map<std::string, Controller::Ptr>& controllers = cs->getControllers();
             std::map<std::string, Controller::Ptr>::const_iterator it;
 
@@ -455,9 +458,21 @@ namespace ha {
                 out << "node [label=<<i>empty</i>>] " << v << ";" << std::endl;
             }
 
-            // iterate through controllers
+            // iterate over controllers
             for (it = controllers.begin(); it != controllers.end(); it++) {
-                out << "node [label=<" << it->first << "<BR/><BR/><FONT POINT-SIZE=\"8\">epsilon = 0.01<BR/>goal=foo</FONT>>] ";
+                out << "node [label=<" << it->first << "<BR/><BR/>";
+                out << "<FONT POINT-SIZE=\"8\">" << std::endl;
+                // iterate through parameters
+                Controller::Ptr ctrl = it->second;
+                out << "type" << "=" << ctrl->getType() << "<BR/>" << std::endl;
+                if (ctrl->getGoal().rows() > 0)
+                    out << "goal" << "=" << ctrl->getGoal() << "<BR/>" << std::endl;
+                const std::map<std::string, std::string>& aa = ctrl->getAdditionalArgumentsString();
+                std::map<std::string, std::string>::const_iterator its;
+                for (its = aa.begin(); its != aa.end(); its++) {
+                    out << its->first << "=" << its->second << "<BR/>" << std::endl;
+                }
+                out << "</FONT>>] ";
                 if (it != controllers.begin())
                     out << "controller_";
                 out << v << ";" << std::endl;
@@ -481,7 +496,13 @@ namespace ha {
                 HA_ERROR("HybridAutomaton.visualizeGraph", "Unable to obtain ControlSwitch for vertex " << e << " - is your graph correct?");
                 return;
             }
-            out << " [label=\"" << cs->getName() << "\"]";
+            out << " [label=<" << cs->getName();
+            // TODO iterate over jump conditions
+//            out << "<br/>" cs->getJumpConditions()
+            out << ">";
+            // TODO hide arrow behind box -> get vertex indices from graph
+//            out << "ltail=cluster_" << 0 << " " << "lhead=cluster_" <<
+            out << "]";
         }
     };
 
@@ -494,7 +515,8 @@ namespace ha {
 
         void operator()(std::ostream& out) const {
             out << "graph [fontsize=10 fontname=\"Verdana\" compound=true];" << std::endl;
-            out << "node [shape=record fontsize=10 fontname=\"Verdana\" style=filled]" << std::endl;
+            out << "node [color=lightgrey shape=box fontsize=10 fontname=\"Verdana\" style=filled]" << std::endl;
+            out << "edge [fontsize=10 fontname=\"Verdana\"]" << std::endl;
 
 //            out << "edge[style=\"dotted\"];" << std::endl;
 //            out << "compound=true;" << std::endl;

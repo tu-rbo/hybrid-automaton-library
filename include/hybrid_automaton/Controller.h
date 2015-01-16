@@ -171,6 +171,11 @@ namespace ha {
 			(const Eigen::MatrixXd& x0, const Eigen::MatrixXd& xf,
 			const Eigen::MatrixXd& xdot0 = Eigen::MatrixXd(), const Eigen::MatrixXd& xdotf = Eigen::MatrixXd()) const;
 
+
+        const std::map<std::string, std::string>& getAdditionalArgumentsString() {
+            return _additional_arguments;
+        }
+
 	protected:
 
 		virtual void setArgumentString(const std::string& name, const std::string& value)
