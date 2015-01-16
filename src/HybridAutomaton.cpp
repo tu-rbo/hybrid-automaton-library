@@ -432,7 +432,23 @@ namespace ha {
                 HA_ERROR("HybridAutomaton.visualizeGraph", "Unable to obtain ControlMode for vertex " << v << " - is your graph correct?");
                 return;
             }
-            out << " [label=\"" << cm->getName() << "\"]";
+
+//            out << " [label=\"" << cm->getName() << "\"]";
+
+            // HACK: move backwards as many steps as necessary to remove leading node id
+            for (int i=0; i <= v/10; i++) out <<'\b';
+
+            out << "subgraph " << "cluster" << v << " {" << std::endl;
+            out << v << " [label=\"" << cm->getName() << "\"];" <<std::endl;
+            ControlSetPtr cs = cm->getControlSet();
+            const std::map<std::string, Controller::Ptr>& controllers = cs->getControllers();
+            std::map<std::string, Controller::Ptr>::const_iterator it;
+            for (it = controllers.begin(); it != controllers.end(); it++) {
+                std::cout << it->first << ";" << std::endl;
+                out << it->first << ";" << std::endl;
+            }
+            out << "}" << std::endl;
+
         }
     };
 
@@ -463,6 +479,7 @@ namespace ha {
 
         void operator()(std::ostream& out) const {
             out << "edge[style=\"dotted\"];" << std::endl;
+            out << "compound=true;" << std::endl;
         }
     };
 
@@ -470,8 +487,13 @@ namespace ha {
         // write the dot file
         std::ofstream dotfile (filename.c_str ());
 
-        AdjacencyListGraph& g = _graph.graph();
+//        AdjacencyListGraph& g = _graph.graph();
 
+//        boost::dynamic_properties dp;
+//        dp.property("name", vertex_writer<AdjacencyListGraph>(_graph.graph()));
+//        dp.property("node_id", vertex_writer<AdjacencyListGraph>(_graph.graph());
+
+//        boost::write_graphviz_dp(dotfile, this->_graph, dp);
         boost::write_graphviz( dotfile, this->_graph,
                                vertex_writer<AdjacencyListGraph>(_graph.graph()),
                                edge_writer<AdjacencyListGraph>(_graph.graph()),

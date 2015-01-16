@@ -56,12 +56,24 @@ namespace ha {
 
 		virtual Controller::ConstPtr getControllerByName(const std::string& name) const; 
 
-	protected:
+        /**
+         * @brief Get the list of stored controllers (const reference)
+         *
+         * This method is used by HybridAutomaton to visualize the controllers.
+         *
+         */
+        virtual const std::map<std::string, Controller::Ptr>& getControllers()  {
+            return _controllers;
+        }
+
+    protected:
 		virtual ControlSet* _doClone() const {
 			return new ControlSet(*this);
 		}
 
 		virtual void _addController(const Controller::Ptr& cntrl);
+
+
 
 	protected:
 		std::string						_name;
