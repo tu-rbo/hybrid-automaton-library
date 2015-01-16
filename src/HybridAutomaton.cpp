@@ -422,8 +422,9 @@ namespace ha {
     struct vertex_writer {
     private:
         Graph _g;
+        ControlModePtr _current_cm;
     public:
-        vertex_writer(Graph& g) : _g(g) {}
+        vertex_writer(Graph& g, ControlModePtr current_cm) : _g(g), _current_cm(current_cm) {}
 
         template <class V>
         void operator()(std::ostream& out, const V& v) const {
@@ -433,19 +434,33 @@ namespace ha {
                 return;
             }
 
-//            out << " [label=\"" << cm->getName() << "\"]";
 
             // HACK: move backwards as many steps as necessary to remove leading node id
             for (int i=0; i <= v/10; i++) out <<'\b';
 
             out << "subgraph " << "cluster" << v << " {" << std::endl;
-            out << v << " [label=\"" << cm->getName() << "\"];" <<std::endl;
+
+            if (cm == _current_cm)
+                out << "style=double;" << std::endl;
+
+            out << "label=\"" << cm->getName() << "\";" <<std::endl;
+            out << "color=blue;" <<std::endl;
             ControlSetPtr cs = cm->getControlSet();
             const std::map<std::string, Controller::Ptr>& controllers = cs->getControllers();
             std::map<std::string, Controller::Ptr>::const_iterator it;
+
+            // No controller: make dummy node in the subgraph
+            if (controllers.empty()) {
+                //out << "node [label=<" << cm->getName() << ">] ";
+                out << "node [label=<<i>empty</i>>] " << v << ";" << std::endl;
+            }
+
+            // iterate through controllers
             for (it = controllers.begin(); it != controllers.end(); it++) {
-                std::cout << it->first << ";" << std::endl;
-                out << it->first << ";" << std::endl;
+                out << "node [label=<" << it->first << "<BR/><BR/><FONT POINT-SIZE=\"8\">epsilon = 0.01<BR/>goal=foo</FONT>>] ";
+                if (it != controllers.begin())
+                    out << "controller_";
+                out << v << ";" << std::endl;
             }
             out << "}" << std::endl;
 
@@ -478,26 +493,41 @@ namespace ha {
         graph_writer(Graph& g) : _g(g) {}
 
         void operator()(std::ostream& out) const {
-            out << "edge[style=\"dotted\"];" << std::endl;
-            out << "compound=true;" << std::endl;
+            out << "graph [fontsize=10 fontname=\"Verdana\" compound=true];" << std::endl;
+            out << "node [shape=record fontsize=10 fontname=\"Verdana\" style=filled]" << std::endl;
+
+//            out << "edge[style=\"dotted\"];" << std::endl;
+//            out << "compound=true;" << std::endl;
         }
     };
 
     void HybridAutomaton::visualizeGraph(const std::string& filename) {
         // write the dot file
-        std::ofstream dotfile (filename.c_str ());
 
-//        AdjacencyListGraph& g = _graph.graph();
+        // hacky: we need to remove the \b and the preceding characters
 
-//        boost::dynamic_properties dp;
-//        dp.property("name", vertex_writer<AdjacencyListGraph>(_graph.graph()));
-//        dp.property("node_id", vertex_writer<AdjacencyListGraph>(_graph.graph());
-
-//        boost::write_graphviz_dp(dotfile, this->_graph, dp);
-        boost::write_graphviz( dotfile, this->_graph,
-                               vertex_writer<AdjacencyListGraph>(_graph.graph()),
+        std::stringstream tmp;
+        boost::write_graphviz( tmp, this->_graph,
+                               vertex_writer<AdjacencyListGraph>(_graph.graph(), getCurrentControlMode()),
                                edge_writer<AdjacencyListGraph>(_graph.graph()),
                                graph_writer<AdjacencyListGraph>(_graph.graph())
                 );
+        std::string tmp2 = tmp.str();
+        char* tmp3 = new char[tmp2.size()];
+        int len=0;
+        for (std::string::iterator it = tmp2.begin(); it != tmp2.end(); it++, len++) {
+            if (*it == '\b') {
+                len -= 2;
+                continue;
+            }
+            tmp3[len] = *it;
+        }
+        tmp3[len] = '\0';
+
+        std::ofstream file;
+        file.open(filename.c_str());
+        file << std::string(tmp3);
+        file.close();
+
     }
 }
