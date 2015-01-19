@@ -132,6 +132,9 @@ namespace ha {
 
 		virtual void deserialize(const DescriptionTreeNode::ConstPtr& tree, const System::ConstPtr& system, const HybridAutomaton* ha);
 
+        virtual std::string toString(bool use_latex=false);
+
+
 	protected:
 
 		GoalSource	_goalSource;

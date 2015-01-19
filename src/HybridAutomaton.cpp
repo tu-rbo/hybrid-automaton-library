@@ -4,6 +4,7 @@
 #include "hybrid_automaton/error_handling.h"
 
 #include <boost/graph/graphviz.hpp>
+#include <boost/algorithm/string.hpp>
 
 #include <sstream>
 
@@ -426,6 +427,10 @@ namespace ha {
     public:
         vertex_writer(Graph& g, ControlModePtr current_cm) : _g(g), _current_cm(current_cm) {}
 
+        static bool compareControllers(ControllerPtr c1, ControllerPtr c2) {
+            return c1->getPriority() > c2->getPriority();
+        }
+
         template <class V>
         void operator()(std::ostream& out, const V& v) const {
             ControlMode::Ptr cm = _g[v];
@@ -441,7 +446,7 @@ namespace ha {
             out << "subgraph " << "cluster" << v << " {" << std::endl;
 
             if (cm == _current_cm)
-                out << "style=double;" << std::endl;
+                out << "style=\"setlinewidth(3)\";" << std::endl;
 
             ControlSetPtr cs = cm->getControlSet();
 
@@ -449,33 +454,44 @@ namespace ha {
             out << "<BR/>" << cs->getName() << " [" << cs->getType() << "]>;";
             out << std::endl;
             out << "color=blue;" <<std::endl;
-            const std::map<std::string, Controller::Ptr>& controllers = cs->getControllers();
-            std::map<std::string, Controller::Ptr>::const_iterator it;
+            const std::map<std::string, Controller::Ptr>& controller_map = cs->getControllers();
 
             // No controller: make dummy node in the subgraph
-            if (controllers.empty()) {
+            if (controller_map.empty()) {
                 //out << "node [label=<" << cm->getName() << ">] ";
                 out << "node [label=<<i>empty</i>>] " << v << ";" << std::endl;
-            }
+            } else {
 
-            // iterate over controllers
-            for (it = controllers.begin(); it != controllers.end(); it++) {
-                out << "node [label=<" << it->first << "<BR/><BR/>";
-                out << "<FONT POINT-SIZE=\"8\">" << std::endl;
-                // iterate through parameters
-                Controller::Ptr ctrl = it->second;
-                out << "type" << "=" << ctrl->getType() << "<BR/>" << std::endl;
-                if (ctrl->getGoal().rows() > 0)
-                    out << "goal" << "=" << ctrl->getGoal() << "<BR/>" << std::endl;
-                const std::map<std::string, std::string>& aa = ctrl->getAdditionalArgumentsString();
-                std::map<std::string, std::string>::const_iterator its;
-                for (its = aa.begin(); its != aa.end(); its++) {
-                    out << its->first << "=" << its->second << "<BR/>" << std::endl;
+                // iterate over controllers
+                // sort by priority
+                std::vector<Controller::Ptr> controllers;
+                for (std::map<std::string, Controller::Ptr>::const_iterator it = controller_map.begin(); it != controller_map.end(); it++) {
+                    controllers.push_back(it->second);
                 }
-                out << "</FONT>>] ";
-                if (it != controllers.begin())
-                    out << "controller_";
-                out << v << ";" << std::endl;
+                std::sort(controllers.begin(), controllers.end(), vertex_writer::compareControllers);
+
+                int i=0;
+                for (std::vector<Controller::Ptr>::iterator it = controllers.begin(); it != controllers.end(); it++) {
+                    Controller::Ptr& ctrl = *it;
+
+                    out << "node [label=<" << ctrl->getName() << "<BR/><BR/>";
+                    out << "<FONT POINT-SIZE=\"8\">" << std::endl;
+                    // iterate through parameters
+                    out << "type" << "=" << ctrl->getType() << "<BR/>" << std::endl;
+                    if (ctrl->getGoal().rows() > 0)
+                        out << "goal" << "=" << ctrl->getGoal() << "<BR/>" << std::endl;
+                    out << "priority = " << ctrl->getPriority() << "<BR/>" << std::endl;
+                    const std::map<std::string, std::string>& aa = ctrl->getAdditionalArgumentsString();
+                    std::map<std::string, std::string>::const_iterator its;
+                    for (its = aa.begin(); its != aa.end(); its++) {
+                        out << its->first << "=" << its->second << "<BR/>" << std::endl;
+                    }
+                    out << "</FONT>>] ";
+                    if (it != controllers.begin())
+                        out << "controller_" << i++ << ";";
+                    else
+                        out << v << ";" << std::endl;
+                }
             }
             out << "}" << std::endl;
 
@@ -487,7 +503,18 @@ namespace ha {
     private:
         Graph _g;
     public:
+
         edge_writer(Graph& g) : _g(g) {}
+
+        static void escape(std::string &data)
+        {
+            using boost::algorithm::replace_all;
+            replace_all(data, "&",  "&amp;");
+            replace_all(data, "\"", "&quot;");
+            replace_all(data, "\'", "&apos;");
+            replace_all(data, "<",  "&lt;");
+            replace_all(data, ">",  "&gt;");
+        }
 
         template <class E>
         void operator()(std::ostream& out, const E& e) const {
@@ -496,12 +523,26 @@ namespace ha {
                 HA_ERROR("HybridAutomaton.visualizeGraph", "Unable to obtain ControlSwitch for vertex " << e << " - is your graph correct?");
                 return;
             }
+
             out << " [label=<" << cs->getName();
-            // TODO iterate over jump conditions
-//            out << "<br/>" cs->getJumpConditions()
-            out << ">";
-            // TODO hide arrow behind box -> get vertex indices from graph
-//            out << "ltail=cluster_" << 0 << " " << "lhead=cluster_" <<
+            out << "<br/>";
+            out << "<font><i>";
+            const std::vector<JumpConditionPtr>& jcs = cs->getJumpConditions();
+            // iterate over jump conditions
+            for (std::vector<JumpConditionPtr>::const_iterator it = jcs.begin(); it != jcs.end(); it++) {
+                std::string s = (*it)->toString();
+                escape(s);
+                // escape
+                out << s;
+                if (it != jcs.end()-1)
+                    out << " and ";
+            }
+            out << "</i></font>";
+            out << ">, ";
+
+            // hide arrow behind box -> get vertex indices from graph
+            out << "ltail=cluster" << boost::source(e, _g);
+            out << " " << "lhead=cluster" << boost::target(e, _g);
             out << "]";
         }
     };
@@ -527,6 +568,9 @@ namespace ha {
         // write the dot file
 
         // hacky: we need to remove the \b and the preceding characters
+
+        AdjacencyListGraph a;
+
 
         std::stringstream tmp;
         boost::write_graphviz( tmp, this->_graph,

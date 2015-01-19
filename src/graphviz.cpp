@@ -89,20 +89,27 @@ int main() {
     ha::Controller::Ptr new_ctrl(new ha::Controller());
     ha::Controller::Ptr new_ctrl2(new ha::Controller());
     ha::Controller::Ptr new_ctrl22(new ha::Controller());
+    ha::Controller::Ptr new_ctrl222(new ha::Controller());
     ha::Controller::Ptr grasp_ctrl(new ha::Controller());
     ha::Controller::Ptr new_ctrl3(new ha::Controller());
     ha::Controller::Ptr deflate_ctrl(new ha::Controller());
 
     new_ctrl->setName("HomeCtrl");
     new_ctrl2->setName("HomeCtrl");
-    new_ctrl22->setName("HomeCtrl_3");
+    new_ctrl22->setName("BlaCtrl_3");
+    new_ctrl222->setName("BlubCtrl");
     grasp_ctrl->setName("FeixGraspControl");
     new_ctrl3->setName("HomeCtrl_2");
     deflate_ctrl->setName("FeixGraspControl");
 
+    new_ctrl->setPriority(2);
+    new_ctrl22->setPriority(0);
+    new_ctrl222->setPriority(1);
+
     new_ctrl->setType("InterpolatedJointController");
     new_ctrl2->setType("InterpolatedJointController");
     new_ctrl22->setType("InterpolatedJointController");
+    new_ctrl222->setType("InterpolatedJointController");
     grasp_ctrl->setType("FeixGraspSoftHandController");
     new_ctrl3->setType("InterpolatedJointController");
     deflate_ctrl->setType("FeixGraspSoftHandController");
@@ -139,6 +146,7 @@ int main() {
 
     new_cs->appendController(new_ctrl);
     new_cs->appendController(new_ctrl22);
+    new_cs->appendController(new_ctrl222);
     new_cs2->appendController(new_ctrl2);
     grasp_cs->appendController(grasp_ctrl);
     //grasp_cs->appendController(hold_ctrl);

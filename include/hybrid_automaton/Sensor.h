@@ -39,7 +39,8 @@ namespace ha {
 
 		virtual ::Eigen::MatrixXd getRelativeCurrentValue() const;
 
-		virtual const std::string getType() const;
+        // automatically implemented by HA_SENSOR_INSTANCE macro
+        virtual const std::string getType() const;
 		virtual void setType(const std::string& new_type);
 
 		virtual ::Eigen::MatrixXd getInitialValue() const;

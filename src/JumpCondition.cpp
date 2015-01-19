@@ -362,6 +362,81 @@ namespace ha {
 
 	}
 
+    std::string JumpCondition::toString(bool ) {
+        // TODO use latex
+
+        std::stringstream ss;
+
+        bool norm;
+
+        if (this->_jump_criterion == THRESH_UPPER_BOUND
+                || this->_jump_criterion == THRESH_LOWER_BOUND
+                || this->_jump_criterion == NUM_CRITERIA) {
+            norm = false;
+        } else {
+            norm = true;
+        }
+
+        if (norm) ss << "|";
+
+        if (_norm_weights.rows() > 0) {
+            if (_norm_weights.rows() > 1 && _norm_weights.cols() > 1) {
+                ss << "NormMatrix";
+            } else {
+               ss << "(";
+               // vector
+               for (int i = 0; i < _norm_weights.rows(); i++) {
+                    for (int j = 0; j < _norm_weights.cols(); j++) {
+                        ss << _norm_weights(i,j) << " ";
+                    }
+               }
+               ss << ")";
+            }
+        }
+
+        ss << "x_" << this->_sensor->getType();
+
+        ss << " - ";
+
+        if (this->_goalSource == CONSTANT) {
+            if (_goal.rows() > 0) {
+                if (_goal.rows() > 1 && _goal.cols() > 1) {
+                    ss << "GoalMatrix";
+                } else {
+                    ss << "(";
+                    // vector
+                    for (int i = 0; i < _goal.rows(); i++) {
+                        for (int j = 0; j < _goal.cols(); j++) {
+                            ss << _goal(i,j) << " ";
+                        }
+                    }
+                    ss << ")";
+                }
+            }
+        } else if (this->_goalSource == CONTROLLER)
+            ss << "x_[ctrl:" << _controller->getName() << "]";
+        else if (this->_goalSource == ROSTOPIC)
+            ss << "x_[ROS" << "]"; // TODO topic name
+
+        if (norm) {
+            ss << "|";
+            if (this->_jump_criterion == NORM_L1) ss << "_1";
+            else if (this->_jump_criterion == NORM_L2) ss << "_2";
+            else if (this->_jump_criterion == NORM_L_INF) ss << "_oo";
+            else if (this->_jump_criterion == NORM_ROTATION) ss << "_R";
+            else if (this->_jump_criterion == NORM_TRANSFORM) ss << "_T";
+            ss << " < " << _epsilon;
+        } else {
+            if (this->_jump_criterion == THRESH_UPPER_BOUND) ss << " > ";
+            else if (this->_jump_criterion == THRESH_LOWER_BOUND) ss << " < ";
+            ss << _epsilon;
+            // TODO
+            //else if (this->_jump_criterion == NUM_CRITERIA)
+        }
+
+        return ss.str();
+    }
+
 	void JumpCondition::setGoalRelative()
 	{
 		this->_is_goal_relative = true;
