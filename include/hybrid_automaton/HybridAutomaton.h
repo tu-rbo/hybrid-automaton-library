@@ -86,6 +86,8 @@ namespace ha {
 			return sensor_type_map; 
 		}
 
+        bool _deserialize_default_entities; /**< if true deserialization will not try to find the actual controller etc., but deserialize them raw */
+
 	public:
 		HybridAutomaton();
 		virtual ~HybridAutomaton();
@@ -200,6 +202,26 @@ namespace ha {
 		virtual ControlMode::ConstPtr getTargetControlMode(const std::string& controlSwitch) const;
 
         virtual void visualizeGraph(const std::string& filename);
+
+
+        /**
+         * @brief If set to true the deserialization process will translate controllers and control sets to
+         *  Controller and ControlSet classes, and not the specific classes.
+         *
+         * This flag is useful if you want to deserialize a hybrid automaton on the client system,
+         * i.e. the system that does not contain the concrete implementations, but which only
+         * assembles the automaton.
+         *
+         * @see visualizeGraph()
+         *
+         * @param b
+         */
+        virtual void setDeserializeDefaultEntities(bool b) {
+            _deserialize_default_entities = b;
+        }
+        virtual bool getDeserializeDefaultEntities() const {
+            return _deserialize_default_entities;
+        }
 
 		HybridAutomatonPtr clone() const {
 			return HybridAutomatonPtr(_doClone());

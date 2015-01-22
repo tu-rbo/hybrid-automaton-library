@@ -11,7 +11,7 @@
 namespace ha {
 
 	HybridAutomaton::HybridAutomaton()
-		: _active(false)
+        : _active(false), _deserialize_default_entities(false)
 	{
 	}
 
@@ -51,12 +51,18 @@ namespace ha {
 			HA_THROW_ERROR("HybridAutomaton.createController", "Cannot get controller type from node");
 		}
 
-		std::map<std::string, HybridAutomaton::ControllerCreator>& controller_type_map = getControllerTypeMap();
-		std::map<std::string, HybridAutomaton::ControllerCreator>::iterator it = controller_type_map.find(ctrl_type);
-		if ( !isControllerRegistered(ctrl_type) ) {
-			HA_THROW_ERROR("HybridAutomaton.createController", "Controller type not registered: " << ctrl_type);
-		}
-		return (*(it->second))(node, system, ha);
+        if (ha->getDeserializeDefaultEntities()) {
+            Controller::Ptr ctrl(new Controller);
+            ctrl->deserialize(node, system, ha);
+            return ctrl;
+        } else {
+            std::map<std::string, HybridAutomaton::ControllerCreator>& controller_type_map = getControllerTypeMap();
+            std::map<std::string, HybridAutomaton::ControllerCreator>::iterator it = controller_type_map.find(ctrl_type);
+            if ( !isControllerRegistered(ctrl_type) ) {
+                HA_THROW_ERROR("HybridAutomaton.createController", "Controller type not registered: " << ctrl_type);
+            }
+            return (*(it->second))(node, system, ha);
+        }
 	}
 
 	void HybridAutomaton::registerControlSet(const std::string& ctrl_type, ControlSetCreator cc) 
@@ -83,13 +89,19 @@ namespace ha {
 			HA_THROW_ERROR("HybridAutomaton.createControlSet", "Cannot get controller type from node");
 		}
 
-		std::map<std::string, HybridAutomaton::ControlSetCreator>& controlset_type_map = getControlSetTypeMap();
-		std::map<std::string, HybridAutomaton::ControlSetCreator>::iterator it = controlset_type_map.find(ctrl_type);
-		if ( !isControlSetRegistered(ctrl_type) ) {
-			HA_THROW_ERROR("HybridAutomaton.createControlSet", "ControlSet type not registered: " << ctrl_type);
-		}
-		return (*(it->second))(node, system, ha);
-	}
+        if (ha->getDeserializeDefaultEntities()) {
+            ControlSet::Ptr cs(new ControlSet);
+            cs->deserialize(node, system, ha);
+            return cs;
+        } else {
+            std::map<std::string, HybridAutomaton::ControlSetCreator>& controlset_type_map = getControlSetTypeMap();
+            std::map<std::string, HybridAutomaton::ControlSetCreator>::iterator it = controlset_type_map.find(ctrl_type);
+            if ( !isControlSetRegistered(ctrl_type) ) {
+                HA_THROW_ERROR("HybridAutomaton.createControlSet", "ControlSet type not registered: " << ctrl_type);
+            }
+            return (*(it->second))(node, system, ha);
+        }
+    }
 
 	void HybridAutomaton::unregisterControlSet(const std::string& ctrl_type) {
 		std::map<std::string, HybridAutomaton::ControlSetCreator>& controlset_type_map = getControlSetTypeMap();
@@ -130,12 +142,12 @@ namespace ha {
 			HA_THROW_ERROR("HybridAutomaton.createSensor", "Cannot get sensor type from node");
 		}
 
-		std::map<std::string, HybridAutomaton::SensorCreator>& sensor_type_map = getSensorTypeMap();
-		std::map<std::string, HybridAutomaton::SensorCreator>::iterator it = sensor_type_map.find(sensor_type);
-		if ( !isSensorRegistered(sensor_type) ) {
-			HA_THROW_ERROR("HybridAutomaton.createSensor", "Sensor type not registered: " << sensor_type);
-		}
-		return (*(it->second))(node, system, ha);
+        std::map<std::string, HybridAutomaton::SensorCreator>& sensor_type_map = getSensorTypeMap();
+        std::map<std::string, HybridAutomaton::SensorCreator>::iterator it = sensor_type_map.find(sensor_type);
+        if ( !isSensorRegistered(sensor_type) ) {
+            HA_THROW_ERROR("HybridAutomaton.createSensor", "Sensor type not registered: " << sensor_type);
+        }
+        return (*(it->second))(node, system, ha);
 	}
 
 

@@ -1,8 +1,12 @@
 #include <iostream>
+#include <fstream>
+
 #include "hybrid_automaton/HybridAutomaton.h"
 #include "hybrid_automaton/JointConfigurationSensor.h"
 #include "hybrid_automaton/ForceTorqueSensor.h"
 #include "hybrid_automaton/ClockSensor.h"
+
+#include "hybrid_automaton/DescriptionTreeXML.h"
 
 using namespace ha;
 
@@ -246,6 +250,16 @@ int main() {
  //std::cout<<"---------------------------------------------------------"<<std::endl;
     std::cout<<ha_string<<std::endl;
     */
+
+
+    ha::DescriptionTreeXML::Ptr dt(new ha::DescriptionTreeXML);
+    ha::DescriptionTreeNode::Ptr node = new_ha->serialize(dt);
+    dt->setRootNode(node);
+    std::ofstream out;
+    out.open("test.xml");
+    out << dt->writeTreeXML();
+    out.close();
+
 
     new_ha->visualizeGraph("test.dot");
 

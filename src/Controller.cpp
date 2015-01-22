@@ -65,10 +65,14 @@ namespace ha {
 		}
 		tree->getAttribute<std::string>("type", _type, "");
 
-		if (_type == "" || !HybridAutomaton::isControllerRegistered(_type)) {
-			HA_THROW_ERROR("Controller.deserialize", "Controller type '" << _type << "' "
-				<< "invalid - empty or not registered with HybridAutomaton!");
-		}
+        if (!ha->getDeserializeDefaultEntities()) {
+            if (_type == "" || !HybridAutomaton::isControllerRegistered(_type)) {
+                HA_THROW_ERROR("Controller.deserialize", "Controller type '" << _type << "' "
+                               << "invalid - empty or not registered with HybridAutomaton!");
+            } else {
+                setType(_type);
+            }
+        }
 
 		if(!tree->getAttribute<std::string>("name", _name, ""))
 			HA_WARN("Controller.deserialize", "No \"name\" parameter given in Controller - using default value");

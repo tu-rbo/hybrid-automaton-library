@@ -51,10 +51,14 @@ namespace ha {
 		}
 		tree->getAttribute<std::string>("type", _type, "");
 
-		if (_type == "" || !HybridAutomaton::isControlSetRegistered(_type)) {
-			HA_THROW_ERROR("ControlSet::deserialize", "ControlSet type '" << _type << "' "
-			   << "invalid - empty or not registered with HybridAutomaton!");
-		}
+        if (!ha->getDeserializeDefaultEntities()) {
+            if (_type == "" || !HybridAutomaton::isControlSetRegistered(_type)) {
+                HA_THROW_ERROR("ControlSet::deserialize", "ControlSet type '" << _type << "' "
+                               << "invalid - empty or not registered with HybridAutomaton!");
+            }
+        } else {
+            setType(_type);
+        }
 
 		if(!tree->getAttribute<std::string>("name", _name, ""))
 			HA_WARN("ControlSet::deserialize", "No \"name\" parameter given in ControlSet - using default value");

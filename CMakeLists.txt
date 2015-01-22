@@ -169,11 +169,28 @@ source_group("Source Files\\Sensor" FILES ${HA_SENSOR_SOURCES})
 add_library(hybrid_automaton STATIC ${HA_CORE_SOURCES} 
                         ${HA_DESCRIPTION_SOURCES} 
                         ${HA_SENSOR_SOURCES} 
-						${HA_CORE_HEADERS} 
+												${HA_CORE_HEADERS}
                         ${HA_DESCRIPTION_HEADERS} 
                         ${HA_SENSOR_HEADERS})
 						
 target_link_libraries(hybrid_automaton ${TinyXML_LIBRARIES} ${Boost_LIBRARIES} ${Eigen3_LIBRARIES})
+
+
+# because of sensor registration hybrid_automaton_visualizer needs to compile
+# the sources again and cannot link agains the libraries
+add_executable(hybrid_automaton_visualizer src/hybrid_automaton_visualizer.cpp
+												${HA_CORE_SOURCES}
+												${HA_DESCRIPTION_SOURCES}
+												${HA_SENSOR_SOURCES}
+												${HA_CORE_HEADERS}
+												${HA_DESCRIPTION_HEADERS}
+												${HA_SENSOR_HEADERS})
+target_link_libraries(hybrid_automaton_visualizer ${TinyXML_LIBRARIES} ${Boost_LIBRARIES} ${Eigen3_LIBRARIES})
+
+# FIXME remove
+add_executable(graphviz_test src/graphviz.cpp)
+target_link_libraries(graphviz_test hybrid_automaton)
+
 
 #subdirs(src)
 
