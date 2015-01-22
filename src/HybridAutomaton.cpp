@@ -12,8 +12,8 @@ namespace ha {
 
 	HybridAutomaton::HybridAutomaton()
         : _active(false), _deserialize_default_entities(false)
-	{
-	}
+    {
+    }
 
 	HybridAutomaton::~HybridAutomaton()
 	{
@@ -339,8 +339,10 @@ namespace ha {
 		} 
 		*/
 
-		//if (!existsControlMode(control_mode))
-		if (::boost::vertex_by_label(control_mode, _graph) == GraphTraits::null_vertex())
+        if (!existsControlMode(control_mode))
+        // DO NOT USE the following line - vertex_by_label returns a bool, therefore it makes
+        // no sense to compare it to null_vertex
+//        if (::boost::vertex_by_label(control_mode, _graph) == GraphTraits::null_vertex())
 			HA_THROW_ERROR("HybridAutomaton.setCurrentControlMode", "Control mode '" << control_mode << "' does not exist! Cannot set current control mode.");
 
 		if (_current_control_mode != NULL)
