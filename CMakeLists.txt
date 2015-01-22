@@ -187,10 +187,6 @@ add_executable(hybrid_automaton_visualizer src/hybrid_automaton_visualizer.cpp
 												${HA_SENSOR_HEADERS})
 target_link_libraries(hybrid_automaton_visualizer ${TinyXML_LIBRARIES} ${Boost_LIBRARIES} ${Eigen3_LIBRARIES})
 
-# FIXME remove
-add_executable(graphviz_test src/graphviz.cpp)
-target_link_libraries(graphviz_test hybrid_automaton)
-
 
 #subdirs(src)
 
