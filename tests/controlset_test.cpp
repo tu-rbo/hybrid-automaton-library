@@ -71,7 +71,8 @@ TEST(ControlSet, SuccessfulRegistration) {
 	// shared pointers)
 	DescriptionTreeNode::Ptr mockedNodePtr(mockedNode);
 
-	ControlSet::Ptr c = HybridAutomaton::createControlSet(mockedNodePtr, emptySystem, NULL);
+    HybridAutomaton ha;
+    ControlSet::Ptr c = HybridAutomaton::createControlSet(mockedNodePtr, emptySystem, &ha);
 	EXPECT_FALSE(c.get() == NULL);
 	
 	HybridAutomaton::unregisterControlSet(ctrlName1);
@@ -106,7 +107,8 @@ TEST(ControlSet, UnsuccessfulRegistration) {
 
 	// create controller should throw an exception because
 	// FantasyNonRegisteredController was not registered
-	ASSERT_ANY_THROW( HybridAutomaton::createControlSet(mockedNodePtr, emptySystem, NULL));
+    HybridAutomaton ha;
+    ASSERT_ANY_THROW( HybridAutomaton::createControlSet(mockedNodePtr, emptySystem, &ha));
 
 }
 

@@ -76,7 +76,8 @@ TEST(Controller, SuccessfulRegistration) {
 	// (google mock somewhat does not like to use EXPECT_CALL with
 	// shared pointers)
 
-	Controller::Ptr c = HybridAutomaton::createController(mockedNode, emptySystem, NULL);
+    HybridAutomaton ha;
+    Controller::Ptr c = HybridAutomaton::createController(mockedNode, emptySystem, &ha);
 	EXPECT_FALSE(c.get() == NULL);
 
 	HybridAutomaton::unregisterController(ctrlType);
@@ -105,7 +106,8 @@ TEST(Controller, UnsuccessfulRegistration) {
 
 	// create controller should throw an exception because
 	// FantasyNonRegisteredController was not registered
-	ASSERT_ANY_THROW( HybridAutomaton::createController(mockedNode, emptySystem, NULL));
+    HybridAutomaton ha;
+    ASSERT_ANY_THROW( HybridAutomaton::createController(mockedNode, emptySystem, &ha));
 }
 
 
@@ -196,7 +198,8 @@ TEST(Controller, Deserialization) {
 
 	Controller::Ptr ctrl(new Controller);
 
-	ctrl->deserialize(ctrl_node, System::Ptr(), NULL);
+    HybridAutomaton ha;
+    ctrl->deserialize(ctrl_node, System::Ptr(), &ha);
 
 	EXPECT_EQ("myCtrl", ctrl->getName());
 	EXPECT_EQ(ctrlType, ctrl->getType());
