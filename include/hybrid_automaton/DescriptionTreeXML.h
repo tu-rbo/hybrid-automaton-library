@@ -44,7 +44,7 @@ namespace ha {
 		virtual void setRootNode(const DescriptionTreeNode::Ptr& root_node);
 	
 	protected: 
-		boost::shared_ptr<TiXmlDocument> _tinyxml_document;
+		TiXmlDocument* _tinyxml_document;
 		DescriptionTreeNodeXML::Ptr _root_node;
 	};
 }

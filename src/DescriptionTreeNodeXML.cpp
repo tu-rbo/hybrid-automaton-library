@@ -4,18 +4,30 @@
 namespace ha {
 
 	DescriptionTreeNodeXML::DescriptionTreeNodeXML(const std::string& type)
-		: _tinyxml_node(new TiXmlElement(type.c_str()))
+		: _tinyxml_node(new TiXmlElement(type.c_str())),
+		  _node_is_in_tree(false)
 	{		
 	}
 
 	DescriptionTreeNodeXML::DescriptionTreeNodeXML(TiXmlElement* tinyxml_node)
-		: _tinyxml_node(tinyxml_node)
+		: _tinyxml_node(tinyxml_node),
+		_node_is_in_tree(false)
+
 	{
 	}
 
 	DescriptionTreeNodeXML::DescriptionTreeNodeXML(const DescriptionTreeNodeXML& dtn)
 	{
 		this->_tinyxml_node = dtn._tinyxml_node;
+		this->_node_is_in_tree = dtn._node_is_in_tree;
+	}
+
+	DescriptionTreeNodeXML::~DescriptionTreeNodeXML()
+	{
+		//Only delete the TIXML element, if it is not yet assigned to a TiXMLTree!
+		//Otherwise TinyXML will clean up
+		if(!this->_node_is_in_tree)
+			delete this->_tinyxml_node;
 	}
 
 	const std::string DescriptionTreeNodeXML::getType() const
@@ -42,7 +54,8 @@ namespace ha {
 			mst_element != NULL; 
 			mst_element = mst_element->NextSiblingElement(type.c_str())) 
 		{
-			DescriptionTreeNode::Ptr nextChild(new DescriptionTreeNodeXML(mst_element));
+			DescriptionTreeNodeXML::Ptr nextChild(new DescriptionTreeNodeXML(mst_element));
+			nextChild->addNodeToTree();
 			children.push_back(nextChild);
 			foundChildren = true;
 		}
@@ -57,7 +70,8 @@ namespace ha {
 			mst_element != NULL; 
 			mst_element = mst_element->NextSiblingElement() )
 		{
-			DescriptionTreeNode::Ptr nextChild(new DescriptionTreeNodeXML(mst_element));
+			DescriptionTreeNodeXML::Ptr nextChild(new DescriptionTreeNodeXML(mst_element));
+			nextChild->addNodeToTree();
 			children.push_back(nextChild);
 			foundChildren = true;
 		}
@@ -74,10 +88,10 @@ namespace ha {
 	{
 		//Downcast
 		DescriptionTreeNodeXML::Ptr childXMLNode = boost::dynamic_pointer_cast<DescriptionTreeNodeXML>(child);
-
+	
+		childXMLNode->_node_is_in_tree = true;
 		_tinyxml_node->LinkEndChild(childXMLNode->_tinyxml_node);
-		
-		//childXMLNode->_tinyxml_node = _tinyxml_node->LastChild()->;
+
 	}
 
 	void DescriptionTreeNodeXML::getAllAttributes(std::map<std::string, std::string> & attrs) const {

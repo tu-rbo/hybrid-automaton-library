@@ -20,9 +20,16 @@ namespace ha {
 	class DescriptionTreeNodeXML: public DescriptionTreeNode{
 
 	protected:
+		/** 
+		* @brief the underlying TinyXml element
+		* This member can have two possible owners - if this node is part of a tree (_node_is_in_tree = true), TinyXML will delete the TiXmlElement
+		* If not, it will be deleted in the destructor.
+		*/
 		TiXmlElement* _tinyxml_node;
+		bool	      _node_is_in_tree;
 
 	public:
+
 
 		typedef boost::shared_ptr<DescriptionTreeNodeXML> Ptr;
 		typedef boost::shared_ptr<const DescriptionTreeNodeXML> ConstPtr;
@@ -44,7 +51,16 @@ namespace ha {
 		 */
 		DescriptionTreeNodeXML(const DescriptionTreeNodeXML& dtn);
 
+		virtual ~DescriptionTreeNodeXML();
+
 		virtual const std::string getType() const;
+
+		/**
+		* addNodeToTree
+		* This function should only be called by the DescriptionTreeXML to note that ownership of
+		* the TIXMLNode now belongs to the TIXMLTree
+		*/
+		virtual void addNodeToTree() {_node_is_in_tree = true;};
 
 		/**
 		* getChildrenNodes

@@ -8,7 +8,7 @@ namespace ha {
 	{
 		// Create the first (and only) root element and link it to the base document
 		this->_root_node.reset(new DescriptionTreeNodeXML(new TiXmlElement("HybridAutomaton")));
-
+		this->_root_node->addNodeToTree();	
 		this->_tinyxml_document->LinkEndChild(this->_root_node->getXMLNode());
 	}
 		
@@ -20,6 +20,7 @@ namespace ha {
 
 	DescriptionTreeXML::~DescriptionTreeXML()
 	{
+		delete _tinyxml_document;
 	}
 
 	/**
@@ -43,9 +44,9 @@ namespace ha {
 			return false;
 		}
 		
-		TiXmlHandle docHandle(this->_tinyxml_document.get());
+		TiXmlHandle docHandle(this->_tinyxml_document);
 		this->_root_node.reset(new DescriptionTreeNodeXML(docHandle.FirstChild().ToElement()));
-		
+		_root_node->addNodeToTree();
 		// Check if the HybridAutomaton element was found
 		if (this->_root_node == NULL) {
 			HA_THROW_ERROR("DescriptionTreeXML.initTree", "undefined");
@@ -72,6 +73,7 @@ namespace ha {
 	{
 		this->_tinyxml_document->Clear();
 		this->_root_node = boost::dynamic_pointer_cast<DescriptionTreeNodeXML>(root_node);
+		_root_node->addNodeToTree();
 		this->_tinyxml_document->LinkEndChild(this->_root_node->getXMLNode());
 	}
 
