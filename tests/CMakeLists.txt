@@ -32,6 +32,7 @@ if(CMAKE_COMPILER_IS_GNUCXX)
 endif()
 
 set (HA_TESTS_SOURCES
+	"gtest_mem_main.cpp"
     "controller_test.cpp"
     "controlmode_test.cpp"
     "controlset_test.cpp"
