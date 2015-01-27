@@ -41,7 +41,6 @@ using ::testing::_;
 
 
 TEST(Controller, SuccessfulRegistration) {
-
 	System::Ptr emptySystem;
 
 	std::string ctrlType("MockRegisteredController");
@@ -80,8 +79,8 @@ TEST(Controller, SuccessfulRegistration) {
     Controller::Ptr c = HybridAutomaton::createController(mockedNode, emptySystem, &ha);
 	EXPECT_FALSE(c.get() == NULL);
 
-	HybridAutomaton::unregisterController(ctrlType);
-	EXPECT_FALSE(HybridAutomaton::isControllerRegistered(ctrlType));
+	//HybridAutomaton::unregisterController(ctrlType);
+	//EXPECT_FALSE(HybridAutomaton::isControllerRegistered(ctrlType));
 
 }
 
@@ -208,8 +207,8 @@ TEST(Controller, Deserialization) {
 	ctrl->getArgument("extra_arg", val);
 	EXPECT_EQ(add_args["extra_arg"], val);
 
-	HybridAutomaton::unregisterController(ctrlType);
-	EXPECT_FALSE(HybridAutomaton::isControllerRegistered(ctrlType));
+	//HybridAutomaton::unregisterController(ctrlType);
+	//EXPECT_FALSE(HybridAutomaton::isControllerRegistered(ctrlType));
 
 }
 
