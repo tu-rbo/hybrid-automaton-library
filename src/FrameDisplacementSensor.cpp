@@ -27,12 +27,6 @@ namespace ha
 		return pose;
 	}
 
-	::Eigen::MatrixXd FrameDisplacementSensor::getRelativeCurrentValue() const
-	{
-		//TODO!
-		HA_THROW_ERROR("Sensor::getRelativeCurrentValue()", "Not Implemented for FrameDisplacementSensor");
-	}
-
 	DescriptionTreeNode::Ptr FrameDisplacementSensor::serialize(const DescriptionTree::ConstPtr& factory) const
 	{
 		DescriptionTreeNode::Ptr tree = factory->createNode("Sensor");
@@ -53,5 +47,8 @@ namespace ha
 			HA_THROW_ERROR("FrameDisplacementSensor.deserialize", "SensorType type '" << _type << "' "
 				<< "invalid - empty or not registered with HybridAutomaton!");
 		}
+
+		
+		_system = system;
 	}
 }

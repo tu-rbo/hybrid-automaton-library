@@ -50,5 +50,7 @@ namespace ha
 			HA_THROW_ERROR("FramePoseSensor.deserialize", "SensorType type '" << _type << "' "
 				<< "invalid - empty or not registered with HybridAutomaton!");
 		}
+		
+		_system = system;
 	}
 }
