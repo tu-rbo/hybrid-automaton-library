@@ -19,11 +19,34 @@ namespace ha
 	{
 	}
 
+	void FrameDisplacementSensor::initialize(const double& t) 
+	{
+		this->_initial_sensor_value = this->_system->getFramePose(this->_frame_id);
+	}
+
 	::Eigen::MatrixXd FrameDisplacementSensor::getCurrentValue() const
 	{
 		::Eigen::MatrixXd pose = this->_system->getFramePose(this->_frame_id);
 		pose = pose.col(3);
 		pose.conservativeResize(3,1);
+		return pose;
+	}
+
+	::Eigen::MatrixXd FrameDisplacementSensor::getInitialValue() const
+	{
+		::Eigen::MatrixXd ret = this->_initial_sensor_value.col(3);
+		ret.conservativeResize(3,1);
+		return ret;
+	}
+
+	::Eigen::MatrixXd FrameDisplacementSensor::getRelativeCurrentValue() const
+	{
+		
+		::Eigen::MatrixXd pose = this->_system->getFramePose(this->_frame_id);
+		pose=_initial_sensor_value.inverse()*pose;
+		pose = pose.col(3);
+		pose.conservativeResize(3,1);
+		
 		return pose;
 	}
 
@@ -48,7 +71,6 @@ namespace ha
 				<< "invalid - empty or not registered with HybridAutomaton!");
 		}
 
-		
 		_system = system;
 	}
 }

@@ -30,7 +30,13 @@ namespace ha {
 			return (FrameDisplacementSensorPtr(_doClone()));
 		};
 
+		virtual void initialize(const double& t); 
+		
+		virtual ::Eigen::MatrixXd getRelativeCurrentValue() const;
+
 		virtual ::Eigen::MatrixXd getCurrentValue() const;
+
+		virtual ::Eigen::MatrixXd getInitialValue() const;
 		
 		virtual DescriptionTreeNode::Ptr serialize(const DescriptionTree::ConstPtr& factory) const;
 
