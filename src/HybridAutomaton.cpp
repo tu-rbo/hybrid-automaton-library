@@ -502,7 +502,7 @@ namespace ha {
                     }
                     out << "</FONT>>] ";
                     if (it != controllers.begin())
-                        out << "controller_" << i++ << ";";
+                        out << "controller_" << v << i++ << ";";
                     else
                         out << v << ";" << std::endl;
                 }
