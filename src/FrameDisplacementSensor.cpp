@@ -55,6 +55,7 @@ namespace ha
 		DescriptionTreeNode::Ptr tree = factory->createNode("Sensor");
 
 		tree->setAttribute<std::string>(std::string("type"), this->getType());
+		tree->setAttribute<std::string>(std::string("frame_id"), _frame_id);
 
 		return tree;
 	}
@@ -69,6 +70,12 @@ namespace ha
 		if (_type == "" || !HybridAutomaton::isSensorRegistered(_type)) {
 			HA_THROW_ERROR("FrameDisplacementSensor.deserialize", "SensorType type '" << _type << "' "
 				<< "invalid - empty or not registered with HybridAutomaton!");
+		}
+		
+		if(!tree->getAttribute<std::string>("frame_id", _frame_id))
+		{
+			HA_WARN("FramePoseSensor::deserialize", "frame_id not defined. using default value EE");
+			_frame_id = "EE";
 		}
 
 		_system = system;

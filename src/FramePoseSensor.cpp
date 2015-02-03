@@ -26,8 +26,9 @@ namespace ha
 
 	::Eigen::MatrixXd FramePoseSensor::getRelativeCurrentValue() const
 	{
-		//TODO!
-		HA_THROW_ERROR("Sensor::getRelativeCurrentValue()", "Not Implemented for FramePoseSensor");
+		::Eigen::MatrixXd pose = this->_system->getFramePose(this->_frame_id);
+		pose = _initial_sensor_value.inverse()*pose;
+		return pose;
 	}
 
 	DescriptionTreeNode::Ptr FramePoseSensor::serialize(const DescriptionTree::ConstPtr& factory) const
@@ -35,6 +36,7 @@ namespace ha
 		DescriptionTreeNode::Ptr tree = factory->createNode("Sensor");
 
 		tree->setAttribute<std::string>(std::string("type"), this->getType());
+		tree->setAttribute<std::string>(std::string("frame_id"), _frame_id);
 
 		return tree;
 	}
@@ -50,6 +52,13 @@ namespace ha
 			HA_THROW_ERROR("FramePoseSensor.deserialize", "SensorType type '" << _type << "' "
 				<< "invalid - empty or not registered with HybridAutomaton!");
 		}
+
+		if(!tree->getAttribute<std::string>("frame_id", _frame_id))
+		{
+			HA_WARN("FramePoseSensor::deserialize", "frame_id not defined. using default value EE");
+			_frame_id = "EE";
+		}
+
 		
 		_system = system;
 	}
