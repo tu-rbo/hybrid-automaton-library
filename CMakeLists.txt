@@ -179,7 +179,7 @@ target_link_libraries(hybrid_automaton ${TinyXML_LIBRARIES} ${Boost_LIBRARIES} $
 
 
 # because of sensor registration hybrid_automaton_visualizer needs to compile
-# the sources again and cannot link agains the libraries
+# the sources again and cannot link against the libraries
 add_executable(hybrid_automaton_visualizer src/hybrid_automaton_visualizer.cpp
 												${HA_CORE_SOURCES}
 												${HA_DESCRIPTION_SOURCES}
@@ -188,7 +188,6 @@ add_executable(hybrid_automaton_visualizer src/hybrid_automaton_visualizer.cpp
 												${HA_DESCRIPTION_HEADERS}
 												${HA_SENSOR_HEADERS})
 target_link_libraries(hybrid_automaton_visualizer ${TinyXML_LIBRARIES} ${Boost_LIBRARIES} ${Eigen3_LIBRARIES})
-
 
 #subdirs(src)
 
@@ -201,5 +200,7 @@ else()
 	message ("Compilation of unit tests is disabled. (default behavior).")
 	message ("Hint: use -DUNIT_TESTS=true if you want them built.")
 endif()
+
+install(TARGETS hybrid_automaton DESTINATION "${CMAKE_CURRENT_SOURCE_DIR}/lib")
 
 
