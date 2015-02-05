@@ -7,6 +7,8 @@
  * and detects memory leaks.
  */
 
+#ifdef _WIN32
+
 #define _CRTDBG_MAP_ALLOC
 #include <iostream>
 #include <crtdbg.h>
@@ -56,3 +58,5 @@ _CrtSetReportMode( _CRT_ERROR, _CRTDBG_MODE_DEBUG );
   _CrtDumpMemoryLeaks();
   return ret;
 }
+
+#endif
