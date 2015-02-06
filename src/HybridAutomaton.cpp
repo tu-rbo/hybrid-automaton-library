@@ -490,11 +490,14 @@ namespace ha {
 
                     out << "node [label=<" << ctrl->getName() << "<BR/><BR/>";
                     out << "<FONT POINT-SIZE=\"8\">" << std::endl;
+
                     // iterate through parameters
-                    out << "type" << "=" << ctrl->getType() << "<BR/>" << std::endl;
-                    if (ctrl->getGoal().rows() > 0)
-                        out << "goal" << "=" << ctrl->getGoal() << "<BR/>" << std::endl;
-                    out << "priority = " << ctrl->getPriority() << "<BR/>" << std::endl;
+                    // Arne: all these parameters are stored in additional_arguments.
+                    // We do not print them here to prevent dublicates.
+                    //out << "type" << "=" << ctrl->getType() << "<BR/>" << std::endl;
+                    //if (ctrl->getGoal().cols() > 0)
+                    //   out << "goal" << "=" << ctrl->getGoal() << "<BR/>" << std::endl;
+                    //out << "priority = " << ctrl->getPriority() << "<BR/>" << std::endl;
                     const std::map<std::string, std::string>& aa = ctrl->getAdditionalArgumentsString();
                     std::map<std::string, std::string>::const_iterator its;
                     for (its = aa.begin(); its != aa.end(); its++) {
