@@ -42,11 +42,11 @@ else()
 	include_directories(${TinyXML_INCLUDE_DIRS})
 endif()
 
-find_package(Boost 1.47.0)
+find_package(Boost 1.46.0)
 if(NOT Boost_FOUND AND WIN32)
 	message ("Boost not found automatically. Retrying using BOOST_ROOT=C:/Program Files/boost/boost_1_57_0")
 	set (BOOST_ROOT "C:/Program Files/boost/boost_1_57_0")
-	find_package(Boost 1.47.0)
+	find_package(Boost 1.46.0)
 endif()
 	
 if(NOT Boost_FOUND)
