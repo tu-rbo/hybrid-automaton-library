@@ -42,6 +42,11 @@ namespace ha {
 			tree->addChildNode((ctrl_it->second)->serialize(factory));
 		}
 
+		std::map<std::string, std::string>::const_iterator it;
+		for (it = this->_additional_arguments.begin(); it != this->_additional_arguments.end(); ++it) {
+			tree->setAttribute(it->first, it->second);
+		}
+
 		return tree;
 	}
 
@@ -73,7 +78,8 @@ namespace ha {
 			this->appendController(ctrl);
 		}
 
-		// TODO more properties
+		// write all arguments into "_additional_arguments" field
+		tree->getAllAttributes(_additional_arguments);
 	}
 
 	void ControlSet::setType(const std::string& new_type) {
