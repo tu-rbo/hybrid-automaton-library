@@ -455,7 +455,7 @@ namespace ha {
 
 
             // HACK: move backwards as many steps as necessary to remove leading node id
-            for (int i=0; i <= v/10; i++) out <<'\b';
+            for (int i=0; i <= (int)(v/10); i++) out <<'\b';
 
             out << "subgraph " << "cluster" << v << " {" << std::endl;
 
