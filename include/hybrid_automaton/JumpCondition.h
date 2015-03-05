@@ -29,7 +29,7 @@ namespace ha {
 		// NUM_CRITERIA must be always the last value of the enum to know the number of elements it contains
 		enum JumpCriterion {NORM_L1, NORM_L2, NORM_L_INF, NORM_ROTATION, NORM_TRANSFORM, THRESH_UPPER_BOUND, THRESH_LOWER_BOUND, NUM_CRITERIA}; 
 
-		enum GoalSource {CONSTANT, CONTROLLER, ROSTOPIC}; 
+		enum GoalSource {CONSTANT, CONTROLLER, ROSTOPIC, ROSTOPIC_TF}; 
 
 		typedef boost::shared_ptr<JumpCondition> Ptr;
 
@@ -72,7 +72,9 @@ namespace ha {
 
 		virtual void setConstantGoal(double goal);
 
-    virtual void setRosTopicGoal(const std::string& topic);
+		virtual void setROSTopicGoal(const std::string& topic, const std::string& topic_type);
+
+		virtual void setROSTfGoal(const std::string& child, const std::string& parent);
 
 		virtual void setGoalRelative();
 
@@ -80,10 +82,6 @@ namespace ha {
 
 		virtual bool isGoalRelative() const;
 		
-		
-		// TODO
-		//virtual void setROSTopicGoal(std::string rosTopicName);
-
 		/**
 		 * @brief Get the current goal
 		 * 
@@ -142,10 +140,15 @@ namespace ha {
 		GoalSource	_goalSource;
 		::Eigen::MatrixXd _goal;
 		Controller::ConstPtr _controller;
-    std::string _ros_topic_goal;
+
+		std::string _ros_topic_goal_name;
+		std::string _ros_topic_goal_type;
+
+		std::string _ros_tf_goal_child;
+		std::string _ros_tf_goal_parent;
 
 		Sensor::Ptr _sensor;
-    System::ConstPtr _system;
+		System::ConstPtr _system;
 
 		JumpCriterion	_jump_criterion;
 		::Eigen::MatrixXd _norm_weights;

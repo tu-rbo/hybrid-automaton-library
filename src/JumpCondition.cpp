@@ -26,11 +26,19 @@ namespace ha {
 		this->_jump_criterion = jc._jump_criterion;
 		this->_norm_weights = jc._norm_weights;
 		this->_epsilon = jc._epsilon;
+		this->_ros_topic_goal_name = jc._ros_topic_goal_name;
+		this->_ros_topic_goal_type = jc._ros_topic_goal_type;
 	}
 
 	void JumpCondition::initialize(const double& t) 
 	{
 		this->_sensor->initialize(t); 
+		if (this->_goalSource == ROSTOPIC) {
+			_system->subscribeToROSMessage(_ros_topic_goal_name);
+		}
+		if (this->_goalSource == ROSTOPIC_TF) {
+			_system->subscribeToTransform(_ros_tf_goal_child, _ros_tf_goal_parent);
+		}
 	}
 
 	void JumpCondition::terminate() 
@@ -171,10 +179,17 @@ namespace ha {
 		_goal<<goal;
 	}
 
-  void JumpCondition::setRosTopicGoal(const std::string& topic) {
-    _goalSource = ROSTOPIC;
-    _ros_topic_goal = topic;
-  }
+	void JumpCondition::setROSTopicGoal(const std::string& topic, const std::string& topic_type) {
+		_goalSource = ROSTOPIC;
+		_ros_topic_goal_name = topic;
+		_ros_topic_goal_type = topic_type;
+	}
+
+	void JumpCondition::setROSTfGoal(const std::string& child, const std::string& parent) {
+		_goalSource = ROSTOPIC_TF;
+		_ros_tf_goal_child = child;
+		_ros_tf_goal_parent = parent;
+	}
 
 
 	::Eigen::MatrixXd JumpCondition::getGoal() const	
@@ -186,11 +201,25 @@ namespace ha {
 			case CONTROLLER: 
 				return _controller->getGoal();
 
-      case ROSTOPIC:
-        return _system->getROSTfPose(_ros_topic_goal);
+			case ROSTOPIC: {
+				::Eigen::MatrixXd pose;
+				if(!_system->getROSPose(_ros_topic_goal_name, _ros_topic_goal_type, pose)) {
+					HA_ERROR("JumpCondition.getGoal", "Unable to fetch pose from ROS");
+				} else {
+					return pose;
+				}
+			}
+			case ROSTOPIC_TF: {
+				::Eigen::MatrixXd pose;
+				if(!_system->getROSTfPose(_ros_tf_goal_child, _ros_tf_goal_parent, pose)) {
+					HA_ERROR("JumpCondition.getGoal", "Unable to fetch pose from ROS TF");
+				} else {
+					return pose;
+				}
+			}
 
 			default:
-				HA_THROW_ERROR("JumpCondition::getGoal", "Not Implemented: unknown goal source");
+				HA_THROW_ERROR("JumpCondition.getGoal", "Not Implemented: unknown goal source");
 		}
 
 		return ::Eigen::MatrixXd();
@@ -252,8 +281,14 @@ namespace ha {
 				tree->setAttribute<std::string>(std::string("controller"), this->_controller->getName());
 				break;
 			
-			case ROSTOPIC: 				
-				HA_THROW_ERROR("JumpCondition::serialize", "Not Implemented: ROSTOPIC");
+			case ROSTOPIC:
+				tree->setAttribute<std::string>(std::string("ros_topic"), _ros_topic_goal_name);
+				tree->setAttribute<std::string>(std::string("ros_topic_type"), _ros_topic_goal_type);
+				break;
+
+			case ROSTOPIC_TF:
+				tree->setAttribute<std::string>(std::string("ros_tf_child"), _ros_tf_goal_child);
+				tree->setAttribute<std::string>(std::string("ros_tf_parent"), _ros_tf_goal_parent);
 				break;
 
 			default:
@@ -302,7 +337,7 @@ namespace ha {
 		DescriptionTreeNode::ConstPtr first = * (sensorList.begin());
 		this->_sensor = HybridAutomaton::createSensor(first, system, ha);
 
-    this->_system = system;
+		this->_system = system;
 
 		//////////////////////////////
 		////GOALS/////////////////////
@@ -340,6 +375,22 @@ namespace ha {
 				HA_WARN("JumpCondition.deserialize", "No \"controller\" OR \"goal\" parameter given  in JumpCondition - using default values");
 		}
 
+		std::string ros_goal;
+		if(tree->getAttribute<std::string>(std::string("ros_topic"), ros_goal)) {
+			std::string type;
+			if(!tree->getAttribute<std::string>(std::string("ros_topic_type"), type)) {
+				HA_THROW_ERROR("JumpCondition.deserialize", "If you use ros_topic as goal ros_topic_type must be set!");
+			}
+			this->setROSTopicGoal(ros_goal, type);
+		}
+
+		if(tree->getAttribute<std::string>(std::string("ros_tf_child"), ros_goal)) {
+			std::string parent;
+			if(!tree->getAttribute<std::string>(std::string("ros_tf_parent"), parent)) {
+				HA_THROW_ERROR("JumpCondition.deserialize", "If you use ros_tf as goal ros_tf_parent must be set!");
+			}
+			this->setROSTfGoal(ros_goal, parent);
+		}
 
 		//////////////////////////////
 		////PARAMETERS////////////////
@@ -423,7 +474,9 @@ namespace ha {
         } else if (this->_goalSource == CONTROLLER)
             ss << "x_[ctrl:" << _controller->getName() << "]";
         else if (this->_goalSource == ROSTOPIC)
-            ss << "x_[ROS" << "]"; // TODO topic name
+			ss << "x_[ROS:" << _ros_topic_goal_name << ":"<< _ros_topic_goal_type <<"]"; 
+        else if (this->_goalSource == ROSTOPIC_TF)
+			ss << "x_[ROS_TF:" << _ros_tf_goal_child << ":"<< _ros_tf_goal_parent <<"]"; 
 
         if (norm) {
             ss << "|";

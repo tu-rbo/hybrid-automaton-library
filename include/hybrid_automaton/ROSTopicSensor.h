@@ -30,6 +30,8 @@ namespace ha {
 			return (ROSTopicSensorPtr(_doClone()));
 		};
 
+		virtual void initialize(const double& t); 
+
 		virtual ::Eigen::MatrixXd getCurrentValue() const;
 		
 		virtual DescriptionTreeNode::Ptr serialize(const DescriptionTree::ConstPtr& factory) const;

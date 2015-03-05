@@ -14,6 +14,12 @@ namespace ha
 	{
 	}
 
+	void ROSTopicSensor::initialize(const double& t) {
+		Sensor::initialize(t);
+		// connect to topic
+		_system->subscribeToROSMessage(_ros_topic_name);
+	}
+
 	::Eigen::MatrixXd ROSTopicSensor::getCurrentValue() const
 	{
 		::Eigen::MatrixXd pose;
