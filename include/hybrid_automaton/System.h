@@ -30,7 +30,12 @@ namespace ha {
 		virtual ::Eigen::MatrixXd getForceTorqueMeasurement() const = 0;
 		virtual ::Eigen::MatrixXd getFramePose(const std::string& frame_id) const = 0;
 
-	};
+    virtual ::Eigen::MatrixXd getROSTfPose(const std::string& child) const {
+      return getROSTfPose(child, "");
+    }
+    virtual ::Eigen::MatrixXd getROSTfPose(const std::string& child, const std::string& parent) const = 0;
+
+  };
 
 }
 

@@ -72,6 +72,8 @@ namespace ha {
 
 		virtual void setConstantGoal(double goal);
 
+    virtual void setRosTopicGoal(const std::string& topic);
+
 		virtual void setGoalRelative();
 
 		virtual void setGoalAbsolute();
@@ -140,8 +142,10 @@ namespace ha {
 		GoalSource	_goalSource;
 		::Eigen::MatrixXd _goal;
 		Controller::ConstPtr _controller;
+    std::string _ros_topic_goal;
 
 		Sensor::Ptr _sensor;
+    System::ConstPtr _system;
 
 		JumpCriterion	_jump_criterion;
 		::Eigen::MatrixXd _norm_weights;

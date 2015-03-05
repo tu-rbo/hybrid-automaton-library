@@ -171,6 +171,12 @@ namespace ha {
 		_goal<<goal;
 	}
 
+  void JumpCondition::setRosTopicGoal(const std::string& topic) {
+    _goalSource = ROSTOPIC;
+    _ros_topic_goal = topic;
+  }
+
+
 	::Eigen::MatrixXd JumpCondition::getGoal() const	
 	{
 		switch(_goalSource) {
@@ -180,9 +186,8 @@ namespace ha {
 			case CONTROLLER: 
 				return _controller->getGoal();
 
-			case ROSTOPIC: 				
-				HA_THROW_ERROR("JumpCondition::getGoal", "Not Implemented: ROSTOPIC");
-				break;
+      case ROSTOPIC:
+        return _system->getROSTfPose(_ros_topic_goal);
 
 			default:
 				HA_THROW_ERROR("JumpCondition::getGoal", "Not Implemented: unknown goal source");
@@ -296,6 +301,8 @@ namespace ha {
 
 		DescriptionTreeNode::ConstPtr first = * (sensorList.begin());
 		this->_sensor = HybridAutomaton::createSensor(first, system, ha);
+
+    this->_system = system;
 
 		//////////////////////////////
 		////GOALS/////////////////////
