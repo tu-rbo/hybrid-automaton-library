@@ -15,7 +15,6 @@ namespace ha {
 		_priority(0.0),
 		_name("default")
 	{
-
 	}
 
 	Controller::~Controller()
@@ -94,10 +93,10 @@ namespace ha {
 			HA_WARN("Controller.deserialize", "No \"completion_times\" parameter given in Controller "<<_name<<" - using default value");
 
 		//TODO: Read v_max and a_max from dml file
-		if(!tree->getAttribute<Eigen::MatrixXd>(std::string("completion_times"), this->_v_max))
+		if(!tree->getAttribute<Eigen::MatrixXd>(std::string("v_max"), this->_v_max))
 			HA_WARN("Controller.deserialize", "No \"v_max\" parameter given in Controller "<<_name<<" - using default value");
 
-		if(!tree->getAttribute<Eigen::MatrixXd>(std::string("completion_times"), this->_a_max))
+		if(!tree->getAttribute<Eigen::MatrixXd>(std::string("a_max"), this->_a_max))
 			HA_WARN("Controller.deserialize", "No \"a_max\" parameter given in Controller "<<_name<<" - using default value");
 		
 		if(!tree->getAttribute<double>(std::string("priority"), this->_priority, 0.0))
