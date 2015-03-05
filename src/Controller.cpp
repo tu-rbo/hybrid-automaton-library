@@ -245,6 +245,9 @@ namespace ha {
 			HA_WARN("rlabController::computeInterpolationTime", "maximal acceleration limits currently not supported!");
 		}
 
+		if(x0.cols() > 1 || xf.cols() > 1)
+			HA_THROW_ERROR("rlabController::computeInterpolationTime", "x0 and xf are matrices!!");
+
 		for(int i = 0; i < x0.rows(); i++)
 		{
 			for(int j = 0; j < x0.cols(); j++)
