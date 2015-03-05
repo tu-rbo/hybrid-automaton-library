@@ -251,6 +251,8 @@ namespace ha {
 		{
 			for(int j = 0; j < x0.cols(); j++)
 			{
+				if( _v_max(i,j) <= 0.0)
+					HA_THROW_ERROR("rlabController::computeInterpolationTime", "You gave zero or negative maximum velocity!");
 				tf = std::max(tf,fabs(xf(i,j) - x0(i,j)) / _v_max(i,j));
 			}
 		}
