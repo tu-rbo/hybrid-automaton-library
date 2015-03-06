@@ -147,8 +147,6 @@ namespace ha {
 		std::string _ros_tf_goal_child;
 		std::string _ros_tf_goal_parent;
 
-		int _ros_update_rate;
-
 		Sensor::Ptr _sensor;
 		System::ConstPtr _system;
 

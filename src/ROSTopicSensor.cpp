@@ -30,20 +30,26 @@ namespace ha
 	}
 
 	bool ROSTopicSensor::isActive() const {
-		return _system->isROSTopicAvailable(this->_ros_topic_name);
+		bool available = _system->isROSTopicAvailable(this->_ros_topic_name); 
+		if (available && _last_pose.rows() == 0) {
+			getCurrentValue();
+		}
+		return (available && _last_pose.rows() != 0);
 	}
 
 	::Eigen::MatrixXd ROSTopicSensor::getCurrentValue() const
 	{
-		static int counter = 1;// wait update_rate-1 ticks before considering querying blackboard at all
-
-		::Eigen::MatrixXd pose;
-		if ( (_update_rate < 0 && counter == 0) || (counter++ % _update_rate == 0) ) {
+		if (this->_system->isROSTopicUpdated(this->_ros_topic_name)) {
+			::Eigen::MatrixXd pose;
 			if (!this->_system->getROSPose(this->_ros_topic_name, this->_ros_topic_type, pose)) {
 				HA_WARN("ROSTopicSensor.getCurrentValue", "Unable to get Pose from topic " << _ros_topic_name << "! Is the topic still being published?");
 			}
+			if (_last_pose.rows() == 0)
+				_initial_sensor_value = pose;
+
+			_last_pose = pose;
 		}
-		return pose;
+		return _last_pose;
 	}
 
 	DescriptionTreeNode::Ptr ROSTopicSensor::serialize(const DescriptionTree::ConstPtr& factory) const
@@ -54,7 +60,6 @@ namespace ha
 
 		tree->setAttribute<std::string>(std::string("ros_topic_name"), this->_ros_topic_name);
 		tree->setAttribute<std::string>(std::string("ros_topic_type"), this->_ros_topic_type);
-		tree->setAttribute<int>(std::string("update_rate"), this->_update_rate);
 
 		return tree;
 	}
@@ -80,15 +85,6 @@ namespace ha
 			HA_THROW_ERROR("ROSTopicSensor.deserialize", "topic type not defined");
 		}
 
-		if(!tree->getAttribute<int>("update_rate", _update_rate))
-		{
-			_update_rate = 10;
-			HA_WARN("ROSTopicSensor.deserialize", "update_rate not defined. setting to default update_rate=" << _update_rate);
-		}
-		if (_update_rate <= 0) {
-			HA_THROW_ERROR("ROSTopicSensor.deserialize", "update_rate must be > 0!");
-		}
-		
 		_system = system;
 	}
 }
