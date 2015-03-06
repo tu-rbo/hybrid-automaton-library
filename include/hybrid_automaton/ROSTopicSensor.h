@@ -43,6 +43,8 @@ namespace ha {
 			_ros_topic_type = type;
 		}
 
+		virtual bool isActive() const;
+
 		// required to enable deserialization of this sensor
 		HA_SENSOR_INSTANCE(node, system, ha) {
 			Sensor::Ptr sensor(new ROSTopicSensor());
@@ -54,6 +56,10 @@ namespace ha {
 
 		std::string _ros_topic_name;
 		std::string _ros_topic_type;
+
+		int _update_rate;
+
+		bool _is_subscribed;
 
 		virtual ROSTopicSensor* _doClone() const
 		{

@@ -39,6 +39,10 @@ namespace ha {
 			HA_THROW_ERROR("System.subscribeToTransform", "Not implemented");
 		}
 
+		virtual bool isROSTopicAvailable(const std::string& topic_name) const  {
+			HA_THROW_ERROR("System.isROSTopicAvailable", "Not implemented");
+		}
+
 		virtual bool getROSPose(const std::string& topic_name, const std::string& topic_type, ::Eigen::MatrixXd& pose) const  {
 			HA_THROW_ERROR("System.getROSPose", "Not implemented");
 		}

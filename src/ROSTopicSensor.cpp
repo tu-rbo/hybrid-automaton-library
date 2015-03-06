@@ -5,7 +5,7 @@ namespace ha
 
 	HA_SENSOR_REGISTER("ROSTopicSensor", ROSTopicSensor);
 
-	ROSTopicSensor::ROSTopicSensor() :Sensor() {}
+	ROSTopicSensor::ROSTopicSensor() :Sensor(), _is_subscribed(false) {}
 
 	ROSTopicSensor::~ROSTopicSensor() {}
 
@@ -15,15 +15,34 @@ namespace ha
 	}
 
 	void ROSTopicSensor::initialize(const double& t) {
-		Sensor::initialize(t);
 		// connect to topic
-		_system->subscribeToROSMessage(_ros_topic_name);
+		if (!_is_subscribed) {
+			if (!_system->subscribeToROSMessage(_ros_topic_name)) {
+				HA_THROW_ERROR("ROSTopicSensor.initialize", "Unable to connect to topic " << _ros_topic_name << "! Aborting initializion");
+			}
+			HA_INFO("ROSTopicSensor.initialize", "Successfully subscribed to topic " << _ros_topic_name << "");
+			_is_subscribed = true;
+		}
+
+		// needs to be executed after connecting to topic because
+		// it queries getCurrentValue
+		Sensor::initialize(t);
+	}
+
+	bool ROSTopicSensor::isActive() const {
+		return _system->isROSTopicAvailable(this->_ros_topic_name);
 	}
 
 	::Eigen::MatrixXd ROSTopicSensor::getCurrentValue() const
 	{
+		static int counter = 1;// wait update_rate-1 ticks before considering querying blackboard at all
+
 		::Eigen::MatrixXd pose;
-		this->_system->getROSPose(this->_ros_topic_name, this->_ros_topic_type, pose);
+		if ( (_update_rate < 0 && counter == 0) || (counter++ % _update_rate == 0) ) {
+			if (!this->_system->getROSPose(this->_ros_topic_name, this->_ros_topic_type, pose)) {
+				HA_WARN("ROSTopicSensor.getCurrentValue", "Unable to get Pose from topic " << _ros_topic_name << "! Is the topic still being published?");
+			}
+		}
 		return pose;
 	}
 
@@ -35,6 +54,7 @@ namespace ha
 
 		tree->setAttribute<std::string>(std::string("ros_topic_name"), this->_ros_topic_name);
 		tree->setAttribute<std::string>(std::string("ros_topic_type"), this->_ros_topic_type);
+		tree->setAttribute<int>(std::string("update_rate"), this->_update_rate);
 
 		return tree;
 	}
@@ -58,6 +78,15 @@ namespace ha
 		if(!tree->getAttribute<std::string>("ros_topic_type", _ros_topic_type))
 		{
 			HA_THROW_ERROR("ROSTopicSensor.deserialize", "topic type not defined");
+		}
+
+		if(!tree->getAttribute<int>("update_rate", _update_rate))
+		{
+			_update_rate = 10;
+			HA_WARN("ROSTopicSensor.deserialize", "update_rate not defined. setting to default update_rate=" << _update_rate);
+		}
+		if (_update_rate <= 0) {
+			HA_THROW_ERROR("ROSTopicSensor.deserialize", "update_rate must be > 0!");
 		}
 		
 		_system = system;

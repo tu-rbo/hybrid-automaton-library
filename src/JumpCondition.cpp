@@ -7,7 +7,8 @@ namespace ha {
 		_goalSource(CONSTANT),
 		_jump_criterion(NORM_L1),
 		_epsilon(0.0),
-		_is_goal_relative(false)
+		_is_goal_relative(false),
+		_ros_update_rate(10)
 	{
 
 	}
@@ -28,6 +29,7 @@ namespace ha {
 		this->_epsilon = jc._epsilon;
 		this->_ros_topic_goal_name = jc._ros_topic_goal_name;
 		this->_ros_topic_goal_type = jc._ros_topic_goal_type;
+		this->_ros_update_rate = jc._ros_update_rate;
 	}
 
 	void JumpCondition::initialize(const double& t) 
@@ -53,6 +55,10 @@ namespace ha {
 
 	bool JumpCondition::isActive() const 
 	{
+		if (!this->_sensor->isActive()) {
+			return false;
+		}
+
 		::Eigen::MatrixXd current = this->_sensor->getCurrentValue();
 		::Eigen::MatrixXd initial = this->_sensor->getInitialValue();
 		::Eigen::MatrixXd desired = this->getGoal();
@@ -180,12 +186,16 @@ namespace ha {
 	}
 
 	void JumpCondition::setROSTopicGoal(const std::string& topic, const std::string& topic_type) {
+		// TODO
+		HA_THROW_ERROR("JumpCondition.setROSTopicGoal", "Not implemented / tested");
 		_goalSource = ROSTOPIC;
 		_ros_topic_goal_name = topic;
 		_ros_topic_goal_type = topic_type;
 	}
 
 	void JumpCondition::setROSTfGoal(const std::string& child, const std::string& parent) {
+		// TODO
+		HA_THROW_ERROR("JumpCondition.setROSTopicGoal", "Not implemented / tested");
 		_goalSource = ROSTOPIC_TF;
 		_ros_tf_goal_child = child;
 		_ros_tf_goal_parent = parent;
@@ -203,6 +213,7 @@ namespace ha {
 
 			case ROSTOPIC: {
 				::Eigen::MatrixXd pose;
+				// TODO include the _ros_update_rate for fetching the ros message
 				if(!_system->getROSPose(_ros_topic_goal_name, _ros_topic_goal_type, pose)) {
 					HA_ERROR("JumpCondition.getGoal", "Unable to fetch pose from ROS");
 				} else {
@@ -211,6 +222,7 @@ namespace ha {
 			}
 			case ROSTOPIC_TF: {
 				::Eigen::MatrixXd pose;
+				// TODO include the _ros_update_rate for fetching the ros message
 				if(!_system->getROSTfPose(_ros_tf_goal_child, _ros_tf_goal_parent, pose)) {
 					HA_ERROR("JumpCondition.getGoal", "Unable to fetch pose from ROS TF");
 				} else {
@@ -302,6 +314,8 @@ namespace ha {
 
 		tree->setAttribute<double>(std::string("epsilon"), this->_epsilon);
 
+		tree->setAttribute<int>(std::string("ros_update_rate"), this->_ros_update_rate);
+
 		if (!this->_sensor) {
 			HA_THROW_ERROR("JumpCondition::serialize", "All JumpConditions need to have a sensor!");
 		}
@@ -375,6 +389,9 @@ namespace ha {
 				HA_WARN("JumpCondition.deserialize", "No \"controller\" OR \"goal\" parameter given  in JumpCondition - using default values");
 		}
 
+		//////////////////////////////////
+		////ROS GOAL STUFF////////////////
+		//////////////////////////////////
 		std::string ros_goal;
 		if(tree->getAttribute<std::string>(std::string("ros_topic"), ros_goal)) {
 			std::string type;
@@ -390,6 +407,15 @@ namespace ha {
 				HA_THROW_ERROR("JumpCondition.deserialize", "If you use ros_tf as goal ros_tf_parent must be set!");
 			}
 			this->setROSTfGoal(ros_goal, parent);
+		}
+
+		if(tree->getAttribute<int>("ros_update_rate", _ros_update_rate))
+		{
+			if (_ros_update_rate <= 0) {
+				HA_THROW_ERROR("JumpCondition.deserialize", "update_rate must be > 0!");
+			}
+		} else {
+			_ros_update_rate = 10;
 		}
 
 		//////////////////////////////

@@ -51,6 +51,17 @@ namespace ha {
 		virtual void terminate();
 		virtual void step(const double& t);
 
+		/**
+		 * @brief If a sensor is inactive (e.g. it is still booting)
+		 *  its JumpCondition will interpret its state as false
+		 *
+		 * By default, a sensor is always active. Override this method
+		 * to change behavior.
+		 */
+		virtual bool isActive() const {
+			return true;
+		}
+
 	protected:
 		System::ConstPtr _system;
 
