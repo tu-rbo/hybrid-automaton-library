@@ -12,6 +12,7 @@ namespace ha {
 		_completion_times(),
 		_v_max(),
 		_a_max(),
+		_do_reinterpolation(false),
 		_priority(0.0),
 		_name("default")
 	{
@@ -29,6 +30,9 @@ namespace ha {
 		this->_kp = controller._kp;
 		this->_kv = controller._kv;
 		this->_completion_times = controller._completion_times;
+		this->_v_max = controller._v_max;
+		this->_a_max = controller._a_max;
+		this->_do_reinterpolation = controller._do_reinterpolation;
 		this->_priority = controller._priority;
 		this->_name = controller._name;
 	}
@@ -47,6 +51,7 @@ namespace ha {
 		tree->setAttribute<Eigen::MatrixXd>(std::string("completion_times"), this->_completion_times);
 		tree->setAttribute<Eigen::MatrixXd>(std::string("v_max"), this->_v_max);
 		tree->setAttribute<Eigen::MatrixXd>(std::string("a_max"), this->_a_max);
+		tree->setAttribute<bool>(std::string("reinterpolation"), this->_do_reinterpolation);
 		tree->setAttribute<double>(std::string("priority"), this->_priority);
 
 		std::map<std::string, std::string>::const_iterator it;
@@ -98,6 +103,9 @@ namespace ha {
 
 		if(!tree->getAttribute<Eigen::MatrixXd>(std::string("a_max"), this->_a_max))
 			HA_WARN("Controller.deserialize", "No \"a_max\" parameter given in Controller "<<_name<<" - using default value");
+
+		if(!tree->getAttribute<bool>(std::string("reinterpolation"), this->_do_reinterpolation))
+			HA_WARN("Controller.deserialize", "No \"reinterpolation\" parameter given in Controller "<<_name<<" - using default value");
 		
 		if(!tree->getAttribute<double>(std::string("priority"), this->_priority, 0.0))
 			HA_WARN("Controller.deserialize", "No \"priority\" parameter given in Controller "<<_name<<" - using default value");
@@ -191,6 +199,16 @@ namespace ha {
 	Eigen::MatrixXd	Controller::getMaximumAcceleration() const
 	{
 		return _a_max;
+	}
+
+    void Controller::setDoReinterpolation(bool do_reinterpolation)
+	{
+		_do_reinterpolation = do_reinterpolation;
+	}
+
+	bool Controller::getDoReinterpolation() const
+	{
+		return _do_reinterpolation;
 	}
 
 	double Controller::getPriority() const

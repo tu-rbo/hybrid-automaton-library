@@ -121,6 +121,10 @@ namespace ha {
 
 		virtual Eigen::MatrixXd	getMaximumVelocity() const;
 		virtual Eigen::MatrixXd	getMaximumAcceleration() const;
+
+		virtual void setDoReinterpolation(bool do_reinterpolation);
+		virtual bool getDoReinterpolation() const;
+		
 		/**
 		 * @brief Priority of this controller in a ControlSet
 		 *
@@ -211,12 +215,17 @@ namespace ha {
 		bool				_goal_is_relative;
 		Eigen::MatrixXd		_kp;
 		Eigen::MatrixXd		_kv;
-		Eigen::MatrixXd		_completion_times;
-		Eigen::MatrixXd		_v_max;
-		Eigen::MatrixXd		_a_max;
+
 		double				_priority;
 		std::string			_name;
 		std::string			_type;
+
+		//The following four fieds are only used for interpolated controllers
+		Eigen::MatrixXd		_completion_times;
+		Eigen::MatrixXd		_v_max;
+		Eigen::MatrixXd		_a_max;
+		bool				_do_reinterpolation;
+
 
 		std::map<std::string, std::string> _additional_arguments;
 	};
