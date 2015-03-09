@@ -51,6 +51,17 @@ namespace ha {
 		virtual void terminate();
 		virtual void step(const double& t);
 
+		/**
+		 * @brief If a sensor is inactive (e.g. it is still booting)
+		 *  its JumpCondition will interpret its state as false
+		 *
+		 * By default, a sensor is always active. Override this method
+		 * to change behavior.
+		 */
+		virtual bool isActive() const {
+			return true;
+		}
+
 	protected:
 		System::ConstPtr _system;
 
@@ -58,7 +69,16 @@ namespace ha {
 
 		std::string _type;
 
-		::Eigen::MatrixXd _initial_sensor_value;
+		/**
+		 * @brief Initial sensor value
+		 *
+		 * Required to compute relative sensor value.
+		 *
+		 * It is mutable as some sensors might not be able
+		 * to fill it in the initialize method but only when
+		 * becoming active (e.g. ROSTopicSensor)
+		 */
+		mutable ::Eigen::MatrixXd _initial_sensor_value;
 
 	};
 
