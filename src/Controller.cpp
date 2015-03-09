@@ -79,36 +79,36 @@ namespace ha {
         }
 
 		if(!tree->getAttribute<std::string>("name", _name, ""))
-			HA_WARN("Controller.deserialize", "No \"name\" parameter given in Controller - using default value");
+			HA_WARN("Controller.deserialize", "No \"name\" parameter given in Controller - using default value (" << _name << ")");
 		// TODO register object with HybridAutomaton / check that it is unique!
 
 		if(!tree->getAttribute<Eigen::MatrixXd>(std::string("goal"), this->_goal))
-			HA_WARN("Controller.deserialize", "No \"goal\" parameter given in Controller "<<_name<<" - using default value");
+			HA_WARN("Controller.deserialize", "No \"goal\" parameter given in Controller "<<_name<<" - using default value (" << _goal << ")");
 		
 		if(!tree->getAttribute<bool>(std::string("goal_is_relative"), this->_goal_is_relative, false))
-			HA_WARN("Controller.deserialize", "No \"goal_is_relative\" parameter given in Controller "<<_name<<" - using default value");
+			HA_WARN("Controller.deserialize", "No \"goal_is_relative\" parameter given in Controller "<<_name<<" - using default value (" << _goal_is_relative << ")");
 		
 		if(!tree->getAttribute<Eigen::MatrixXd>(std::string("kp"), this->_kp))
-			HA_WARN("Controller.deserialize", "No \"kp\" parameter given in Controller "<<_name<<" - using default value");
+			HA_WARN("Controller.deserialize", "No \"kp\" parameter given in Controller "<<_name<<" - using default value (" << _kp << ")");
 		
 		if(!tree->getAttribute<Eigen::MatrixXd>(std::string("kv"), this->_kv))
-			HA_WARN("Controller.deserialize", "No \"kv\" parameter given in Controller "<<_name<<" - using default value");
+			HA_WARN("Controller.deserialize", "No \"kv\" parameter given in Controller "<<_name<<" - using default value (" << _kv << ")");
 
 		if(!tree->getAttribute<Eigen::MatrixXd>(std::string("completion_times"), this->_completion_times))
-			HA_WARN("Controller.deserialize", "No \"completion_times\" parameter given in Controller "<<_name<<" - using default value");
+			HA_WARN("Controller.deserialize", "No \"completion_times\" parameter given in Controller "<<_name<<" - using default value (" << _completion_times << ")");
 
 		//TODO: Read v_max and a_max from dml file
 		if(!tree->getAttribute<Eigen::MatrixXd>(std::string("v_max"), this->_v_max))
-			HA_WARN("Controller.deserialize", "No \"v_max\" parameter given in Controller "<<_name<<" - using default value");
+			HA_WARN("Controller.deserialize", "No \"v_max\" parameter given in Controller "<<_name<<" - using default value (" << _v_max << ")");
 
 		if(!tree->getAttribute<Eigen::MatrixXd>(std::string("a_max"), this->_a_max))
-			HA_WARN("Controller.deserialize", "No \"a_max\" parameter given in Controller "<<_name<<" - using default value");
+			HA_WARN("Controller.deserialize", "No \"a_max\" parameter given in Controller "<<_name<<" - using default value (" << _a_max << ")");
 
 		if(!tree->getAttribute<bool>(std::string("reinterpolation"), this->_do_reinterpolation))
-			HA_WARN("Controller.deserialize", "No \"reinterpolation\" parameter given in Controller "<<_name<<" - using default value");
+			HA_WARN("Controller.deserialize", "No \"reinterpolation\" parameter given in Controller "<<_name<<" - using default value (" << _do_reinterpolation << ")");
 		
 		if(!tree->getAttribute<double>(std::string("priority"), this->_priority, 0.0))
-			HA_WARN("Controller.deserialize", "No \"priority\" parameter given in Controller "<<_name<<" - using default value");
+			HA_WARN("Controller.deserialize", "No \"priority\" parameter given in Controller "<<_name<<" - using default value (" << _priority << ")");
 
 		// write all arguments into "_additional_arguments" field
 		tree->getAllAttributes(_additional_arguments);
@@ -249,12 +249,12 @@ namespace ha {
 
 		if(x0.rows() != xf.rows() || x0.cols() != xf.cols())
 		{
-			HA_THROW_ERROR("rlabController::computeInterpolationTime", "Dimension mismatch in x0 and xf!!");
+			HA_THROW_ERROR("rlabController::computeInterpolationTime", "Dimension mismatch between initial (dim " << x0.rows() << ") and final (dim " << xf.rows() <<") position!!");
 		}
 
 		if(x0.rows() != _v_max.rows() || x0.cols() != _v_max.cols())
 		{
-			HA_THROW_ERROR("rlabController::computeInterpolationTime", "Dimension mismatch in x0 and vmax!!");
+			HA_THROW_ERROR("rlabController::computeInterpolationTime", "Dimension mismatch between initial (dim " << x0.rows() << ") and max velocity (dim " << _v_max.rows() <<")!!");
 		}
 
 		if(_a_max.rows() != 0 || xdot0.rows() != 0 || xdotf.rows() != 0)
@@ -263,7 +263,7 @@ namespace ha {
 		}
 
 		if(x0.cols() > 1 || xf.cols() > 1)
-			HA_THROW_ERROR("rlabController::computeInterpolationTime", "x0 and xf are matrices!!");
+			HA_THROW_ERROR("rlabController::computeInterpolationTime", "Initial and/or final position are matrices!!");
 
 		for(int i = 0; i < x0.rows(); i++)
 		{
