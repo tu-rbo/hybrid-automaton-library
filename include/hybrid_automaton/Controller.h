@@ -165,6 +165,9 @@ namespace ha {
 		 * @brief Computes a default interpolation time for a trajectory from x0 to xf
 		 * under velocity and acceleration limits. Currrently assumes linear interpolation!
 		 * 
+		 * The implementation in Controller computes element-wise linear interpolation.
+		 * If you want to have more complex behaviour (i.e. rotational interpolation) overload this function.
+		 *
 	     * @return minimal interpolation time.
 		 */
 		virtual double computeInterpolationTime
