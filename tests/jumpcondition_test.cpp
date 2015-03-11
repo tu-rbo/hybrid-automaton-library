@@ -6,6 +6,9 @@
 #include "hybrid_automaton/JumpCondition.h"
 #include "hybrid_automaton/DescriptionTreeNode.h"
 #include "hybrid_automaton/JointConfigurationSensor.h"
+#include "hybrid_automaton/FrameOrientationSensor.h"
+#include "hybrid_automaton/FrameDisplacementSensor.h"
+#include "hybrid_automaton/FramePoseSensor.h"
 #include "tests/MockDescriptionTree.h"
 #include "tests/MockDescriptionTreeNode.h"
 
@@ -203,6 +206,28 @@ TEST(JumpCondition, Activation) {
 	jc1->setJumpCriterion(JumpCondition::THRESH_LOWER_BOUND, weights);
 	
 	goalMat<<0.9,1.1,1.1;
+	jc1->setConstantGoal(goalMat);
+	EXPECT_TRUE(jc1->isActive());
+
+	goalMat<<1.1,0.9,1.1;
+	jc1->setConstantGoal(goalMat);
+	EXPECT_FALSE(jc1->isActive());
+
+	//Test the norm of the rotation
+
+	OrientationSensor* _js_s = new JointConfigurationSensor();
+	JointConfigurationSensor::Ptr js_s(_js_s);	
+	js_s->setSystem(ms);
+
+	JumpCondition* _jc1 = new JumpCondition;
+	JumpCondition::Ptr jc1(_jc1);	
+	jc1->setSensor(js_s);
+
+
+
+	jc1->setJumpCriterion(JumpCondition::NORM_ROTATION, weights);
+	
+	goalMat<<1.0,0.0,0.0,0.0,1.0,0.0,0.0,0.0,1.0;
 	jc1->setConstantGoal(goalMat);
 	EXPECT_TRUE(jc1->isActive());
 

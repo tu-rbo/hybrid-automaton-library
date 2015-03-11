@@ -133,7 +133,7 @@ namespace ha {
 					if(x.cols() != 3 || x.rows() != 3|| y.cols() != 3|| x.rows() != 3)
 					{
 						HA_THROW_ERROR("JumpCondition._computeJumpCriterion", "Either the goal or the current value is not a rotation matrix." <<
-							<<"x dim = " << x.cols()  << "x" <<  x.rows()<<". y dim = " << y.cols()  << "x" <<  y.rows());
+							"x dim = " << x.cols()  << "x" <<  x.rows()<<". y dim = " << y.cols()  << "x" <<  y.rows());
 					}
 
 					//Compute relative Rotation from x0 to xf
@@ -153,7 +153,7 @@ namespace ha {
 					if(x.cols() != 4 || x.rows() != 4|| y.cols() != 4|| x.rows() != 4)
 					{
 						HA_THROW_ERROR("JumpCondition._computeJumpCriterion", "Either the goal or the current value is not a homogeneous transformation matrix." <<
-							<<"x dim = " << x.cols()  << "x" <<  x.rows()<<". y dim = " << y.cols()  << "x" <<  y.rows());
+							"x dim = " << x.cols()  << "x" <<  x.rows()<<". y dim = " << y.cols()  << "x" <<  y.rows());
 					}
 
 					//Compute relative Rotation from x0 to xf
@@ -174,8 +174,8 @@ namespace ha {
 
 					if(weights.cols() !=1 || weights.rows() !=2)
 					{
-						HA_THROW_ERROR("JumpCondition._computeJumpCriterion", "We need 2 weights for the estimation of the norm between 2 HTransforms, one for rotation and one for translation. " 
-							<< "weights dim = " <<weights.cols()<<" " << weights.rows().");
+						HA_THROW_ERROR("JumpCondition._computeJumpCriterion", "We need 2 weights for the estimation of the norm between 2 HTransforms, " <<
+							"one for rotation and one for translation. weights dim = " <<weights.cols()<<" " << weights.rows());
 					}
 					ret = weights(0,0) * angle_diff + weights(1,0) * disp_diff;
 				}
