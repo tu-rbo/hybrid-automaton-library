@@ -129,10 +129,56 @@ namespace ha {
 				}
 				break;
 			case NORM_ROTATION:
-				HA_THROW_ERROR("JumpCondition._computeJumpCriterion", "Not Implemented: ROTATION");
+				{
+					if(x.cols() != 3 || x.rows() != 3|| y.cols() != 3|| x.rows() != 3)
+					{
+						HA_THROW_ERROR("JumpCondition._computeJumpCriterion", "Either the goal or the current value is not a rotation matrix." <<
+							<<"x dim = " << x.cols()  << "x" <<  x.rows()<<". y dim = " << y.cols()  << "x" <<  y.rows());
+					}
+
+					//Compute relative Rotation from x0 to xf
+					Eigen::Matrix3d xRot = x.inverse()*y;
+
+					//Conver to angle axis to get angle
+					Eigen::AngleAxisd xRotAA;
+					xRotAA = xRot;
+
+					ret = xRotAA.angle();
+
+					HA_INFO("JumpCondition._computeJumpCriterion", "Angle between goal and current: " << ret);
+				}
 				break;
 			case NORM_TRANSFORM:
-				HA_THROW_ERROR("JumpCondition._computeJumpCriterion", "Not Implemented: TRANSFORM");
+				{
+					if(x.cols() != 4 || x.rows() != 4|| y.cols() != 4|| x.rows() != 4)
+					{
+						HA_THROW_ERROR("JumpCondition._computeJumpCriterion", "Either the goal or the current value is not a homogeneous transformation matrix." <<
+							<<"x dim = " << x.cols()  << "x" <<  x.rows()<<". y dim = " << y.cols()  << "x" <<  y.rows());
+					}
+
+					//Compute relative Rotation from x0 to xf
+					Eigen::Matrix3d xRot = x.block(0,0,3,3).inverse()*y.block(0,0,3,3);
+
+					//Conver to angle axis to get angle
+					Eigen::AngleAxisd xRotAA;
+					xRotAA = xRot;
+
+					double angle_diff = xRotAA.angle();
+
+					HA_INFO("JumpCondition._computeJumpCriterion", "Angle between goal and current: " << angle_diff);
+					
+					Eigen::Vector3d xDisp = x.block(0,3,3,1)-y.block(0,3,3,1);
+					double disp_diff = xDisp.norm();
+
+					HA_INFO("JumpCondition._computeJumpCriterion", "Distance between goal and current: " << disp_diff);
+
+					if(weights.cols() !=1 || weights.rows() !=2)
+					{
+						HA_THROW_ERROR("JumpCondition._computeJumpCriterion", "We need 2 weights for the estimation of the norm between 2 HTransforms, one for rotation and one for translation. " 
+							<< "weights dim = " <<weights.cols()<<" " << weights.rows().");
+					}
+					ret = weights(0,0) * angle_diff + weights(1,0) * disp_diff;
+				}
 				break;
 
 			case THRESH_UPPER_BOUND:
