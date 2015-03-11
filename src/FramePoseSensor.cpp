@@ -19,6 +19,12 @@ namespace ha
 	{
 	}
 
+
+	void FramePoseSensor::initialize(const double& t) 
+	{
+		this->_initial_sensor_value = this->_system->getFramePose(this->_frame_id);
+	}
+
 	::Eigen::MatrixXd FramePoseSensor::getCurrentValue() const
 	{
 		return this->_system->getFramePose(this->_frame_id);
@@ -29,6 +35,11 @@ namespace ha
 		::Eigen::MatrixXd pose = this->_system->getFramePose(this->_frame_id);
 		pose = _initial_sensor_value.inverse()*pose;
 		return pose;
+	}
+
+	::Eigen::MatrixXd FramePoseSensor::getInitialValue() const
+	{
+		return this->_initial_sensor_value;
 	}
 
 	DescriptionTreeNode::Ptr FramePoseSensor::serialize(const DescriptionTree::ConstPtr& factory) const
