@@ -183,11 +183,11 @@ namespace ha {
 					Eigen::Vector3d xDisp = x.block(0,3,3,1)-y.block(0,3,3,1);
 					double disp_diff = xDisp.norm();
 
-					if(rate_print++%500 == 0)
-					{
-					  HA_INFO("JumpCondition._computeJumpCriterion", "Angle between goal and current: " << angle_diff);
-					  HA_INFO("JumpCondition._computeJumpCriterion", "Distance between goal and current: " << disp_diff);
-					}
+					//if(rate_print++%500 == 0)
+					//{
+					//  HA_INFO("JumpCondition._computeJumpCriterion", "Angle between goal and current: " << angle_diff);
+					//  HA_INFO("JumpCondition._computeJumpCriterion", "Distance between goal and current: " << disp_diff);
+					//}
 
 					if(_norm_weights.cols() !=1 || _norm_weights.rows() !=2)
 					{
