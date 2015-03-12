@@ -61,6 +61,17 @@ namespace ha {
 		::Eigen::MatrixXd initial = this->_sensor->getInitialValue();
 		::Eigen::MatrixXd desired = this->getGoal();
 
+		if(desired.cols()== 0 && desired.rows() ==0)
+		{
+			static int not_yet_ctr = 0;
+
+			if(not_yet_ctr++%500 == 0)
+			{
+				HA_INFO("JumpCondition.isActive","Goal is not set yet. Returning false. Are you running a BB controller?");
+			}
+			return false;
+		}
+
 		if(desired.rows() != current.rows() || desired.cols() != current.cols())
 		{
 			HA_THROW_ERROR("JumpCondition.isActive", "Dimension mismatch in sensor and goal - sensor: "
@@ -145,7 +156,7 @@ namespace ha {
 
 					ret = xRotAA.angle();
 
-					HA_INFO("JumpCondition._computeJumpCriterion", "Angle between goal and current: " << ret);
+					//HA_INFO("JumpCondition._computeJumpCriterion", "Angle between goal and current: " << ret);
 				}
 				break;
 			case NORM_TRANSFORM:
@@ -163,19 +174,27 @@ namespace ha {
 					Eigen::AngleAxisd xRotAA;
 					xRotAA = xRot;
 
+					static int rate_print = 0;
+
 					double angle_diff = xRotAA.angle();
 
-					HA_INFO("JumpCondition._computeJumpCriterion", "Angle between goal and current: " << angle_diff);
+					
 					
 					Eigen::Vector3d xDisp = x.block(0,3,3,1)-y.block(0,3,3,1);
 					double disp_diff = xDisp.norm();
 
-					HA_INFO("JumpCondition._computeJumpCriterion", "Distance between goal and current: " << disp_diff);
-
-					if(weights.cols() !=1 || weights.rows() !=2)
+					if(rate_print++%500 == 0)
 					{
-						HA_THROW_ERROR("JumpCondition._computeJumpCriterion", "We need 2 weights for the estimation of the norm between 2 HTransforms, " <<
-							"one for rotation and one for translation. weights dim = " <<weights.cols()<<" " << weights.rows());
+					  HA_INFO("JumpCondition._computeJumpCriterion", "Angle between goal and current: " << angle_diff);
+					  HA_INFO("JumpCondition._computeJumpCriterion", "Distance between goal and current: " << disp_diff);
+					}
+
+					if(_norm_weights.cols() !=1 || _norm_weights.rows() !=2)
+					{
+						//HA_THROW_ERROR("JumpCondition._computeJumpCriterion", "We need 2 weights for the estimation of the norm between 2 HTransforms, " <<
+						//	"one for rotation and one for translation. weights dim = " <<weights.cols()<<" " << weights.rows());
+						weights = Eigen::MatrixXd(2,1);
+						weights << 0.1, 1.;
 					}
 					ret = weights(0,0) * angle_diff + weights(1,0) * disp_diff;
 				}
