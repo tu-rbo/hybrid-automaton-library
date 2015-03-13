@@ -215,22 +215,35 @@ TEST(JumpCondition, Activation) {
 
 	//Test the norm of the rotation
 
+	//The sensor reading of the system - we will mock it as constant
+	sensorMat = Eigen::MatrixXd::Identity(4,4);
+	EXPECT_CALL(*_ms, getFramePose(_))
+		.WillRepeatedly(Return(sensorMat));
+
 	FrameOrientationSensor* _fo_s = new FrameOrientationSensor();
 	FrameOrientationSensor::Ptr fo_s(_fo_s);	
 	fo_s->setSystem(ms);
+	jc1->setSensor(fo_s);
 
-	JumpCondition* _jc2 = new JumpCondition;
-	JumpCondition::Ptr jc2(_jc2);	
-	jc2->setSensor(fo_s);
-
-	jc2->setJumpCriterion(JumpCondition::NORM_ROTATION, weights);
-	
+	jc1->setJumpCriterion(JumpCondition::NORM_ROTATION);
+	goalMat.resize(3,3);
 	goalMat<<1.0,0.0,0.0,0.0,1.0,0.0,0.0,0.0,1.0;
-	jc2->setConstantGoal(goalMat);
-	EXPECT_TRUE(jc2->isActive());
+	jc1->setConstantGoal(goalMat);
+	jc1->setEpsilon(0.01);
 
-	goalMat<<1.0,0.0,0.0,0.0,1.0,0.0,0.0,0.0,1.0;
-	jc2->setConstantGoal(goalMat);
-	EXPECT_FALSE(jc2->isActive());
+	jc1->initialize(0.0);
+	EXPECT_TRUE(jc1->isActive());
+
+	double angle = 0.009;
+	//rotate around z
+	goalMat<<std::cos(angle),-std::sin(angle),0.0,std::sin(angle),std::cos(angle),0.0,0.0,0.0,1.0;
+	jc1->setConstantGoal(goalMat);
+	EXPECT_TRUE(jc1->isActive());
+
+	angle = 0.011;
+	//rotate around z
+	goalMat<<std::cos(angle),-std::sin(angle),0.0,std::sin(angle),std::cos(angle),0.0,0.0,0.0,1.0;
+	jc1->setConstantGoal(goalMat);
+	EXPECT_FALSE(jc1->isActive());
 }
 

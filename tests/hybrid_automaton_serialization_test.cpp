@@ -255,6 +255,10 @@ protected:
 			.WillRepeatedly(Return(false));
 		EXPECT_CALL(*js_node, getAttributeString(std::string("goal"), _))
 			.WillRepeatedly(Return(false));
+		EXPECT_CALL(*js_node, getAttributeString(std::string("ros_topic"), _))
+			.WillRepeatedly(Return(false));
+		EXPECT_CALL(*js_node, getAttributeString(std::string("ros_tf_child"), _))
+			.WillRepeatedly(Return(false));
 		EXPECT_CALL(*js_node, getAttributeString(std::string("jump_criterion"), _))
 			.WillRepeatedly(Return(false));
 		EXPECT_CALL(*js_node, getAttributeString(std::string("epsilon"), _))
