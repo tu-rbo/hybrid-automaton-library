@@ -18,10 +18,11 @@ namespace ha
 		// connect to topic
 		if (!_is_subscribed) {
 			if (!_system->subscribeToROSMessage(_ros_topic_name)) {
-				HA_THROW_ERROR("ROSTopicSensor.initialize", "Unable to connect to topic " << _ros_topic_name << "! Aborting initializion");
+				HA_WARN("ROSTopicSensor.initialize", "Unable to connect to topic " << _ros_topic_name);
+			}else{
+				HA_INFO("ROSTopicSensor.initialize", "Successfully subscribed to topic " << _ros_topic_name << "");
+				_is_subscribed = true;
 			}
-			HA_INFO("ROSTopicSensor.initialize", "Successfully subscribed to topic " << _ros_topic_name << "");
-			_is_subscribed = true;
 		}
 
 		// needs to be executed after connecting to topic because
@@ -30,6 +31,17 @@ namespace ha
 	}
 
 	bool ROSTopicSensor::isActive() const {
+		// If the subscription failed in the initialization we try again
+		if(!this->_is_subscribed)
+		{
+			this->_is_subscribed = _system->subscribeToROSMessage(_ros_topic_name);
+			if (!this->_is_subscribed) {
+				HA_WARN("ROSTopicSensor.isActive", "Unable to connect to topic " << _ros_topic_name);
+			}
+			// In the same tick is not possible to subscribe to a topic and that this topic is available
+			return false;
+		}
+
 		bool available = _system->isROSTopicAvailable(this->_ros_topic_name); 
 		if (available && _last_pose.rows() == 0) {
 			getCurrentValue();
@@ -39,6 +51,7 @@ namespace ha
 
 	::Eigen::MatrixXd ROSTopicSensor::getCurrentValue() const
 	{
+
 		if (this->_system->isROSTopicUpdated(this->_ros_topic_name)) {
 			::Eigen::MatrixXd pose;
 			if (!this->_system->getROSPose(this->_ros_topic_name, this->_ros_topic_type, pose)) {

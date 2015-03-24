@@ -57,7 +57,7 @@ namespace ha {
 		std::string _ros_topic_name;
 		std::string _ros_topic_type;
 
-		bool _is_subscribed;
+		mutable bool _is_subscribed;
 
 		mutable ::Eigen::MatrixXd _last_pose;
 
