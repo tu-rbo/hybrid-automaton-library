@@ -183,12 +183,6 @@ namespace ha {
 					Eigen::Vector3d xDisp = x.block(0,3,3,1)-y.block(0,3,3,1);
 					double disp_diff = xDisp.norm();
 
-					//if(rate_print++%500 == 0)
-					//{
-					//  HA_INFO("JumpCondition._computeJumpCriterion", "Angle between goal and current: " << angle_diff);
-					//  HA_INFO("JumpCondition._computeJumpCriterion", "Distance between goal and current: " << disp_diff);
-					//}
-
 					if(_norm_weights.cols() !=1 || _norm_weights.rows() !=2)
 					{
 						//HA_THROW_ERROR("JumpCondition._computeJumpCriterion", "We need 2 weights for the estimation of the norm between 2 HTransforms, " <<
@@ -197,6 +191,13 @@ namespace ha {
 						weights << 0.1, 1.;
 					}
 					ret = weights(0,0) * angle_diff + weights(1,0) * disp_diff;
+
+					if(rate_print++%500 == 0)
+					{
+					  //HA_INFO("JumpCondition._computeJumpCriterion", "Angle between goal and current: " << angle_diff);
+					  //HA_INFO("JumpCondition._computeJumpCriterion", "Distance between goal and current: " << disp_diff);
+					  //HA_INFO("JumpCondition._computeJumpCriterion", "Weighted difference: " << ret << " (epsilon=" << _epsilon << ")");
+					}
 				}
 				break;
 
