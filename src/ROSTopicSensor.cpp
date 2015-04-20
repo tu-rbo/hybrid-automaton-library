@@ -16,6 +16,7 @@ namespace ha
 
 	void ROSTopicSensor::initialize(const double& t) {
 		// connect to topic
+		_last_pose.resize(0,0);
 		if (!_is_subscribed) {
 			if (!_system->subscribeToROSMessage(_ros_topic_name)) {
 				HA_WARN("ROSTopicSensor.initialize", "Unable to connect to topic " << _ros_topic_name);
