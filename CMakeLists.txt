@@ -127,7 +127,8 @@ set (HA_SENSOR_HEADERS
 	"${PROJECT_SOURCE_DIR}/include/hybrid_automaton/JointConfigurationSensor.h"
 	"${PROJECT_SOURCE_DIR}/include/hybrid_automaton/FrameDisplacementSensor.h"
 	"${PROJECT_SOURCE_DIR}/include/hybrid_automaton/FrameOrientationSensor.h"
- 	"${PROJECT_SOURCE_DIR}/include/hybrid_automaton/ROSTopicSensor.h")
+ 	"${PROJECT_SOURCE_DIR}/include/hybrid_automaton/ROSTopicSensor.h"
+	"${PROJECT_SOURCE_DIR}/include/hybrid_automaton/SubjointConfigurationSensor.h")
 
 set (HA_DESCRIPTION_HEADERS
 	"${PROJECT_SOURCE_DIR}/include/hybrid_automaton/DescriptionTree.h"
@@ -158,7 +159,8 @@ set (HA_SENSOR_SOURCES
     "${PROJECT_SOURCE_DIR}/src/JointConfigurationSensor.cpp"
     "${PROJECT_SOURCE_DIR}/src/FrameDisplacementSensor.cpp"
 	"${PROJECT_SOURCE_DIR}/src/FrameOrientationSensor.cpp"
-	"${PROJECT_SOURCE_DIR}/src/ROSTopicSensor.cpp")
+	"${PROJECT_SOURCE_DIR}/src/ROSTopicSensor.cpp"
+    "${PROJECT_SOURCE_DIR}/src/SubjointConfigurationSensor.cpp")
 	
 source_group("Header Files" FILES ${HA_CORE_HEADERS})
 
