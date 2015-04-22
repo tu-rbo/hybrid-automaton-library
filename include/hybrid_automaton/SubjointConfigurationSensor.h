@@ -30,6 +30,16 @@ namespace ha {
             return (SubjointConfigurationSensorPtr(_doClone()));
         }
 
+        virtual std::vector<int> getIndex() const
+        {
+            return _index;
+        }
+
+        virtual void setIndex(const std::vector<int>& index)
+        {
+            _index = index;
+        }
+
 		virtual ::Eigen::MatrixXd getCurrentValue() const;
 
 		virtual DescriptionTreeNode::Ptr serialize(const DescriptionTree::ConstPtr& factory) const;

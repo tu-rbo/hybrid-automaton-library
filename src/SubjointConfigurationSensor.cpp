@@ -34,6 +34,12 @@ namespace ha
 
 		tree->setAttribute<std::string>(std::string("type"), this->getType());
 
+		Eigen::MatrixXd index_mat(_index.size(), 1);
+        for(int j=0; j<index_mat.rows(); j++)
+			index_mat(j) = _index[j];
+
+		tree->setAttribute< Eigen::MatrixXd >(std::string("index"), index_mat);
+
 		return tree;
 	}
 
@@ -48,8 +54,9 @@ namespace ha
         if(!tree->getAttribute< ::Eigen::MatrixXd >("index", index_mat) )
             HA_THROW_ERROR("SubjointConfigurationSensor.deserialize", "This type of sensor needs a value 'index'!");
 
+		_index.resize(index_mat.rows());
         for(int j=0; j<index_mat.rows(); j++)
-            _index.push_back(index_mat(j));
+            _index[j]=index_mat(j);
 
 		if (_type == "" || !HybridAutomaton::isSensorRegistered(_type)) {
             HA_THROW_ERROR("SubjointConfigurationSensor.deserialize", "SensorType type '" << _type << "' "
