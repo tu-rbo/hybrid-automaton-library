@@ -56,7 +56,7 @@ namespace ha
 
 		_index.resize(index_mat.rows());
         for(int j=0; j<index_mat.rows(); j++)
-            _index[j]=index_mat(j);
+            _index[j]=(int)index_mat(j);
 
 		if (_type == "" || !HybridAutomaton::isSensorRegistered(_type)) {
             HA_THROW_ERROR("SubjointConfigurationSensor.deserialize", "SensorType type '" << _type << "' "
