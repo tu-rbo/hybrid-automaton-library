@@ -125,6 +125,7 @@ set (HA_SENSOR_HEADERS
 	"${PROJECT_SOURCE_DIR}/include/hybrid_automaton/ForceTorqueSensor.h"
 	"${PROJECT_SOURCE_DIR}/include/hybrid_automaton/FramePoseSensor.h"
 	"${PROJECT_SOURCE_DIR}/include/hybrid_automaton/JointConfigurationSensor.h"
+        "${PROJECT_SOURCE_DIR}/include/hybrid_automaton/JointVelocitySensor.h"
 	"${PROJECT_SOURCE_DIR}/include/hybrid_automaton/FrameDisplacementSensor.h"
 	"${PROJECT_SOURCE_DIR}/include/hybrid_automaton/FrameOrientationSensor.h"
  	"${PROJECT_SOURCE_DIR}/include/hybrid_automaton/ROSTopicSensor.h"
@@ -157,9 +158,10 @@ set (HA_SENSOR_SOURCES
     "${PROJECT_SOURCE_DIR}/src/ForceTorqueSensor.cpp"
     "${PROJECT_SOURCE_DIR}/src/FramePoseSensor.cpp"
     "${PROJECT_SOURCE_DIR}/src/JointConfigurationSensor.cpp"
+    "${PROJECT_SOURCE_DIR}/src/JointVelocitySensor.cpp"
     "${PROJECT_SOURCE_DIR}/src/FrameDisplacementSensor.cpp"
-	"${PROJECT_SOURCE_DIR}/src/FrameOrientationSensor.cpp"
-	"${PROJECT_SOURCE_DIR}/src/ROSTopicSensor.cpp"
+    "${PROJECT_SOURCE_DIR}/src/FrameOrientationSensor.cpp"
+    "${PROJECT_SOURCE_DIR}/src/ROSTopicSensor.cpp"
     "${PROJECT_SOURCE_DIR}/src/SubjointConfigurationSensor.cpp")
 	
 source_group("Header Files" FILES ${HA_CORE_HEADERS})

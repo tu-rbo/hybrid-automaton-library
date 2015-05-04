@@ -20,7 +20,7 @@ namespace ha
 
     ::Eigen::MatrixXd SubjointConfigurationSensor::getCurrentValue() const
 	{
-        ::Eigen::MatrixXd cfg = this->_system->getConfiguration();
+        ::Eigen::MatrixXd cfg = this->_system->getJointConfiguration();
         ::Eigen::MatrixXd subcfg(_index.size(), 1);
         for(int i=0; i< _index.size(); i++)
             subcfg(i) = cfg(_index[i]);

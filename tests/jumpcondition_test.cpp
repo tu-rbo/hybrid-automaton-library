@@ -24,7 +24,8 @@ namespace JumpConditionSerialization1 {
 	class MockSystem : public ha::System {
 	public:
 		MOCK_CONST_METHOD0(getDof, int () );
-		MOCK_CONST_METHOD0(getConfiguration, ::Eigen::MatrixXd () );
+		MOCK_CONST_METHOD0(getJointConfiguration, ::Eigen::MatrixXd () );
+		MOCK_CONST_METHOD0(getJointVelocity, ::Eigen::MatrixXd () );
 		MOCK_CONST_METHOD0(getForceTorqueMeasurement, ::Eigen::MatrixXd () );
 		MOCK_CONST_METHOD0(getCurrentTime, ::Eigen::MatrixXd () );
 		MOCK_CONST_METHOD1(getFramePose, ::Eigen::MatrixXd (const std::string& frame_id) );
@@ -124,7 +125,7 @@ TEST(JumpCondition, Activation) {
 	//The sensor reading of the system - we will mock it as constant
 	::Eigen::MatrixXd sensorMat(3,1);
 	sensorMat<<1.0,1.0,1.0;
-	EXPECT_CALL(*_ms, getConfiguration())
+	EXPECT_CALL(*_ms, getJointConfiguration())
 		.WillRepeatedly(Return(sensorMat));
 
 	/////////////////////////////////////////////////

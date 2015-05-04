@@ -20,7 +20,7 @@ namespace ha
 
 	::Eigen::MatrixXd JointConfigurationSensor::getCurrentValue() const
 	{
-		return this->_system->getConfiguration();
+		return this->_system->getJointConfiguration();
 	}
 
 	DescriptionTreeNode::Ptr JointConfigurationSensor::serialize(const DescriptionTree::ConstPtr& factory) const
