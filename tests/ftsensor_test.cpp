@@ -44,9 +44,9 @@ TEST(ForceTorqueSensor, FrameId) {
         .WillRepeatedly(Return(ftSensorMat));
 
     ::Eigen::MatrixXd poseMat(4,4);
-    poseMat.row(0) << 0.0,1.0,0.0,   1.0;
-    poseMat.row(1) << 1.0,0.0,0.0,   2.0;
-    poseMat.row(2) << 0.0,0.0,1.0,   3.0;
+    poseMat.row(0) << 0.0,1.0,0.0,   0.; //1.0;
+    poseMat.row(1) << 1.0,0.0,0.0,   0.; //2.0;
+    poseMat.row(2) << 0.0,0.0,1.0,   0.; //3.0;
     poseMat.row(3) << 0.0,0.0,0.0,   1.0;
 
     EXPECT_CALL(*_ms, getFramePose(_))
@@ -54,7 +54,7 @@ TEST(ForceTorqueSensor, FrameId) {
 
 
     ::Eigen::MatrixXd ftSensorMatTransformed(6,1);
-    ftSensorMatTransformed << 2.0,1.0,3.0,4.0,5.0,6.0;
+    ftSensorMatTransformed << 2.0,1.0,3.0,5.0,4.0,6.0;
 
 
     //std::map<std::string, std::string> add_args;
@@ -105,7 +105,7 @@ TEST(ForceTorqueSensor, FrameId) {
     EXPECT_EQ("ForceTorqueSensor", ftsensor->getType());
 
     ::Eigen::MatrixXd ret = ftsensor->getCurrentValue();
-    cout << ret << endl;
+    //cout << ret << endl;
     EXPECT_EQ(ftSensorMatTransformed, ret);
 
     }

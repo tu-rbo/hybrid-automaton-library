@@ -26,10 +26,24 @@ namespace ha
             if (forceTorque.rows() == 6 && forceTorque.cols() == 1) {
                 ::Eigen::MatrixXd pose = this->_system->getFramePose(this->_frame_id);
                 if (pose.rows() == 4 && pose.cols() == 4) {
+                    // get inverse
+                    // TODO
+
                     // apply transformation
-                    // FIXME were are only changing the orientation!
+
                     ::Eigen::MatrixXd rot = pose.topLeftCorner(3,3);
-                    forceTorque.topLeftCorner(3,1) = rot*forceTorque.topLeftCorner(3, 1);
+                    ::Eigen::Vector3d translation = pose.topRightCorner(3, 1);
+                    ::Eigen::Vector3d force = forceTorque.topLeftCorner(3, 1);
+                    ::Eigen::Vector3d torque = forceTorque.bottomLeftCorner(3, 1);
+
+                    ::Eigen::MatrixXd ft(6,1);
+                    // force
+                    ft.topLeftCorner(3,1) = rot*force;
+                    // torque
+                    ft.bottomLeftCorner(3,1) = rot*torque + translation.cross(force);
+
+                    forceTorque = ft;
+
                 } else {
                     static bool error_logged=false;
                     if (!error_logged) {
