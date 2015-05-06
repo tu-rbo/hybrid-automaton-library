@@ -43,6 +43,14 @@ namespace ha {
 			return sensor;
 		}
 
+		virtual void setFrameId(const std::string& frame_id) {
+			_frame_id = frame_id;
+		}
+
+		virtual std::string getFrameId() const {
+			return _frame_id;
+		}
+
 	protected:
 
         /**
