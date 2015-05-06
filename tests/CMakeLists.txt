@@ -42,6 +42,7 @@ set (HA_TESTS_SOURCES
     "description_tree_tinyxml_test.cpp"
     "hybrid_automaton_serialization_test.cpp"
 	"hybrid_automaton_stepping_test.cpp"
+	"ftsensor_test.cpp"
 	)
 
 set (HA_TESTS_HEADERS

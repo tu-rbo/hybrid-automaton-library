@@ -45,6 +45,11 @@ namespace ha {
 
 	protected:
 
+        /**
+         * @brief Optional frame ID to transform the force into
+         */
+        std::string _frame_id;
+
 		virtual ForceTorqueSensor* _doClone() const
 		{
 			return (new ForceTorqueSensor(*this));
