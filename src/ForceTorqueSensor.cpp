@@ -27,11 +27,12 @@ namespace ha
                 ::Eigen::MatrixXd pose = this->_system->getFramePose(this->_frame_id);
                 if (pose.rows() == 4 && pose.cols() == 4) {
                     // get inverse
-                    // TODO
+                    //pose = pose.inverse();
 
                     // apply transformation
 
                     ::Eigen::MatrixXd rot = pose.topLeftCorner(3,3);
+					rot = rot.inverse();
                     ::Eigen::Vector3d translation = pose.topRightCorner(3, 1);
                     ::Eigen::Vector3d force = forceTorque.topLeftCorner(3, 1);
                     ::Eigen::Vector3d torque = forceTorque.bottomLeftCorner(3, 1);
@@ -40,9 +41,18 @@ namespace ha
                     // force
                     ft.topLeftCorner(3,1) = rot*force;
                     // torque
-                    ft.bottomLeftCorner(3,1) = rot*torque + translation.cross(force);
+                    ft.bottomLeftCorner(3,1) = rot*torque; // + translation.cross(force);
+
+					static int i = 0;
+					if ( (i++ % 500) == 0)
+					{
+						std::cout << "ori: "<< forceTorque.transpose() << std::endl;
+						std::cout << "rot: "<<ft.transpose() << std::endl;
+
+					}
 
                     forceTorque = ft;
+
 
                 } else {
                     static bool error_logged=false;
