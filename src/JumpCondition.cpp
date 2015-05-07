@@ -311,8 +311,8 @@ namespace ha {
 
 	void JumpCondition::setJumpCriterion(JumpCriterion jump_criterion, ::Eigen::MatrixXd weights)
 	{
-		if(weights.rows() == 0)
-			HA_INFO("JumpCondition::setJumpCriterion", "No value given for weights. Using default weights of 1.");
+//		if(weights.rows() == 0)
+//			HA_WARN("JumpCondition::setJumpCriterion", "No value given for weights. Using default weights of 1.");
 		_jump_criterion = jump_criterion;
 		_norm_weights = weights;
 	}
