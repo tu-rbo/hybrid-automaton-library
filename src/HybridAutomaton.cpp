@@ -194,16 +194,16 @@ namespace ha {
 					// switch to the next control mode
 					ModeHandle mode_handle = boost::target(switch_handle, _graph);
 
-					ha::ControlMode::Ptr next_control_mode = _graph.graph()[mode_handle];					
-					//switchControlMode realizes smooth transitions between control modes
-					next_control_mode->switchControlMode(_current_control_mode);
-					
 					_current_control_mode->terminate();
+					_current_control_mode = _graph.graph()[mode_handle];
 
-					_current_control_mode = next_control_mode;
-					
 					_activateCurrentControlMode(t);
 
+					// CE: We still need to encapsulate this functionality:
+					//		if (!_activeMotionBehaviour->replaceControllers((MotionBehaviour*) edges[0]))
+					//		{
+					//			_activeMotionBehaviour = (MotionBehaviour*) edges[0];
+					//		}
 					break;
 				}
 			}
