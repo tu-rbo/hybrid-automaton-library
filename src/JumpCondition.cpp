@@ -472,8 +472,8 @@ namespace ha {
 		//////////////////////////////
 		////PARAMETERS////////////////
 		//////////////////////////////
-		if(!tree->getAttribute<Eigen::MatrixXd>("norm_weights", _norm_weights))
-			HA_WARN("JumpCondition.deserialize", "No \"norm_weights\" parameter given in JumpCondition - using default values");
+		tree->getAttribute<Eigen::MatrixXd>("norm_weights", _norm_weights);
+			//HA_WARN("JumpCondition.deserialize", "No \"norm_weights\" parameter given in JumpCondition - using default values");
 		
 		if(!tree->getAttribute<double>("epsilon", _epsilon))
 			HA_WARN("JumpCondition.deserialize", "No \"epsilon\" parameter given in JumpCondition - using default values");
