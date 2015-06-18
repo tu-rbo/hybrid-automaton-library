@@ -12,6 +12,9 @@ namespace ha {
 	typedef boost::shared_ptr<FramePoseSensor> FramePoseSensorPtr;
 	typedef boost::shared_ptr<const FramePoseSensor> FramePoseSensorConstPtr;
 
+    /**
+     * @brief An interface to measure the pose of the given robot frame using forward kinematics
+     */
 	class FramePoseSensor : public Sensor
 	{
 	public:
@@ -32,6 +35,10 @@ namespace ha {
 
 		virtual void initialize(const double& t); 
 
+
+        /**
+         * @brief Returns the current frame pose as a 4x4 homogenuous transformation matrix
+         */
 		virtual ::Eigen::MatrixXd getCurrentValue() const;
 		
 		virtual ::Eigen::MatrixXd getRelativeCurrentValue() const;

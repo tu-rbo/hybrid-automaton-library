@@ -17,6 +17,18 @@ namespace ha {
 	typedef boost::shared_ptr<ControlSet> ControlSetPtr;
 	typedef boost::shared_ptr<const ControlSet> ControlSetConstPtr;
 
+    /**
+     * @brief Interface for a ControlSet
+     *
+     * A ControlSet combines the output of several Controllers.
+     * Some advanced control methods need to combine several subtasks into a control signal.
+     *
+     * An example for this would be closing a hand and maintaining arm position at the same time.
+     * In this case a Controller for the hand and a Controller for the arm would be added to the ControlSet.
+     *
+     * Another example could be different forces at different operational points of the robot which
+     * then are combined in the ControlSet using nullspace projections.
+     */
 	class ControlSet : public Serializable {
 
 	public:
@@ -27,14 +39,30 @@ namespace ha {
 
 		ControlSet(const ControlSet& cs);
 
+
+        /**
+        * @brief Activate the ControlSet for execution. Is called automatically from the ControlMode
+        */
 		virtual void initialize();
 
+        /**
+        * @brief Deactivate the ControlSet after execution. Is called automatically from the ControlMode
+        */
 		virtual void terminate();
 
+        /**
+        * @brief Compute the control signal from all contained Controllers. Is called in the control loop.
+        */
 		virtual ::Eigen::MatrixXd step(const double& t);
 
+        /**
+          @brief Serialize into DescriptionTreeNode
+        */
 		virtual DescriptionTreeNode::Ptr serialize(const DescriptionTree::ConstPtr& factory) const;
 
+        /**
+        * @brief Deserialize from DescriptionTreeNode
+        */
 		virtual void deserialize(const DescriptionTreeNode::ConstPtr& tree, const System::ConstPtr& system, const HybridAutomaton* ha);
 
 		ControlSetPtr clone() const {
@@ -45,9 +73,6 @@ namespace ha {
 
 		virtual const std::string getType() const;
 
-		/**
-		 * @brief Pass any additional argument for your controlset
-		 */
 		template <typename T> void setArgument(const std::string& field_name, const T& field_value)
 		{
 			ha_ostringstream ha_oss;
@@ -71,15 +96,20 @@ namespace ha {
 			}
 		}
 
+        /**
+        * @brief Add a Controller to this ControlSet
+        */
 		void appendController(const Controller::Ptr& controller);
-
-		// what is this method for?
-		//virtual const std::vector<Controller::Ptr>& getControllers() const;
 
 		virtual void setName(const std::string& new_name);
 
 		virtual const std::string getName() const;
 
+        /**
+        * @brief Return the contained Controller with name \a name
+        *
+        * @returns Null poionter if it does not exist
+        */
 		virtual Controller::ConstPtr getControllerByName(const std::string& name) const; 
 
         /**
@@ -117,10 +147,26 @@ namespace ha {
 
 
 	protected:
+        /**
+         * @brief The name of this ControlSet
+         */
 		std::string						_name;
+
+        /**
+         * @brief The type of this ControlSet - your ControlSet must be registered with the HybridAutomaton
+         */
 		std::string						_type;
+
+        /**
+         * @brief The Controllers contained in this ControlSet
+         */
 		std::map<std::string, Controller::Ptr>	_controllers;
 	
+        /**
+         * @brief A list of optional attributes for specific ControlSet implementations.
+         *
+         * All entries in this map will be serialized and deserialized
+         */
 		std::map<std::string, std::string> _additional_arguments;
 	};
 

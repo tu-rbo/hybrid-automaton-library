@@ -17,6 +17,9 @@ namespace ha {
 	typedef boost::shared_ptr<DescriptionTreeNodeXML> DescriptionTreeNodeXMLPtr;
 	typedef boost::shared_ptr<const DescriptionTreeNodeXML> DescriptionTreeNodeXMLConstPtr;
 
+    /**
+    * @brief A xml implementation of the DescriptionTreeNode
+    */
 	class DescriptionTreeNodeXML: public DescriptionTreeNode{
 
 	protected:

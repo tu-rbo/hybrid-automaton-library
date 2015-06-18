@@ -22,8 +22,6 @@ namespace ha{
 			}
 		}
 
-		//std::cout << "special call" << std::endl;
-
 		return *this;
 	}
 }

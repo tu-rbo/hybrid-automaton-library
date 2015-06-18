@@ -19,10 +19,9 @@ namespace ha {
 
 
     /**
-     * @brief Control mode
+     * @brief Control mode - A control mode is a node in the hybrid automaton graph.
      *
-     * A control mode is a node in the hybrid automaton graph. It contains
-     * a ControlSet which again contains a set of controllers.
+     * It contains a ControlSet which again contains a set of controllers.
      *
      * @see ControlSet
      * @see Controller
@@ -37,6 +36,11 @@ namespace ha {
 
 		virtual ~ControlMode() {}
 
+        /**
+         * @brief Activate the controller for execution.
+         *
+         * Is called after switching from another mode to this one
+         */
 		virtual void initialize() {
 			if (_control_set)
 				_control_set->initialize();
@@ -44,6 +48,11 @@ namespace ha {
 				HA_THROW_ERROR("ControlSet.initialize", "No control set defined.");
 		}
 
+        /**
+         * @brief Deactivate the controller for execution.
+         *
+         * Is called when switching from this mode to another
+         */
 		virtual void terminate() {
 			if (_control_set)
 				_control_set->terminate();
@@ -51,6 +60,11 @@ namespace ha {
 				HA_THROW_ERROR("ControlSet.terminate", "No control set defined.");
 		}
 
+        /**
+         * @brief Compute the current control signal
+         *
+         * Is called from the HybridAutomaton - once within each control loop
+         */
 		virtual ::Eigen::MatrixXd step(const double& t) {
 			if (_control_set)
 				return _control_set->step(t);
@@ -91,9 +105,15 @@ namespace ha {
 		}
 
 	protected:
+
+        /**
+         * @brief The ControlSet that generates the commands for this CotrolMode
+         */
 		ControlSet::Ptr _control_set;
 
-		// unique identifier within one hybrid automaton
+        /**
+         * @brief identifier of this ControlMode - must be unique within each HybridAutomaton!
+         */
 		std::string _name;
 
 	};

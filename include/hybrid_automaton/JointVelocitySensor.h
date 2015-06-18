@@ -12,6 +12,9 @@ namespace ha {
 	typedef boost::shared_ptr<JointVelocitySensor> JointVelocitySensorPtr;
 	typedef boost::shared_ptr<const JointVelocitySensor> JointVelocitySensorConstPtr;
 
+    /**
+     * @brief An interface to the current joint velocity (usually estimated from encoders)
+     */
 	class JointVelocitySensor : public Sensor
 	{
 	public:
@@ -30,6 +33,9 @@ namespace ha {
 			return (JointVelocitySensorPtr(_doClone()));
 		};
 
+        /**
+         * @brief Return the current joint velocity as a dimx1-vector
+         */
 		virtual ::Eigen::MatrixXd getCurrentValue() const;
 
 		virtual DescriptionTreeNode::Ptr serialize(const DescriptionTree::ConstPtr& factory) const;

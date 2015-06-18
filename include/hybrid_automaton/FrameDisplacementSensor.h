@@ -12,6 +12,9 @@ namespace ha {
 	typedef boost::shared_ptr<FrameDisplacementSensor> FrameDisplacementSensorPtr;
 	typedef boost::shared_ptr<const FrameDisplacementSensor> FrameDisplacementSensorConstPtr;
 
+    /**
+     * @brief An interface to measure the position of the given frame usinf forward kinematics
+     */
 	class FrameDisplacementSensor : public Sensor
 	{
 	public:
@@ -34,6 +37,9 @@ namespace ha {
 		
 		virtual ::Eigen::MatrixXd getRelativeCurrentValue() const;
 
+        /**
+         * @brief Returns the current frame position as a 3x1 vector
+         */
 		virtual ::Eigen::MatrixXd getCurrentValue() const;
 
 		virtual ::Eigen::MatrixXd getInitialValue() const;

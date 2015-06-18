@@ -17,6 +17,9 @@ namespace ha {
 	typedef boost::shared_ptr<DescriptionTreeXML> DescriptionTreeXMLPtr;
 	typedef boost::shared_ptr<const DescriptionTreeXML> DescriptionTreeXMLConstPtr;
 
+    /**
+    * @brief A xml implementation of the DescriptionTree
+    */
 	class DescriptionTreeXML: public DescriptionTree{
 	public:
 		typedef boost::shared_ptr<DescriptionTreeXML> Ptr;
@@ -33,18 +36,31 @@ namespace ha {
 		 */
 		virtual DescriptionTreeNode::Ptr createNode(const std::string& type) const;
 
-		// Generate / parse Description Tree
+        /**
+         * @brief Generate / parse description tree
+         *
+         * @throws Error if there are any xml syntax errors
+         */
 		virtual bool initTree(const std::string& input);
 
+        /**
+         * @brief Deparse xml tree into string
+         */
 		virtual std::string writeTreeXML() const;
 
-		//Return first tree element
 		virtual DescriptionTreeNode::Ptr getRootNode();
 
 		virtual void setRootNode(const DescriptionTreeNode::Ptr& root_node);
 	
 	protected: 
+        /**
+         * @brief The underlying Tinyxml Document for parsing/deparsing
+         */
 		TiXmlDocument* _tinyxml_document;
+
+        /**
+         * @brief The root xml node
+         */
 		DescriptionTreeNodeXML::Ptr _root_node;
 	};
 }

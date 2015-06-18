@@ -12,6 +12,12 @@ namespace ha {
 	typedef boost::shared_ptr<ClockSensor> ClockSensorPtr;
 	typedef boost::shared_ptr<const ClockSensor> ClockSensorConstPtr;
 
+    /**
+     * @brief A sensor that measures the current time of the System.
+     *
+     * Use this to execute a ControlMode for X seconds.
+     * To do so you need a relative JumpCondition and the THRESH_LOWER_BOUND norm
+     */
 	class ClockSensor : public Sensor
 	{
 	public:
@@ -30,6 +36,9 @@ namespace ha {
 			return (ClockSensorPtr(_doClone()));
         }
 
+        /**
+         * @brief Returns the current System time as a 1x1 matrix
+         */
 		virtual ::Eigen::MatrixXd getCurrentValue() const;
 
 		virtual void initialize(const double& t); 
