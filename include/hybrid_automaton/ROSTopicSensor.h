@@ -12,6 +12,10 @@ namespace ha {
 	typedef boost::shared_ptr<ROSTopicSensor> ROSTopicSensorPtr;
 	typedef boost::shared_ptr<const ROSTopicSensor> ROSTopicSensorConstPtr;
 
+    /**
+     * @brief An interface to read the value from a ROS topic
+     *
+    */
 	class ROSTopicSensor : public Sensor
 	{
 	public:
@@ -32,12 +36,20 @@ namespace ha {
 
 		virtual void initialize(const double& t); 
 
+        /**
+         * @brief Return the value of the topic /a _ros_topic_name
+         */
 		virtual ::Eigen::MatrixXd getCurrentValue() const;
 		
 		virtual DescriptionTreeNode::Ptr serialize(const DescriptionTree::ConstPtr& factory) const;
 
 		virtual void deserialize(const DescriptionTreeNode::ConstPtr& tree, const System::ConstPtr& system, const HybridAutomaton* ha);
 
+        /**
+         * @brief Set the topic to listen to
+         * @param topic the topic name (leading "/" is important)
+         * @param type the datatype of the topic - choose from Bool/Float64/Float64MultiArray/Transform
+         */
 		virtual void setTopic(const std::string& topic, const std::string& type) {
 			_ros_topic_name = topic;
 			_ros_topic_type = type;

@@ -224,7 +224,7 @@ namespace ha {
         /**
          * @brief The goal of this Controller
          *
-         * If set to true, the robot will only move relative to it s current position.
+         * If set to true, the robot will only move relative to it's current position.
          * Ie. if goal is a null matrix it will maintain the position
          */
 		bool				_goal_is_relative;

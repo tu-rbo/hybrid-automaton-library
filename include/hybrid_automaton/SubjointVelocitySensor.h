@@ -19,6 +19,11 @@ namespace ha {
         typedef boost::shared_ptr<SubjointVelocitySensor> Ptr;
         typedef boost::shared_ptr<const SubjointVelocitySensor> ConstPtr;
 
+        /**
+         * @brief An interface to a subset of the current joint velocity
+         *
+         * Specify the dimensions of interest with the \a index vector
+         */
         SubjointVelocitySensor();
 
         virtual ~SubjointVelocitySensor();
@@ -35,11 +40,21 @@ namespace ha {
             return _index;
         }
 
+        /**
+         * @brief Returns a subset of the joint velcoity vector of as a matrix of size dim(index)x1
+         *
+         * the output value of this Sensor will be (q_dot[index[0]], ... q_dot[index[n]])^T
+         */
         virtual void setIndex(const std::vector<int>& index)
         {
             _index = index;
         }
 
+        /**
+         * @brief Returns a subset of the joint velcoity vector of as a matrix of size dim(index)x1
+         *
+         * the output value of this Sensor will be (q_dot[index[0]], ... q_dot[index[n]])^T
+         */
 		virtual ::Eigen::MatrixXd getCurrentValue() const;
 
 		virtual DescriptionTreeNode::Ptr serialize(const DescriptionTree::ConstPtr& factory) const;
