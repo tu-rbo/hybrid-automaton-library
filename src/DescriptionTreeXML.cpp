@@ -40,7 +40,7 @@ namespace ha {
 		{
             HA_THROW_ERROR("DescriptionTreeXML.initTree", "Parsing the xml document: " <<
                            "ERROR CODE: " <<  _tinyxml_document->ErrorId() << std::endl <<
-                           _tinyxml_document->ErrorDesc() << std::endl;);
+                           _tinyxml_document->ErrorDesc() << std::endl);
 			return false;
 		}
 		
