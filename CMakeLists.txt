@@ -138,6 +138,9 @@ set (HA_DESCRIPTION_HEADERS
 	"${PROJECT_SOURCE_DIR}/include/hybrid_automaton/DescriptionTreeXML.h"
 	"${PROJECT_SOURCE_DIR}/include/hybrid_automaton/DescriptionTreeNodeXML.h")
 
+set (HA_FACTORY_HEADERS
+	"${PROJECT_SOURCE_DIR}/include/hybrid_automaton/HybridAutomatonFactory.h")
+
 
 set (HA_CORE_SOURCES
     "${PROJECT_SOURCE_DIR}/src/HybridAutomaton.cpp"
@@ -165,6 +168,9 @@ set (HA_SENSOR_SOURCES
     "${PROJECT_SOURCE_DIR}/src/ROSTopicSensor.cpp"
     "${PROJECT_SOURCE_DIR}/src/SubjointConfigurationSensor.cpp"
     "${PROJECT_SOURCE_DIR}/src/SubjointVelocitySensor.cpp")
+
+set (HA_FACTORY_SOURCES
+    "${PROJECT_SOURCE_DIR}/src/HybridAutomatonFactory.cpp")
 	
 source_group("Header Files" FILES ${HA_CORE_HEADERS})
 
@@ -177,13 +183,17 @@ source_group("Source Files" FILES ${HA_CORE_SOURCES})
 source_group("Source Files\\Description" FILES ${HA_DESCRIPTION_SOURCES})
 
 source_group("Source Files\\Sensor" FILES ${HA_SENSOR_SOURCES})
+
+source_group("Source Files\\Factory" FILES ${HA_FACTORY_SOURCES})
 	
 add_library(hybrid_automaton STATIC ${HA_CORE_SOURCES} 
                         ${HA_DESCRIPTION_SOURCES} 
-                        ${HA_SENSOR_SOURCES} 
-												${HA_CORE_HEADERS}
+                        ${HA_SENSOR_SOURCES}
+                        ${HA_FACTORY_SOURCES} 
+			${HA_CORE_HEADERS}
                         ${HA_DESCRIPTION_HEADERS} 
-                        ${HA_SENSOR_HEADERS})
+                        ${HA_SENSOR_HEADERS}
+                        ${HA_FACTORY_HEADERS})
 						
 target_link_libraries(hybrid_automaton ${TinyXML_LIBRARIES} ${Boost_LIBRARIES} ${Eigen3_LIBRARIES})
 
@@ -194,9 +204,11 @@ add_executable(hybrid_automaton_visualizer src/hybrid_automaton_visualizer.cpp
 												${HA_CORE_SOURCES}
 												${HA_DESCRIPTION_SOURCES}
 												${HA_SENSOR_SOURCES}
+												${HA_FACTORY_SOURCES} 
 												${HA_CORE_HEADERS}
-												${HA_DESCRIPTION_HEADERS}
-												${HA_SENSOR_HEADERS})
+                        									${HA_DESCRIPTION_HEADERS} 
+                        									${HA_SENSOR_HEADERS}
+                        									${HA_FACTORY_HEADERS})
 target_link_libraries(hybrid_automaton_visualizer ${TinyXML_LIBRARIES} ${Boost_LIBRARIES} ${Eigen3_LIBRARIES})
 
 #subdirs(src)
