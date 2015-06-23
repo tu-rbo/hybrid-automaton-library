@@ -3,10 +3,45 @@
 #define DEFAULT_NUM_DOF_ARM 7
 #define DEFAULT_NUM_DOF_BASE 3
 
+#define DEFAULT_MAX_VEL_JS_ARM 0.3
+#define DEFAULT_MAX_VEL_JS_BASE 0.15
+
+#define DEFAULT_KP_JS_ARM 0.0
+#define DEFAULT_KV_JS_ARM 0.0
+#define DEFAULT_KP_JS_BASE 40.0
+#define DEFAULT_KV_JS_BASE 7.0
+
+#define DEFAULT_KP_JS_NAKAMURA_ARM 15.0
+#define DEFAULT_KP_JS_NAKAMURA_BASE 0.0
+#define DEFAULT_KV_JS_NAKAMURA_ARM 0.5
+#define DEFAULT_KV_JS_NAKAMURA_BASE 5.0
+
+#define DEFAULT_JOINT_WEIGHTS_NAKAMURA_ARM 1.0
+#define DEFAULT_JOINT_WEIGHTS_NAKAMURA_BASE 0.5
+#define DEFAULT_JOINT_WEIGHTS_NAKAMURA_BASE_LITTLE_MOTION 0.01
+
+#define DEFAULT_KP_OS_LINEAR 0.0
+#define DEFAULT_KP_OS_ANGULAR 0.0
+#define DEFAULT_KV_OS_LINEAR 10.0
+#define DEFAULT_KV_OS_ANGULAR 10.0
+
+#define DEFAULT_HOME_CONFIG_JS_ARM 0.0
+#define DEFAULT_HOME_CONFIG_JS_BASE 0.0
+
+#define DEFAULT_POS_EPSILON_JS_ARM 0.13
+#define DEFAULT_POS_EPSILON_JS_BASE 0.05
+#define DEFAULT_VEL_EPSILON_JS_ARM 0.01
+#define DEFAULT_VEL_EPSILON_JS_BASE 0.001
+
+#define DEFAULT_POS_EPSILON_OS_LINEAR 0.01
+#define DEFAULT_POS_EPSILON_OS_ANGULAR 0.01
+#define DEFAULT_VEL_EPSILON_OS_LINEAR 0.01
+#define DEFAULT_VEL_EPSILON_OS_ANGULAR 0.01
+
 namespace ha
 {
 HybridAutomatonFactory::HybridAutomatonFactory()
-    : HybridAutomatonFactory(DEFAULT_NUM_DOF_ARM,DEFAULT_NUM_DOF_BASE)
+    : HybridAutomatonFactory(DEFAULT_NUM_DOF_ARM, DEFAULT_NUM_DOF_BASE)
 {
 
 }
@@ -39,41 +74,73 @@ HybridAutomatonFactory::HybridAutomatonFactory(const int& num_dof_arm, const int
     }
     _index_str_base = index_base_ss.str();
 
-    _max_vel_js_arm.resize(_num_dof_arm, 1);
-    _max_vel_js_base.resize(_num_dof_base, 1);
+    _max_vel_js_arm = Eigen::MatrixXd::Constant(_num_dof_arm, 1, DEFAULT_MAX_VEL_JS_ARM);
+    _max_vel_js_base = Eigen::MatrixXd::Constant(_num_dof_base, 1, DEFAULT_MAX_VEL_JS_BASE);
 
-    _kp_js_arm.resize(_num_dof_arm, 1);
-    _kp_js_base.resize(_num_dof_base, 1);
-    _kv_js_arm.resize(_num_dof_arm, 1);
-    _kv_js_base.resize(_num_dof_base, 1);
+    _kp_js_arm = Eigen::MatrixXd::Constant(_num_dof_arm, 1, DEFAULT_KP_JS_ARM);
+    if(_num_dof_arm == DEFAULT_NUM_DOF_ARM)
+    {
+        _kp_js_arm << 300.0, 200.0, 150.0, 120.0, 10.0, 10.0, 10.0;
+    }
+    _kp_js_base = Eigen::MatrixXd::Constant(_num_dof_base, 1, DEFAULT_KP_JS_BASE);
 
-    _kp_os_linear.resize(3, 1);
-    _kp_os_angular.resize(3, 1);
-    _kv_os_linear.resize(3, 1);
-    _kv_os_angular.resize(3, 1);
+    _kv_js_arm = Eigen::MatrixXd::Constant(_num_dof_arm, 1, DEFAULT_KV_JS_ARM);
+    if(_num_dof_arm == DEFAULT_NUM_DOF_ARM)
+    {
+        _kv_js_arm << 2.0, 4.0, 2.0, 1.2, 0.2, 0.3, 0.02;
+    }
+    _kv_js_base = Eigen::MatrixXd::Constant(_num_dof_base, 1, DEFAULT_KV_JS_BASE);
 
-    _kp_js_nakamura_arm.resize(_num_dof_arm, 1);
-    _kp_js_nakamura_base.resize(_num_dof_base, 1);
-    _kv_js_nakamura_arm.resize(_num_dof_arm, 1);
-    _kv_js_nakamura_base.resize(_num_dof_base, 1);
+    _kp_os_linear = Eigen::MatrixXd::Constant(3, 1, DEFAULT_KP_OS_LINEAR);
+    _kp_os_angular = Eigen::MatrixXd::Constant(3, 1, DEFAULT_KP_OS_ANGULAR);
+    _kv_os_linear = Eigen::MatrixXd::Constant(3, 1, DEFAULT_KV_OS_LINEAR);
+    _kv_os_angular = Eigen::MatrixXd::Constant(3, 1, DEFAULT_KV_OS_ANGULAR);
 
-    _joint_weights_nakamura_arm.resize(_num_dof_arm, 1);
-    _joint_weights_nakamura_base.resize(_num_dof_base, 1);
+    _kp_js_nakamura_arm = Eigen::MatrixXd::Constant(_num_dof_arm, 1, DEFAULT_KP_JS_NAKAMURA_ARM);
+    if(_num_dof_arm == DEFAULT_NUM_DOF_ARM)
+    {
+        _kp_js_nakamura_arm << 30.0, 20.0, 15.0, 20.0, 10.0, 10.0, 10.0;
+    }
+    _kp_js_nakamura_base = Eigen::MatrixXd::Constant(_num_dof_base, 1, DEFAULT_KP_JS_NAKAMURA_BASE);
 
-    _home_config_arm.resize(_num_dof_arm, 1);
-    _home_config_base.resize(_num_dof_base, 1);
+    _kv_js_nakamura_arm = Eigen::MatrixXd::Constant(_num_dof_arm, 1, DEFAULT_KV_JS_NAKAMURA_ARM);
+    if(_num_dof_arm == DEFAULT_NUM_DOF_ARM)
+    {
+        _kv_js_nakamura_arm << 1.0, 2.0, 1.0, 0.4, 0.1, 0.1, 0.01;
+    }
+    _kv_js_nakamura_base = Eigen::MatrixXd::Constant(_num_dof_base, 1, DEFAULT_KV_JS_NAKAMURA_BASE);
+    if(_num_dof_base== DEFAULT_NUM_DOF_BASE)
+    {
+        _kv_js_nakamura_base << 10.0, 10.0, 2.0;
+    }
 
-    _pos_epsilon_js_arm.resize(_num_dof_arm, 1);
-    _pos_epsilon_js_base.resize(_num_dof_base, 1);
+    _joint_weights_nakamura_arm = Eigen::MatrixXd::Constant(_num_dof_arm, 1, DEFAULT_JOINT_WEIGHTS_NAKAMURA_ARM);
+    _joint_weights_nakamura_base = Eigen::MatrixXd::Constant(_num_dof_base, 1, DEFAULT_JOINT_WEIGHTS_NAKAMURA_BASE);
+    _joint_weights_nakamura_base_no_rotation = Eigen::MatrixXd::Constant(_num_dof_base, 1, DEFAULT_JOINT_WEIGHTS_NAKAMURA_BASE);
+    if(_num_dof_base== DEFAULT_NUM_DOF_BASE)
+    {
+        _joint_weights_nakamura_base_no_rotation << DEFAULT_JOINT_WEIGHTS_NAKAMURA_BASE, DEFAULT_JOINT_WEIGHTS_NAKAMURA_BASE, DEFAULT_JOINT_WEIGHTS_NAKAMURA_BASE_LITTLE_MOTION;
+    }
+    _joint_weights_nakamura_base_little_motion = Eigen::MatrixXd::Constant(_num_dof_base, 1, DEFAULT_JOINT_WEIGHTS_NAKAMURA_BASE_LITTLE_MOTION);
 
-    _vel_epsilon_js_arm.resize(_num_dof_arm, 1);
-    _vel_epsilon_js_base.resize(_num_dof_base, 1);
+    _home_config_js_arm = Eigen::MatrixXd::Constant(_num_dof_arm, 1, DEFAULT_HOME_CONFIG_JS_ARM);
+    if(_num_dof_arm == DEFAULT_NUM_DOF_ARM)
+    {
+        _home_config_js_arm << 0.0, -0.14, 0.0, 2.18, 0.0, 0.2, -0.13;
+    }
+    _home_config_js_base = Eigen::MatrixXd::Constant(_num_dof_base, 1, DEFAULT_HOME_CONFIG_JS_BASE);
 
-    _pos_epsilon_os_linear.resize(3, 1);
-    _pos_epsilon_os_angular.resize(3, 1);
+    _pos_epsilon_js_arm = Eigen::MatrixXd::Constant(_num_dof_arm, 1, DEFAULT_POS_EPSILON_JS_ARM);
+    _pos_epsilon_js_base = Eigen::MatrixXd::Constant(_num_dof_base, 1, DEFAULT_POS_EPSILON_JS_BASE);
 
-    _vel_epsilon_os_linear.resize(3, 1);
-    _vel_epsilon_os_angular.resize(3, 1);
+    _vel_epsilon_js_arm = Eigen::MatrixXd::Constant(_num_dof_arm, 1, DEFAULT_VEL_EPSILON_JS_ARM);
+    _vel_epsilon_js_base = Eigen::MatrixXd::Constant(_num_dof_base, 1, DEFAULT_VEL_EPSILON_JS_BASE);
+
+    _pos_epsilon_os_linear = Eigen::MatrixXd::Constant(3, 1, DEFAULT_POS_EPSILON_OS_LINEAR);
+    _pos_epsilon_os_angular = Eigen::MatrixXd::Constant(3, 1, DEFAULT_POS_EPSILON_OS_ANGULAR);
+
+    _vel_epsilon_os_linear = Eigen::MatrixXd::Constant(3, 1, DEFAULT_VEL_EPSILON_OS_LINEAR);
+    _vel_epsilon_os_angular = Eigen::MatrixXd::Constant(3, 1, DEFAULT_VEL_EPSILON_OS_ANGULAR);
 
 }
 

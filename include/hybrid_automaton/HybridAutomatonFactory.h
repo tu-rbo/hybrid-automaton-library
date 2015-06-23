@@ -117,11 +117,13 @@ namespace ha {
         /// Weights of each joint for operational space Nakamura control set
         Eigen::MatrixXd _joint_weights_nakamura_arm;
         Eigen::MatrixXd _joint_weights_nakamura_base;
+        Eigen::MatrixXd _joint_weights_nakamura_base_no_rotation;
+        Eigen::MatrixXd _joint_weights_nakamura_base_little_motion;
 
         /// Home configuration - usually a good initial position to begin the interaction and/or a safe
         /// position to return to
-        Eigen::MatrixXd _home_config_arm;
-        Eigen::MatrixXd _home_config_base;
+        Eigen::MatrixXd _home_config_js_arm;
+        Eigen::MatrixXd _home_config_js_base;
 
         /// Convergence radius of a joint space (js) controller
         Eigen::MatrixXd _pos_epsilon_js_arm;
