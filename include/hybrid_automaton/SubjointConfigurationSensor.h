@@ -6,6 +6,8 @@
 
 #include <boost/shared_ptr.hpp>
 
+#include <Eigen/Dense>
+
 namespace ha {
 
     class SubjointConfigurationSensor;
@@ -38,6 +40,15 @@ namespace ha {
         virtual void setIndex(const std::vector<int>& index)
         {
             _index = index;
+        }
+
+        virtual void setIndex(const Eigen::MatrixXd& index)
+        {
+            _index.resize(index.size());
+            for(int i=0; i<index.rows(); i++)
+            {
+                _index.at(i) = index(i,0);
+            }
         }
 
 		virtual ::Eigen::MatrixXd getCurrentValue() const;

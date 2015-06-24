@@ -55,6 +55,20 @@ namespace ha {
          *
          * the output value of this Sensor will be (q_dot[index[0]], ... q_dot[index[n]])^T
          */
+        virtual void setIndex(const Eigen::MatrixXd& index)
+        {
+            _index.resize(index.size());
+            for(int i=0; i<index.rows(); i++)
+            {
+                _index.at(i) = index(i,0);
+            }
+        }
+
+        /**
+         * @brief Returns a subset of the joint velcoity vector of as a matrix of size dim(index)x1
+         *
+         * the output value of this Sensor will be (q_dot[index[0]], ... q_dot[index[n]])^T
+         */
 		virtual ::Eigen::MatrixXd getCurrentValue() const;
 
 		virtual DescriptionTreeNode::Ptr serialize(const DescriptionTree::ConstPtr& factory) const;

@@ -56,6 +56,9 @@
 #define DEFAULT_VEL_GOAL_OS_LINEAR 0.0
 #define DEFAULT_VEL_GOAL_OS_ANGULAR 0.0
 
+#define DEFAULT_MAX_VEL_OS_LINEAR 0.03
+#define DEFAULT_MAX_VEL_OS_ANGULAR 0.5
+
 namespace ha
 {
 HybridAutomatonFactory::HybridAutomatonFactory()
@@ -68,25 +71,25 @@ HybridAutomatonFactory::HybridAutomatonFactory(const int& num_dof_arm, const int
     :_num_dof_arm(num_dof_arm), _num_dof_base(num_dof_base)
 {
 
-    _index_vec_arm.resize(_num_dof_arm, 0.0);
+    _index_vec_arm = Eigen::MatrixXd::Constant(_num_dof_arm, 1, 0);
     std::stringstream index_arm_ss;
     index_arm_ss << "[" << _num_dof_arm << ",1]";
     const char* separator_arm = "";
     for(int idx_arm=0; idx_arm<_num_dof_arm; idx_arm++)
     {
-        _index_vec_arm.push_back(idx_arm);
+        _index_vec_arm(idx_arm, 0) = idx_arm;
         index_arm_ss << separator_arm << idx_arm;
         separator_arm = ";";
     }
     _index_str_arm = index_arm_ss.str();
 
-    _index_vec_base.resize(_num_dof_base, 0.0);
+    _index_vec_base = Eigen::MatrixXd::Constant(_num_dof_base, 1, 0);
     std::stringstream index_base_ss;
     index_base_ss << "[" << _num_dof_base << ",1]";
     const char* separator_base = "";
     for(int idx_base=_num_dof_arm; idx_base<_num_dof_arm+_num_dof_base; idx_base++)
     {
-        _index_vec_base.push_back(idx_base);
+        _index_vec_base(idx_base, 0) = idx_base;
         index_base_ss << separator_base << idx_base;
         separator_base = ";";
     }
@@ -163,8 +166,11 @@ HybridAutomatonFactory::HybridAutomatonFactory(const int& num_dof_arm, const int
     _vel_epsilon_os_linear =  DEFAULT_VEL_EPSILON_OS_LINEAR;
     _vel_epsilon_os_angular =  DEFAULT_VEL_EPSILON_OS_ANGULAR;
 
-    _vel_goal_os_linear =  DEFAULT_VEL_GOAL_OS_LINEAR;
-    _vel_goal_os_angular =  DEFAULT_VEL_GOAL_OS_ANGULAR;
+    _vel_goal_os_linear = Eigen::MatrixXd::Constant(3, 1, DEFAULT_VEL_GOAL_OS_LINEAR);
+    _vel_goal_os_angular =  Eigen::MatrixXd::Constant(3, 1, DEFAULT_VEL_GOAL_OS_ANGULAR);
+
+    _max_vel_os_linear = DEFAULT_MAX_VEL_OS_LINEAR;
+    _max_vel_os_angular = DEFAULT_MAX_VEL_OS_ANGULAR;
 
 }
 
@@ -358,75 +364,75 @@ void HybridAutomatonFactory::setHome_config_js_base(const Eigen::MatrixXd &home_
 {
     _home_config_js_base = home_config_js_base;
 }
-Eigen::MatrixXd HybridAutomatonFactory::pos_epsilon_js_arm() const
+double HybridAutomatonFactory::pos_epsilon_js_arm() const
 {
     return _pos_epsilon_js_arm;
 }
 
-void HybridAutomatonFactory::setPos_epsilon_js_arm(const Eigen::MatrixXd &pos_epsilon_js_arm)
+void HybridAutomatonFactory::setPos_epsilon_js_arm(const double &pos_epsilon_js_arm)
 {
     _pos_epsilon_js_arm = pos_epsilon_js_arm;
 }
-Eigen::MatrixXd HybridAutomatonFactory::pos_epsilon_js_base() const
+double HybridAutomatonFactory::pos_epsilon_js_base() const
 {
     return _pos_epsilon_js_base;
 }
 
-void HybridAutomatonFactory::setPos_epsilon_js_base(const Eigen::MatrixXd &pos_epsilon_js_base)
+void HybridAutomatonFactory::setPos_epsilon_js_base(const double &pos_epsilon_js_base)
 {
     _pos_epsilon_js_base = pos_epsilon_js_base;
 }
-Eigen::MatrixXd HybridAutomatonFactory::vel_epsilon_js_arm() const
+double HybridAutomatonFactory::vel_epsilon_js_arm() const
 {
     return _vel_epsilon_js_arm;
 }
 
-void HybridAutomatonFactory::setVel_epsilon_js_arm(const Eigen::MatrixXd &vel_epsilon_js_arm)
+void HybridAutomatonFactory::setVel_epsilon_js_arm(const double &vel_epsilon_js_arm)
 {
     _vel_epsilon_js_arm = vel_epsilon_js_arm;
 }
-Eigen::MatrixXd HybridAutomatonFactory::vel_epsilon_js_base() const
+double HybridAutomatonFactory::vel_epsilon_js_base() const
 {
     return _vel_epsilon_js_base;
 }
 
-void HybridAutomatonFactory::setVel_epsilon_js_base(const Eigen::MatrixXd &vel_epsilon_js_base)
+void HybridAutomatonFactory::setVel_epsilon_js_base(const double &vel_epsilon_js_base)
 {
     _vel_epsilon_js_base = vel_epsilon_js_base;
 }
-Eigen::MatrixXd HybridAutomatonFactory::pos_epsilon_os_linear() const
+double HybridAutomatonFactory::pos_epsilon_os_linear() const
 {
     return _pos_epsilon_os_linear;
 }
 
-void HybridAutomatonFactory::setPos_epsilon_os_linear(const Eigen::MatrixXd &pos_epsilon_os_linear)
+void HybridAutomatonFactory::setPos_epsilon_os_linear(const double &pos_epsilon_os_linear)
 {
     _pos_epsilon_os_linear = pos_epsilon_os_linear;
 }
-Eigen::MatrixXd HybridAutomatonFactory::pos_epsilon_os_angular() const
+double HybridAutomatonFactory::pos_epsilon_os_angular() const
 {
     return _pos_epsilon_os_angular;
 }
 
-void HybridAutomatonFactory::setPos_epsilon_os_angular(const Eigen::MatrixXd &pos_epsilon_os_angular)
+void HybridAutomatonFactory::setPos_epsilon_os_angular(const double &pos_epsilon_os_angular)
 {
     _pos_epsilon_os_angular = pos_epsilon_os_angular;
 }
-Eigen::MatrixXd HybridAutomatonFactory::vel_epsilon_os_linear() const
+double HybridAutomatonFactory::vel_epsilon_os_linear() const
 {
     return _vel_epsilon_os_linear;
 }
 
-void HybridAutomatonFactory::setVel_epsilon_os_linear(const Eigen::MatrixXd &vel_epsilon_os_linear)
+void HybridAutomatonFactory::setVel_epsilon_os_linear(const double &vel_epsilon_os_linear)
 {
     _vel_epsilon_os_linear = vel_epsilon_os_linear;
 }
-Eigen::MatrixXd HybridAutomatonFactory::vel_epsilon_os_angular() const
+double HybridAutomatonFactory::vel_epsilon_os_angular() const
 {
     return _vel_epsilon_os_angular;
 }
 
-void HybridAutomatonFactory::setVel_epsilon_os_angular(const Eigen::MatrixXd &vel_epsilon_os_angular)
+void HybridAutomatonFactory::setVel_epsilon_os_angular(const double &vel_epsilon_os_angular)
 {
     _vel_epsilon_os_angular = vel_epsilon_os_angular;
 }
@@ -437,7 +443,7 @@ ha::HybridAutomaton::Ptr HybridAutomatonFactory::createInitialHybridAutomaton(co
                                                                               const Eigen::MatrixXd& max_vel_js_arm,
                                                                               const Eigen::MatrixXd& max_vel_js_base,
                                                                               const Eigen::MatrixXd& index_vec_arm,
-                                                                              const Eigen::MatrixXd& pos_epsilon_js_arm)
+                                                                              const double& pos_epsilon_js_arm)
 {
 
     //create Hybrid Automaton
@@ -449,10 +455,10 @@ ha::HybridAutomaton::Ptr HybridAutomatonFactory::createInitialHybridAutomaton(co
 
     move_home_initial_cm->setName("move_home_initial_cm");
 
-    ha::Controller::Ptr home_ctrl_arm = createJointSpaceArmController("move_home_initial_arm_ctrl",
+    ha::Controller::Ptr home_ctrl_arm = createSubjointSpaceControllerArm("move_home_initial_arm_ctrl",
                                                                       (home_config_js_arm.size() == 0 ? _home_config_js_arm : home_config_js_arm),
                                                                       (max_vel_js_arm.size() == 0 ? _max_vel_js_arm : max_vel_js_arm));
-    ha::Controller::Ptr home_ctrl_base = createJointSpaceBaseController("move_home_initial_base_ctrl",
+    ha::Controller::Ptr home_ctrl_base = createSubjointSpaceControllerBase("move_home_initial_base_ctrl",
                                                                         (home_config_js_base.size() == 0 ? _home_config_js_base : home_config_js_base),
                                                                         (max_vel_js_base.size() == 0 ? _max_vel_js_base : max_vel_js_base));
     std::vector<ha::Controller::Ptr> home_ctrls;
@@ -493,13 +499,13 @@ ha::HybridAutomaton::Ptr HybridAutomatonFactory::createInitialHybridAutomaton(co
     //Create first ControlSwitch
     move_home_initial_cs->setName("move_home_initial_cs");
     ha::JumpConditionPtr initial_convergence_arm_jc =
-            createSubjointSpaceControllerArmGoalConvergenceCondition(home_ctrl_arm,
+            createSubjointSpaceConvergenceConditionArm(home_ctrl_arm,
                                                     (index_vec_arm.size() == 0 ? _index_vec_arm : index_vec_arm),
-                                                    (pos_epsilon_js_arm.size() == 0 ? _pos_epsilon_js_arm : pos_epsilon_js_arm));
+                                                    (pos_epsilon_js_arm == -1 ? _pos_epsilon_js_arm : pos_epsilon_js_arm));
     ha::JumpConditionPtr initial_convergence_vel_arm_jc =
-            createJointSpaceArmConvergenceWithZeroVelCondition();
-    ha::JumpConditionPtr initial_convergence_base_jc = createJointSpaceBaseConvergenceCondition(home_ctrl_base);
-    ha::JumpConditionPtr initial_convergence_vel_base_jc = createJointSpaceBaseConvergenceWithZeroVelCondition();
+            createJointSpaceZeroVelocityConditionArm();
+    ha::JumpConditionPtr initial_convergence_base_jc = createSubjointSpaceConvergenceConditionBase(home_ctrl_base);
+    ha::JumpConditionPtr initial_convergence_vel_base_jc = createJointSpaceZeroVelocityConditionBase();
     move_home_initial_cs->add(initial_convergence_arm_jc);
     move_home_initial_cs->add(initial_convergence_vel_arm_jc);
     move_home_initial_cs->add(initial_convergence_base_jc);
@@ -599,7 +605,7 @@ ha::Controller::Ptr HybridAutomatonFactory::createJointSpaceController(std::stri
     ctrl->setName(name);
     ctrl->setType("InterpolatedJointController");
     ctrl->setArgument("interpolation_type", "quintic");
-    ctrl->setGoal(goal);
+    ctrl->setGoal(goal_js);
     ctrl->setKp((kp_js.size() == 0 ? _combineArmAndBase(_kp_js_arm, _kp_js_base) : kp_js));
     ctrl->setKv((kv_js.size() == 0 ? _combineArmAndBase(_kv_js_arm, _kv_js_base) : kv_js));
     ctrl->setCompletionTime(completion_time);
@@ -624,6 +630,33 @@ ha::Controller::Ptr HybridAutomatonFactory::createSubjointSpaceController(std::s
     index_vec_ss << index_vec;
     ctrl->setArgument("index", index_vec_ss.str());
     ctrl->setGoal(goal_js);
+    ctrl->setKp(kp_js);
+    ctrl->setKv(kv_js);
+    ctrl->setMaximumVelocity(max_velocity);
+    ctrl->setGoalIsRelative(is_relative);
+    return ctrl;
+}
+
+ha::Controller::Ptr HybridAutomatonFactory::createBBSubjointSpaceController(std::string name,
+                                                                            const std::string& topic,
+                                                                            const Eigen::MatrixXd& max_velocity,
+                                                                            const Eigen::MatrixXd& index_vec,
+                                                                            const Eigen::MatrixXd& kp_js,
+                                                                            const Eigen::MatrixXd& kv_js,
+                                                                            bool is_relative,
+                                                                            int update_rate)
+{
+    ha::Controller::Ptr ctrl(new ha::Controller());
+    ctrl->setName(name);
+    ctrl->setType("BlackboardInterpolatedSubjointController");
+    ctrl->setArgument("interpolation_type", "quintic");
+    ha_ostringstream index_vec_ss;
+    index_vec_ss << index_vec;
+    ctrl->setArgument("index", index_vec_ss.str());
+    ctrl->setArgument("reinterpolation", "1");
+    ctrl->setArgument("use_tf", "0");
+    ctrl->setArgument("topic_name", topic);
+    ctrl->setArgument("update_rate", 100);
     ctrl->setKp(kp_js);
     ctrl->setKv(kv_js);
     ctrl->setMaximumVelocity(max_velocity);
@@ -665,68 +698,51 @@ ha::Controller::Ptr HybridAutomatonFactory::createSubjointSpaceControllerBase(st
                                          is_relative);
 }
 
-ha::Controller::Ptr HybridAutomatonFactory::createSubjointSpaceController(std::string name,
-                                                                          const string& topic_name,
-                                                                          const Eigen::MatrixXd& index_vec,
-                                                                          const Eigen::MatrixXd& kp_js,
-                                                                          const Eigen::MatrixXd& kv_js,
-                                                                          const Eigen::MatrixXd& max_velocity,
-                                                                          bool is_relative)
+ha::Controller::Ptr HybridAutomatonFactory::createTFSubjointSpaceControllerBase(std::string name,
+                                                                                const std::string& topic_name,
+                                                                                const std::string& parent_name,
+                                                                                const Eigen::MatrixXd& max_vel_js_base,
+                                                                                const Eigen::MatrixXd& index_vec_base,
+                                                                                const Eigen::MatrixXd& kp_js_base,
+                                                                                const Eigen::MatrixXd& kv_js_base,
+                                                                                bool is_relative,
+                                                                                int update_rate)
 {
-    ha::Controller::Ptr ctrl(new ha::Controller());
-    ctrl->setName(name);
-    ctrl->setType("InterpolatedSubjointController");
-    ctrl->setArgument("interpolation_type", "quintic");
-    ha_ostringstream index_vec_ss;
-    index_vec_ss << index_vec;
-    ctrl->setArgument("index", index_vec_ss.str());
-    ctrl->setGoal(goal_js);
-    ctrl->setKp(kp_js);
-    ctrl->setKv(kv_js);
-    ctrl->setMaximumVelocity(max_velocity);
-    ctrl->setGoalIsRelative(is_relative);
-    return ctrl;
-}
-
-ha::Controller::Ptr HybridAutomatonFactory::createJointSpaceBaseController(std::string name, const std::string& topic, const Eigen::MatrixXd& max_velocity){
     ha::Controller::Ptr ctrl(new ha::Controller());
     ctrl->setName(name);
     ctrl->setType("BlackboardInterpolatedSubjointController");
     ctrl->setArgument("interpolation_type", "quintic");
-    ctrl->setArgument("index", _base_index_str);
+    ha_ostringstream index_vec_ss;
+    index_vec_ss << (index_vec_base.size() == 0 ? _index_vec_base : index_vec_base);
+    ctrl->setArgument("index", index_vec_ss.str());
     ctrl->setArgument("reinterpolation", "1");
     ctrl->setArgument("use_tf", "1");
-    ctrl->setArgument("topic_name", topic);
-    ctrl->setArgument("tf_parent", "odom");
-    ctrl->setArgument("update_rate", 100);
-    ctrl->setKp(_kp_base_jointspace);
-    ctrl->setKv(_kv_base_jointspace);
-    ctrl->setMaximumVelocity(max_velocity);
-    ctrl->setGoalIsRelative(0);
-    return ctrl;
-}
-
-ha::Controller::Ptr HybridAutomatonFactory::createJointSpaceControllerMoreThanOneGoal(std::string name, const Eigen::MatrixXd &goals, const Eigen::MatrixXd vel_max){
-    ha::Controller::Ptr ctrl(new ha::Controller());
-    ctrl->setName(name);
-    ctrl->setType("InterpolatedJointController");
-    ctrl->setArgument("interpolation_type", "quintic");
-    ctrl->setGoal(goals);
-    ctrl->setKp(_kp_jointspace);
-    ctrl->setKv(_kv_jointspace);
-    //ctrl->setCompletionTimes(completionTimes);
-    ctrl->setMaximumVelocity(vel_max);
+    ctrl->setArgument("topic_name", topic_name);
+    ctrl->setArgument("tf_parent", parent_name);
+    ctrl->setArgument("update_rate", update_rate);
+    ctrl->setKp((kp_js_base.size() == 0 ? _kp_js_base : kp_js_base));
+    ctrl->setKv((kv_js_base.size() == 0 ? _kv_js_base : kv_js_base));
+    ctrl->setMaximumVelocity((max_vel_js_base.size() == 0 ? _max_vel_js_base : max_vel_js_base));
+    ctrl->setGoalIsRelative(is_relative);
     return ctrl;
 }
 
 
-ha::Controller::Ptr HybridAutomatonFactory::createTaskSpaceController(std::string name, const Eigen::MatrixXd &pos, const Eigen::MatrixXd &ori, double completionTime){
+ha::Controller::Ptr HybridAutomatonFactory::createOperationalSpaceController(std::string name,
+                                                                             const Eigen::MatrixXd &goal_op_pos,
+                                                                             const Eigen::MatrixXd &goal_op_ori,
+                                                                             double completion_time,
+                                                                             const Eigen::MatrixXd &kp_os_linear,
+                                                                             const Eigen::MatrixXd &kp_os_angular,
+                                                                             const Eigen::MatrixXd &kv_os_linear,
+                                                                             const Eigen::MatrixXd &kv_os_angular,
+                                                                             bool is_relative){
 
     Eigen::MatrixXd bin_home_frame;
     bin_home_frame.resize(4,4);
     bin_home_frame.setIdentity();
-    bin_home_frame.block(0,0,3,3) = ori;
-    bin_home_frame.block(0,3,3,1) = pos;
+    bin_home_frame.block(0,0,3,3) = goal_op_ori;
+    bin_home_frame.block(0,3,3,1) = goal_op_pos;
 
     //Endeffector Frame Controller
     ha::Controller::Ptr ctrl(new ha::Controller);
@@ -735,16 +751,29 @@ ha::Controller::Ptr HybridAutomatonFactory::createTaskSpaceController(std::strin
     ctrl->setArgument("interpolation_type", "cubic");
 
     ctrl->setGoal(bin_home_frame);
-    ctrl->setKp(_kp_opspace);
-    ctrl->setKv(_kv_opspace);
-    ctrl->setCompletionTime(completionTime);
-    ctrl->setGoalIsRelative(0);
+    ctrl->setKp(_combineArmAndBase((kp_os_linear.size() == 0 ? _kp_os_linear : kp_os_linear),
+                                   (kp_os_angular.size() == 0 ? _kp_os_angular : kp_os_angular)));
+    ctrl->setKv(_combineArmAndBase((kv_os_linear.size() == 0 ? _kv_os_linear : kv_os_linear),
+                                   (kv_os_angular.size() == 0 ? _kv_os_angular : kv_os_angular)));
+
+    ctrl->setCompletionTime(completion_time);
+    ctrl->setGoalIsRelative(is_relative);
     ctrl->setArgument("operational_frame", "EE");
 
     return ctrl;
 }
 
-ha::Controller::Ptr HybridAutomatonFactory::createTaskSpaceControllerTF(std::string name, const std::string frame, double max_displacement_velocity, double max_rotational_velocity){
+ha::Controller::Ptr HybridAutomatonFactory::createTFOperationalSpaceController(std::string name,
+                                                                               const std::string frame,
+                                                                               const std::string parent_frame,
+                                                                               double max_vel_os_linear,
+                                                                               double max_vel_os_angular,
+                                                                               const Eigen::MatrixXd &kp_os_linear,
+                                                                               const Eigen::MatrixXd &kp_os_angular,
+                                                                               const Eigen::MatrixXd &kv_os_linear,
+                                                                               const Eigen::MatrixXd &kv_os_angular,
+                                                                               bool is_relative,
+                                                                               int update_rate){
 
     //Endeffector Frame Controller
     ha::Controller::Ptr ctrl(new ha::Controller);
@@ -754,61 +783,39 @@ ha::Controller::Ptr HybridAutomatonFactory::createTaskSpaceControllerTF(std::str
     ctrl->setArgument("reinterpolation", "1");
     ctrl->setArgument("use_tf", "1");
     ctrl->setArgument("topic_name", frame);
-    ctrl->setArgument("tf_parent", "odom");
-    ctrl->setArgument("update_rate", 50);
+    ctrl->setArgument("tf_parent", parent_frame);
+    ctrl->setArgument("update_rate", update_rate);
 
     Eigen::MatrixXd max_vel(2,1);
-    max_vel << max_rotational_velocity, max_displacement_velocity;
+    max_vel << (max_vel_os_linear == -1 ? _max_vel_os_linear : max_vel_os_linear), (max_vel_os_angular == -1 ? _max_vel_os_angular : max_vel_os_angular);
     ctrl->setMaximumVelocity(max_vel);
 
-    ctrl->setKp( _kp_opspace);
-    ctrl->setKv( _kv_opspace);
-    ctrl->setGoalIsRelative(0);
+    ctrl->setKp(_combineArmAndBase((kp_os_linear.size() == 0 ? _kp_os_linear : kp_os_linear),
+                                   (kp_os_angular.size() == 0 ? _kp_os_angular : kp_os_angular)));
+    ctrl->setKv(_combineArmAndBase((kv_os_linear.size() == 0 ? _kv_os_linear : kv_os_linear),
+                                   (kv_os_angular.size() == 0 ? _kv_os_angular : kv_os_angular)));
+    ctrl->setGoalIsRelative(is_relative);
     ctrl->setArgument("operational_frame", "EE");
 
     return ctrl;
 }
 
-ha::Controller::Ptr HybridAutomatonFactory::createTaskSpaceTrajController(std::string name, const std::string topic, double max_displacement_velocity, double max_rotational_velocity, bool relative_goal){
-
-    //Endeffector Frame Controller
-    ha::Controller::Ptr ctrl(new ha::Controller);
-    ctrl->setName(name);
-    ctrl->setType("BlackboardInterpolatedHTransformTrajectoryController");
-    ctrl->setArgument("interpolation_type", "cubic");
-    ctrl->setArgument("reinterpolation", "1");
-    ctrl->setArgument("use_tf", "0");
-    ctrl->setArgument("topic_name", topic);
-    ctrl->setArgument("update_rate", -1);
-
-    Eigen::MatrixXd max_vel(2,1);
-    max_vel << max_rotational_velocity, max_displacement_velocity;
-    ctrl->setMaximumVelocity(max_vel);
-
-    ctrl->setKp( _kp_opspace);
-    ctrl->setKv( _kv_opspace);
-    ctrl->setGoalIsRelative(relative_goal);
-    ctrl->setArgument("operational_frame", "EE");
-
-    return ctrl;
-}
-
-ha::JumpCondition::Ptr HybridAutomatonFactory::createJointSpaceControllerGoalConvergenceCondition(ha::ControllerConstPtr js_ctrl,
-                                                                                                  const Eigen::MatrixXd& pos_epsilon_js)
+ha::JumpCondition::Ptr HybridAutomatonFactory::createJointSpaceConvergenceCondition(ha::ControllerConstPtr js_ctrl,
+                                                                                                  const double& pos_epsilon_js)
 {
     ha::JumpConditionPtr jc(new ha::JumpCondition());
     ha::SensorPtr sensor(new ha::JointConfigurationSensor());
     jc->setSensor(sensor);
-    jc->setControllerGoal(ctrl);
+    jc->setControllerGoal(js_ctrl);
     jc->setJumpCriterion(ha::JumpCondition::NORM_L_INF);
-    jc->setEpsilon((pos_epsilon_js.size() == 0 ? _combineArmAndBase(_pos_epsilon_js_arm, _pos_epsilon_js_base) : pos_epsilon_js));
+    jc->setEpsilon(pos_epsilon_js);
 
     return jc;
 }
 
-ha::JumpCondition::Ptr HybridAutomatonFactory::createSubjointSpaceControllerGoalConvergenceCondition(ha::ControllerConstPtr subjs_ctrl,
-                                                                                       const std::vector<int>& index_vec,
-                                                                                       const Eigen::MatrixXd& pos_epsilon_js)
+ha::JumpCondition::Ptr HybridAutomatonFactory::createSubjointSpaceConvergenceCondition(ha::ControllerConstPtr subjs_ctrl,
+                                                                                       const Eigen::MatrixXd& index_vec,
+                                                                                       const double& pos_epsilon_js)
 {
     ha::JumpConditionPtr jc(new ha::JumpCondition());
     ha::SubjointConfigurationSensorPtr sensor(new ha::SubjointConfigurationSensor());
@@ -821,27 +828,27 @@ ha::JumpCondition::Ptr HybridAutomatonFactory::createSubjointSpaceControllerGoal
     return jc;
 }
 
-ha::JumpCondition::Ptr HybridAutomatonFactory::createSubjointSpaceControllerArmGoalConvergenceCondition(ha::ControllerConstPtr subjs_ctrl,
+ha::JumpCondition::Ptr HybridAutomatonFactory::createSubjointSpaceConvergenceConditionArm(ha::ControllerConstPtr subjs_ctrl,
                                                                                        const Eigen::MatrixXd& index_vec_arm,
-                                                                                       const Eigen::MatrixXd& pos_epsilon_js_arm)
+                                                                                       const double& pos_epsilon_js_arm)
 {
-    return createSubjointSpaceControllerGoalConvergenceCondition(subjs_ctrl,
+    return createSubjointSpaceConvergenceCondition(subjs_ctrl,
                                                                  (index_vec_arm.size() == 0 ? _index_vec_arm : index_vec_arm),
-                                                                 (pos_epsilon_js_arm.size() == 0 ? _pos_epsilon_js_arm : pos_epsilon_js_arm));
+                                                                 (pos_epsilon_js_arm == -1 ? _pos_epsilon_js_arm : pos_epsilon_js_arm));
 }
 
-ha::JumpCondition::Ptr HybridAutomatonFactory::createSubjointSpaceControllerBaseGoalConvergenceCondition(ha::ControllerConstPtr subjs_ctrl,
+ha::JumpCondition::Ptr HybridAutomatonFactory::createSubjointSpaceConvergenceConditionBase(ha::ControllerConstPtr subjs_ctrl,
                                                                                         const Eigen::MatrixXd& index_vec_base,
-                                                                                        const Eigen::MatrixXd& pos_epsilon_js_base)
+                                                                                        const double& pos_epsilon_js_base)
  {
-     return createSubjointSpaceControllerGoalConvergenceCondition(subjs_ctrl,
+     return createSubjointSpaceConvergenceCondition(subjs_ctrl,
                                                                   (index_vec_base.size() == 0 ? _index_vec_base : index_vec_base),
-                                                                  (pos_epsilon_js_base.size() == 0 ? _pos_epsilon_js_base : pos_epsilon_js_base));
+                                                                  (pos_epsilon_js_base == -1 ? _pos_epsilon_js_base : pos_epsilon_js_base));
  }
 
-ha::JumpCondition::Ptr HybridAutomatonFactory::createJointSpaceConvergenceWithVelocityCondition(const Eigen::MatrixXd& index_vec,
+ha::JumpCondition::Ptr HybridAutomatonFactory::createJointSpaceVelocityCondition(const Eigen::MatrixXd& index_vec,
                                                                                                 const Eigen::MatrixXd& vel_goal_js,
-                                                                                                const Eigen::MatrixXd& vel_epsilon_js){
+                                                                                                const double& vel_epsilon_js){
     ha::JumpConditionPtr jc(new ha::JumpCondition());
     ha::SubjointVelocitySensorPtr sensor(new ha::SubjointVelocitySensor());
     sensor->setIndex(index_vec);
@@ -853,43 +860,46 @@ ha::JumpCondition::Ptr HybridAutomatonFactory::createJointSpaceConvergenceWithVe
     return jc;
 }
 
-ha::JumpCondition::Ptr HybridAutomatonFactory::createJointSpaceConvergenceWithZeroVelocityCondition(const Eigen::MatrixXd& index_vec,
-                                                                                                    const Eigen::MatrixXd& vel_epsilon_js)
+ha::JumpCondition::Ptr HybridAutomatonFactory::createJointSpaceZeroVelocityCondition(const Eigen::MatrixXd& index_vec,
+                                                                                                    const double &vel_epsilon_js)
 {
-    Eigen::MatrixXd zero_goal = Eigen::MatrixXd::Contant(vel_epsilon_js.size(), 1, 0.0);
-    return createJointSpaceConvergenceWithVelocityCondition(index_vec, zero_goal, vel_epsilon_js);
+    Eigen::MatrixXd zero_goal = Eigen::MatrixXd::Constant(index_vec.size(), 1, 0.0);
+    return createJointSpaceVelocityCondition(index_vec, zero_goal, vel_epsilon_js);
 }
 
-ha::JumpCondition::Ptr HybridAutomatonFactory::createJointSpaceArmConvergenceWithZeroVelocityCondition(const Eigen::MatrixXd& index_vec_arm,
-                                                                                                       const Eigen::MatrixXd& vel_epsilon_js_arm)
+ha::JumpCondition::Ptr HybridAutomatonFactory::createJointSpaceZeroVelocityConditionArm(const Eigen::MatrixXd& index_vec_arm,
+                                                                                                       const double &vel_epsilon_js_arm)
 {
-    return createJointSpaceConvergenceWithZeroVelocityCondition((index_vec_arm.size() == 0 ? _index_vec_arm : index_vec_arm),
-                                                                (vel_epsilon_js_arm.size() == 0 ? _vel_epsilon_js_arm : vel_epsilon_js_arm));
+    return createJointSpaceZeroVelocityCondition((index_vec_arm.size() == 0 ? _index_vec_arm : index_vec_arm),
+                                                                (vel_epsilon_js_arm == -1 ? _vel_epsilon_js_arm : vel_epsilon_js_arm));
 }
 
-ha::JumpCondition::Ptr HybridAutomatonFactory::createJointSpaceArmConvergenceWithVelocityCondition(const Eigen::MatrixXd& index_vec_arm,
+ha::JumpCondition::Ptr HybridAutomatonFactory::createJointSpaceVelocityConditionArm(const Eigen::MatrixXd& index_vec_arm,
                                                                                                    const Eigen::MatrixXd& vel_goal_js_arm,
-                                                                                                   const Eigen::MatrixXd& vel_epsilon_js_arm)
+                                                                                                   const double& vel_epsilon_js_arm)
 {
-    return createJointSpaceConvergenceWithVelocityCondition((index_vec_arm.size() == 0 ? _index_vec_arm : index_vec_arm),
-                                                            (vel_goal_js_arm.size() == 0 ? _vel_goal_js_arm : vel_goal_js_arm)
-                                                            (vel_epsilon_js_arm.size() == 0 ? _vel_epsilon_js_arm : vel_epsilon_js_arm));
+    return createJointSpaceVelocityCondition((index_vec_arm.size() == 0 ? _index_vec_arm : index_vec_arm),
+                                                            (vel_goal_js_arm.size() == 0 ? _vel_goal_js_arm : vel_goal_js_arm),
+                                                            (vel_epsilon_js_arm == -1 ? _vel_epsilon_js_arm : vel_epsilon_js_arm));
 }
 
-ha::JumpCondition::Ptr HybridAutomatonFactory::createJointSpaceBaseConvergenceWithZeroVelocityCondition(const Eigen::MatrixXd& index_vec_base,
-                                                                                                        const Eigen::MatrixXd& vel_epsilon_js_base)
+ha::JumpCondition::Ptr HybridAutomatonFactory::createJointSpaceZeroVelocityConditionBase(const Eigen::MatrixXd& index_vec_base,
+                                                                                                        const double& vel_epsilon_js_base)
 {
-    return createJointSpaceConvergenceWithZeroVelocityCondition((index_vec_base.size() == 0 ? _index_vec_base : index_vec_base),
-                                                                (vel_epsilon_js_base.size() == 0 ? _vel_epsilon_js_base : vel_epsilon_js_base));
+    return createJointSpaceZeroVelocityCondition((index_vec_base.size() == 0 ? _index_vec_base : index_vec_base),
+                                                                (vel_epsilon_js_base == -1 ? _vel_epsilon_js_base : vel_epsilon_js_base));
 }
 
-ha::JumpCondition::Ptr HybridAutomatonFactory::createTaskSpaceConvergenceCondition(ha::ControllerConstPtr ctrl, bool relative){
+ha::JumpCondition::Ptr HybridAutomatonFactory::createOperationalSpaceConvergenceCondition(ha::ControllerConstPtr ctrl,
+                                                                                          bool relative,
+                                                                                          const double& pos_epsilon_os)
+{
     ha::JumpConditionPtr jc(new ha::JumpCondition());
     ha::SensorPtr sensor(new ha::FramePoseSensor());
     jc->setSensor(sensor);
     jc->setControllerGoal(ctrl);
     jc->setJumpCriterion(ha::JumpCondition::NORM_TRANSFORM);
-    jc->setEpsilon(_op_epsilon);
+    jc->setEpsilon(pos_epsilon_os);
 
     if(relative)
         jc->setGoalRelative();
