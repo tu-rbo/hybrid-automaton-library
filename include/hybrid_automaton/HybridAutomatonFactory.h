@@ -359,20 +359,6 @@ public:
 //    bool CreateGoToHomeCMAndConvergenceCS(const ha::ControlMode::Ptr& cm_ptr, const ha::ControlSwitch::Ptr& cs_ptr, const std::string& name, const Eigen::MatrixXd& goal_cfg);
 
 //    /**
-//     * @brief Create a CM to go to the viewing position (joint space - arm+base) and a CS for its convergence (both position and zero velocity)
-//     *
-//     * @param cm_ptr Pointer to the resulting CM
-//     * @param cs_ptr Pointer to the resulting CS
-//     * @param name Name used as root for the CM and the CS
-//     * @param localization The map used for localization (viewing poses depend on it)
-//     * @param shelf_tracking The model used for tracking (viewing poses depend on it)
-//     * @param bin_id The bin that has to be observed (viewing poses depend on it)
-//     * @return bool
-//     */
-//    bool CreateGoToViewCMAndConvergenceCS(const ha::ControlMode::Ptr& cm_ptr, const ha::ControlSwitch::Ptr& cs_ptr,
-//                                          const std::string& name, int localization, int shelf_tracking, int bin_id);
-
-//    /**
 //     * @brief Create a CM to grasp (close the hand or activate vacuum cleaner + joint space of the arm to maintain pose) and a CS that indicates successful grasp
 //     * (waits 3 seconds AND if the tool is the vacuum cleaner, the pressure should go over a threshold)
 //     *
