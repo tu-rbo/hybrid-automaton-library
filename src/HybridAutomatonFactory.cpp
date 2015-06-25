@@ -781,6 +781,44 @@ ha::Controller::Ptr HybridAutomatonFactory::createOperationalSpaceController(std
     return ctrl;
 }
 
+ha::Controller::Ptr HybridAutomatonFactory::createOperationalSpaceController(std::string name,
+                                                     const Eigen::MatrixXd &goal_op_pos,
+                                                     const Eigen::MatrixXd &goal_op_ori,
+                                                     double max_vel_os_linear,
+                                                     double max_vel_os_angular,
+                                                     const Eigen::MatrixXd &kp_os_linear,
+                                                     const Eigen::MatrixXd &kp_os_angular,
+                                                     const Eigen::MatrixXd &kv_os_linear,
+                                                     const Eigen::MatrixXd &kv_os_angular,
+                                                     bool is_relative)
+{
+    Eigen::MatrixXd bin_home_frame;
+    bin_home_frame.resize(4,4);
+    bin_home_frame.setIdentity();
+    bin_home_frame.block(0,0,3,3) = goal_op_ori;
+    bin_home_frame.block(0,3,3,1) = goal_op_pos;
+
+    //Endeffector Frame Controller
+    ha::Controller::Ptr ctrl(new ha::Controller);
+    ctrl->setName(name);
+    ctrl->setType("InterpolatedHTransformController");
+    ctrl->setArgument("interpolation_type", "cubic");
+
+    ctrl->setGoal(bin_home_frame);
+    ctrl->setKp(_combineArmAndBase((kp_os_linear.size() == 0 ? _kp_os_linear : kp_os_linear),
+                                   (kp_os_angular.size() == 0 ? _kp_os_angular : kp_os_angular)));
+    ctrl->setKv(_combineArmAndBase((kv_os_linear.size() == 0 ? _kv_os_linear : kv_os_linear),
+                                   (kv_os_angular.size() == 0 ? _kv_os_angular : kv_os_angular)));
+
+    Eigen::MatrixXd max_vel(2,1);
+    max_vel << (max_vel_os_linear == -1 ? _max_vel_os_linear : max_vel_os_linear), (max_vel_os_angular == -1 ? _max_vel_os_angular : max_vel_os_angular);
+    ctrl->setMaximumVelocity(max_vel);
+    ctrl->setGoalIsRelative(is_relative);
+    ctrl->setArgument("operational_frame", "EE");
+
+    return ctrl;
+}
+
 ha::Controller::Ptr HybridAutomatonFactory::createBBOperationalSpaceController(std::string name,
                                                                                bool trajectory,
                                                                                bool use_tf,
@@ -1176,23 +1214,6 @@ void HybridAutomatonFactory::CreateUngraspCMAndCS(const ha::ControlMode::Ptr& cm
     cs_ptr2->add(to_stop_or_time_jc);
 }
 
-
-
-
-/**
- * @brief Create a CM to move to a frame defined in a ROS tf or a topic (op space - arm+base) and a CS that indicates convergence
- *
- * @param cm_ptr Pointer to the resulting CM
- * @param cs_ptr Pointer to the resulting CS
- * @param name Name used as root for the CM and the CS
- * @param frame_name Name of the frame (or the topic) to be listened to from ROS
- * @param lin_vel Linear velocity for the interpolation
- * @param ang_vel Angular velocity for the interpolation
- * @param relative True if the goal is relative to the current pose
- * @param useTf True if the goal is a tf, false if the goal is a set of frames published in a topic
- * @param useBase True if we want to move the base
- * @return bool
- */
 void HybridAutomatonFactory::CreateGoToBBCMAndConvergenceCS(const ha::ControlMode::Ptr& cm_ptr,
                                                             const ha::ControlSwitch::Ptr& cs_ptr,
                                                             const std::string& name,
@@ -1201,14 +1222,13 @@ void HybridAutomatonFactory::CreateGoToBBCMAndConvergenceCS(const ha::ControlMod
                                                             const double& pos_epsilon_os,
                                                             const std::string& frame_name,
                                                             const std::string& parent_frame_name,
-                                                            bool relative,
-                                                            bool useTf,
-                                                            bool useBase,
+                                                            bool use_tf,
+                                                            bool use_base,
+                                                            bool is_relative,
                                                             const Eigen::MatrixXd &kp_os_linear,
                                                             const Eigen::MatrixXd &kp_os_angular,
                                                             const Eigen::MatrixXd &kv_os_linear,
-                                                            const Eigen::MatrixXd &kv_os_angular,
-                                                            bool is_relative,
+                                                            const Eigen::MatrixXd &kv_os_angular,                                                            
                                                             int update_rate){
     cm_ptr->setName(name + std::string("_cm"));
 
@@ -1216,7 +1236,7 @@ void HybridAutomatonFactory::CreateGoToBBCMAndConvergenceCS(const ha::ControlMod
     ha::Controller::Ptr bb_ctrl;
     bb_ctrl = createBBOperationalSpaceController(name + std::string("_ctrl"),
                                                         false,
-                                                        useTf,
+                                                        use_tf,
                                                         max_vel_os_linear,
                                                         max_vel_os_angular,
                                                         frame_name,
@@ -1228,16 +1248,52 @@ void HybridAutomatonFactory::CreateGoToBBCMAndConvergenceCS(const ha::ControlMod
                                                         is_relative,
                                                         update_rate);
 
-    ha::ControlSet::Ptr bb_cs = createTPNakamuraControlSet(bb_ctrl, useBase);
+    ha::ControlSet::Ptr bb_cs = createTPNakamuraControlSet(bb_ctrl, use_base);
     cm_ptr->setControlSet(bb_cs);
 
     cs_ptr->setName(name + std::string("_cs"));
-    ha::JumpConditionPtr convergence_jc = createOperationalSpaceConvergenceCondition(bb_ctrl, relative, pos_epsilon_os);
+    ha::JumpConditionPtr convergence_jc = createOperationalSpaceConvergenceCondition(bb_ctrl, is_relative, pos_epsilon_os);
     cs_ptr->add(convergence_jc);
 }
 
+void HybridAutomatonFactory::CreateGoToCMAndConvergenceCS(const ha::ControlMode::Ptr& cm_ptr,
+                                                            const ha::ControlSwitch::Ptr& cs_ptr,
+                                                            const std::string& name,
+                                                            const Eigen::MatrixXd &goal_op_pos,
+                                                            const Eigen::MatrixXd &goal_op_ori,
+                                                            double max_vel_os_linear,
+                                                            double max_vel_os_angular,
+                                                            const double& pos_epsilon_os,
+                                                            bool use_base,
+                                                            bool is_relative,
+                                                            const Eigen::MatrixXd &kp_os_linear,
+                                                            const Eigen::MatrixXd &kp_os_angular,
+                                                            const Eigen::MatrixXd &kv_os_linear,
+                                                            const Eigen::MatrixXd &kv_os_angular){
+    cm_ptr->setName(name + std::string("_cm"));
 
+    //Endeffector Frame Controller
+    ha::Controller::Ptr os_ctrl;
+    std::string name,
 
+    os_ctrl = createOperationalSpaceController(name + std::string("_ctrl"),
+                                               goal_op_pos,
+                                               goal_op_ori,
+                                               max_vel_os_linear,
+                                               max_vel_os_angular,
+                                               kp_os_linear,
+                                               kp_os_angular,
+                                               kv_os_linear,
+                                               kv_os_angular,
+                                               is_relative);
+
+    ha::ControlSet::Ptr os_cs = createTPNakamuraControlSet(os_ctrl, use_base);
+    cm_ptr->setControlSet(os_cs);
+
+    cs_ptr->setName(name + std::string("_cs"));
+    ha::JumpConditionPtr convergence_jc = createOperationalSpaceConvergenceCondition(os_ctrl, is_relative, pos_epsilon_os);
+    cs_ptr->add(convergence_jc);
+}
 
 Eigen::MatrixXd HybridAutomatonFactory::_combineArmAndBase(const Eigen::MatrixXd& arm_vector, const Eigen::MatrixXd base_vector)
 {

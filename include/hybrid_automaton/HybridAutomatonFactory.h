@@ -457,6 +457,38 @@ public:
                                         bool is_relative = false,
                                         int update_rate = 50);
 
+    /**
+     * @brief Create a CM to move to a static frame (op space - arm+base) and a CS that indicates convergence
+     *
+     * @param cm_ptr Pointer to the resulting CM
+     * @param cs_ptr Pointer to the resulting CS
+     * @param name Name used as root for the CM and the CS
+     * @param frame_name Name of the frame (or the topic) to be listened to from ROS
+     * @param lin_vel Linear velocity for the interpolation
+     * @param ang_vel Angular velocity for the interpolation
+     * @param relative True if the goal is relative to the current pose
+     * @param useTf True if the goal is a tf, false if the goal is a set of frames published in a topic
+     * @param useBase True if we want to move the base
+     * @return bool
+     */
+    void CreateGoToCMAndConvergenceCS(const ha::ControlMode::Ptr& cm_ptr,
+                                        const ha::ControlSwitch::Ptr& cs_ptr,
+                                        const std::string& name,
+                                        double max_vel_os_linear,
+                                        double max_vel_os_angular,
+                                        const double& pos_epsilon_os,
+                                        const std::string& frame_name,
+                                        const std::string& parent_frame_name,
+                                        bool relative,
+                                        bool useTf,
+                                        bool useBase,
+                                        const Eigen::MatrixXd &kp_os_linear = Eigen::MatrixXd(),
+                                        const Eigen::MatrixXd &kp_os_angular = Eigen::MatrixXd(),
+                                        const Eigen::MatrixXd &kv_os_linear = Eigen::MatrixXd(),
+                                        const Eigen::MatrixXd &kv_os_angular = Eigen::MatrixXd(),
+                                        bool is_relative = false,
+                                        int update_rate = 50);
+
 
 
     Eigen::MatrixXd max_vel_js_arm() const;
