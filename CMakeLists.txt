@@ -106,6 +106,8 @@ endif()
 include_directories(${PROJECT_SOURCE_DIR})
 include_directories(${PROJECT_SOURCE_DIR}/include)
 
+add_subdirectory(examples)
+
 # Collect sources into the variable HA_SOURCES 
 set (HA_CORE_HEADERS
     "${PROJECT_SOURCE_DIR}/include/hybrid_automaton/HybridAutomaton.h"
