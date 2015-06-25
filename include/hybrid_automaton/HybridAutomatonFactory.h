@@ -482,8 +482,6 @@ public:
                                       const Eigen::MatrixXd &kv_os_linear = Eigen::MatrixXd(),
                                       const Eigen::MatrixXd &kv_os_angular = Eigen::MatrixXd());
 
-
-
     Eigen::MatrixXd max_vel_js_arm() const;
     void setMax_vel_js_arm(const Eigen::MatrixXd &max_vel_js_arm);
 
