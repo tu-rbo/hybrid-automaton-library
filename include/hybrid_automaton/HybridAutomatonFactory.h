@@ -225,6 +225,17 @@ public:
                                                          const Eigen::MatrixXd &kv_os_angular = Eigen::MatrixXd(),
                                                          bool is_relative = false);
 
+    ha::Controller::Ptr createOperationalSpaceController(std::string name,
+                                                         const Eigen::MatrixXd &goal_op_pos,
+                                                         const Eigen::MatrixXd &goal_op_ori,
+                                                         double max_vel_os_linear = -1,
+                                                         double max_vel_os_angular = -1,
+                                                         const Eigen::MatrixXd &kp_os_linear = Eigen::MatrixXd(),
+                                                         const Eigen::MatrixXd &kp_os_angular = Eigen::MatrixXd(),
+                                                         const Eigen::MatrixXd &kv_os_linear = Eigen::MatrixXd(),
+                                                         const Eigen::MatrixXd &kv_os_angular = Eigen::MatrixXd(),
+                                                         bool is_relative = false);
+
     /**
          * @brief Create an interpolated task space controller to move the end-effector from the current robots position to a goal frame given as a /tf frame
          *
@@ -447,15 +458,29 @@ public:
                                         const double& pos_epsilon_os,
                                         const std::string& frame_name,
                                         const std::string& parent_frame_name,
-                                        bool relative,
-                                        bool useTf,
-                                        bool useBase,
+                                        bool use_tf,
+                                        bool use_base,
+                                        bool is_relative = false,
                                         const Eigen::MatrixXd &kp_os_linear = Eigen::MatrixXd(),
                                         const Eigen::MatrixXd &kp_os_angular = Eigen::MatrixXd(),
                                         const Eigen::MatrixXd &kv_os_linear = Eigen::MatrixXd(),
                                         const Eigen::MatrixXd &kv_os_angular = Eigen::MatrixXd(),
-                                        bool is_relative = false,
                                         int update_rate = 50);
+
+    void CreateGoToCMAndConvergenceCS(const ha::ControlMode::Ptr& cm_ptr,
+                                      const ha::ControlSwitch::Ptr& cs_ptr,
+                                      const std::string& name,
+                                      const Eigen::MatrixXd &goal_op_pos,
+                                      const Eigen::MatrixXd &goal_op_ori,
+                                      double max_vel_os_linear,
+                                      double max_vel_os_angular,
+                                      const double& pos_epsilon_os,
+                                      bool use_base,
+                                      bool is_relative = false,
+                                      const Eigen::MatrixXd &kp_os_linear = Eigen::MatrixXd(),
+                                      const Eigen::MatrixXd &kp_os_angular = Eigen::MatrixXd(),
+                                      const Eigen::MatrixXd &kv_os_linear = Eigen::MatrixXd(),
+                                      const Eigen::MatrixXd &kv_os_angular = Eigen::MatrixXd());
 
 
 
