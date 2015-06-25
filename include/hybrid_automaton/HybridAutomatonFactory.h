@@ -102,9 +102,9 @@ public:
          * @param ctrl The controller in the controlset
          * @return ha::ControlSet::Ptr The generated control set
          */
-    ha::ControlSet::Ptr createJointSpaceControlSet(ha::Controller::Ptr ctrl);
+    ha::ControlSet::Ptr createControlSet(ha::Controller::Ptr ctrl);
 
-    ha::ControlSet::Ptr createJointSpaceControlSet(const std::vector<ha::Controller::Ptr>& ctrls);
+    ha::ControlSet::Ptr createControlSet(const std::vector<ha::Controller::Ptr>& ctrls);
 
     /**
          * @brief Create a control set for task space controllers
@@ -113,7 +113,7 @@ public:
          * @param move_base True if the control set should move both base and arm
          * @return ha::ControlSet::Ptr The generated control set
          */
-    ha::ControlSet::Ptr createOperationalSpaceNakamuraControlSet(ha::Controller::Ptr ctrl,
+    ha::ControlSet::Ptr createTPNakamuraControlSet(ha::Controller::Ptr ctrl,
                                                                  bool move_base,
                                                                  const Eigen::MatrixXd &kp_js_nakamura_arm = Eigen::MatrixXd(),
                                                                  const Eigen::MatrixXd &kp_js_nakamura_base = Eigen::MatrixXd(),

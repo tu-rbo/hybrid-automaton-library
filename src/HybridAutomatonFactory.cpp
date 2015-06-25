@@ -467,7 +467,7 @@ ha::HybridAutomaton::Ptr HybridAutomatonFactory::createInitialHybridAutomaton(co
     std::vector<ha::Controller::Ptr> home_ctrls;
     home_ctrls.push_back(home_ctrl_arm);
     home_ctrls.push_back(home_ctrl_base);
-    ha::ControlSet::Ptr goto_home_cs = createJointSpaceControlSet(home_ctrls);
+    ha::ControlSet::Ptr goto_home_cs = createControlSet(home_ctrls);
     move_home_initial_cm->setControlSet(goto_home_cs);
 
     //add controller to ControlSet
@@ -551,7 +551,7 @@ ha::HybridAutomaton::Ptr HybridAutomatonFactory::createEmptyHybridAutomaton()
     return grav_comp_ha;
 }
 
-ha::ControlSet::Ptr HybridAutomatonFactory::createJointSpaceControlSet(ha::Controller::Ptr ctrl)
+ha::ControlSet::Ptr HybridAutomatonFactory::createControlSet(ha::Controller::Ptr ctrl)
 {
     ha::ControlSet::Ptr cs(new ha::ControlSet());
     cs->setType("rxControlSet");
@@ -559,7 +559,7 @@ ha::ControlSet::Ptr HybridAutomatonFactory::createJointSpaceControlSet(ha::Contr
     return cs;
 }
 
-ha::ControlSet::Ptr HybridAutomatonFactory::createJointSpaceControlSet(const std::vector<ha::Controller::Ptr>& ctrls)
+ha::ControlSet::Ptr HybridAutomatonFactory::createControlSet(const std::vector<ha::Controller::Ptr>& ctrls)
 {
     ha::ControlSet::Ptr cs(new ha::ControlSet());
     cs->setType("rxControlSet");
@@ -568,7 +568,7 @@ ha::ControlSet::Ptr HybridAutomatonFactory::createJointSpaceControlSet(const std
     return cs;
 }
 
-ha::ControlSet::Ptr HybridAutomatonFactory::createOperationalSpaceNakamuraControlSet(ha::Controller::Ptr ctrl, bool move_base,
+ha::ControlSet::Ptr HybridAutomatonFactory::createTPNakamuraControlSet(ha::Controller::Ptr ctrl, bool move_base,
                                                                                      const Eigen::MatrixXd& kp_js_nakamura_arm,
                                                                                      const Eigen::MatrixXd& kp_js_nakamura_base,
                                                                                      const Eigen::MatrixXd& kv_js_nakamura_arm,
@@ -989,7 +989,7 @@ void HybridAutomatonFactory::CreateGoToHomeCMAndConvergenceCSArm(const ha::Contr
 
 
     //ha::ControlSet::Ptr goto_home_cs = _createJointSpaceWholeBodyControlSet(home_ctrl_arm, ha::ControllerPtr());
-    ha::ControlSet::Ptr goto_home_cs =  createJointSpaceControlSet(home_ctrl_arm);
+    ha::ControlSet::Ptr goto_home_cs =  createControlSet(home_ctrl_arm);
 
     cm_ptr->setControlSet(goto_home_cs);
 
@@ -1226,7 +1226,7 @@ void HybridAutomatonFactory::CreateGoToBBCMAndConvergenceCS(const ha::ControlMod
                                                         is_relative,
                                                         update_rate);
 
-    ha::ControlSet::Ptr bb_cs = createOperationalSpaceNakamuraControlSet(bb_ctrl, useBase);
+    ha::ControlSet::Ptr bb_cs = createTPNakamuraControlSet(bb_ctrl, useBase);
     cm_ptr->setControlSet(bb_cs);
 
     cs_ptr->setName(name + std::string("_cs"));
