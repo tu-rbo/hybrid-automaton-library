@@ -6,19 +6,23 @@ This library implements a platform agnostic framework for constructing and execu
 
 # Hybrid Automaton Basics
 
-A Hybrid Automaton is a directed graph where the nodes are controllers and the edges are transitions between controllers.
+A [Hybrid Automaton](@ref ha::HybridAutomaton)  is a directed graph where the nodes are continuous behaviours defined by one or more controllers and the edges are discrete transitions between them.
+
+## Control Mode
+A [Control Mode](@ref ha::ControlMode) is a node in this graph. Only one [Control Mode](@ref ha::ControlMode) can be active at a time. The active mode completely defines the motion of the robot.
+
+Each [Control Mode](@ref ha::ControlMode) contains one [Control Set](@ref ha::ControlSet). The [Control Set](@ref ha::ControlSet) is an interface for an algorithm that combines the output of one or more [Controllers](@ref ha::Controller) into a control signal for the robot. Each [Control Set](@ref ha::ControlSet) contains one or more [Controllers](@ref ha::Controller). 
 
 ## Control Switch 
 
-A Control Switch is a transition between two Controllers. A Control Switch is said to be active when the transition should be executed 
+A [Control Switch](@ref ha::ControlSwitch) is a transition between two Control Modes. A Control Switch is said to be active when the transition should be executed. 
 
-A Control Switch gets active, when all its Jump Conditions are met
+Each ControlSwitch contains one or more [Jump Conditions](@ref ha::JumpCondition). A Control Switch gets active, when all its Jump Conditions are met.
 
 If two or more Control Switches get active simultaneously, the one that was added first to the Hybrid Automaton will be executed. 
 
-
 ## Jump Condition 
-A Jump Condition is the smallest unit of a system state. Jump conditions can relate to both internal states (e.g. elapsed time, controller convergence) and external observations (e.g. force threshold). In the latter case, they resemble perceptual feature detectors.
+A [Jump Condition](@ref ha::JumpCondition) is the smallest unit of a system state. Jump conditions can relate to both internal states (e.g. elapsed time, controller convergence) and external observations (e.g. force threshold).
 
 Typical Jump Conditions are:
 
@@ -26,19 +30,8 @@ Typical Jump Conditions are:
 * Reaching a certain time stamp
 * Registering a force threshold
 
-## Controller 
-
-Every node of a Hybrid Automaton is called Controller. 
-In fact, in our implementation every node is a set of controllers to simplify reuse.
-
-
-
-
-A Controller is a set of control algorithms that are executed concurrently until any of the outgoing Control Switches are met. 
-
-
-
 # Installation
+See our [GitLab WIKI](https://gitlab.tubit.tu-berlin.de/rbo-lab/rswin/wikis/ha_build)
 
 ## Dependencies
 

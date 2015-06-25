@@ -21,6 +21,11 @@ namespace ha {
 		typedef boost::shared_ptr<Sensor> Ptr;
 		typedef boost::shared_ptr<const Sensor> ConstPtr;
 
+        /**
+        * @brief The interface for all Sensors to use in a JumpCondition
+        *
+        * implementations need to overload getCurrentValue and possibly getRelativeCurrentValue
+        */
 		Sensor();
 
 		virtual ~Sensor();
@@ -33,10 +38,19 @@ namespace ha {
 		SensorPtr clone() const
 		{
 			return (SensorPtr(_doClone()));
-		};
+        }
 
+        /**
+        * @brief The current value of this sensor
+        */
 		virtual ::Eigen::MatrixXd getCurrentValue() const = 0;
 
+        /**
+        * @brief The value of this sensor, relative to the initial sensor value (at activation time)
+        *
+        * The default implementation returns current_value - initial_value,
+        * this might need to be adapted, i.e. if your sensor value is a homogenuous transform
+        */
 		virtual ::Eigen::MatrixXd getRelativeCurrentValue() const;
 
         // automatically implemented by HA_SENSOR_INSTANCE macro
@@ -47,8 +61,19 @@ namespace ha {
 
 		virtual void setSystem(const System::ConstPtr& system);
 
+        /**
+        * @brief Activates the sensor and stores the initial sensor value - is called from the JumpCondition
+        */
 		virtual void initialize(const double& t); 
-		virtual void terminate();
+
+        /**
+        * @brief Deactivates the sensor - is called from the JumpCondition
+        */
+        virtual void terminate();
+
+        /**
+        * @brief Update sensor value - is called from the JumpCondition once per control cycle
+        */
 		virtual void step(const double& t);
 
 		/**

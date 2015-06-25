@@ -7,6 +7,10 @@
 
 namespace ha {
 
+/**
+* @brief This is a helper class to override the << operator for some data types.
+* i.e. we use it here to have a compactly formatted output for Eigen:: types without newlines
+*/
 class ha_ostringstream
 	{
 	public:

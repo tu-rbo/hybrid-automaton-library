@@ -116,11 +116,6 @@ namespace ha {
 		_system = system;
 	}
 
-	int Controller::getDimensionality() const
-	{
-		return -1;
-	}
-
 	void Controller::setSystem(const System::ConstPtr& system)
 	{
 		this->_system = system;

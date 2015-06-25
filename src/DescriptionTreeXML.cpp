@@ -38,9 +38,9 @@ namespace ha {
 		
 		if(ret_val == NULL && _tinyxml_document->Error()) 	
 		{
-			std::cout << "ERROR CODE: " <<  _tinyxml_document->ErrorId() << std::endl;
-			std::cout << _tinyxml_document->ErrorDesc() << std::endl;
-			HA_THROW_ERROR("DescriptionTreeXML.initTree", "Parsing the xml document.");
+            HA_THROW_ERROR("DescriptionTreeXML.initTree", "Parsing the xml document: " <<
+                           "ERROR CODE: " <<  _tinyxml_document->ErrorId() << std::endl <<
+                           _tinyxml_document->ErrorDesc() << std::endl);
 			return false;
 		}
 		

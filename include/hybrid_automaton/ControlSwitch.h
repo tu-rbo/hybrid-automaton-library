@@ -16,6 +16,18 @@ namespace ha {
   typedef boost::shared_ptr<ControlSwitch> ControlSwitchPtr;
   typedef boost::shared_ptr<const ControlSwitch> ControlSwitchConstPtr;
 
+  /**
+   * @brief ControlSwitch - A control switch is an edge in the HybridAutomaton.
+   *
+   * A ControlSwitch describes a discrete transitions between two ControlModes.
+   *
+   * A ControlSwitch contains one or more JumpConditions. these JumpConditions are conditional statements.
+   * If they all evaluate to "true", this ControlSwitch will become active and the ControlMode this switch points to
+   * will be executed.
+   *
+   * @see ControlSet
+   * @see Controller
+   */
   class ControlSwitch : public Serializable
   {
   public:
@@ -31,10 +43,27 @@ namespace ha {
       return (ControlSwitchPtr(_doClone()));
     }
 
+    /**
+    * @brief Activate the ControlSwitch. Is called automatically when the source ControlMode is activated.
+    */
 	virtual void initialize(const double& t);
+
+    /**
+    * @brief Deactivate the ControlSwitch. Is called automatically when the source ControlMode is deactivated.
+    */
 	virtual void terminate();
 
+    /**
+     * @brief Update the underlying JumpConditions
+     *
+     * Is called from the HybridAutomaton - once within each control loop
+     */
 	virtual void step(const double& t);
+
+    /**
+     * @brief Check if all contained JumpConditions evaluate to true
+     * Is called from the HybridAutomaton once within each control loop
+     */
     virtual bool isActive() const;
 
 	virtual void add(const JumpConditionPtr& jump_condition);
@@ -49,8 +78,14 @@ namespace ha {
 	void setHybridAutomaton(const HybridAutomaton* hybrid_automaton);
 
   protected:
+    /**
+     * @brief The JumpConditions in this ControlSwitch - all need to evaluate to ture for this switch to become active
+     */
     std::vector<JumpConditionPtr> _jump_conditions;
 
+    /**
+     * @brief The name of this ControlSwitch - needs to be unique within one HybridAutomaton
+     */
 	std::string _name;
 
     virtual ControlSwitch* _doClone() const
@@ -58,13 +93,9 @@ namespace ha {
       return (new ControlSwitch(*this));
     }
 
-	//These variables are just used when deserializing! Do not use them
-	//anywhere else. They might be invalid!
-	/*
-	std::string _source_control_mode_name;
-	std::string _target_control_mode_name;  
-	*/
-
+    /**
+     * @brief A pointer to the HybridAutomaton - the ControlSet needs this to access the graph structure
+     */
 	const HybridAutomaton* _hybrid_automaton;
   };
 

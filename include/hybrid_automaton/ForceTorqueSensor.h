@@ -12,6 +12,9 @@ namespace ha {
 	typedef boost::shared_ptr<ForceTorqueSensor> ForceTorqueSensorPtr;
 	typedef boost::shared_ptr<const ForceTorqueSensor> ForceTorqueSensorConstPtr;
 
+    /**
+     * @brief An interface to a six-axis force-torque sensor
+     */
 	class ForceTorqueSensor : public Sensor
 	{
 	public:
@@ -30,6 +33,13 @@ namespace ha {
 			return (ForceTorqueSensorPtr(_doClone()));
 		};
 
+        /**
+         * @brief Returns the current force-torque sensor reading as a 6x1 vector.
+         *
+         * Optionally transforms the force into frame _frame_id - PLEASE TEST THIS BEFORE USING!
+         *
+         * x ,y ,z ,rot_x, rot_y, rot_z
+         */
 		virtual ::Eigen::MatrixXd getCurrentValue() const;
 
 		virtual DescriptionTreeNode::Ptr serialize(const DescriptionTree::ConstPtr& factory) const;
@@ -43,7 +53,20 @@ namespace ha {
 			return sensor;
 		}
 
+		virtual void setFrameId(const std::string& frame_id) {
+			_frame_id = frame_id;
+		}
+
+		virtual std::string getFrameId() const {
+			return _frame_id;
+		}
+
 	protected:
+
+        /**
+         * @brief Optional frame ID to transform the force into
+         */
+        std::string _frame_id;
 
 		virtual ForceTorqueSensor* _doClone() const
 		{

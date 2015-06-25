@@ -21,15 +21,40 @@ namespace ha {
 		typedef boost::shared_ptr<System> Ptr;
 		typedef boost::shared_ptr<const System> ConstPtr;
 
+        /**
+        * @brief An interface to your robot system
+        *
+        * Overload all virtual functions to connect to your hardware
+        */
 		System() {
 		}
 
 		virtual ~System() {
 		}
 
+        /**
+        * @brief Return the number degrees of freedom of your system
+        */
 		virtual int getDof() const = 0;
-		virtual ::Eigen::MatrixXd getConfiguration() const = 0;
+
+        /**
+        * @brief Return the current joint configuration vector (dimx1)
+        */
+		virtual ::Eigen::MatrixXd getJointConfiguration() const = 0;
+
+        /**
+        * @brief Return the current joint velocity vector (dimx1)
+        */
+		virtual ::Eigen::MatrixXd getJointVelocity() const = 0;
+
+        /**
+        * @brief Return the current Force-torque mieasurement of your sensor (6x1)
+        */
 		virtual ::Eigen::MatrixXd getForceTorqueMeasurement() const = 0;
+
+        /**
+        * @brief Return the pose of a frame with id \a frame_id (4x4)
+        */
 		virtual ::Eigen::MatrixXd getFramePose(const std::string& frame_id) const = 0;
 
 		virtual bool subscribeToROSMessage(const std::string& topic) const {

@@ -311,8 +311,8 @@ namespace ha {
 
 	void JumpCondition::setJumpCriterion(JumpCriterion jump_criterion, ::Eigen::MatrixXd weights)
 	{
-		if(weights.rows() == 0)
-			HA_INFO("JumpCondition::setJumpCriterion", "No value given for weights. Using default weights of 1.");
+//		if(weights.rows() == 0)
+//			HA_WARN("JumpCondition::setJumpCriterion", "No value given for weights. Using default weights of 1.");
 		_jump_criterion = jump_criterion;
 		_norm_weights = weights;
 	}
@@ -472,8 +472,8 @@ namespace ha {
 		//////////////////////////////
 		////PARAMETERS////////////////
 		//////////////////////////////
-		if(!tree->getAttribute<Eigen::MatrixXd>("norm_weights", _norm_weights))
-			HA_WARN("JumpCondition.deserialize", "No \"norm_weights\" parameter given in JumpCondition - using default values");
+		tree->getAttribute<Eigen::MatrixXd>("norm_weights", _norm_weights);
+			//HA_WARN("JumpCondition.deserialize", "No \"norm_weights\" parameter given in JumpCondition - using default values");
 		
 		if(!tree->getAttribute<double>("epsilon", _epsilon))
 			HA_WARN("JumpCondition.deserialize", "No \"epsilon\" parameter given in JumpCondition - using default values");

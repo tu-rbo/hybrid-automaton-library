@@ -20,7 +20,7 @@ namespace ha
 
     ::Eigen::MatrixXd SubjointConfigurationSensor::getCurrentValue() const
 	{
-        ::Eigen::MatrixXd cfg = this->_system->getConfiguration();
+        ::Eigen::MatrixXd cfg = this->_system->getJointConfiguration();
         ::Eigen::MatrixXd subcfg(_index.size(), 1);
         for(int i=0; i< _index.size(); i++)
             subcfg(i) = cfg(_index[i]);
@@ -56,7 +56,7 @@ namespace ha
 
 		_index.resize(index_mat.rows());
         for(int j=0; j<index_mat.rows(); j++)
-            _index[j]=index_mat(j);
+            _index[j]=(int)index_mat(j);
 
 		if (_type == "" || !HybridAutomaton::isSensorRegistered(_type)) {
             HA_THROW_ERROR("SubjointConfigurationSensor.deserialize", "SensorType type '" << _type << "' "

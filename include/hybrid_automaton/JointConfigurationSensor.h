@@ -12,6 +12,9 @@ namespace ha {
 	typedef boost::shared_ptr<JointConfigurationSensor> JointConfigurationSensorPtr;
 	typedef boost::shared_ptr<const JointConfigurationSensor> JointConfigurationSensorConstPtr;
 
+    /**
+     * @brief An interface to the current joint encoder readings
+     */
 	class JointConfigurationSensor : public Sensor
 	{
 	public:
@@ -30,6 +33,9 @@ namespace ha {
 			return (JointConfigurationSensorPtr(_doClone()));
 		};
 
+        /**
+         * @brief Return the current robot configuration as a dimx1-vector
+         */
 		virtual ::Eigen::MatrixXd getCurrentValue() const;
 
 		virtual DescriptionTreeNode::Ptr serialize(const DescriptionTree::ConstPtr& factory) const;
