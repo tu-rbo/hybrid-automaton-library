@@ -543,6 +543,14 @@ public:
     double vel_epsilon_os_angular() const;
     void setVel_epsilon_os_angular(const double &vel_epsilon_os_angular);
 
+    /**
+     * @brief
+     *
+     * @param ha
+     * @return std::string
+     */
+    std::string HybridAutomatonToString(ha::HybridAutomaton::ConstPtr ha);
+
 protected:
 
     /**

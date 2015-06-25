@@ -15,6 +15,8 @@
 #include "hybrid_automaton/FramePoseSensor.h"
 #include "hybrid_automaton/ROSTopicSensor.h"
 
+#include "hybrid_automaton/DescriptionTreeXML.h"
+
 #define DEFAULT_NUM_DOF_ARM 7
 #define DEFAULT_NUM_DOF_BASE 3
 
@@ -1243,6 +1245,23 @@ Eigen::MatrixXd HybridAutomatonFactory::_combineArmAndBase(const Eigen::MatrixXd
     combined_vector <<  arm_vector,
             base_vector;
     return combined_vector;
+}
+
+std::string HybridAutomatonFactory::HybridAutomatonToString(ha::HybridAutomaton::ConstPtr ha)
+{
+    ha::DescriptionTreeXML::Ptr tree(new ha::DescriptionTreeXML);
+    ha::DescriptionTreeNode::Ptr ha_serialized;
+
+    try{
+        ha_serialized = ha->serialize(tree);
+    }
+    catch(std::string err)
+    {
+        std::cerr << "[HybridAutomatonFactory.HybridAutomatonToString] Failed to serialize Hybrid Automaton: " << err << std::endl;
+    }
+
+    tree->setRootNode(ha_serialized);
+    return tree->writeTreeXML();
 }
 
 }
