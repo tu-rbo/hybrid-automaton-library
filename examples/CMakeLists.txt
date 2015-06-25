@@ -1,0 +1,2 @@
+add_executable(example_gc example_gc.cpp)
+target_link_libraries(example_gc hybrid_automaton)
