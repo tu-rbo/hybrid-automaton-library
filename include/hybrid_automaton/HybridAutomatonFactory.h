@@ -145,18 +145,27 @@ public:
                                                       const Eigen::MatrixXd& goal_js,
                                                       const Eigen::MatrixXd& max_velocity,
                                                       const Eigen::MatrixXd& index_vec,
-                                                      const Eigen::MatrixXd& kp_js,
-                                                      const Eigen::MatrixXd& kv_js,
-                                                      bool is_relative);
+                                                      const Eigen::MatrixXd& kp_js = Eigen::MatrixXd(),
+                                                      const Eigen::MatrixXd& kv_js= Eigen::MatrixXd(),
+                                                      bool is_relative=false);
 
-    ha::Controller::Ptr createBBSubjointSpaceController(std::string name,
+    ha::Controller::Ptr createSubjointSpaceController(std::string name,
                                                       const std::string& topic,
                                                       const Eigen::MatrixXd& max_velocity,
                                                       const Eigen::MatrixXd& index_vec,
-                                                      const Eigen::MatrixXd& kp_js,
-                                                      const Eigen::MatrixXd& kv_js,
-                                                      bool is_relative,
-                                                      int update_rate);
+                                                      const Eigen::MatrixXd& kp_js= Eigen::MatrixXd(),
+                                                      const Eigen::MatrixXd& kv_js= Eigen::MatrixXd(),
+                                                      bool is_relative=false,
+                                                      int update_rate=-1);
+
+    ha::Controller::Ptr createBBSubjointSpaceController(std::string name,
+                                                                                const std::string& topic,
+                                                                                const Eigen::MatrixXd& max_velocity,
+                                                                                const Eigen::MatrixXd& index_vec,
+                                                                                const Eigen::MatrixXd& kp_js= Eigen::MatrixXd(),
+                                                                                const Eigen::MatrixXd& kv_js= Eigen::MatrixXd(),
+                                                                                bool is_relative=false,
+                                                                                int update_rate=-1);
 
     /**
      * @brief Create an interpolated joint space controller to move from the current robots position to a goal configuration (only arm)
@@ -198,7 +207,7 @@ public:
       * @param max_velocity The maximum velocity for the base
       * @return ha::Controller::Ptr The generated controller
       */
-    ha::Controller::Ptr createTFSubjointSpaceControllerBase(std::string name,
+    ha::Controller::Ptr createBBSubjointSpaceControllerBase(std::string name,
                                                             const std::string& topic_name,
                                                             const std::string& parent_name = std::string("odom"),
                                                             const Eigen::MatrixXd& max_vel_js_base = Eigen::MatrixXd(),
@@ -228,17 +237,20 @@ public:
          * @param max_displacement_velocity the maximal end-effector translational velocity in m/s
          * @param max_rotational_velocity the maximal end-effector rotational velocity in rad/s
          */
-    ha::Controller::Ptr createTFOperationalSpaceController(std::string name,
-                                                           const std::string frame,
-                                                           const std::string parent_frame,
+    ha::Controller::Ptr createBBOperationalSpaceController(std::string name,
+                                                           bool trajectory,
+                                                           bool use_tf,
                                                            double max_vel_os_linear,
                                                            double max_vel_os_angular,
+                                                           const std::string frame,
+                                                           const std::string parent_frame="/odom",
                                                            const Eigen::MatrixXd &kp_os_linear = Eigen::MatrixXd(),
                                                            const Eigen::MatrixXd &kp_os_angular = Eigen::MatrixXd(),
                                                            const Eigen::MatrixXd &kv_os_linear = Eigen::MatrixXd(),
                                                            const Eigen::MatrixXd &kv_os_angular = Eigen::MatrixXd(),
                                                            bool is_relative = false,
                                                            int update_rate = 50);
+
 
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -314,91 +326,133 @@ public:
                                                                                               bool relative,
                                                                                               const double& pos_epsilon_os);
 
-//    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//    /// GENERATION OF CONTROL SWITCHES
-//    ///
 
-//    /**
-//     * @brief Create a control switch that triggers when some max time is exceeded
-//     *
-//     * @param mode_name Name of the mode. Used to generate a name for the CS
-//     * @param max_time Max time to wait before triggering
-//     * @return ha::ControlSwitch::Ptr The generated CS
-//     */
-//    ha::ControlSwitch::Ptr CreateMaxTimeControlSwitch(const std::string& mode_name, double max_time);
+    ha::JumpCondition::Ptr createMaxTimeCondition(double max_time);
 
-//    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//    /// GENERATION OF CONTROL MODES
-//    ///
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// GENERATION OF CONTROL SWITCHES
+    ///
 
-//    /**
-//     * @brief Create a control mode that commands the robot to gravity compensation
-//     *
-//     * @param cm_ptr The pointer of the generated CM
-//     * @param name The name for the control mode
-//     * @return bool
-//     */
-//    bool CreateGCCM(const ha::ControlMode::Ptr& cm_ptr, const std::string& name);
+    /**
+     * @brief Create a control switch that triggers when some max time is exceeded
+     *
+     * @param mode_name Name of the mode. Used to generate a name for the CS
+     * @param max_time Max time to wait before triggering
+     * @return ha::ControlSwitch::Ptr The generated CS
+     */
+    ha::ControlSwitch::Ptr CreateMaxTimeControlSwitch(const std::string& mode_name, double max_time);
 
-//    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//    /// GENERATION OF CONTROL MODES AND CONTROL SWITCHES
-//    ///
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// GENERATION OF CONTROL MODES
+    ///
 
-//    /**
-//     * @brief Create a CM to go to home position (joint space - arm+base) and a CS for its convergence
-//     *
-//     * @param cm_ptr Pointer to the resulting CM
-//     * @param cs_ptr Pointer to the resulting CS
-//     * @param name Name used as root for the CM and the CS
-//     * @param goal_cfg Goal of the CM and the convergence
-//     * @return bool
-//     */
-//    bool CreateGoToHomeCMAndConvergenceCS(const ha::ControlMode::Ptr& cm_ptr, const ha::ControlSwitch::Ptr& cs_ptr, const std::string& name, const Eigen::MatrixXd& goal_cfg);
+    /**
+     * @brief Create a control mode that commands the robot to gravity compensation
+     *
+     * @param cm_ptr The pointer of the generated CM
+     * @param name The name for the control mode
+     * @return bool
+     */
+    void CreateGCCM(const ha::ControlMode::Ptr& cm_ptr, const std::string& name);
 
-//    /**
-//     * @brief Create a CM to grasp (close the hand or activate vacuum cleaner + joint space of the arm to maintain pose) and a CS that indicates successful grasp
-//     * (waits 3 seconds AND if the tool is the vacuum cleaner, the pressure should go over a threshold)
-//     *
-//     * @param cm_ptr Pointer to the resulting CM
-//     * @param cs_ptr Pointer to the resulting CS
-//     * @param name Name used as root for the CM and the CS
-//     * @param tool The type of tool used (vacuum cleaner, soft hand or no tool)
-//     * @return bool
-//     */
-//    bool CreateGraspCMAndCS(const ha::ControlMode::Ptr& cm_ptr, const ha::ControlSwitch::Ptr& cs_ptr, const std::string& name, int tool);
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// GENERATION OF CONTROL MODES AND CONTROL SWITCHES
+    ///
 
-//    /**
-//     * @brief Create a CM to ungrasp (open the hand or deactivate vacuum cleaner + joint space of the arm to maintain pose) and a CS that indicates successful ungrasp
-//     * (waits 15 seconds OR the pressure should go under a threshold - only for vacuum cleaner!)
-//     *
-//     * @param cm_ptr Pointer to the resulting CM
-//     * @param cs_ptr Pointer to the resulting CS1 (pressure under threshold)
-//     * @param cs_ptr2 Pointer to the resulting CS2 (15 seconds)
-//     * @param name Name used as root for the CM and the CSs
-//     * @param tool The type of tool used (vacuum cleaner, soft hand or no tool)
-//     * @return bool
-//     */
-//    bool CreateUngraspCMAndCS(const ha::ControlMode::Ptr& cm_ptr, const ha::ControlSwitch::Ptr& cs_ptr, const ha::ControlSwitch::Ptr& cs_ptr2, const std::string& name, int tool);
+    /**
+     * @brief Create a CM to go to home position (joint space - arm+base) and a CS for its convergence
+     *
+     * @param cm_ptr Pointer to the resulting CM
+     * @param cs_ptr Pointer to the resulting CS
+     * @param name Name used as root for the CM and the CS
+     * @param goal_cfg Goal of the CM and the convergence
+     * @return bool
+     */
+    void CreateGoToHomeCMAndConvergenceCSArm(const ha::ControlMode::Ptr& cm_ptr,
+                                          const ha::ControlSwitch::Ptr& cs_ptr,
+                                          const std::string& name,
+                                          //Arguments to createSubjointSpaceControllerArm
+                                          const Eigen::MatrixXd& goal_cfg,
+                                          const Eigen::MatrixXd& max_vel_js_arm = Eigen::MatrixXd(),
+                                          const Eigen::MatrixXd& index_vec_arm = Eigen::MatrixXd(),
+                                          const Eigen::MatrixXd& kp_js_arm= Eigen::MatrixXd(),
+                                          const Eigen::MatrixXd& kv_js_arm= Eigen::MatrixXd(),
+                                          bool is_relative =false,
+                                          //createSubjointSpaceConvergenceConditionArm
+                                          const double& pos_epsilon_js_arm = -1,
+                                          //createJointSpaceZeroVelocityConditionArm
+                                          const double& vel_epsilon_js_arm = -1);
 
-//    /**
-//     * @brief Create a CM to move to a frame defined in a ROS tf or a topic (op space - arm+base) and a CS that indicates convergence
-//     *
-//     * @param cm_ptr Pointer to the resulting CM
-//     * @param cs_ptr Pointer to the resulting CS
-//     * @param name Name used as root for the CM and the CS
-//     * @param frame_name Name of the frame (or the topic) to be listened to from ROS
-//     * @param lin_vel Linear velocity for the interpolation
-//     * @param ang_vel Angular velocity for the interpolation
-//     * @param relative True if the goal is relative to the current pose
-//     * @param useTf True if the goal is a tf, false if the goal is a set of frames published in a topic
-//     * @param useBase True if we want to move the base
-//     * @return bool
-//     */
-//    bool CreateGoToBBCMAndConvergenceCS(const ha::ControlMode::Ptr& cm_ptr,
-//                                        const ha::ControlSwitch::Ptr& cs_ptr, const std::string& name, const std::string& frame_name, double lin_vel, double ang_vel, bool relative, bool useTf, bool useBase);
+    /**
+     * @brief Create a CM to grasp (close the hand or activate vacuum cleaner + joint space of the arm to maintain pose) and a CS that indicates successful grasp
+     * (waits 3 seconds AND if the tool is the vacuum cleaner, the pressure should go over a threshold)
+     *
+     * @param cm_ptr Pointer to the resulting CM
+     * @param cs_ptr Pointer to the resulting CS
+     * @param name Name used as root for the CM and the CS
+     * @param tool The type of tool used (vacuum cleaner, soft hand or no tool)
+     * @return bool
+     */
+    void CreateGraspCMAndCS(const ha::ControlMode::Ptr& cm_ptr,
+                            const ha::ControlSwitch::Ptr& cs_ptr,
+                            const std::string& name,
+                            const GripperType& gripper,
+                            const Eigen::MatrixXd& kp_grasp,
+                            const Eigen::MatrixXd& kv_grasp);
+
+    /**
+     * @brief Create a CM to ungrasp (open the hand or deactivate vacuum cleaner + joint space of the arm to maintain pose) and a CS that indicates successful ungrasp
+     * (waits 15 seconds OR the pressure should go under a threshold - only for vacuum cleaner!)
+     *
+     * @param cm_ptr Pointer to the resulting CM
+     * @param cs_ptr Pointer to the resulting CS1 (pressure under threshold)
+     * @param cs_ptr2 Pointer to the resulting CS2 (15 seconds)
+     * @param name Name used as root for the CM and the CSs
+     * @param tool The type of tool used (vacuum cleaner, soft hand or no tool)
+     * @return bool
+     */
+    void CreateUngraspCMAndCS(const ha::ControlMode::Ptr& cm_ptr,
+                              const ha::ControlSwitch::Ptr& cs_ptr,
+                              const ha::ControlSwitch::Ptr& cs_ptr2,
+                              const std::string& name,
+                              const GripperType& gripper,
+                              const Eigen::MatrixXd& kp_drop,
+                              const Eigen::MatrixXd& kv_drop);
+
+    /**
+     * @brief Create a CM to move to a frame defined in a ROS tf or a topic (op space - arm+base) and a CS that indicates convergence
+     *
+     * @param cm_ptr Pointer to the resulting CM
+     * @param cs_ptr Pointer to the resulting CS
+     * @param name Name used as root for the CM and the CS
+     * @param frame_name Name of the frame (or the topic) to be listened to from ROS
+     * @param lin_vel Linear velocity for the interpolation
+     * @param ang_vel Angular velocity for the interpolation
+     * @param relative True if the goal is relative to the current pose
+     * @param useTf True if the goal is a tf, false if the goal is a set of frames published in a topic
+     * @param useBase True if we want to move the base
+     * @return bool
+     */
+    void CreateGoToBBCMAndConvergenceCS(const ha::ControlMode::Ptr& cm_ptr,
+                                        const ha::ControlSwitch::Ptr& cs_ptr,
+                                        const std::string& name,
+                                        double max_vel_os_linear,
+                                        double max_vel_os_angular,
+                                        const double& pos_epsilon_os,
+                                        const std::string& frame_name,
+                                        const std::string& parent_frame_name,
+                                        bool relative,
+                                        bool useTf,
+                                        bool useBase,
+                                        const Eigen::MatrixXd &kp_os_linear = Eigen::MatrixXd(),
+                                        const Eigen::MatrixXd &kp_os_angular = Eigen::MatrixXd(),
+                                        const Eigen::MatrixXd &kv_os_linear = Eigen::MatrixXd(),
+                                        const Eigen::MatrixXd &kv_os_angular = Eigen::MatrixXd(),
+                                        bool is_relative = false,
+                                        int update_rate = 50);
 
 
 
