@@ -444,7 +444,9 @@ ha::HybridAutomaton::Ptr HybridAutomatonFactory::createInitialHybridAutomaton(co
                                                                               const Eigen::MatrixXd& max_vel_js_arm,
                                                                               const Eigen::MatrixXd& max_vel_js_base,
                                                                               const Eigen::MatrixXd& index_vec_arm,
-                                                                              const double& pos_epsilon_js_arm)
+                                                                              const double& pos_epsilon_js_arm,
+                                                                              const double& grasp_strength,
+                                                                              const int& grasp_type)
 {
 
     //create Hybrid Automaton
@@ -456,12 +458,12 @@ ha::HybridAutomaton::Ptr HybridAutomatonFactory::createInitialHybridAutomaton(co
 
     move_home_initial_cm->setName("move_home_initial_cm");
 
-    ha::Controller::Ptr home_ctrl_arm = createSubjointSpaceControllerArm("move_home_initial_arm_ctrl",
-                                                                      (home_config_js_arm.size() == 0 ? _home_config_js_arm : home_config_js_arm),
-                                                                      (max_vel_js_arm.size() == 0 ? _max_vel_js_arm : max_vel_js_arm));
-    ha::Controller::Ptr home_ctrl_base = createSubjointSpaceControllerBase("move_home_initial_base_ctrl",
-                                                                        (home_config_js_base.size() == 0 ? _home_config_js_base : home_config_js_base),
-                                                                        (max_vel_js_base.size() == 0 ? _max_vel_js_base : max_vel_js_base));
+    ha::Controller::Ptr home_ctrl_arm = createSubjointSpaceControllerArm("move_home_initial_arm_ctrl",home_config_js_arm,max_vel_js_arm);
+//                                                                      (home_config_js_arm.size() == 0 ? _home_config_js_arm : home_config_js_arm),
+//                                                                      (max_vel_js_arm.size() == 0 ? _max_vel_js_arm : max_vel_js_arm));
+    ha::Controller::Ptr home_ctrl_base = createSubjointSpaceControllerBase("move_home_initial_base_ctrl",home_config_js_base,max_vel_js_base);
+//                                                                        (home_config_js_base.size() == 0 ? _home_config_js_base : home_config_js_base),
+//                                                                        (max_vel_js_base.size() == 0 ? _max_vel_js_base : max_vel_js_base));
     std::vector<ha::Controller::Ptr> home_ctrls;
     home_ctrls.push_back(home_ctrl_arm);
     home_ctrls.push_back(home_ctrl_base);
@@ -478,8 +480,8 @@ ha::HybridAutomaton::Ptr HybridAutomatonFactory::createInitialHybridAutomaton(co
     {
         ungrasp_ctrl->setName("FeixGraspControl");
         ungrasp_ctrl->setType("FeixGraspSoftHandController");
-        ungrasp_ctrl->setArgument("grasp_strength", "4.0");
-        ungrasp_ctrl->setArgument("grasp_type", "0");
+        ungrasp_ctrl->setArgument("grasp_strength", grasp_strength);
+        ungrasp_ctrl->setArgument("grasp_type", grasp_type);
         goto_home_cs->appendController(ungrasp_ctrl);
     }
         break;
@@ -639,7 +641,9 @@ ha::Controller::Ptr HybridAutomatonFactory::createSubjointSpaceController(std::s
 }
 
 ha::Controller::Ptr HybridAutomatonFactory::createBBSubjointSpaceController(std::string name,
-                                                                            const std::string& topic,
+                                                                            bool use_tf,
+                                                                            const std::string& topic_name,
+                                                                            const std::string& tf_parent,
                                                                             const Eigen::MatrixXd& max_velocity,
                                                                             const Eigen::MatrixXd& index_vec,
                                                                             const Eigen::MatrixXd& kp_js,
@@ -655,8 +659,13 @@ ha::Controller::Ptr HybridAutomatonFactory::createBBSubjointSpaceController(std:
     index_vec_ss << index_vec;
     ctrl->setArgument("index", index_vec_ss.str());
     ctrl->setArgument("reinterpolation", "1");
-    ctrl->setArgument("use_tf", "0");
-    ctrl->setArgument("topic_name", topic);
+    if (use_tf){
+        ctrl->setArgument("use_tf", "1");
+        ctrl->setArgument("tf_parent", tf_parent);
+    } else {
+        ctrl->setArgument("use_tf", "0");
+    }
+    ctrl->setArgument("topic_name", topic_name);
     ctrl->setArgument("update_rate", update_rate);
     ctrl->setKp(kp_js);
     ctrl->setKv(kv_js);
@@ -700,8 +709,9 @@ ha::Controller::Ptr HybridAutomatonFactory::createSubjointSpaceControllerBase(st
 }
 
 ha::Controller::Ptr HybridAutomatonFactory::createBBSubjointSpaceControllerBase(std::string name,
+                                                                                bool use_tf,
                                                                                 const std::string& topic_name,
-                                                                                const std::string& parent_name,
+                                                                                const std::string& tf_parent,
                                                                                 const Eigen::MatrixXd& max_vel_js_base,
                                                                                 const Eigen::MatrixXd& index_vec_base,
                                                                                 const Eigen::MatrixXd& kp_js_base,
@@ -717,9 +727,14 @@ ha::Controller::Ptr HybridAutomatonFactory::createBBSubjointSpaceControllerBase(
     index_vec_ss << (index_vec_base.size() == 0 ? _index_vec_base : index_vec_base);
     ctrl->setArgument("index", index_vec_ss.str());
     ctrl->setArgument("reinterpolation", "1");
-    ctrl->setArgument("use_tf", "1");
+    if (use_tf){
+        ctrl->setArgument("use_tf", "1");
+        ctrl->setArgument("tf_parent", tf_parent);
+    } else {
+        ctrl->setArgument("use_tf", "0");
+    }
     ctrl->setArgument("topic_name", topic_name);
-    ctrl->setArgument("tf_parent", parent_name);
+    ctrl->setArgument("tf_parent", tf_parent);
     ctrl->setArgument("update_rate", update_rate);
     ctrl->setKp((kp_js_base.size() == 0 ? _kp_js_base : kp_js_base));
     ctrl->setKv((kv_js_base.size() == 0 ? _kv_js_base : kv_js_base));
@@ -1004,7 +1019,9 @@ void HybridAutomatonFactory::CreateGraspCMAndCS(const ha::ControlMode::Ptr& cm_p
                                                 const std::string& name,
                                                 const GripperType& gripper,
                                                 const Eigen::MatrixXd& kp_grasp,
-                                                const Eigen::MatrixXd& kv_grasp){
+                                                const Eigen::MatrixXd& kv_grasp,
+                                                const double grasp_strength,
+                                                const int grasp_type){
     cm_ptr->setName(name+ std::string("_cm"));
     ha::ControlSet::Ptr grasp_cs(new ha::ControlSet());
 
@@ -1020,8 +1037,8 @@ void HybridAutomatonFactory::CreateGraspCMAndCS(const ha::ControlMode::Ptr& cm_p
     {
         grasp_ctrl->setName("FeixGraspControl");
         grasp_ctrl->setType("FeixGraspSoftHandController");
-        grasp_ctrl->setArgument("grasp_strength", "0.1");
-        grasp_ctrl->setArgument("grasp_type", "4");
+        grasp_ctrl->setArgument("grasp_strength", grasp_strength);
+        grasp_ctrl->setArgument("grasp_type", grasp_type);
     }
         break;
     case SUCTION_CUP:
@@ -1085,7 +1102,9 @@ void HybridAutomatonFactory::CreateUngraspCMAndCS(const ha::ControlMode::Ptr& cm
                                                   const std::string& name,
                                                   const GripperType& gripper,
                                                   const Eigen::MatrixXd& kp_drop,
-                                                  const Eigen::MatrixXd& kv_drop){
+                                                  const Eigen::MatrixXd& kv_drop,
+                                                  const double& grasp_strength,
+                                                  const int& grasp_type){
     cm_ptr->setName(name+ std::string("_cm"));
     ha::ControlSet::Ptr ungrasp_cs(new ha::ControlSet());
     ungrasp_cs->setType("rxControlSet");
@@ -1102,8 +1121,8 @@ void HybridAutomatonFactory::CreateUngraspCMAndCS(const ha::ControlMode::Ptr& cm
     {
         ungrasp_ctrl->setName("FeixGraspControl");
         ungrasp_ctrl->setType("FeixGraspSoftHandController");
-        ungrasp_ctrl->setArgument("grasp_strength", "4.0");
-        ungrasp_ctrl->setArgument("grasp_type", "0");
+        ungrasp_ctrl->setArgument("grasp_strength", grasp_strength);
+        ungrasp_ctrl->setArgument("grasp_type", grasp_type);
         ungrasp_cs->appendController(ungrasp_ctrl);
     }
         break;

@@ -82,7 +82,9 @@ public:
                                                           const Eigen::MatrixXd& max_vel_js_arm = Eigen::MatrixXd(),
                                                           const Eigen::MatrixXd& max_vel_js_base = Eigen::MatrixXd(),
                                                           const Eigen::MatrixXd& index_vec_arm = Eigen::MatrixXd(),
-                                                          const double& pos_epsilon_js_arm = -1);
+                                                          const double& pos_epsilon_js_arm = -1,
+                                                          const double& grasp_strength=4.0,
+                                                          const int& grasp_type=0);
 
     /**
          * @brief Create an empty hybrid automaton which performs gravity compensation
@@ -149,17 +151,12 @@ public:
                                                       const Eigen::MatrixXd& kv_js= Eigen::MatrixXd(),
                                                       bool is_relative=false);
 
-    ha::Controller::Ptr createSubjointSpaceController(std::string name,
-                                                      const std::string& topic,
-                                                      const Eigen::MatrixXd& max_velocity,
-                                                      const Eigen::MatrixXd& index_vec,
-                                                      const Eigen::MatrixXd& kp_js= Eigen::MatrixXd(),
-                                                      const Eigen::MatrixXd& kv_js= Eigen::MatrixXd(),
-                                                      bool is_relative=false,
-                                                      int update_rate=-1);
+
 
     ha::Controller::Ptr createBBSubjointSpaceController(std::string name,
-                                                                                const std::string& topic,
+                                                        bool use_tf,
+                                                        const std::string& topic_name,
+                                                        const std::string& tf_parent,
                                                                                 const Eigen::MatrixXd& max_velocity,
                                                                                 const Eigen::MatrixXd& index_vec,
                                                                                 const Eigen::MatrixXd& kp_js= Eigen::MatrixXd(),
@@ -208,8 +205,9 @@ public:
       * @return ha::Controller::Ptr The generated controller
       */
     ha::Controller::Ptr createBBSubjointSpaceControllerBase(std::string name,
+                                                            bool use_tf,
                                                             const std::string& topic_name,
-                                                            const std::string& parent_name = std::string("odom"),
+                                                            const std::string& tf_parent = std::string("odom"),
                                                             const Eigen::MatrixXd& max_vel_js_base = Eigen::MatrixXd(),
                                                             const Eigen::MatrixXd& index_vec_base = Eigen::MatrixXd(),
                                                             const Eigen::MatrixXd& kp_js_base = Eigen::MatrixXd(),
@@ -401,7 +399,10 @@ public:
                             const std::string& name,
                             const GripperType& gripper,
                             const Eigen::MatrixXd& kp_grasp,
-                            const Eigen::MatrixXd& kv_grasp);
+                            const Eigen::MatrixXd& kv_grasp,
+                            //softhand
+                            const double grasp_strength=0.1,
+                            const int graps_type=4);
 
     /**
      * @brief Create a CM to ungrasp (open the hand or deactivate vacuum cleaner + joint space of the arm to maintain pose) and a CS that indicates successful ungrasp
@@ -420,7 +421,9 @@ public:
                               const std::string& name,
                               const GripperType& gripper,
                               const Eigen::MatrixXd& kp_drop,
-                              const Eigen::MatrixXd& kv_drop);
+                              const Eigen::MatrixXd& kv_drop,
+                              const double& grasp_strength=4.0,
+                              const int& grasp_type=1);
 
     /**
      * @brief Create a CM to move to a frame defined in a ROS tf or a topic (op space - arm+base) and a CS that indicates convergence
