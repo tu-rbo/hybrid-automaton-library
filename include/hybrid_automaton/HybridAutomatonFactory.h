@@ -409,8 +409,8 @@ public:
                             const ha::ControlSwitch::Ptr& cs_ptr,
                             const std::string& name,
                             const GripperType& gripper,
-                            const Eigen::MatrixXd& kp_grasp,
-                            const Eigen::MatrixXd& kv_grasp,
+                            const Eigen::MatrixXd& kp_grasp = Eigen::MatrixXd(),
+                            const Eigen::MatrixXd& kv_grasp = Eigen::MatrixXd(),
                             //softhand
                             const double grasp_strength=0.1,
                             const int graps_type=4);

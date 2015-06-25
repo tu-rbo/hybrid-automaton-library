@@ -1097,12 +1097,11 @@ void HybridAutomatonFactory::CreateGraspCMAndCS(const ha::ControlMode::Ptr& cm_p
     ha::Controller::Ptr grasp_joint_ctrl(new ha::Controller());
     grasp_joint_ctrl->setName("grasp_joint_ctrl");
     grasp_joint_ctrl->setType("JointController");
-    Eigen::MatrixXd grasp_zeros_goal(10,1);
-    grasp_zeros_goal << 0,0,0,0,0,0,0,0,0,0;
+    Eigen::MatrixXd grasp_zeros_goal = Eigen::MatrixXd::Constant(_num_dof_arm + _num_dof_base, 1, 0.0);
     grasp_joint_ctrl->setGoal(grasp_zeros_goal);
     grasp_joint_ctrl->setGoalIsRelative(1);
-    grasp_joint_ctrl->setKp(kp_grasp);
-    grasp_joint_ctrl->setKv(kv_grasp);
+    grasp_joint_ctrl->setKp((kp_grasp.size() == 0 ? _combineArmAndBase(_kp_js_arm, _kp_js_base) : kp_grasp));
+    grasp_joint_ctrl->setKv((kv_grasp.size() == 0 ? _combineArmAndBase(_kv_js_arm, _kv_js_base) : kv_grasp));
 
 
     if(gripper!=NO_GRIPPER){
