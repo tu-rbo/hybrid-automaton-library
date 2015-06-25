@@ -1274,8 +1274,6 @@ void HybridAutomatonFactory::CreateGoToCMAndConvergenceCS(const ha::ControlMode:
 
     //Endeffector Frame Controller
     ha::Controller::Ptr os_ctrl;
-    std::string name,
-
     os_ctrl = createOperationalSpaceController(name + std::string("_ctrl"),
                                                goal_op_pos,
                                                goal_op_ori,
