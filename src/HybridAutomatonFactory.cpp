@@ -75,28 +75,16 @@ HybridAutomatonFactory::HybridAutomatonFactory(const int& num_dof_arm, const int
 {
 
     _index_vec_arm = Eigen::MatrixXd::Constant(_num_dof_arm, 1, 0);
-    std::stringstream index_arm_ss;
-    index_arm_ss << "[" << _num_dof_arm << ",1]";
-    const char* separator_arm = "";
     for(int idx_arm=0; idx_arm<_num_dof_arm; idx_arm++)
     {
         _index_vec_arm(idx_arm, 0) = idx_arm;
-        index_arm_ss << separator_arm << idx_arm;
-        separator_arm = ";";
     }
-    _index_str_arm = index_arm_ss.str();
 
     _index_vec_base = Eigen::MatrixXd::Constant(_num_dof_base, 1, 0);
-    std::stringstream index_base_ss;
-    index_base_ss << "[" << _num_dof_base << ",1]";
-    const char* separator_base = "";
     for(int idx_base=_num_dof_arm; idx_base<_num_dof_arm+_num_dof_base; idx_base++)
     {
         _index_vec_base(idx_base, 0) = idx_base;
-        index_base_ss << separator_base << idx_base;
-        separator_base = ";";
     }
-    _index_str_base = index_base_ss.str();
 
     _max_vel_js_arm = Eigen::MatrixXd::Constant(_num_dof_arm, 1, DEFAULT_MAX_VEL_JS_ARM);
     _max_vel_js_base = Eigen::MatrixXd::Constant(_num_dof_base, 1, DEFAULT_MAX_VEL_JS_BASE);
@@ -114,7 +102,6 @@ HybridAutomatonFactory::HybridAutomatonFactory(const int& num_dof_arm, const int
         _kv_js_arm << 2.0, 4.0, 2.0, 1.2, 0.2, 0.3, 0.02;
     }
     _kv_js_base = Eigen::MatrixXd::Constant(_num_dof_base, 1, DEFAULT_KV_JS_BASE);
-
     _kp_os_linear = Eigen::MatrixXd::Constant(3, 1, DEFAULT_KP_OS_LINEAR);
     _kp_os_angular = Eigen::MatrixXd::Constant(3, 1, DEFAULT_KP_OS_ANGULAR);
     _kv_os_linear = Eigen::MatrixXd::Constant(3, 1, DEFAULT_KV_OS_LINEAR);
@@ -146,7 +133,6 @@ HybridAutomatonFactory::HybridAutomatonFactory(const int& num_dof_arm, const int
         _joint_weights_nakamura_base_no_rotation << DEFAULT_JOINT_WEIGHTS_NAKAMURA_BASE, DEFAULT_JOINT_WEIGHTS_NAKAMURA_BASE, DEFAULT_JOINT_WEIGHTS_NAKAMURA_BASE_LITTLE_MOTION;
     }
     _joint_weights_nakamura_base_little_motion = Eigen::MatrixXd::Constant(_num_dof_base, 1, DEFAULT_JOINT_WEIGHTS_NAKAMURA_BASE_LITTLE_MOTION);
-
     _home_config_js_arm = Eigen::MatrixXd::Constant(_num_dof_arm, 1, DEFAULT_HOME_CONFIG_JS_ARM);
     if(_num_dof_arm == DEFAULT_NUM_DOF_ARM)
     {
@@ -165,7 +151,6 @@ HybridAutomatonFactory::HybridAutomatonFactory(const int& num_dof_arm, const int
 
     _pos_epsilon_os_linear =  DEFAULT_POS_EPSILON_OS_LINEAR;
     _pos_epsilon_os_angular =  DEFAULT_POS_EPSILON_OS_ANGULAR;
-
     _vel_epsilon_os_linear =  DEFAULT_VEL_EPSILON_OS_LINEAR;
     _vel_epsilon_os_angular =  DEFAULT_VEL_EPSILON_OS_ANGULAR;
 
@@ -747,8 +732,8 @@ ha::Controller::Ptr HybridAutomatonFactory::createBBSubjointSpaceControllerBase(
 
 
 ha::Controller::Ptr HybridAutomatonFactory::createOperationalSpaceController(std::string name,
-                                                                             const Eigen::MatrixXd &goal_op_pos,
-                                                                             const Eigen::MatrixXd &goal_op_ori,
+                                                                             const Eigen::MatrixXd &goal_op_translation,
+                                                                             const Eigen::MatrixXd &goal_op_rot_matrix,
                                                                              double completion_time,
                                                                              const Eigen::MatrixXd &kp_os_linear,
                                                                              const Eigen::MatrixXd &kp_os_angular,
@@ -759,8 +744,11 @@ ha::Controller::Ptr HybridAutomatonFactory::createOperationalSpaceController(std
     Eigen::MatrixXd bin_home_frame;
     bin_home_frame.resize(4,4);
     bin_home_frame.setIdentity();
-    bin_home_frame.block(0,0,3,3) = goal_op_ori;
-    bin_home_frame.block(0,3,3,1) = goal_op_pos;
+    if(goal_op_rot_matrix.size() != 0)
+    {
+        bin_home_frame.block(0,0,3,3) = goal_op_rot_matrix;
+    }
+    bin_home_frame.block(0,3,3,1) = goal_op_translation;
 
     //Endeffector Frame Controller
     ha::Controller::Ptr ctrl(new ha::Controller);
@@ -782,8 +770,8 @@ ha::Controller::Ptr HybridAutomatonFactory::createOperationalSpaceController(std
 }
 
 ha::Controller::Ptr HybridAutomatonFactory::createOperationalSpaceController(std::string name,
-                                                     const Eigen::MatrixXd &goal_op_pos,
-                                                     const Eigen::MatrixXd &goal_op_ori,
+                                                     const Eigen::MatrixXd &goal_op_translation,
+                                                     const Eigen::MatrixXd &goal_op_rot_matrix,
                                                      double max_vel_os_linear,
                                                      double max_vel_os_angular,
                                                      const Eigen::MatrixXd &kp_os_linear,
@@ -795,8 +783,11 @@ ha::Controller::Ptr HybridAutomatonFactory::createOperationalSpaceController(std
     Eigen::MatrixXd bin_home_frame;
     bin_home_frame.resize(4,4);
     bin_home_frame.setIdentity();
-    bin_home_frame.block(0,0,3,3) = goal_op_ori;
-    bin_home_frame.block(0,3,3,1) = goal_op_pos;
+    if(goal_op_rot_matrix.size() != 0)
+    {
+        bin_home_frame.block(0,0,3,3) = goal_op_rot_matrix;
+    }
+    bin_home_frame.block(0,3,3,1) = goal_op_translation;
 
     //Endeffector Frame Controller
     ha::Controller::Ptr ctrl(new ha::Controller);
@@ -988,6 +979,31 @@ ha::JumpCondition::Ptr HybridAutomatonFactory::createMaxTimeCondition(double max
     return max_time_cond;
 }
 
+ha::ControlSwitch::Ptr HybridAutomatonFactory::CreateMaxForceTorqueControlSwitch(const std::string& name,
+                                                                                 const Eigen::MatrixXd& ft_weights,
+                                                                                 const Eigen::MatrixXd& ft_max_val)
+{
+    ha::ControlSwitch::Ptr max_ft_cs(new ha::ControlSwitch());
+    CreateMaxForceTorqueControlSwitch(max_ft_cs, name, ft_weights, ft_max_val);
+    return max_ft_cs;
+}
+
+void HybridAutomatonFactory::CreateMaxForceTorqueControlSwitch(const ha::ControlSwitch::Ptr& cs_ptr,
+                                                                                 const std::string& name,
+                                                                                 const Eigen::MatrixXd& ft_weights,
+                                                                                 const Eigen::MatrixXd& ft_max_val)
+{
+    cs_ptr->setName(name + std::string("_max_ft_cs"));
+    ha::JumpConditionPtr max_ft_jc(new ha::JumpCondition());
+    ha::ForceTorqueSensorPtr ft_sensor(new ha::ForceTorqueSensor());
+    max_ft_jc->setSensor(ft_sensor);
+    max_ft_jc->setGoalRelative();
+    max_ft_jc->setConstantGoal(ft_max_val);
+    max_ft_jc->setJumpCriterion(ha::JumpCondition::THRESH_LOWER_BOUND ,ft_weights);
+    max_ft_jc->setEpsilon(0.0);
+    cs_ptr->add(max_ft_jc);
+}
+
 ha::ControlSwitch::Ptr HybridAutomatonFactory::CreateMaxTimeControlSwitch(const std::string& mode_name, double max_time){
     ha::ControlSwitchPtr time_switch(new ha::ControlSwitch);
     time_switch->setName(mode_name + "_time_cs");
@@ -1027,8 +1043,6 @@ void HybridAutomatonFactory::CreateGoToHomeCMAndConvergenceCSArm(const ha::Contr
                                                                                  is_relative);
 
 
-
-    //ha::ControlSet::Ptr goto_home_cs = _createJointSpaceWholeBodyControlSet(home_ctrl_arm, ha::ControllerPtr());
     ha::ControlSet::Ptr goto_home_cs =  createControlSet(home_ctrl_arm);
 
     cm_ptr->setControlSet(goto_home_cs);
@@ -1187,8 +1201,8 @@ void HybridAutomatonFactory::CreateUngraspCMAndCS(const ha::ControlMode::Ptr& cm
     drop_zeros_goal << 0,0,0,0,0,0,0;
     ungrasp_joint_ctrl->setGoal(drop_zeros_goal);
     ungrasp_joint_ctrl->setGoalIsRelative(1);
-    ungrasp_joint_ctrl->setKp(kp_drop);
-    ungrasp_joint_ctrl->setKv(kv_drop);
+    ungrasp_joint_ctrl->setKp((kp_drop.size() == 0 ? _combineArmAndBase(_kp_js_arm, _kp_js_base) : kp_drop));
+    ungrasp_joint_ctrl->setKv((kv_drop.size() == 0 ? _combineArmAndBase(_kv_js_arm, _kv_js_base) : kv_drop));
     ungrasp_cs->appendController(ungrasp_joint_ctrl);
 
     cs_ptr->setName(name + std::string("_pressure_cs"));
@@ -1290,6 +1304,31 @@ void HybridAutomatonFactory::CreateGoToCMAndConvergenceCS(const ha::ControlMode:
     cs_ptr->setName(name + std::string("_cs"));
     ha::JumpConditionPtr convergence_jc = createOperationalSpaceConvergenceCondition(os_ctrl, is_relative, pos_epsilon_os);
     cs_ptr->add(convergence_jc);
+}
+
+void HybridAutomatonFactory::CreateGoToCMConvergenceCSAndMaxForceCS(const ha::ControlMode::Ptr& cm_ptr,
+                                                                    const ha::ControlSwitch::Ptr& convergence_cs_ptr,
+                                                                    const ha::ControlSwitch::Ptr& max_force_cs_ptr,
+                                                                    const std::string& name,
+                                                                    const Eigen::MatrixXd &goal_op_pos,
+                                                                    const Eigen::MatrixXd &goal_op_ori,
+                                                                    double max_vel_os_linear,
+                                                                    double max_vel_os_angular,
+                                                                    const double& pos_epsilon_os,
+                                                                    const Eigen::MatrixXd &ft_weights,
+                                                                    const Eigen::MatrixXd &max_ft,
+                                                                    bool use_base,
+                                                                    bool is_relative,
+                                                                    const Eigen::MatrixXd &kp_os_linear,
+                                                                    const Eigen::MatrixXd &kp_os_angular,
+                                                                    const Eigen::MatrixXd &kv_os_linear,
+                                                                    const Eigen::MatrixXd &kv_os_angular)
+{
+    CreateGoToCMAndConvergenceCS(cm_ptr, convergence_cs_ptr, name, goal_op_pos, goal_op_ori, max_vel_os_linear, max_vel_os_angular, pos_epsilon_os, use_base,
+                                 is_relative, kp_os_linear, kp_os_angular, kv_os_linear, kv_os_angular);
+
+    CreateMaxForceTorqueControlSwitch(max_force_cs_ptr,name, ft_weights, max_ft);
+
 }
 
 Eigen::MatrixXd HybridAutomatonFactory::_combineArmAndBase(const Eigen::MatrixXd& arm_vector, const Eigen::MatrixXd base_vector)

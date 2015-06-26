@@ -216,8 +216,8 @@ public:
                                                             int update_rate = 100);
 
     ha::Controller::Ptr createOperationalSpaceController(std::string name,
-                                                         const Eigen::MatrixXd &goal_op_pos,
-                                                         const Eigen::MatrixXd &goal_op_ori,
+                                                         const Eigen::MatrixXd &goal_op_translation,
+                                                         const Eigen::MatrixXd &goal_op_rot_matrix,
                                                          double completion_time,
                                                          const Eigen::MatrixXd &kp_os_linear = Eigen::MatrixXd(),
                                                          const Eigen::MatrixXd &kp_os_angular = Eigen::MatrixXd(),
@@ -226,8 +226,8 @@ public:
                                                          bool is_relative = false);
 
     ha::Controller::Ptr createOperationalSpaceController(std::string name,
-                                                         const Eigen::MatrixXd &goal_op_pos,
-                                                         const Eigen::MatrixXd &goal_op_ori,
+                                                         const Eigen::MatrixXd &goal_op_translation,
+                                                         const Eigen::MatrixXd &goal_op_rot_matrix,
                                                          double max_vel_os_linear = -1,
                                                          double max_vel_os_angular = -1,
                                                          const Eigen::MatrixXd &kp_os_linear = Eigen::MatrixXd(),
@@ -352,6 +352,13 @@ public:
      */
     ha::ControlSwitch::Ptr CreateMaxTimeControlSwitch(const std::string& mode_name, double max_time);
 
+    ha::ControlSwitch::Ptr CreateMaxForceTorqueControlSwitch(const std::string& name, const Eigen::MatrixXd& ft_weights, const Eigen::MatrixXd& ft_max_val);
+
+    void CreateMaxForceTorqueControlSwitch(const ha::ControlSwitch::Ptr& cs_ptr,
+                                                                                     const std::string& name,
+                                                                                     const Eigen::MatrixXd& ft_weights,
+                                                                                     const Eigen::MatrixXd& ft_max_val);
+
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     /// GENERATION OF CONTROL MODES
@@ -384,7 +391,7 @@ public:
                                           const ha::ControlSwitch::Ptr& cs_ptr,
                                           const std::string& name,
                                           //Arguments to createSubjointSpaceControllerArm
-                                          const Eigen::MatrixXd& goal_cfg,
+                                          const Eigen::MatrixXd& goal_cfg = Eigen::MatrixXd(),
                                           const Eigen::MatrixXd& max_vel_js_arm = Eigen::MatrixXd(),
                                           const Eigen::MatrixXd& index_vec_arm = Eigen::MatrixXd(),
                                           const Eigen::MatrixXd& kp_js_arm= Eigen::MatrixXd(),
@@ -431,8 +438,8 @@ public:
                               const ha::ControlSwitch::Ptr& cs_ptr2,
                               const std::string& name,
                               const GripperType& gripper,
-                              const Eigen::MatrixXd& kp_drop,
-                              const Eigen::MatrixXd& kv_drop,
+                              const Eigen::MatrixXd& kp_drop = Eigen::MatrixXd(),
+                              const Eigen::MatrixXd& kv_drop = Eigen::MatrixXd(),
                               const double& grasp_strength=4.0,
                               const int& grasp_type=1);
 
@@ -481,6 +488,24 @@ public:
                                       const Eigen::MatrixXd &kp_os_angular = Eigen::MatrixXd(),
                                       const Eigen::MatrixXd &kv_os_linear = Eigen::MatrixXd(),
                                       const Eigen::MatrixXd &kv_os_angular = Eigen::MatrixXd());
+
+    void CreateGoToCMConvergenceCSAndMaxForceCS(const ha::ControlMode::Ptr& cm_ptr,
+                                                const ha::ControlSwitch::Ptr& convergence_cs_ptr,
+                                                const ha::ControlSwitch::Ptr& max_force_cs_ptr,
+                                                const std::string& name,
+                                                const Eigen::MatrixXd &goal_op_pos,
+                                                const Eigen::MatrixXd &goal_op_ori,
+                                                double max_vel_os_linear,
+                                                double max_vel_os_angular,
+                                                const double& pos_epsilon_os,
+                                                const Eigen::MatrixXd &ft_idx,
+                                                const Eigen::MatrixXd &max_ft,
+                                                bool use_base,
+                                                bool is_relative = false,
+                                                const Eigen::MatrixXd &kp_os_linear = Eigen::MatrixXd(),
+                                                const Eigen::MatrixXd &kp_os_angular = Eigen::MatrixXd(),
+                                                const Eigen::MatrixXd &kv_os_linear = Eigen::MatrixXd(),
+                                                const Eigen::MatrixXd &kv_os_angular = Eigen::MatrixXd());
 
     Eigen::MatrixXd max_vel_js_arm() const;
     void setMax_vel_js_arm(const Eigen::MatrixXd &max_vel_js_arm);
