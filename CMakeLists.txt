@@ -225,6 +225,10 @@ else()
 	message ("Hint: use -DUNIT_TESTS=true if you want them built.")
 endif()
 
-install(TARGETS hybrid_automaton DESTINATION "${CMAKE_CURRENT_SOURCE_DIR}/lib")
-
-
+if(WIN32)
+	install(TARGETS hybrid_automaton DESTINATION "${CMAKE_CURRENT_SOURCE_DIR}/lib")
+else()
+	install(TARGETS hybrid_automaton DESTINATION "${CMAKE_CURRENT_SOURCE_DIR}/lib")
+	install(TARGETS hybrid_automaton DESTINATION "/usr/local/lib")
+        install(DIRECTORY "${PROJECT_SOURCE_DIR}/include/hybrid_automaton" DESTINATION "/usr/local/include")
+endif()
