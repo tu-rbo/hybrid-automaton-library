@@ -85,7 +85,7 @@ void HybridAutomatonFactory::_initializeDefaultValues()
     }
 
     _index_vec_base = Eigen::MatrixXd::Constant(_num_dof_base, 1, 0);
-    for(int idx_base=0; idx_base<num_dof_base; idx_base++)
+    for(int idx_base=0; idx_base<_num_dof_base; idx_base++)
     {
         _index_vec_base(idx_base, 0) = idx_base+_num_dof_arm;
     }
