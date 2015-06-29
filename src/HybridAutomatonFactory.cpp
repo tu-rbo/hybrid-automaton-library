@@ -448,12 +448,12 @@ ha::HybridAutomaton::Ptr HybridAutomatonFactory::createInitialHybridAutomaton(co
 
     move_home_initial_cm->setName("move_home_initial_cm");
 
-    ha::Controller::Ptr home_ctrl_arm = createSubjointSpaceControllerArm("move_home_initial_arm_ctrl",home_config_js_arm,max_vel_js_arm);
-//                                                                      (home_config_js_arm.size() == 0 ? _home_config_js_arm : home_config_js_arm),
-//                                                                      (max_vel_js_arm.size() == 0 ? _max_vel_js_arm : max_vel_js_arm));
-    ha::Controller::Ptr home_ctrl_base = createSubjointSpaceControllerBase("move_home_initial_base_ctrl",home_config_js_base,max_vel_js_base);
-//                                                                        (home_config_js_base.size() == 0 ? _home_config_js_base : home_config_js_base),
-//                                                                        (max_vel_js_base.size() == 0 ? _max_vel_js_base : max_vel_js_base));
+    ha::Controller::Ptr home_ctrl_arm = createSubjointSpaceControllerArm("move_home_initial_arm_ctrl",
+                                                                         (home_config_js_arm.size() == 0 ? _home_config_js_arm : home_config_js_arm),
+                                                                         max_vel_js_arm);
+    ha::Controller::Ptr home_ctrl_base = createSubjointSpaceControllerBase("move_home_initial_base_ctrl",
+                                                                           (home_config_js_base.size() == 0 ? _home_config_js_base : home_config_js_base),
+                                                                           max_vel_js_base);
     std::vector<ha::Controller::Ptr> home_ctrls;
     home_ctrls.push_back(home_ctrl_arm);
     home_ctrls.push_back(home_ctrl_base);
