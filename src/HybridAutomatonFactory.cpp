@@ -81,9 +81,9 @@ HybridAutomatonFactory::HybridAutomatonFactory(const int& num_dof_arm, const int
     }
 
     _index_vec_base = Eigen::MatrixXd::Constant(_num_dof_base, 1, 0);
-    for(int idx_base=_num_dof_arm; idx_base<_num_dof_arm+_num_dof_base; idx_base++)
+    for(int idx_base=0; idx_base<num_dof_base; idx_base++)
     {
-        _index_vec_base(idx_base, 0) = idx_base;
+        _index_vec_base(idx_base, 0) = idx_base+_num_dof_arm;
     }
 
     _max_vel_js_arm = Eigen::MatrixXd::Constant(_num_dof_arm, 1, DEFAULT_MAX_VEL_JS_ARM);
