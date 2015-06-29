@@ -601,6 +601,8 @@ public:
 
 protected:
 
+	virtual void _initializeDefaultValues();
+
     /**
          * @brief Performs the cloning operation (this solves some issues of inheritance and smart pointers)
          *

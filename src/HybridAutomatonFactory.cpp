@@ -65,15 +65,19 @@
 namespace ha
 {
 HybridAutomatonFactory::HybridAutomatonFactory()
-    : HybridAutomatonFactory(DEFAULT_NUM_DOF_ARM, DEFAULT_NUM_DOF_BASE)
+    : _num_dof_arm(DEFAULT_NUM_DOF_ARM), _num_dof_base(DEFAULT_NUM_DOF_BASE)
 {
-
+    _initializeDefaultValues();
 }
 
 HybridAutomatonFactory::HybridAutomatonFactory(const int& num_dof_arm, const int& num_dof_base)
     :_num_dof_arm(num_dof_arm), _num_dof_base(num_dof_base)
 {
+	_initializeDefaultValues();
+}
 
+void HybridAutomatonFactory::_initializeDefaultValues()
+{
     _index_vec_arm = Eigen::MatrixXd::Constant(_num_dof_arm, 1, 0);
     for(int idx_arm=0; idx_arm<_num_dof_arm; idx_arm++)
     {
@@ -159,7 +163,6 @@ HybridAutomatonFactory::HybridAutomatonFactory(const int& num_dof_arm, const int
 
     _max_vel_os_linear = DEFAULT_MAX_VEL_OS_LINEAR;
     _max_vel_os_angular = DEFAULT_MAX_VEL_OS_ANGULAR;
-
 }
 
 HybridAutomatonFactory::~HybridAutomatonFactory()
