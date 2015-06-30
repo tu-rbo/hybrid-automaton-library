@@ -333,7 +333,8 @@ public:
 
     ha::JumpCondition::Ptr createOperationalSpaceConvergenceCondition(ha::ControllerConstPtr ctrl,
                                                                                               bool relative,
-                                                                                              const double& pos_epsilon_os);
+                                                                                              const double& pos_epsilon_os,
+                                                                      bool only_displacement = false);
 
 
     ha::JumpCondition::Ptr createMaxTimeCondition(double max_time);

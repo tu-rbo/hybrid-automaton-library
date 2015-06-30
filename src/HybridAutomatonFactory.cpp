@@ -780,35 +780,55 @@ ha::Controller::Ptr HybridAutomatonFactory::createOperationalSpaceController(std
                                                      const Eigen::MatrixXd &kp_os_linear,
                                                      const Eigen::MatrixXd &kp_os_angular,
                                                      const Eigen::MatrixXd &kv_os_linear,
-                                                     const Eigen::MatrixXd &kv_os_angular,
-                                                     bool is_relative)
+                                                                             const Eigen::MatrixXd &kv_os_angular,
+                                                                             bool is_relative)
 {
-    Eigen::MatrixXd bin_home_frame;
-    bin_home_frame.resize(4,4);
-    bin_home_frame.setIdentity();
+    ha::Controller::Ptr ctrl(new ha::Controller);
+    Eigen::MatrixXd os_goal;
     if(goal_op_rot_matrix.size() != 0)
     {
-        bin_home_frame.block(0,0,3,3) = goal_op_rot_matrix;
+        os_goal.resize(4,4);
+        os_goal.setIdentity();
+
+        os_goal.block(0,0,3,3) = goal_op_rot_matrix;
+        os_goal.block(0,3,3,1) = goal_op_translation;
+
+        //Endeffector Frame Controller
+
+        ctrl->setName(name);
+        ctrl->setType("InterpolatedHTransformController");
+        ctrl->setArgument("interpolation_type", "cubic");
+
+        ctrl->setGoal(os_goal);
+        ctrl->setKp(_combineArmAndBase((kp_os_linear.size() == 0 ? _kp_os_linear : kp_os_linear),
+                                       (kp_os_angular.size() == 0 ? _kp_os_angular : kp_os_angular)));
+        ctrl->setKv(_combineArmAndBase((kv_os_linear.size() == 0 ? _kv_os_linear : kv_os_linear),
+                                       (kv_os_angular.size() == 0 ? _kv_os_angular : kv_os_angular)));
+
+        Eigen::MatrixXd max_vel(2,1);
+        max_vel << (max_vel_os_linear == -1 ? _max_vel_os_linear : max_vel_os_linear), (max_vel_os_angular == -1 ? _max_vel_os_angular : max_vel_os_angular);
+        ctrl->setMaximumVelocity(max_vel);
+        ctrl->setGoalIsRelative(is_relative);
+        ctrl->setArgument("operational_frame", "EE");
+
+    }else{
+        os_goal = goal_op_translation;
+
+        //Endeffector Frame Controller
+        ctrl->setName(name);
+        ctrl->setType("InterpolatedDisplacementController");
+        ctrl->setArgument("interpolation_type", "cubic");
+
+        ctrl->setGoal(os_goal);
+        ctrl->setKp((kp_os_linear.size() == 0 ? _kp_os_linear : kp_os_linear));
+        ctrl->setKv((kv_os_linear.size() == 0 ? _kv_os_linear : kv_os_linear));
+
+        Eigen::MatrixXd max_vel = Eigen::MatrixXd::Constant(3,1,(max_vel_os_linear == -1 ? _max_vel_os_linear : max_vel_os_linear));
+        ctrl->setMaximumVelocity(max_vel);
+        ctrl->setGoalIsRelative(is_relative);
+        ctrl->setArgument("operational_frame", "EE");
+
     }
-    bin_home_frame.block(0,3,3,1) = goal_op_translation;
-
-    //Endeffector Frame Controller
-    ha::Controller::Ptr ctrl(new ha::Controller);
-    ctrl->setName(name);
-    ctrl->setType("InterpolatedHTransformController");
-    ctrl->setArgument("interpolation_type", "cubic");
-
-    ctrl->setGoal(bin_home_frame);
-    ctrl->setKp(_combineArmAndBase((kp_os_linear.size() == 0 ? _kp_os_linear : kp_os_linear),
-                                   (kp_os_angular.size() == 0 ? _kp_os_angular : kp_os_angular)));
-    ctrl->setKv(_combineArmAndBase((kv_os_linear.size() == 0 ? _kv_os_linear : kv_os_linear),
-                                   (kv_os_angular.size() == 0 ? _kv_os_angular : kv_os_angular)));
-
-    Eigen::MatrixXd max_vel(2,1);
-    max_vel << (max_vel_os_linear == -1 ? _max_vel_os_linear : max_vel_os_linear), (max_vel_os_angular == -1 ? _max_vel_os_angular : max_vel_os_angular);
-    ctrl->setMaximumVelocity(max_vel);
-    ctrl->setGoalIsRelative(is_relative);
-    ctrl->setArgument("operational_frame", "EE");
 
     return ctrl;
 }
@@ -954,13 +974,23 @@ ha::JumpCondition::Ptr HybridAutomatonFactory::createJointSpaceZeroVelocityCondi
 
 ha::JumpCondition::Ptr HybridAutomatonFactory::createOperationalSpaceConvergenceCondition(ha::ControllerConstPtr ctrl,
                                                                                           bool relative,
-                                                                                          const double& pos_epsilon_os)
+                                                                                          const double& pos_epsilon_os,
+                                                                                          bool only_displacement)
 {
     ha::JumpConditionPtr jc(new ha::JumpCondition());
-    ha::SensorPtr sensor(new ha::FramePoseSensor());
-    jc->setSensor(sensor);
-    jc->setControllerGoal(ctrl);
-    jc->setJumpCriterion(ha::JumpCondition::NORM_TRANSFORM);
+    if(!only_displacement)
+    {
+        ha::SensorPtr sensor(new ha::FramePoseSensor());
+        jc->setSensor(sensor);
+        jc->setControllerGoal(ctrl);
+        jc->setJumpCriterion(ha::JumpCondition::NORM_TRANSFORM);
+    }else{
+        ha::SensorPtr sensor(new ha::FrameDisplacementSensor());
+        jc->setSensor(sensor);
+        jc->setControllerGoal(ctrl);
+        jc->setJumpCriterion(ha::JumpCondition::NORM_L2);
+    }
+
     jc->setEpsilon(pos_epsilon_os);
 
     if(relative)
@@ -1304,8 +1334,14 @@ void HybridAutomatonFactory::CreateGoToCMAndConvergenceCS(const ha::ControlMode:
     ha::ControlSet::Ptr os_cs = createTPNakamuraControlSet(os_ctrl, use_base);
     cm_ptr->setControlSet(os_cs);
 
+    bool only_displacement = false;
+    if(goal_op_ori.size() == 0)
+    {
+        only_displacement = true;
+    }
+
     cs_ptr->setName(name + std::string("_cs"));
-    ha::JumpConditionPtr convergence_jc = createOperationalSpaceConvergenceCondition(os_ctrl, is_relative, pos_epsilon_os);
+    ha::JumpConditionPtr convergence_jc = createOperationalSpaceConvergenceCondition(os_ctrl, is_relative, pos_epsilon_os, only_displacement);
     cs_ptr->add(convergence_jc);
 }
 
