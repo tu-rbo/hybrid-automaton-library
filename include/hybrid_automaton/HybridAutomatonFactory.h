@@ -421,7 +421,7 @@ public:
                             const Eigen::MatrixXd& kp_grasp = Eigen::MatrixXd(),
                             const Eigen::MatrixXd& kv_grasp = Eigen::MatrixXd(),
                             //softhand
-                            const double grasp_strength=0.1,
+                            const double grasp_strength=0.2,
                             const int graps_type=4);
 
     /**
