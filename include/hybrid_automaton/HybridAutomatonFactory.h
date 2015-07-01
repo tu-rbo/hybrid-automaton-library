@@ -249,10 +249,10 @@ public:
     ha::Controller::Ptr createBBOperationalSpaceController(std::string name,
                                                            bool trajectory,
                                                            bool use_tf,
-                                                           double max_vel_os_linear,
-                                                           double max_vel_os_angular,
                                                            const std::string frame,
                                                            const std::string parent_frame="/odom",
+                                                           double max_vel_os_linear = -1,
+                                                           double max_vel_os_angular = -1,
                                                            const Eigen::MatrixXd &kp_os_linear = Eigen::MatrixXd(),
                                                            const Eigen::MatrixXd &kp_os_angular = Eigen::MatrixXd(),
                                                            const Eigen::MatrixXd &kv_os_linear = Eigen::MatrixXd(),
@@ -332,8 +332,9 @@ public:
                                                                                     const double& vel_epsilon_js_base =  -1);
 
     ha::JumpCondition::Ptr createOperationalSpaceConvergenceCondition(ha::ControllerConstPtr ctrl,
-                                                                                              bool relative,
-                                                                                              const double& pos_epsilon_os,
+                                                                      bool relative,
+                                                                      double pos_epsilon_os_linear = -1,
+                                                                      double pos_epsilon_os_angular = -1,
                                                                       bool only_displacement = false);
 
 
@@ -461,13 +462,14 @@ public:
     void CreateGoToBBCMAndConvergenceCS(const ha::ControlMode::Ptr& cm_ptr,
                                         const ha::ControlSwitch::Ptr& cs_ptr,
                                         const std::string& name,
-                                        double max_vel_os_linear,
-                                        double max_vel_os_angular,
-                                        const double& pos_epsilon_os,
                                         const std::string& frame_name,
                                         const std::string& parent_frame_name,
                                         bool use_tf,
                                         bool use_base,
+                                        double max_vel_os_linear = -1,
+                                        double max_vel_os_angular = -1,
+                                        double pos_epsilon_os_linear = -1,
+                                        double pos_epsilon_os_angular = -1,
                                         bool is_relative = false,
                                         const Eigen::MatrixXd &kp_os_linear = Eigen::MatrixXd(),
                                         const Eigen::MatrixXd &kp_os_angular = Eigen::MatrixXd(),
@@ -480,10 +482,11 @@ public:
                                       const std::string& name,
                                       const Eigen::MatrixXd &goal_op_pos,
                                       const Eigen::MatrixXd &goal_op_ori,
-                                      double max_vel_os_linear,
-                                      double max_vel_os_angular,
-                                      const double& pos_epsilon_os,
                                       bool use_base,
+                                      double max_vel_os_linear = -1,
+                                      double max_vel_os_angular = -1,
+                                      double pos_epsilon_os_linear = -1,
+                                      double pos_epsilon_os_angular = -1,
                                       bool is_relative = false,
                                       const Eigen::MatrixXd &kp_os_linear = Eigen::MatrixXd(),
                                       const Eigen::MatrixXd &kp_os_angular = Eigen::MatrixXd(),
@@ -496,12 +499,13 @@ public:
                                                 const std::string& name,
                                                 const Eigen::MatrixXd &goal_op_pos,
                                                 const Eigen::MatrixXd &goal_op_ori,
-                                                double max_vel_os_linear,
-                                                double max_vel_os_angular,
-                                                const double& pos_epsilon_os,
                                                 const Eigen::MatrixXd &ft_idx,
                                                 const Eigen::MatrixXd &max_ft,
                                                 bool use_base,
+                                                double max_vel_os_linear = -1,
+                                                double max_vel_os_angular = -1,
+                                                double pos_epsilon_os_linear = -1,
+                                                double pos_epsilon_os_angular = -1,
                                                 bool is_relative = false,
                                                 const Eigen::MatrixXd &kp_os_linear = Eigen::MatrixXd(),
                                                 const Eigen::MatrixXd &kp_os_angular = Eigen::MatrixXd(),
@@ -602,7 +606,7 @@ public:
 
 protected:
 
-	virtual void _initializeDefaultValues();
+    virtual void _initializeDefaultValues();
 
     /**
          * @brief Performs the cloning operation (this solves some issues of inheritance and smart pointers)

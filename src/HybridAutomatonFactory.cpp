@@ -836,11 +836,10 @@ ha::Controller::Ptr HybridAutomatonFactory::createOperationalSpaceController(std
 ha::Controller::Ptr HybridAutomatonFactory::createBBOperationalSpaceController(std::string name,
                                                                                bool trajectory,
                                                                                bool use_tf,
-                                                                               double max_vel_os_linear,
-                                                                               double max_vel_os_angular,
                                                                                const std::string frame,
                                                                                const std::string parent_frame,
-
+                                                                               double max_vel_os_linear,
+                                                                               double max_vel_os_angular,
                                                                                const Eigen::MatrixXd &kp_os_linear,
                                                                                const Eigen::MatrixXd &kp_os_angular,
                                                                                const Eigen::MatrixXd &kv_os_linear,
@@ -974,7 +973,8 @@ ha::JumpCondition::Ptr HybridAutomatonFactory::createJointSpaceZeroVelocityCondi
 
 ha::JumpCondition::Ptr HybridAutomatonFactory::createOperationalSpaceConvergenceCondition(ha::ControllerConstPtr ctrl,
                                                                                           bool relative,
-                                                                                          const double& pos_epsilon_os,
+                                                                                          double pos_epsilon_os_linear,
+                                                                                          double pos_epsilon_os_angular,
                                                                                           bool only_displacement)
 {
     ha::JumpConditionPtr jc(new ha::JumpCondition());
@@ -984,14 +984,18 @@ ha::JumpCondition::Ptr HybridAutomatonFactory::createOperationalSpaceConvergence
         jc->setSensor(sensor);
         jc->setControllerGoal(ctrl);
         jc->setJumpCriterion(ha::JumpCondition::NORM_TRANSFORM);
+
+        jc->setEpsilon((pos_epsilon_os_linear == -1 ? _pos_epsilon_os_linear : pos_epsilon_os_linear));
     }else{
         ha::SensorPtr sensor(new ha::FrameDisplacementSensor());
         jc->setSensor(sensor);
         jc->setControllerGoal(ctrl);
         jc->setJumpCriterion(ha::JumpCondition::NORM_L2);
+
+        jc->setEpsilon((pos_epsilon_os_linear == -1 ? _pos_epsilon_os_linear : pos_epsilon_os_linear));
     }
 
-    jc->setEpsilon(pos_epsilon_os);
+
 
     if(relative)
         jc->setGoalRelative();
@@ -1263,18 +1267,19 @@ void HybridAutomatonFactory::CreateUngraspCMAndCS(const ha::ControlMode::Ptr& cm
 void HybridAutomatonFactory::CreateGoToBBCMAndConvergenceCS(const ha::ControlMode::Ptr& cm_ptr,
                                                             const ha::ControlSwitch::Ptr& cs_ptr,
                                                             const std::string& name,
-                                                            double max_vel_os_linear,
-                                                            double max_vel_os_angular,
-                                                            const double& pos_epsilon_os,
                                                             const std::string& frame_name,
                                                             const std::string& parent_frame_name,
                                                             bool use_tf,
                                                             bool use_base,
+                                                            double max_vel_os_linear,
+                                                            double max_vel_os_angular,
+                                                            double pos_epsilon_os_linear,
+                                                            double pos_epsilon_os_angular,
                                                             bool is_relative,
                                                             const Eigen::MatrixXd &kp_os_linear,
                                                             const Eigen::MatrixXd &kp_os_angular,
                                                             const Eigen::MatrixXd &kv_os_linear,
-                                                            const Eigen::MatrixXd &kv_os_angular,                                                            
+                                                            const Eigen::MatrixXd &kv_os_angular,
                                                             int update_rate){
     cm_ptr->setName(name + std::string("_cm"));
 
@@ -1283,10 +1288,10 @@ void HybridAutomatonFactory::CreateGoToBBCMAndConvergenceCS(const ha::ControlMod
     bb_ctrl = createBBOperationalSpaceController(name + std::string("_ctrl"),
                                                         false,
                                                         use_tf,
-                                                        max_vel_os_linear,
-                                                        max_vel_os_angular,
                                                         frame_name,
                                                         parent_frame_name,
+                                                        max_vel_os_linear,
+                                                        max_vel_os_angular,
                                                         kp_os_linear,
                                                         kp_os_angular,
                                                         kv_os_linear,
@@ -1298,24 +1303,29 @@ void HybridAutomatonFactory::CreateGoToBBCMAndConvergenceCS(const ha::ControlMod
     cm_ptr->setControlSet(bb_cs);
 
     cs_ptr->setName(name + std::string("_cs"));
-    ha::JumpConditionPtr convergence_jc = createOperationalSpaceConvergenceCondition(bb_ctrl, is_relative, pos_epsilon_os);
+    ha::JumpConditionPtr convergence_jc = createOperationalSpaceConvergenceCondition(bb_ctrl,
+                                                                                     is_relative,
+                                                                                     pos_epsilon_os_linear,
+                                                                                     pos_epsilon_os_angular);
     cs_ptr->add(convergence_jc);
 }
 
 void HybridAutomatonFactory::CreateGoToCMAndConvergenceCS(const ha::ControlMode::Ptr& cm_ptr,
-                                                            const ha::ControlSwitch::Ptr& cs_ptr,
-                                                            const std::string& name,
-                                                            const Eigen::MatrixXd &goal_op_pos,
-                                                            const Eigen::MatrixXd &goal_op_ori,
-                                                            double max_vel_os_linear,
-                                                            double max_vel_os_angular,
-                                                            const double& pos_epsilon_os,
-                                                            bool use_base,
-                                                            bool is_relative,
-                                                            const Eigen::MatrixXd &kp_os_linear,
-                                                            const Eigen::MatrixXd &kp_os_angular,
-                                                            const Eigen::MatrixXd &kv_os_linear,
-                                                            const Eigen::MatrixXd &kv_os_angular){
+                                                          const ha::ControlSwitch::Ptr& cs_ptr,
+                                                          const std::string& name,
+                                                          const Eigen::MatrixXd &goal_op_pos,
+                                                          const Eigen::MatrixXd &goal_op_ori,
+                                                          bool use_base,
+                                                          double max_vel_os_linear,
+                                                          double max_vel_os_angular,
+                                                          double pos_epsilon_os_linear,
+                                                          double pos_epsilon_os_angular,
+                                                          bool is_relative,
+                                                          const Eigen::MatrixXd &kp_os_linear,
+                                                          const Eigen::MatrixXd &kp_os_angular,
+                                                          const Eigen::MatrixXd &kv_os_linear,
+                                                          const Eigen::MatrixXd &kv_os_angular)
+{
     cm_ptr->setName(name + std::string("_cm"));
 
     //Endeffector Frame Controller
@@ -1341,7 +1351,11 @@ void HybridAutomatonFactory::CreateGoToCMAndConvergenceCS(const ha::ControlMode:
     }
 
     cs_ptr->setName(name + std::string("_cs"));
-    ha::JumpConditionPtr convergence_jc = createOperationalSpaceConvergenceCondition(os_ctrl, is_relative, pos_epsilon_os, only_displacement);
+    ha::JumpConditionPtr convergence_jc = createOperationalSpaceConvergenceCondition(os_ctrl,
+                                                                                     is_relative,
+                                                                                     pos_epsilon_os_linear,
+                                                                                     pos_epsilon_os_angular,
+                                                                                     only_displacement);
     cs_ptr->add(convergence_jc);
 }
 
@@ -1351,19 +1365,21 @@ void HybridAutomatonFactory::CreateGoToCMConvergenceCSAndMaxForceCS(const ha::Co
                                                                     const std::string& name,
                                                                     const Eigen::MatrixXd &goal_op_pos,
                                                                     const Eigen::MatrixXd &goal_op_ori,
-                                                                    double max_vel_os_linear,
-                                                                    double max_vel_os_angular,
-                                                                    const double& pos_epsilon_os,
                                                                     const Eigen::MatrixXd &ft_weights,
                                                                     const Eigen::MatrixXd &max_ft,
                                                                     bool use_base,
+                                                                    double max_vel_os_linear,
+                                                                    double max_vel_os_angular,
+                                                                    double pos_epsilon_os_linear,
+                                                                    double pos_epsilon_os_angular,
                                                                     bool is_relative,
                                                                     const Eigen::MatrixXd &kp_os_linear,
                                                                     const Eigen::MatrixXd &kp_os_angular,
                                                                     const Eigen::MatrixXd &kv_os_linear,
                                                                     const Eigen::MatrixXd &kv_os_angular)
 {
-    CreateGoToCMAndConvergenceCS(cm_ptr, convergence_cs_ptr, name, goal_op_pos, goal_op_ori, max_vel_os_linear, max_vel_os_angular, pos_epsilon_os, use_base,
+    CreateGoToCMAndConvergenceCS(cm_ptr, convergence_cs_ptr, name, goal_op_pos, goal_op_ori,
+                                 use_base, max_vel_os_linear, max_vel_os_angular, pos_epsilon_os_linear, pos_epsilon_os_angular,
                                  is_relative, kp_os_linear, kp_os_angular, kv_os_linear, kv_os_angular);
 
     CreateMaxForceTorqueControlSwitch(max_force_cs_ptr,name, ft_weights, max_ft);
