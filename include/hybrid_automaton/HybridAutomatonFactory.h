@@ -213,7 +213,7 @@ public:
                                                             const Eigen::MatrixXd& kp_js_base = Eigen::MatrixXd(),
                                                             const Eigen::MatrixXd& kv_js_base = Eigen::MatrixXd(),
                                                             bool is_relative = false,
-                                                            int update_rate = 100);
+                                                            int update_rate = -1);
 
     ha::Controller::Ptr createOperationalSpaceController(std::string name,
                                                          const Eigen::MatrixXd &goal_op_translation,
@@ -700,6 +700,8 @@ protected:
     Eigen::MatrixXd _vel_goal_os_linear;
     Eigen::MatrixXd _vel_goal_os_angular;
 
+    /// The default update rate
+    int _update_rate;
 };
 
 }
