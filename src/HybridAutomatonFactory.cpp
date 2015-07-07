@@ -1074,7 +1074,7 @@ void HybridAutomatonFactory::CreateGoToHomeCMAndConvergenceCSArm(const ha::Contr
 
     //ha::Controller::Ptr home_ctrl_arm = _createJointSpaceArmController(name + std::string("_arm_ctrl"), goal_cfg, _max_js_vel_arm);
     ha::Controller::Ptr home_ctrl_arm = createSubjointSpaceControllerArm(name + std::string("_arm_ctrl"),
-                                                                         goal_cfg,
+                                                                         (goal_cfg.size() == 0 ? _home_config_js_arm : goal_cfg),
                                                                          max_vel_js_arm,
                                                                          index_vec_arm,
                                                                          kp_js_arm,
