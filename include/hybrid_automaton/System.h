@@ -50,7 +50,7 @@ namespace ha {
         /**
         * @brief Return the current Force-torque mieasurement of your sensor (6x1)
         */
-		virtual ::Eigen::MatrixXd getForceTorqueMeasurement() const = 0;
+		virtual ::Eigen::MatrixXd getForceTorqueMeasurement(const std::string& frame_id = "ee") const = 0;
 
         /**
         * @brief Return the pose of a frame with id \a frame_id (4x4)
