@@ -62,6 +62,8 @@
 #define DEFAULT_MAX_VEL_OS_LINEAR 0.03
 #define DEFAULT_MAX_VEL_OS_ANGULAR 0.5
 
+#define DEFAULT_UPDATE_RATE 100
+
 namespace ha
 {
 HybridAutomatonFactory::HybridAutomatonFactory()
@@ -163,6 +165,8 @@ void HybridAutomatonFactory::_initializeDefaultValues()
 
     _max_vel_os_linear = DEFAULT_MAX_VEL_OS_LINEAR;
     _max_vel_os_angular = DEFAULT_MAX_VEL_OS_ANGULAR;
+
+    _update_rate = DEFAULT_UPDATE_RATE;
 }
 
 HybridAutomatonFactory::~HybridAutomatonFactory()
@@ -623,8 +627,8 @@ ha::Controller::Ptr HybridAutomatonFactory::createSubjointSpaceController(std::s
     index_vec_ss << index_vec;
     ctrl->setArgument("index", index_vec_ss.str());
     ctrl->setGoal(goal_js);
-    ctrl->setKp(kp_js);
-    ctrl->setKv(kv_js);
+    ctrl->setKp(kp_js.size() == 0 ? _combineArmAndBase(_kp_js_arm, _kp_js_base): kp_js);
+    ctrl->setKv(kv_js.size() == 0 ? _combineArmAndBase(_kv_js_arm, _kv_js_base): kv_js);
     ctrl->setMaximumVelocity(max_velocity);
     ctrl->setGoalIsRelative(is_relative);
     return ctrl;
@@ -656,9 +660,9 @@ ha::Controller::Ptr HybridAutomatonFactory::createBBSubjointSpaceController(std:
         ctrl->setArgument("use_tf", "0");
     }
     ctrl->setArgument("topic_name", topic_name);
-    ctrl->setArgument("update_rate", update_rate);
-    ctrl->setKp(kp_js);
-    ctrl->setKv(kv_js);
+    ctrl->setArgument("update_rate", update_rate <= 0 ? _update_rate : update_rate);
+    ctrl->setKp(kp_js.size() == 0 ? _combineArmAndBase(_kp_js_arm, _kp_js_base): kp_js);
+    ctrl->setKv(kv_js.size() == 0 ? _combineArmAndBase(_kv_js_arm, _kv_js_base): kv_js);
     ctrl->setMaximumVelocity(max_velocity);
     ctrl->setGoalIsRelative(is_relative);
     return ctrl;
@@ -725,7 +729,7 @@ ha::Controller::Ptr HybridAutomatonFactory::createBBSubjointSpaceControllerBase(
     }
     ctrl->setArgument("topic_name", topic_name);
     ctrl->setArgument("tf_parent", tf_parent);
-    ctrl->setArgument("update_rate", update_rate);
+    ctrl->setArgument("update_rate", update_rate<=0 ? _update_rate : update_rate);
     ctrl->setKp((kp_js_base.size() == 0 ? _kp_js_base : kp_js_base));
     ctrl->setKv((kv_js_base.size() == 0 ? _kv_js_base : kv_js_base));
     ctrl->setMaximumVelocity((max_vel_js_base.size() == 0 ? _max_vel_js_base : max_vel_js_base));
@@ -864,7 +868,7 @@ ha::Controller::Ptr HybridAutomatonFactory::createBBOperationalSpaceController(s
     }
     ctrl->setArgument("topic_name", frame);
 
-    ctrl->setArgument("update_rate", update_rate);
+    ctrl->setArgument("update_rate", update_rate<=0 ? _update_rate : update_rate);
 
     Eigen::MatrixXd max_vel(2,1);
     max_vel <<  (max_vel_os_angular == -1 ? _max_vel_os_angular : max_vel_os_angular), (max_vel_os_linear == -1 ? _max_vel_os_linear : max_vel_os_linear);
@@ -936,7 +940,7 @@ ha::JumpCondition::Ptr HybridAutomatonFactory::createJointSpaceVelocityCondition
     jc->setSensor(sensor);
     jc->setConstantGoal(vel_goal_js);
     jc->setJumpCriterion(ha::JumpCondition::NORM_L_INF);
-    jc->setEpsilon(vel_epsilon_js);
+    jc->setEpsilon(vel_epsilon_js <= 0 ? std::min(_vel_epsilon_js_arm,_vel_epsilon_js_base): vel_epsilon_js);
 
     return jc;
 }
@@ -945,7 +949,7 @@ ha::JumpCondition::Ptr HybridAutomatonFactory::createJointSpaceZeroVelocityCondi
                                                                                      const double &vel_epsilon_js)
 {
     Eigen::MatrixXd zero_goal = Eigen::MatrixXd::Constant(index_vec.size(), 1, 0.0);
-    return createJointSpaceVelocityCondition(index_vec, zero_goal, vel_epsilon_js);
+    return createJointSpaceVelocityCondition(index_vec, zero_goal, vel_epsilon_js <= 0 ? std::min(_vel_epsilon_js_arm,_vel_epsilon_js_base): vel_epsilon_js);
 }
 
 ha::JumpCondition::Ptr HybridAutomatonFactory::createJointSpaceZeroVelocityConditionArm(const Eigen::MatrixXd& index_vec_arm,
