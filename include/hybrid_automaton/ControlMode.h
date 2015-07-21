@@ -72,6 +72,11 @@ namespace ha {
 				HA_THROW_ERROR("ControlSet.step", "No control set defined.");
 		}
 
+		virtual void switchControlMode(ControlMode::Ptr otherMode)
+		{
+			this->getControlSet()->switchControlSet(otherMode->getControlSet());
+		}
+
 		virtual void setControlSet(const ControlSet::Ptr control_set) {
 			_control_set = control_set;
 		}
