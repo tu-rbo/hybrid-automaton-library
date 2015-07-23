@@ -7,7 +7,8 @@ namespace ha {
 		_goalSource(CONSTANT),
 		_jump_criterion(NORM_L1),
 		_epsilon(0.0),
-		_is_goal_relative(false)
+        _is_goal_relative(false),
+        _negate(false)
 	{
 
 	}
@@ -28,6 +29,7 @@ namespace ha {
 		this->_epsilon = jc._epsilon;
 		this->_ros_topic_goal_name = jc._ros_topic_goal_name;
 		this->_ros_topic_goal_type = jc._ros_topic_goal_type;
+        this->_negate=jc._negate;
 	}
 
 	void JumpCondition::initialize(const double& t) 
@@ -87,9 +89,18 @@ namespace ha {
 		 
 		if(this->_is_goal_relative)
 		{
-			return (this->_computeJumpCriterion(this->_sensor->getRelativeCurrentValue(), desired) <= _epsilon);
+            if (!_negate){
+                return (this->_computeJumpCriterion(this->_sensor->getRelativeCurrentValue(), desired) <= _epsilon);
+            } else {
+                return (this->_computeJumpCriterion(this->_sensor->getRelativeCurrentValue(), desired) > _epsilon);
+            }
 		}else{
-			return (this->_computeJumpCriterion( this->_sensor->getCurrentValue(), desired) <= _epsilon);
+            if (!_negate){
+                return (this->_computeJumpCriterion( this->_sensor->getCurrentValue(), desired) <= _epsilon);
+            } else {
+                return (this->_computeJumpCriterion( this->_sensor->getCurrentValue(), desired) > _epsilon);
+            }
+
 		}
 	}
 
@@ -383,6 +394,8 @@ namespace ha {
 
 		tree->setAttribute<bool>(std::string("goal_is_relative"), this->_is_goal_relative);
 
+        tree->setAttribute<bool>(std::string("negate"), this->_negate);
+
 		tree->addChildNode(this->_sensor->serialize(factory));
 
 		return tree;
@@ -495,6 +508,9 @@ namespace ha {
 		if(!tree->getAttribute<bool>("goal_is_relative", _is_goal_relative))
 			HA_WARN("JumpCondition.deserialize", "No \"goal_is_relative\" parameter given in JumpCondition - using default values");
 
+        if(!tree->getAttribute<bool>("negate", _negate))
+            HA_WARN("JumpCondition.deserialize", "No \"negate\" parameter given in JumpCondition - using default values");
+
 	}
 
     std::string JumpCondition::toString(bool ) {
@@ -562,7 +578,8 @@ namespace ha {
             else if (this->_jump_criterion == NORM_L_INF) ss << "_oo";
             else if (this->_jump_criterion == NORM_ROTATION) ss << "_R";
             else if (this->_jump_criterion == NORM_TRANSFORM) ss << "_T";
-            ss << " < " << _epsilon;
+
+            ss << (!_negate?" < ":" > ") << _epsilon;
         } else {
             if (this->_jump_criterion == THRESH_UPPER_BOUND) ss << " > ";
             else if (this->_jump_criterion == THRESH_LOWER_BOUND) ss << " < ";
@@ -588,4 +605,13 @@ namespace ha {
 	{
 		return this->_is_goal_relative;
 	}
+
+    void JumpCondition::setNegate(bool negate){
+        this->_negate=negate;
+    }
+
+    bool JumpCondition::isNegate() const
+    {
+        return this->_negate;
+    }
 }

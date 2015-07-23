@@ -26,7 +26,7 @@ namespace JumpConditionSerialization1 {
 		MOCK_CONST_METHOD0(getDof, int () );
 		MOCK_CONST_METHOD0(getJointConfiguration, ::Eigen::MatrixXd () );
 		MOCK_CONST_METHOD0(getJointVelocity, ::Eigen::MatrixXd () );
-		MOCK_CONST_METHOD0(getForceTorqueMeasurement, ::Eigen::MatrixXd () );
+        MOCK_CONST_METHOD1(getForceTorqueMeasurement, ::Eigen::MatrixXd (const std::string& frame_id) );
 		MOCK_CONST_METHOD0(getCurrentTime, ::Eigen::MatrixXd () );
 		MOCK_CONST_METHOD1(getFramePose, ::Eigen::MatrixXd (const std::string& frame_id) );
 	};
@@ -165,20 +165,32 @@ TEST(JumpCondition, Activation) {
 	goalMat<<1.1,1.0,1.01;
 	jc1->setConstantGoal(goalMat);
 	EXPECT_FALSE(jc1->isActive());
+    jc1->setNegate(true);
+    EXPECT_TRUE(jc1->isActive());
+    jc1->setNegate(false);
 		
 	goalMat<<1.08,1.0,1.01;
 	jc1->setConstantGoal(goalMat);
 	EXPECT_TRUE(jc1->isActive());
+    jc1->setNegate(true);
+    EXPECT_FALSE(jc1->isActive());
+    jc1->setNegate(false);
 
 	//L_INF
 	jc1->setJumpCriterion(JumpCondition::NORM_L_INF, weights);
 	goalMat<<1.11,1.0,1.0;
 	jc1->setConstantGoal(goalMat);
 	EXPECT_FALSE(jc1->isActive());
+    jc1->setNegate(true);
+    EXPECT_TRUE(jc1->isActive());
+    jc1->setNegate(false);
 		
 	goalMat<<1.09,1.09,1.09;
 	jc1->setConstantGoal(goalMat);
 	EXPECT_TRUE(jc1->isActive());
+    jc1->setNegate(true);
+    EXPECT_FALSE(jc1->isActive());
+    jc1->setNegate(false);
 
 	jc1->setEpsilon(0.0);
 
@@ -187,20 +199,32 @@ TEST(JumpCondition, Activation) {
 	goalMat<<0.9,1.1,0.9;
 	jc1->setConstantGoal(goalMat);
 	EXPECT_FALSE(jc1->isActive());
+    jc1->setNegate(true);
+    EXPECT_TRUE(jc1->isActive());
+    jc1->setNegate(false);
 		
 	goalMat<<0.9,0.9,0.9;
 	jc1->setConstantGoal(goalMat);
 	EXPECT_TRUE(jc1->isActive());
+    jc1->setNegate(true);
+    EXPECT_FALSE(jc1->isActive());
+    jc1->setNegate(false);
 
 	//lower bound
 	jc1->setJumpCriterion(JumpCondition::THRESH_LOWER_BOUND, weights);
 	goalMat<<0.9,1.1,1.1;
 	jc1->setConstantGoal(goalMat);
 	EXPECT_FALSE(jc1->isActive());
+    jc1->setNegate(true);
+    EXPECT_TRUE(jc1->isActive());
+    jc1->setNegate(false);
 		
 	goalMat<<1.1,1.1,1.1;
 	jc1->setConstantGoal(goalMat);
 	EXPECT_TRUE(jc1->isActive());
+    jc1->setNegate(true);
+    EXPECT_FALSE(jc1->isActive());
+    jc1->setNegate(false);
 
 	//Now with weights (first entry does not matter)
 	weights<<0.0,1.0,1.0;
@@ -209,10 +233,16 @@ TEST(JumpCondition, Activation) {
 	goalMat<<0.9,1.1,1.1;
 	jc1->setConstantGoal(goalMat);
 	EXPECT_TRUE(jc1->isActive());
+    jc1->setNegate(true);
+    EXPECT_FALSE(jc1->isActive());
+    jc1->setNegate(false);
 
 	goalMat<<1.1,0.9,1.1;
 	jc1->setConstantGoal(goalMat);
 	EXPECT_FALSE(jc1->isActive());
+    jc1->setNegate(true);
+    EXPECT_TRUE(jc1->isActive());
+    jc1->setNegate(false);
 
 	//Test the norm of the rotation
 
@@ -234,17 +264,26 @@ TEST(JumpCondition, Activation) {
 
 	jc1->initialize(0.0);
 	EXPECT_TRUE(jc1->isActive());
+    jc1->setNegate(true);
+    EXPECT_FALSE(jc1->isActive());
+    jc1->setNegate(false);
 
 	double angle = 0.009;
 	//rotate around z
 	goalMat<<std::cos(angle),-std::sin(angle),0.0,std::sin(angle),std::cos(angle),0.0,0.0,0.0,1.0;
 	jc1->setConstantGoal(goalMat);
 	EXPECT_TRUE(jc1->isActive());
+    jc1->setNegate(true);
+    EXPECT_FALSE(jc1->isActive());
+    jc1->setNegate(false);
 
 	angle = 0.011;
 	//rotate around z
 	goalMat<<std::cos(angle),-std::sin(angle),0.0,std::sin(angle),std::cos(angle),0.0,0.0,0.0,1.0;
 	jc1->setConstantGoal(goalMat);
 	EXPECT_FALSE(jc1->isActive());
+    jc1->setNegate(true);
+    EXPECT_TRUE(jc1->isActive());
+    jc1->setNegate(false);
 }
 

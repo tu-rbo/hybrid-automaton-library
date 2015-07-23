@@ -148,6 +148,10 @@ namespace ha {
 
 		virtual bool isGoalRelative() const;
 		
+        virtual void setNegate(bool smaller_equal);
+
+        virtual bool isNegate() const;
+
 		/**
 		 * @brief Get the current goal
 		 * 
@@ -225,6 +229,8 @@ namespace ha {
 		std::string _sourceModeName;
 
 		bool	_is_goal_relative;
+
+        bool _negate;
 
 		double _computeJumpCriterion(const ::Eigen::MatrixXd& x, const ::Eigen::MatrixXd& y) const;
 
