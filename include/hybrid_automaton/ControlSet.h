@@ -101,6 +101,17 @@ namespace ha {
         */
 		void appendController(const Controller::Ptr& controller);
 
+		/**
+		* This function realizes a smooth transfer from this controlSet to otherSet
+		*
+		* Overload it in your controlSet, i.e. if you want to transfer members from one CS to the other
+		*/
+	    virtual void switchControlSet(ControlSet::ConstPtr other_set)
+		{
+			//Default: do nothing
+		}
+		
+
 		virtual void setName(const std::string& new_name);
 
 		virtual const std::string getName() const;
