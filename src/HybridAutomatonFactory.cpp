@@ -1417,6 +1417,4 @@ std::string HybridAutomatonFactory::HybridAutomatonToString(ha::HybridAutomaton:
     tree->setRootNode(ha_serialized);
     return tree->writeTreeXML();
 }
-
 }
-
