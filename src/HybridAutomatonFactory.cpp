@@ -1023,10 +1023,12 @@ ha::JumpCondition::Ptr HybridAutomatonFactory::createMaxTimeCondition(double max
 ha::ControlSwitch::Ptr HybridAutomatonFactory::CreateMaxForceTorqueControlSwitch(const std::string& name,
                                                                                  const Eigen::MatrixXd& ft_weights,
                                                                                  const Eigen::MatrixXd& ft_max_val,
-                                                                                 const ha::JumpCondition::JumpCriterion ft_criterion)
+                                                                                 const ha::JumpCondition::JumpCriterion ft_criterion,
+                                                                                 const bool negate_ft_condition,
+                                                                                 const float epsilon)
 {
     ha::ControlSwitch::Ptr max_ft_cs(new ha::ControlSwitch());
-    CreateMaxForceTorqueControlSwitch(max_ft_cs, name, ft_weights, ft_max_val, ft_criterion);
+    CreateMaxForceTorqueControlSwitch(max_ft_cs, name, ft_weights, ft_max_val, ft_criterion, negate_ft_condition,epsilon);
     return max_ft_cs;
 }
 
@@ -1034,7 +1036,9 @@ void HybridAutomatonFactory::CreateMaxForceTorqueControlSwitch(const ha::Control
                                                                const std::string& name,
                                                                const Eigen::MatrixXd& ft_weights,
                                                                const Eigen::MatrixXd& ft_max_val,
-                                                               const ha::JumpCondition::JumpCriterion ft_criterion)
+                                                               const ha::JumpCondition::JumpCriterion ft_criterion,
+                                                               const bool negate_ft_condition,
+                                                               const float epsilon)
 {
     cs_ptr->setName(name + std::string("_max_ft_cs"));
     ha::JumpConditionPtr max_ft_jc(new ha::JumpCondition());
@@ -1043,7 +1047,8 @@ void HybridAutomatonFactory::CreateMaxForceTorqueControlSwitch(const ha::Control
     max_ft_jc->setGoalRelative();
     max_ft_jc->setConstantGoal(ft_max_val);
     max_ft_jc->setJumpCriterion(ft_criterion ,ft_weights);
-    max_ft_jc->setEpsilon(0.0);
+    max_ft_jc->setEpsilon(epsilon);
+    max_ft_jc->setNegate(negate_ft_condition);
     cs_ptr->add(max_ft_jc);
 }
 
@@ -1263,7 +1268,19 @@ void HybridAutomatonFactory::CreateUngraspCMAndCS(const ha::ControlMode::Ptr& cm
     ha::JumpConditionPtr to_stop_or_time_jc(new ha::JumpCondition());
     ha::SensorPtr free_sensor_time(new ha::ClockSensor());
     to_stop_or_time_jc->setSensor(free_sensor_time);
-    to_stop_or_time_jc->setConstantGoal(15);
+    switch(gripper)
+    {
+    case SOFT_HAND:
+        to_stop_or_time_jc->setConstantGoal(3);
+        break;
+    case SUCTION_CUP:
+    case NO_GRIPPER:
+    case BARRETT_HAND:
+    default:
+        to_stop_or_time_jc->setConstantGoal(15);
+        break;
+    }
+
     to_stop_or_time_jc->setGoalRelative();
     to_stop_or_time_jc->setEpsilon(0);
     to_stop_or_time_jc->setJumpCriterion(ha::JumpCondition::THRESH_UPPER_BOUND);
@@ -1375,6 +1392,8 @@ void HybridAutomatonFactory::CreateGoToCMConvergenceCSAndMaxForceCS(const ha::Co
                                                                     const Eigen::MatrixXd &max_ft,
                                                                     const ha::JumpCondition::JumpCriterion ft_criterion,
                                                                     bool use_base,
+                                                                    bool negate_ft_condition,
+                                                                    double ft_epsilon,
                                                                     double max_vel_os_linear,
                                                                     double max_vel_os_angular,
                                                                     double pos_epsilon_os_linear,
@@ -1389,7 +1408,7 @@ void HybridAutomatonFactory::CreateGoToCMConvergenceCSAndMaxForceCS(const ha::Co
                                  use_base, max_vel_os_linear, max_vel_os_angular, pos_epsilon_os_linear, pos_epsilon_os_angular,
                                  is_relative, kp_os_linear, kp_os_angular, kv_os_linear, kv_os_angular);
 
-    CreateMaxForceTorqueControlSwitch(max_force_cs_ptr,name, ft_weights, max_ft, ft_criterion);
+    CreateMaxForceTorqueControlSwitch(max_force_cs_ptr,name, ft_weights, max_ft, ft_criterion,negate_ft_condition,ft_epsilon);
 
 }
 

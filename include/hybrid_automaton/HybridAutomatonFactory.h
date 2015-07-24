@@ -357,13 +357,17 @@ public:
     ha::ControlSwitch::Ptr CreateMaxForceTorqueControlSwitch(const std::string& name,
                                                              const Eigen::MatrixXd& ft_weights,
                                                              const Eigen::MatrixXd& ft_max_val,
-                                                             const ha::JumpCondition::JumpCriterion ft_criterion);
+                                                             const ha::JumpCondition::JumpCriterion ft_criterion,
+                                                             const bool negate_ft_condition=false,
+                                                             const float epsilon=0.0);
 
     void CreateMaxForceTorqueControlSwitch(const ha::ControlSwitch::Ptr& cs_ptr,
                                            const std::string& name,
                                            const Eigen::MatrixXd& ft_weights,
                                            const Eigen::MatrixXd& ft_max_val,
-                                           const ha::JumpCondition::JumpCriterion ft_criterion);
+                                           const ha::JumpCondition::JumpCriterion ft_criterion,
+                                           const bool negate_ft_condition=false,
+                                           const float epsilon = 0.0);
 
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -507,6 +511,8 @@ public:
                                                 const Eigen::MatrixXd &max_ft,
                                                 const ha::JumpCondition::JumpCriterion ft_criterion,
                                                 bool use_base,
+                                                bool negate_ft_condition=false,
+                                                double ft_epsilon=0.0,
                                                 double max_vel_os_linear = -1,
                                                 double max_vel_os_angular = -1,
                                                 double pos_epsilon_os_linear = -1,
