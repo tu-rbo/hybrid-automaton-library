@@ -789,13 +789,36 @@ ha::Controller::Ptr HybridAutomatonFactory::createOperationalSpaceController(std
 {
     ha::Controller::Ptr ctrl(new ha::Controller);
     Eigen::MatrixXd os_goal;
+
     if(goal_op_rot_matrix.size() != 0)
     {
-        os_goal.resize(4,4);
-        os_goal.setIdentity();
 
-        os_goal.block(0,0,3,3) = goal_op_rot_matrix;
-        os_goal.block(0,3,3,1) = goal_op_translation;
+        //std::cout<<"-------------Factory-----------"<<std::endl;
+        //std::cout<<"pos matrix size:"<<goal_op_translation.rows()<<" "<<goal_op_translation.cols()<<std::endl;
+        //std::cout<<"rot matrix size:"<<goal_op_rot_matrix.rows()<<" "<<goal_op_rot_matrix.cols()<<std::endl;
+        int n_targets = goal_op_translation.cols();
+        int os_goal_rows = 4;
+        int os_goal_cols = 4 * n_targets;
+        //std::cout<<"resizing os_goal to: "<<os_goal_rows<<" "<<os_goal_cols<<std::endl;
+        os_goal.resize(os_goal_rows,os_goal_cols);
+        //os_goal.setIdentity();
+
+        for(int i=0; i<n_targets;++i){
+            int offset = 4 * i;
+            int offset_trans = 1 * i;
+            int offset_rot = 3 * i;
+
+            std::cout<<offset<<" "<<offset_trans<<" "<<offset_rot<<" "<<std::endl;
+            os_goal.block(0,offset,4,4).setIdentity();
+            std::cout<<"doing rot"<<std::endl;
+            os_goal.block(0,offset + 0,3,3) = goal_op_rot_matrix.block(0,offset_rot + 0, 3, 3);
+
+            os_goal.block(0,offset + 3,3,1) = goal_op_translation.block(0, offset_trans + 0, 3, 1);
+
+        }
+        //std::cout<<"os_goal"<<std::endl;
+        //std::cout<<os_goal<<std::endl;
+
 
         //Endeffector Frame Controller
 
@@ -1404,6 +1427,7 @@ void HybridAutomatonFactory::CreateGoToCMConvergenceCSAndMaxForceCS(const ha::Co
                                                                     const Eigen::MatrixXd &kv_os_linear,
                                                                     const Eigen::MatrixXd &kv_os_angular)
 {
+    std::cout<<"generating max force csadjkl"<<std::endl;
     CreateGoToCMAndConvergenceCS(cm_ptr, convergence_cs_ptr, name, goal_op_pos, goal_op_ori,
                                  use_base, max_vel_os_linear, max_vel_os_angular, pos_epsilon_os_linear, pos_epsilon_os_angular,
                                  is_relative, kp_os_linear, kp_os_angular, kv_os_linear, kv_os_angular);
