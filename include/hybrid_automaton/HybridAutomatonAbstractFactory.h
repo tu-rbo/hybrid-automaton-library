@@ -1,5 +1,5 @@
-#ifndef HYBRID_AUTOMATON_FACTORY_H
-#define HYBRID_AUTOMATON_FACTORY_H
+#ifndef HYBRID_AUTOMATON_ABSTRACT_FACTORY_H
+#define HYBRID_AUTOMATON_ABSTRACT_FACTORY_H
 
 #include "hybrid_automaton/HybridAutomaton.h"
 
@@ -15,26 +15,31 @@ enum GripperType
     BARRETT_HAND
 };
 
-class HybridAutomatonFactory;
-typedef boost::shared_ptr<HybridAutomatonFactory> HybridAutomatonFactoryPtr;
-typedef boost::shared_ptr<const HybridAutomatonFactory> HybridAutomatonFactoryConstPtr;
+class HybridAutomatonAbstractFactory;
+typedef boost::shared_ptr<HybridAutomatonAbstractFactory> HybridAutomatonAbstractFactoryPtr;
+typedef boost::shared_ptr<const HybridAutomatonAbstractFactory> HybridAutomatonAbstractFactoryConstPtr;
+
+struct HybridAutomatonAbstractParams
+{
+
+};
 
 /**
      * @brief A class to easily generate basic hybrid automata, control modes, control switches, jump conditions...
      *
      */
-class HybridAutomatonFactory
+class HybridAutomatonAbstractFactory
 {
 public:
 
-    typedef boost::shared_ptr<HybridAutomatonFactory> Ptr;
-    typedef boost::shared_ptr<const HybridAutomatonFactory> ConstPtr;
+    typedef boost::shared_ptr<HybridAutomatonAbstractFactory> Ptr;
+    typedef boost::shared_ptr<const HybridAutomatonAbstractFactory> ConstPtr;
 
     /**
          * @brief Default constructor
          *
          */
-    HybridAutomatonFactory();
+    HybridAutomatonAbstractFactory();
 
     /**
          * @brief Constructor
@@ -42,29 +47,29 @@ public:
          * @param num_dof_arm Number of degrees of freedom of the arm
          * @param num_dof_base Number of degrees of freedom of the base
          */
-    HybridAutomatonFactory(const int& num_dof_arm, const int& num_dof_base);
+    HybridAutomatonAbstractFactory(const int& num_dof_arm, const int& num_dof_base);
 
     /**
          * @brief Destructor
          *
          */
-    virtual ~HybridAutomatonFactory();
+    virtual ~HybridAutomatonAbstractFactory();
 
     /**
          * @brief Copy constructor
          *
          * @param haf Object to make a copy from
          */
-    HybridAutomatonFactory(const HybridAutomatonFactory& haf);
+    HybridAutomatonAbstractFactory(const HybridAutomatonAbstractFactory& haf);
 
     /**
          * @brief Clone function
          *
-         * @return HybridAutomatonFactoryPtr Pointer to the generated clone
+         * @return HybridAutomatonAbstractFactoryPtr Pointer to the generated clone
          */
-    HybridAutomatonFactoryPtr clone() const
+    HybridAutomatonAbstractFactoryPtr clone() const
     {
-        return (HybridAutomatonFactoryPtr(_doClone()));
+        return (HybridAutomatonAbstractFactoryPtr(_doClone()));
     }
 
     /**
@@ -136,33 +141,11 @@ public:
      * @param completion_time the desired time to arrive for the interpolator
      * @return ha::Controller::Ptr The generated controller
      */
-    ha::Controller::Ptr createJointSpaceController(std::string name,
-                                                   const Eigen::MatrixXd &goal_js,
-                                                   double completion_time,
-                                                   const Eigen::MatrixXd &kp_js = Eigen::MatrixXd(),
-                                                   const Eigen::MatrixXd &kv_js = Eigen::MatrixXd(),
-                                                   bool goal_relative = false);
+    virtual ha::Controller::Ptr createJointSpaceController(const HybridAutomatonAbstractParams& params) = 0;
 
-    ha::Controller::Ptr createSubjointSpaceController(std::string name,
-                                                      const Eigen::MatrixXd& goal_js,
-                                                      const Eigen::MatrixXd& max_velocity,
-                                                      const Eigen::MatrixXd& index_vec,
-                                                      const Eigen::MatrixXd& kp_js = Eigen::MatrixXd(),
-                                                      const Eigen::MatrixXd& kv_js= Eigen::MatrixXd(),
-                                                      bool is_relative=false);
+    virtual ha::Controller::Ptr createSubjointSpaceController(const HybridAutomatonAbstractParams& params) = 0;
 
-
-
-    ha::Controller::Ptr createBBSubjointSpaceController(std::string name,
-                                                        bool use_tf,
-                                                        const std::string& topic_name,
-                                                        const std::string& tf_parent,
-                                                        const Eigen::MatrixXd& max_velocity,
-                                                        const Eigen::MatrixXd& index_vec,
-                                                        const Eigen::MatrixXd& kp_js= Eigen::MatrixXd(),
-                                                        const Eigen::MatrixXd& kv_js= Eigen::MatrixXd(),
-                                                        bool is_relative=false,
-                                                        int update_rate=-1);
+    virtual ha::Controller::Ptr createBBSubjointSpaceController(const HybridAutomatonAbstractParams& params) = 0;
 
     /**
      * @brief Create an interpolated joint space controller to move from the current robots position to a goal configuration (only arm)
@@ -172,13 +155,7 @@ public:
      * @param max_velocity The maximum velocity for the joints of the arm
      * @return ha::Controller::Ptr The generated controller
      */
-    ha::Controller::Ptr createSubjointSpaceControllerArm(std::string name,
-                                                         const Eigen::MatrixXd& goal_js_arm,
-                                                         const Eigen::MatrixXd& max_vel_js_arm = Eigen::MatrixXd(),
-                                                         const Eigen::MatrixXd& index_vec_arm = Eigen::MatrixXd(),
-                                                         const Eigen::MatrixXd& kp_js_arm= Eigen::MatrixXd(),
-                                                         const Eigen::MatrixXd& kv_js_arm= Eigen::MatrixXd(),
-                                                         bool is_relative =false);
+    virtual ha::Controller::Ptr createSubjointSpaceControllerArm(const HybridAutomatonAbstractParams& params) = 0;
 
     /**
          * @brief Create an interpolated joint space controller to move from the current robots position to a goal configuration (only base)
@@ -188,13 +165,7 @@ public:
          * @param max_velocity The maximum velocity for the base
          * @return ha::Controller::Ptr The generated controller
          */
-    ha::Controller::Ptr createSubjointSpaceControllerBase(std::string name,
-                                                          const Eigen::MatrixXd& goal_js_base,
-                                                          const Eigen::MatrixXd& max_vel_js_base = Eigen::MatrixXd(),
-                                                          const Eigen::MatrixXd& index_vec_base = Eigen::MatrixXd(),
-                                                          const Eigen::MatrixXd& kp_js_base= Eigen::MatrixXd(),
-                                                          const Eigen::MatrixXd& kv_js_base= Eigen::MatrixXd(),
-                                                          bool is_relative =false);
+    virtual ha::Controller::Ptr createSubjointSpaceControllerBase(const HybridAutomatonAbstractParams& params) = 0;
 
     /**
       * @brief Create an interpolated joint space controller to move from the current robots position to a goal configuration (only base)
@@ -204,37 +175,11 @@ public:
       * @param max_velocity The maximum velocity for the base
       * @return ha::Controller::Ptr The generated controller
       */
-    ha::Controller::Ptr createBBSubjointSpaceControllerBase(std::string name,
-                                                            bool use_tf,
-                                                            const std::string& topic_name,
-                                                            const std::string& tf_parent = std::string("odom"),
-                                                            const Eigen::MatrixXd& max_vel_js_base = Eigen::MatrixXd(),
-                                                            const Eigen::MatrixXd& index_vec_base = Eigen::MatrixXd(),
-                                                            const Eigen::MatrixXd& kp_js_base = Eigen::MatrixXd(),
-                                                            const Eigen::MatrixXd& kv_js_base = Eigen::MatrixXd(),
-                                                            bool is_relative = false,
-                                                            int update_rate = -1);
+    virtual ha::Controller::Ptr createBBSubjointSpaceControllerBase(const HybridAutomatonAbstractParams& params) = 0;
 
-    ha::Controller::Ptr createOperationalSpaceController(std::string name,
-                                                         const Eigen::MatrixXd &goal_op_translation,
-                                                         const Eigen::MatrixXd &goal_op_rot_matrix,
-                                                         double completion_time,
-                                                         const Eigen::MatrixXd &kp_os_linear = Eigen::MatrixXd(),
-                                                         const Eigen::MatrixXd &kp_os_angular = Eigen::MatrixXd(),
-                                                         const Eigen::MatrixXd &kv_os_linear = Eigen::MatrixXd(),
-                                                         const Eigen::MatrixXd &kv_os_angular = Eigen::MatrixXd(),
-                                                         bool is_relative = false);
+    virtual ha::Controller::Ptr createOperationalSpaceController(const HybridAutomatonAbstractParams& params) = 0;
 
-    ha::Controller::Ptr createOperationalSpaceController(std::string name,
-                                                         const Eigen::MatrixXd &goal_op_translation,
-                                                         const Eigen::MatrixXd &goal_op_rot_matrix,
-                                                         double max_vel_os_linear = -1,
-                                                         double max_vel_os_angular = -1,
-                                                         const Eigen::MatrixXd &kp_os_linear = Eigen::MatrixXd(),
-                                                         const Eigen::MatrixXd &kp_os_angular = Eigen::MatrixXd(),
-                                                         const Eigen::MatrixXd &kv_os_linear = Eigen::MatrixXd(),
-                                                         const Eigen::MatrixXd &kv_os_angular = Eigen::MatrixXd(),
-                                                         bool is_relative = false);
+    virtual ha::Controller::Ptr createOperationalSpaceController(const HybridAutomatonAbstractParams& params) = 0;
 
     /**
          * @brief Create an interpolated task space controller to move the end-effector from the current robots position to a goal frame given as a /tf frame
@@ -246,19 +191,7 @@ public:
          * @param max_displacement_velocity the maximal end-effector translational velocity in m/s
          * @param max_rotational_velocity the maximal end-effector rotational velocity in rad/s
          */
-    ha::Controller::Ptr createBBOperationalSpaceController(std::string name,
-                                                           bool trajectory,
-                                                           bool use_tf,
-                                                           const std::string frame,
-                                                           const std::string parent_frame="/odom",
-                                                           double max_vel_os_linear = -1,
-                                                           double max_vel_os_angular = -1,
-                                                           const Eigen::MatrixXd &kp_os_linear = Eigen::MatrixXd(),
-                                                           const Eigen::MatrixXd &kp_os_angular = Eigen::MatrixXd(),
-                                                           const Eigen::MatrixXd &kv_os_linear = Eigen::MatrixXd(),
-                                                           const Eigen::MatrixXd &kv_os_angular = Eigen::MatrixXd(),
-                                                           bool is_relative = false,
-                                                           int update_rate = 50);
+    virtual ha::Controller::Ptr createBBOperationalSpaceController(const HybridAutomatonAbstractParams& params) = 0;
 
 
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -622,11 +555,11 @@ protected:
     /**
          * @brief Performs the cloning operation (this solves some issues of inheritance and smart pointers)
          *
-         * @return HybridAutomatonFactory Pointer to the generated clone
+         * @return HybridAutomatonAbstractFactory Pointer to the generated clone
          */
-    virtual HybridAutomatonFactory* _doClone() const
+    virtual HybridAutomatonAbstractFactory* _doClone() const
     {
-        return (new HybridAutomatonFactory(*this));
+        return (new HybridAutomatonAbstractFactory(*this));
     }
 
     /**

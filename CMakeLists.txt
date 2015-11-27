@@ -141,7 +141,8 @@ set (HA_DESCRIPTION_HEADERS
 	"${PROJECT_SOURCE_DIR}/include/hybrid_automaton/DescriptionTreeNodeXML.h")
 
 set (HA_FACTORY_HEADERS
-	"${PROJECT_SOURCE_DIR}/include/hybrid_automaton/HybridAutomatonFactory.h")
+	"${PROJECT_SOURCE_DIR}/include/hybrid_automaton/HybridAutomatonAbstractFactory.h"
+	"${PROJECT_SOURCE_DIR}/include/hybrid_automaton/HybridAutomatonRBOFactory.h")
 
 
 set (HA_CORE_SOURCES
@@ -172,7 +173,8 @@ set (HA_SENSOR_SOURCES
     "${PROJECT_SOURCE_DIR}/src/SubjointVelocitySensor.cpp")
 
 set (HA_FACTORY_SOURCES
-    "${PROJECT_SOURCE_DIR}/src/HybridAutomatonFactory.cpp")
+    "${PROJECT_SOURCE_DIR}/src/HybridAutomatonAbstractFactory.cpp"
+    "${PROJECT_SOURCE_DIR}/src/HybridAutomatonRBOFactory.cpp")
 	
 source_group("Header Files" FILES ${HA_CORE_HEADERS})
 

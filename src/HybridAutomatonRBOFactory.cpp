@@ -1,4 +1,4 @@
-#include "hybrid_automaton/HybridAutomatonFactory.h"
+#include "hybrid_automaton/HybridAutomatonRBOFactory.h"
 
 #include "hybrid_automaton/ControlMode.h"
 #include "hybrid_automaton/ControlSet.h"
@@ -66,19 +66,19 @@
 
 namespace ha
 {
-HybridAutomatonFactory::HybridAutomatonFactory()
+HybridAutomatonRBOFactory::HybridAutomatonRBOFactory()
     : _num_dof_arm(DEFAULT_NUM_DOF_ARM), _num_dof_base(DEFAULT_NUM_DOF_BASE)
 {
     _initializeDefaultValues();
 }
 
-HybridAutomatonFactory::HybridAutomatonFactory(const int& num_dof_arm, const int& num_dof_base)
+HybridAutomatonRBOFactory::HybridAutomatonRBOFactory(const int& num_dof_arm, const int& num_dof_base)
     :_num_dof_arm(num_dof_arm), _num_dof_base(num_dof_base)
 {
     _initializeDefaultValues();
 }
 
-void HybridAutomatonFactory::_initializeDefaultValues()
+void HybridAutomatonRBOFactory::_initializeDefaultValues()
 {
     _index_vec_arm = Eigen::MatrixXd::Constant(_num_dof_arm, 1, 0);
     for(int idx_arm=0; idx_arm<_num_dof_arm; idx_arm++)
@@ -169,270 +169,270 @@ void HybridAutomatonFactory::_initializeDefaultValues()
     _update_rate = DEFAULT_UPDATE_RATE;
 }
 
-HybridAutomatonFactory::~HybridAutomatonFactory()
+HybridAutomatonRBOFactory::~HybridAutomatonRBOFactory()
 {
 
 }
 
-HybridAutomatonFactory::HybridAutomatonFactory(const HybridAutomatonFactory& haf)
+HybridAutomatonRBOFactory::HybridAutomatonRBOFactory(const HybridAutomatonRBOFactory& haf)
 {
 
 }
 
-Eigen::MatrixXd HybridAutomatonFactory::max_vel_js_arm() const
+Eigen::MatrixXd HybridAutomatonRBOFactory::max_vel_js_arm() const
 {
     return _max_vel_js_arm;
 }
 
-void HybridAutomatonFactory::setMax_vel_js_arm(const Eigen::MatrixXd &max_vel_js_arm)
+void HybridAutomatonRBOFactory::setMax_vel_js_arm(const Eigen::MatrixXd &max_vel_js_arm)
 {
     _max_vel_js_arm = max_vel_js_arm;
 }
-Eigen::MatrixXd HybridAutomatonFactory::max_vel_js_base() const
+Eigen::MatrixXd HybridAutomatonRBOFactory::max_vel_js_base() const
 {
     return _max_vel_js_base;
 }
 
-void HybridAutomatonFactory::setMax_vel_js_base(const Eigen::MatrixXd &max_vel_js_base)
+void HybridAutomatonRBOFactory::setMax_vel_js_base(const Eigen::MatrixXd &max_vel_js_base)
 {
     _max_vel_js_base = max_vel_js_base;
 }
-Eigen::MatrixXd HybridAutomatonFactory::kp_js_arm() const
+Eigen::MatrixXd HybridAutomatonRBOFactory::kp_js_arm() const
 {
     return _kp_js_arm;
 }
 
-void HybridAutomatonFactory::setKp_js_arm(const Eigen::MatrixXd &kp_js_arm)
+void HybridAutomatonRBOFactory::setKp_js_arm(const Eigen::MatrixXd &kp_js_arm)
 {
     _kp_js_arm = kp_js_arm;
 }
-Eigen::MatrixXd HybridAutomatonFactory::kp_js_base() const
+Eigen::MatrixXd HybridAutomatonRBOFactory::kp_js_base() const
 {
     return _kp_js_base;
 }
 
-void HybridAutomatonFactory::setKp_js_base(const Eigen::MatrixXd &kp_js_base)
+void HybridAutomatonRBOFactory::setKp_js_base(const Eigen::MatrixXd &kp_js_base)
 {
     _kp_js_base = kp_js_base;
 }
-Eigen::MatrixXd HybridAutomatonFactory::kv_js_arm() const
+Eigen::MatrixXd HybridAutomatonRBOFactory::kv_js_arm() const
 {
     return _kv_js_arm;
 }
 
-void HybridAutomatonFactory::setKv_js_arm(const Eigen::MatrixXd &kv_js_arm)
+void HybridAutomatonRBOFactory::setKv_js_arm(const Eigen::MatrixXd &kv_js_arm)
 {
     _kv_js_arm = kv_js_arm;
 }
-Eigen::MatrixXd HybridAutomatonFactory::kv_js_base() const
+Eigen::MatrixXd HybridAutomatonRBOFactory::kv_js_base() const
 {
     return _kv_js_base;
 }
 
-void HybridAutomatonFactory::setKv_js_base(const Eigen::MatrixXd &kv_js_base)
+void HybridAutomatonRBOFactory::setKv_js_base(const Eigen::MatrixXd &kv_js_base)
 {
     _kv_js_base = kv_js_base;
 }
-Eigen::MatrixXd HybridAutomatonFactory::kp_os_linear() const
+Eigen::MatrixXd HybridAutomatonRBOFactory::kp_os_linear() const
 {
     return _kp_os_linear;
 }
 
-void HybridAutomatonFactory::setKp_os_linear(const Eigen::MatrixXd &kp_os_linear)
+void HybridAutomatonRBOFactory::setKp_os_linear(const Eigen::MatrixXd &kp_os_linear)
 {
     _kp_os_linear = kp_os_linear;
 }
-Eigen::MatrixXd HybridAutomatonFactory::kp_os_angular() const
+Eigen::MatrixXd HybridAutomatonRBOFactory::kp_os_angular() const
 {
     return _kp_os_angular;
 }
 
-void HybridAutomatonFactory::setKp_os_angular(const Eigen::MatrixXd &kp_os_angular)
+void HybridAutomatonRBOFactory::setKp_os_angular(const Eigen::MatrixXd &kp_os_angular)
 {
     _kp_os_angular = kp_os_angular;
 }
-Eigen::MatrixXd HybridAutomatonFactory::kv_os_linear() const
+Eigen::MatrixXd HybridAutomatonRBOFactory::kv_os_linear() const
 {
     return _kv_os_linear;
 }
 
-void HybridAutomatonFactory::setKv_os_linear(const Eigen::MatrixXd &kv_os_linear)
+void HybridAutomatonRBOFactory::setKv_os_linear(const Eigen::MatrixXd &kv_os_linear)
 {
     _kv_os_linear = kv_os_linear;
 }
-Eigen::MatrixXd HybridAutomatonFactory::kv_os_angular() const
+Eigen::MatrixXd HybridAutomatonRBOFactory::kv_os_angular() const
 {
     return _kv_os_angular;
 }
 
-void HybridAutomatonFactory::setKv_os_angular(const Eigen::MatrixXd &kv_os_angular)
+void HybridAutomatonRBOFactory::setKv_os_angular(const Eigen::MatrixXd &kv_os_angular)
 {
     _kv_os_angular = kv_os_angular;
 }
-Eigen::MatrixXd HybridAutomatonFactory::kp_js_nakamura_arm() const
+Eigen::MatrixXd HybridAutomatonRBOFactory::kp_js_nakamura_arm() const
 {
     return _kp_js_nakamura_arm;
 }
 
-void HybridAutomatonFactory::setKp_js_nakamura_arm(const Eigen::MatrixXd &kp_js_nakamura_arm)
+void HybridAutomatonRBOFactory::setKp_js_nakamura_arm(const Eigen::MatrixXd &kp_js_nakamura_arm)
 {
     _kp_js_nakamura_arm = kp_js_nakamura_arm;
 }
-Eigen::MatrixXd HybridAutomatonFactory::kp_js_nakamura_base() const
+Eigen::MatrixXd HybridAutomatonRBOFactory::kp_js_nakamura_base() const
 {
     return _kp_js_nakamura_base;
 }
 
-void HybridAutomatonFactory::setKp_js_nakamura_base(const Eigen::MatrixXd &kp_js_nakamura_base)
+void HybridAutomatonRBOFactory::setKp_js_nakamura_base(const Eigen::MatrixXd &kp_js_nakamura_base)
 {
     _kp_js_nakamura_base = kp_js_nakamura_base;
 }
-Eigen::MatrixXd HybridAutomatonFactory::kv_js_nakamura_arm() const
+Eigen::MatrixXd HybridAutomatonRBOFactory::kv_js_nakamura_arm() const
 {
     return _kv_js_nakamura_arm;
 }
 
-void HybridAutomatonFactory::setKv_js_nakamura_arm(const Eigen::MatrixXd &kv_js_nakamura_arm)
+void HybridAutomatonRBOFactory::setKv_js_nakamura_arm(const Eigen::MatrixXd &kv_js_nakamura_arm)
 {
     _kv_js_nakamura_arm = kv_js_nakamura_arm;
 }
-Eigen::MatrixXd HybridAutomatonFactory::kv_js_nakamura_base() const
+Eigen::MatrixXd HybridAutomatonRBOFactory::kv_js_nakamura_base() const
 {
     return _kv_js_nakamura_base;
 }
 
-void HybridAutomatonFactory::setKv_js_nakamura_base(const Eigen::MatrixXd &kv_js_nakamura_base)
+void HybridAutomatonRBOFactory::setKv_js_nakamura_base(const Eigen::MatrixXd &kv_js_nakamura_base)
 {
     _kv_js_nakamura_base = kv_js_nakamura_base;
 }
-Eigen::MatrixXd HybridAutomatonFactory::joint_weights_nakamura_arm() const
+Eigen::MatrixXd HybridAutomatonRBOFactory::joint_weights_nakamura_arm() const
 {
     return _joint_weights_nakamura_arm;
 }
 
-void HybridAutomatonFactory::setJoint_weights_nakamura_arm(const Eigen::MatrixXd &joint_weights_nakamura_arm)
+void HybridAutomatonRBOFactory::setJoint_weights_nakamura_arm(const Eigen::MatrixXd &joint_weights_nakamura_arm)
 {
     _joint_weights_nakamura_arm = joint_weights_nakamura_arm;
 }
-Eigen::MatrixXd HybridAutomatonFactory::joint_weights_nakamura_base() const
+Eigen::MatrixXd HybridAutomatonRBOFactory::joint_weights_nakamura_base() const
 {
     return _joint_weights_nakamura_base;
 }
 
-void HybridAutomatonFactory::setJoint_weights_nakamura_base(const Eigen::MatrixXd &joint_weights_nakamura_base)
+void HybridAutomatonRBOFactory::setJoint_weights_nakamura_base(const Eigen::MatrixXd &joint_weights_nakamura_base)
 {
     _joint_weights_nakamura_base = joint_weights_nakamura_base;
 }
-Eigen::MatrixXd HybridAutomatonFactory::joint_weights_nakamura_base_no_rotation() const
+Eigen::MatrixXd HybridAutomatonRBOFactory::joint_weights_nakamura_base_no_rotation() const
 {
     return _joint_weights_nakamura_base_no_rotation;
 }
 
-void HybridAutomatonFactory::setJoint_weights_nakamura_base_no_rotation(const Eigen::MatrixXd &joint_weights_nakamura_base_no_rotation)
+void HybridAutomatonRBOFactory::setJoint_weights_nakamura_base_no_rotation(const Eigen::MatrixXd &joint_weights_nakamura_base_no_rotation)
 {
     _joint_weights_nakamura_base_no_rotation = joint_weights_nakamura_base_no_rotation;
 }
-Eigen::MatrixXd HybridAutomatonFactory::joint_weights_nakamura_base_little_motion() const
+Eigen::MatrixXd HybridAutomatonRBOFactory::joint_weights_nakamura_base_little_motion() const
 {
     return _joint_weights_nakamura_base_little_motion;
 }
 
-void HybridAutomatonFactory::setJoint_weights_nakamura_base_little_motion(const Eigen::MatrixXd &joint_weights_nakamura_base_little_motion)
+void HybridAutomatonRBOFactory::setJoint_weights_nakamura_base_little_motion(const Eigen::MatrixXd &joint_weights_nakamura_base_little_motion)
 {
     _joint_weights_nakamura_base_little_motion = joint_weights_nakamura_base_little_motion;
 }
-Eigen::MatrixXd HybridAutomatonFactory::home_config_js_arm() const
+Eigen::MatrixXd HybridAutomatonRBOFactory::home_config_js_arm() const
 {
     return _home_config_js_arm;
 }
 
-void HybridAutomatonFactory::setHome_config_js_arm(const Eigen::MatrixXd &home_config_js_arm)
+void HybridAutomatonRBOFactory::setHome_config_js_arm(const Eigen::MatrixXd &home_config_js_arm)
 {
     _home_config_js_arm = home_config_js_arm;
 }
-Eigen::MatrixXd HybridAutomatonFactory::home_config_js_base() const
+Eigen::MatrixXd HybridAutomatonRBOFactory::home_config_js_base() const
 {
     return _home_config_js_base;
 }
 
-void HybridAutomatonFactory::setHome_config_js_base(const Eigen::MatrixXd &home_config_js_base)
+void HybridAutomatonRBOFactory::setHome_config_js_base(const Eigen::MatrixXd &home_config_js_base)
 {
     _home_config_js_base = home_config_js_base;
 }
-double HybridAutomatonFactory::pos_epsilon_js_arm() const
+double HybridAutomatonRBOFactory::pos_epsilon_js_arm() const
 {
     return _pos_epsilon_js_arm;
 }
 
-void HybridAutomatonFactory::setPos_epsilon_js_arm(const double &pos_epsilon_js_arm)
+void HybridAutomatonRBOFactory::setPos_epsilon_js_arm(const double &pos_epsilon_js_arm)
 {
     _pos_epsilon_js_arm = pos_epsilon_js_arm;
 }
-double HybridAutomatonFactory::pos_epsilon_js_base() const
+double HybridAutomatonRBOFactory::pos_epsilon_js_base() const
 {
     return _pos_epsilon_js_base;
 }
 
-void HybridAutomatonFactory::setPos_epsilon_js_base(const double &pos_epsilon_js_base)
+void HybridAutomatonRBOFactory::setPos_epsilon_js_base(const double &pos_epsilon_js_base)
 {
     _pos_epsilon_js_base = pos_epsilon_js_base;
 }
-double HybridAutomatonFactory::vel_epsilon_js_arm() const
+double HybridAutomatonRBOFactory::vel_epsilon_js_arm() const
 {
     return _vel_epsilon_js_arm;
 }
 
-void HybridAutomatonFactory::setVel_epsilon_js_arm(const double &vel_epsilon_js_arm)
+void HybridAutomatonRBOFactory::setVel_epsilon_js_arm(const double &vel_epsilon_js_arm)
 {
     _vel_epsilon_js_arm = vel_epsilon_js_arm;
 }
-double HybridAutomatonFactory::vel_epsilon_js_base() const
+double HybridAutomatonRBOFactory::vel_epsilon_js_base() const
 {
     return _vel_epsilon_js_base;
 }
 
-void HybridAutomatonFactory::setVel_epsilon_js_base(const double &vel_epsilon_js_base)
+void HybridAutomatonRBOFactory::setVel_epsilon_js_base(const double &vel_epsilon_js_base)
 {
     _vel_epsilon_js_base = vel_epsilon_js_base;
 }
-double HybridAutomatonFactory::pos_epsilon_os_linear() const
+double HybridAutomatonRBOFactory::pos_epsilon_os_linear() const
 {
     return _pos_epsilon_os_linear;
 }
 
-void HybridAutomatonFactory::setPos_epsilon_os_linear(const double &pos_epsilon_os_linear)
+void HybridAutomatonRBOFactory::setPos_epsilon_os_linear(const double &pos_epsilon_os_linear)
 {
     _pos_epsilon_os_linear = pos_epsilon_os_linear;
 }
-double HybridAutomatonFactory::pos_epsilon_os_angular() const
+double HybridAutomatonRBOFactory::pos_epsilon_os_angular() const
 {
     return _pos_epsilon_os_angular;
 }
 
-void HybridAutomatonFactory::setPos_epsilon_os_angular(const double &pos_epsilon_os_angular)
+void HybridAutomatonRBOFactory::setPos_epsilon_os_angular(const double &pos_epsilon_os_angular)
 {
     _pos_epsilon_os_angular = pos_epsilon_os_angular;
 }
-double HybridAutomatonFactory::vel_epsilon_os_linear() const
+double HybridAutomatonRBOFactory::vel_epsilon_os_linear() const
 {
     return _vel_epsilon_os_linear;
 }
 
-void HybridAutomatonFactory::setVel_epsilon_os_linear(const double &vel_epsilon_os_linear)
+void HybridAutomatonRBOFactory::setVel_epsilon_os_linear(const double &vel_epsilon_os_linear)
 {
     _vel_epsilon_os_linear = vel_epsilon_os_linear;
 }
-double HybridAutomatonFactory::vel_epsilon_os_angular() const
+double HybridAutomatonRBOFactory::vel_epsilon_os_angular() const
 {
     return _vel_epsilon_os_angular;
 }
 
-void HybridAutomatonFactory::setVel_epsilon_os_angular(const double &vel_epsilon_os_angular)
+void HybridAutomatonRBOFactory::setVel_epsilon_os_angular(const double &vel_epsilon_os_angular)
 {
     _vel_epsilon_os_angular = vel_epsilon_os_angular;
 }
 
-ha::HybridAutomaton::Ptr HybridAutomatonFactory::createInitialHybridAutomaton(const GripperType& gripper,
+ha::HybridAutomaton::Ptr HybridAutomatonRBOFactory::createInitialHybridAutomaton(const GripperType& gripper,
                                                                               const Eigen::MatrixXd& home_config_js_arm,
                                                                               const Eigen::MatrixXd& home_config_js_base,
                                                                               const Eigen::MatrixXd& max_vel_js_arm,
@@ -524,7 +524,7 @@ ha::HybridAutomaton::Ptr HybridAutomatonFactory::createInitialHybridAutomaton(co
     return initial_ha;
 }
 
-ha::HybridAutomaton::Ptr HybridAutomatonFactory::createEmptyHybridAutomaton()
+ha::HybridAutomaton::Ptr HybridAutomatonRBOFactory::createEmptyHybridAutomaton()
 {
 
     //create Hybrid Automaton
@@ -545,7 +545,7 @@ ha::HybridAutomaton::Ptr HybridAutomatonFactory::createEmptyHybridAutomaton()
     return grav_comp_ha;
 }
 
-ha::ControlSet::Ptr HybridAutomatonFactory::createControlSet(ha::Controller::Ptr ctrl)
+ha::ControlSet::Ptr HybridAutomatonRBOFactory::createControlSet(ha::Controller::Ptr ctrl)
 {
     ha::ControlSet::Ptr cs(new ha::ControlSet());
     cs->setType("rxControlSet");
@@ -553,7 +553,7 @@ ha::ControlSet::Ptr HybridAutomatonFactory::createControlSet(ha::Controller::Ptr
     return cs;
 }
 
-ha::ControlSet::Ptr HybridAutomatonFactory::createControlSet(const std::vector<ha::Controller::Ptr>& ctrls)
+ha::ControlSet::Ptr HybridAutomatonRBOFactory::createControlSet(const std::vector<ha::Controller::Ptr>& ctrls)
 {
     ha::ControlSet::Ptr cs(new ha::ControlSet());
     cs->setType("rxControlSet");
@@ -562,7 +562,7 @@ ha::ControlSet::Ptr HybridAutomatonFactory::createControlSet(const std::vector<h
     return cs;
 }
 
-ha::ControlSet::Ptr HybridAutomatonFactory::createTPNakamuraControlSet(ha::Controller::Ptr ctrl, bool move_base,
+ha::ControlSet::Ptr HybridAutomatonRBOFactory::createTPNakamuraControlSet(ha::Controller::Ptr ctrl, bool move_base,
                                                                        const Eigen::MatrixXd& kp_js_nakamura_arm,
                                                                        const Eigen::MatrixXd& kp_js_nakamura_base,
                                                                        const Eigen::MatrixXd& kv_js_nakamura_arm,
@@ -591,7 +591,7 @@ ha::ControlSet::Ptr HybridAutomatonFactory::createTPNakamuraControlSet(ha::Contr
     return cs;
 }
 
-ha::Controller::Ptr HybridAutomatonFactory::createJointSpaceController(std::string name,
+ha::Controller::Ptr HybridAutomatonRBOFactory::createJointSpaceController(std::string name,
                                                                        const Eigen::MatrixXd &goal_js,
                                                                        double completion_time,
                                                                        const Eigen::MatrixXd &kp_js,
@@ -611,7 +611,7 @@ ha::Controller::Ptr HybridAutomatonFactory::createJointSpaceController(std::stri
 }
 
 
-ha::Controller::Ptr HybridAutomatonFactory::createSubjointSpaceController(std::string name,
+ha::Controller::Ptr HybridAutomatonRBOFactory::createSubjointSpaceController(std::string name,
                                                                           const Eigen::MatrixXd& goal_js,
                                                                           const Eigen::MatrixXd& max_velocity,
                                                                           const Eigen::MatrixXd& index_vec,
@@ -634,7 +634,7 @@ ha::Controller::Ptr HybridAutomatonFactory::createSubjointSpaceController(std::s
     return ctrl;
 }
 
-ha::Controller::Ptr HybridAutomatonFactory::createBBSubjointSpaceController(std::string name,
+ha::Controller::Ptr HybridAutomatonRBOFactory::createBBSubjointSpaceController(std::string name,
                                                                             bool use_tf,
                                                                             const std::string& topic_name,
                                                                             const std::string& tf_parent,
@@ -668,7 +668,7 @@ ha::Controller::Ptr HybridAutomatonFactory::createBBSubjointSpaceController(std:
     return ctrl;
 }
 
-ha::Controller::Ptr HybridAutomatonFactory::createSubjointSpaceControllerArm(std::string name,
+ha::Controller::Ptr HybridAutomatonRBOFactory::createSubjointSpaceControllerArm(std::string name,
                                                                              const Eigen::MatrixXd& goal_js_arm,
                                                                              const Eigen::MatrixXd& max_vel_js_arm,
                                                                              const Eigen::MatrixXd& index_vec_arm,
@@ -685,7 +685,7 @@ ha::Controller::Ptr HybridAutomatonFactory::createSubjointSpaceControllerArm(std
                                          is_relative);
 }
 
-ha::Controller::Ptr HybridAutomatonFactory::createSubjointSpaceControllerBase(std::string name,
+ha::Controller::Ptr HybridAutomatonRBOFactory::createSubjointSpaceControllerBase(std::string name,
                                                                               const Eigen::MatrixXd& goal_js_base,
                                                                               const Eigen::MatrixXd& max_vel_js_base,
                                                                               const Eigen::MatrixXd& index_vec_base,
@@ -702,7 +702,7 @@ ha::Controller::Ptr HybridAutomatonFactory::createSubjointSpaceControllerBase(st
                                          is_relative);
 }
 
-ha::Controller::Ptr HybridAutomatonFactory::createBBSubjointSpaceControllerBase(std::string name,
+ha::Controller::Ptr HybridAutomatonRBOFactory::createBBSubjointSpaceControllerBase(std::string name,
                                                                                 bool use_tf,
                                                                                 const std::string& topic_name,
                                                                                 const std::string& tf_parent,
@@ -738,7 +738,7 @@ ha::Controller::Ptr HybridAutomatonFactory::createBBSubjointSpaceControllerBase(
 }
 
 
-ha::Controller::Ptr HybridAutomatonFactory::createOperationalSpaceController(std::string name,
+ha::Controller::Ptr HybridAutomatonRBOFactory::createOperationalSpaceController(std::string name,
                                                                              const Eigen::MatrixXd &goal_op_translation,
                                                                              const Eigen::MatrixXd &goal_op_rot_matrix,
                                                                              double completion_time,
@@ -776,7 +776,7 @@ ha::Controller::Ptr HybridAutomatonFactory::createOperationalSpaceController(std
     return ctrl;
 }
 
-ha::Controller::Ptr HybridAutomatonFactory::createOperationalSpaceController(std::string name,
+ha::Controller::Ptr HybridAutomatonRBOFactory::createOperationalSpaceController(std::string name,
                                                                              const Eigen::MatrixXd &goal_op_translation,
                                                                              const Eigen::MatrixXd &goal_op_rot_matrix,
                                                                              double max_vel_os_linear,
@@ -860,7 +860,7 @@ ha::Controller::Ptr HybridAutomatonFactory::createOperationalSpaceController(std
     return ctrl;
 }
 
-ha::Controller::Ptr HybridAutomatonFactory::createBBOperationalSpaceController(std::string name,
+ha::Controller::Ptr HybridAutomatonRBOFactory::createBBOperationalSpaceController(std::string name,
                                                                                bool trajectory,
                                                                                bool use_tf,
                                                                                const std::string frame,
@@ -908,7 +908,7 @@ ha::Controller::Ptr HybridAutomatonFactory::createBBOperationalSpaceController(s
 
 }
 
-ha::JumpCondition::Ptr HybridAutomatonFactory::createJointSpaceConvergenceCondition(ha::ControllerConstPtr js_ctrl,
+ha::JumpCondition::Ptr HybridAutomatonRBOFactory::createJointSpaceConvergenceCondition(ha::ControllerConstPtr js_ctrl,
                                                                                     const double& pos_epsilon_js)
 {
     ha::JumpConditionPtr jc(new ha::JumpCondition());
@@ -921,7 +921,7 @@ ha::JumpCondition::Ptr HybridAutomatonFactory::createJointSpaceConvergenceCondit
     return jc;
 }
 
-ha::JumpCondition::Ptr HybridAutomatonFactory::createSubjointSpaceConvergenceCondition(ha::ControllerConstPtr subjs_ctrl,
+ha::JumpCondition::Ptr HybridAutomatonRBOFactory::createSubjointSpaceConvergenceCondition(ha::ControllerConstPtr subjs_ctrl,
                                                                                        const Eigen::MatrixXd& index_vec,
                                                                                        const double& pos_epsilon_js)
 {
@@ -936,7 +936,7 @@ ha::JumpCondition::Ptr HybridAutomatonFactory::createSubjointSpaceConvergenceCon
     return jc;
 }
 
-ha::JumpCondition::Ptr HybridAutomatonFactory::createSubjointSpaceConvergenceConditionArm(ha::ControllerConstPtr subjs_ctrl,
+ha::JumpCondition::Ptr HybridAutomatonRBOFactory::createSubjointSpaceConvergenceConditionArm(ha::ControllerConstPtr subjs_ctrl,
                                                                                           const Eigen::MatrixXd& index_vec_arm,
                                                                                           const double& pos_epsilon_js_arm)
 {
@@ -945,7 +945,7 @@ ha::JumpCondition::Ptr HybridAutomatonFactory::createSubjointSpaceConvergenceCon
                                                    (pos_epsilon_js_arm == -1 ? _pos_epsilon_js_arm : pos_epsilon_js_arm));
 }
 
-ha::JumpCondition::Ptr HybridAutomatonFactory::createSubjointSpaceConvergenceConditionBase(ha::ControllerConstPtr subjs_ctrl,
+ha::JumpCondition::Ptr HybridAutomatonRBOFactory::createSubjointSpaceConvergenceConditionBase(ha::ControllerConstPtr subjs_ctrl,
                                                                                            const Eigen::MatrixXd& index_vec_base,
                                                                                            const double& pos_epsilon_js_base)
 {
@@ -954,7 +954,7 @@ ha::JumpCondition::Ptr HybridAutomatonFactory::createSubjointSpaceConvergenceCon
                                                    (pos_epsilon_js_base == -1 ? _pos_epsilon_js_base : pos_epsilon_js_base));
 }
 
-ha::JumpCondition::Ptr HybridAutomatonFactory::createJointSpaceVelocityCondition(const Eigen::MatrixXd& index_vec,
+ha::JumpCondition::Ptr HybridAutomatonRBOFactory::createJointSpaceVelocityCondition(const Eigen::MatrixXd& index_vec,
                                                                                  const Eigen::MatrixXd& vel_goal_js,
                                                                                  const double& vel_epsilon_js){
     ha::JumpConditionPtr jc(new ha::JumpCondition());
@@ -968,21 +968,21 @@ ha::JumpCondition::Ptr HybridAutomatonFactory::createJointSpaceVelocityCondition
     return jc;
 }
 
-ha::JumpCondition::Ptr HybridAutomatonFactory::createJointSpaceZeroVelocityCondition(const Eigen::MatrixXd& index_vec,
+ha::JumpCondition::Ptr HybridAutomatonRBOFactory::createJointSpaceZeroVelocityCondition(const Eigen::MatrixXd& index_vec,
                                                                                      const double &vel_epsilon_js)
 {
     Eigen::MatrixXd zero_goal = Eigen::MatrixXd::Constant(index_vec.size(), 1, 0.0);
     return createJointSpaceVelocityCondition(index_vec, zero_goal, vel_epsilon_js <= 0 ? std::min(_vel_epsilon_js_arm,_vel_epsilon_js_base): vel_epsilon_js);
 }
 
-ha::JumpCondition::Ptr HybridAutomatonFactory::createJointSpaceZeroVelocityConditionArm(const Eigen::MatrixXd& index_vec_arm,
+ha::JumpCondition::Ptr HybridAutomatonRBOFactory::createJointSpaceZeroVelocityConditionArm(const Eigen::MatrixXd& index_vec_arm,
                                                                                         const double &vel_epsilon_js_arm)
 {
     return createJointSpaceZeroVelocityCondition((index_vec_arm.size() == 0 ? _index_vec_arm : index_vec_arm),
                                                  (vel_epsilon_js_arm == -1 ? _vel_epsilon_js_arm : vel_epsilon_js_arm));
 }
 
-ha::JumpCondition::Ptr HybridAutomatonFactory::createJointSpaceVelocityConditionArm(const Eigen::MatrixXd& index_vec_arm,
+ha::JumpCondition::Ptr HybridAutomatonRBOFactory::createJointSpaceVelocityConditionArm(const Eigen::MatrixXd& index_vec_arm,
                                                                                     const Eigen::MatrixXd& vel_goal_js_arm,
                                                                                     const double& vel_epsilon_js_arm)
 {
@@ -991,14 +991,14 @@ ha::JumpCondition::Ptr HybridAutomatonFactory::createJointSpaceVelocityCondition
                                              (vel_epsilon_js_arm == -1 ? _vel_epsilon_js_arm : vel_epsilon_js_arm));
 }
 
-ha::JumpCondition::Ptr HybridAutomatonFactory::createJointSpaceZeroVelocityConditionBase(const Eigen::MatrixXd& index_vec_base,
+ha::JumpCondition::Ptr HybridAutomatonRBOFactory::createJointSpaceZeroVelocityConditionBase(const Eigen::MatrixXd& index_vec_base,
                                                                                          const double& vel_epsilon_js_base)
 {
     return createJointSpaceZeroVelocityCondition((index_vec_base.size() == 0 ? _index_vec_base : index_vec_base),
                                                  (vel_epsilon_js_base == -1 ? _vel_epsilon_js_base : vel_epsilon_js_base));
 }
 
-ha::JumpCondition::Ptr HybridAutomatonFactory::createOperationalSpaceConvergenceCondition(ha::ControllerConstPtr ctrl,
+ha::JumpCondition::Ptr HybridAutomatonRBOFactory::createOperationalSpaceConvergenceCondition(ha::ControllerConstPtr ctrl,
                                                                                           bool relative,
                                                                                           double pos_epsilon_os_linear,
                                                                                           double pos_epsilon_os_angular,
@@ -1032,7 +1032,7 @@ ha::JumpCondition::Ptr HybridAutomatonFactory::createOperationalSpaceConvergence
     return jc;
 }
 
-ha::JumpCondition::Ptr HybridAutomatonFactory::createMaxTimeCondition(double max_time){
+ha::JumpCondition::Ptr HybridAutomatonRBOFactory::createMaxTimeCondition(double max_time){
     ha::JumpCondition::Ptr max_time_cond(new ha::JumpCondition());
     ha::ClockSensor::Ptr time_sensor(new ha::ClockSensor());
     max_time_cond->setSensor(time_sensor);
@@ -1043,7 +1043,7 @@ ha::JumpCondition::Ptr HybridAutomatonFactory::createMaxTimeCondition(double max
     return max_time_cond;
 }
 
-ha::ControlSwitch::Ptr HybridAutomatonFactory::CreateMaxForceTorqueControlSwitch(const std::string& name,
+ha::ControlSwitch::Ptr HybridAutomatonRBOFactory::CreateMaxForceTorqueControlSwitch(const std::string& name,
                                                                                  const Eigen::MatrixXd& ft_weights,
                                                                                  const Eigen::MatrixXd& ft_max_val,
                                                                                  const ha::JumpCondition::JumpCriterion ft_criterion,
@@ -1055,7 +1055,7 @@ ha::ControlSwitch::Ptr HybridAutomatonFactory::CreateMaxForceTorqueControlSwitch
     return max_ft_cs;
 }
 
-void HybridAutomatonFactory::CreateMaxForceTorqueControlSwitch(const ha::ControlSwitch::Ptr& cs_ptr,
+void HybridAutomatonRBOFactory::CreateMaxForceTorqueControlSwitch(const ha::ControlSwitch::Ptr& cs_ptr,
                                                                const std::string& name,
                                                                const Eigen::MatrixXd& ft_weights,
                                                                const Eigen::MatrixXd& ft_max_val,
@@ -1075,7 +1075,7 @@ void HybridAutomatonFactory::CreateMaxForceTorqueControlSwitch(const ha::Control
     cs_ptr->add(max_ft_jc);
 }
 
-ha::ControlSwitch::Ptr HybridAutomatonFactory::CreateMaxTimeControlSwitch(const std::string& mode_name, double max_time){
+ha::ControlSwitch::Ptr HybridAutomatonRBOFactory::CreateMaxTimeControlSwitch(const std::string& mode_name, double max_time){
     ha::ControlSwitchPtr time_switch(new ha::ControlSwitch);
     time_switch->setName(mode_name + "_time_cs");
     ha::JumpConditionPtr time_cond = createMaxTimeCondition(max_time);
@@ -1083,7 +1083,7 @@ ha::ControlSwitch::Ptr HybridAutomatonFactory::CreateMaxTimeControlSwitch(const 
     return time_switch;
 }
 
-void  HybridAutomatonFactory::CreateGCCM(const ha::ControlMode::Ptr& cm_ptr,
+void  HybridAutomatonRBOFactory::CreateGCCM(const ha::ControlMode::Ptr& cm_ptr,
                                          const std::string& name){
     cm_ptr->setName(name);
     ha::ControlSet::Ptr gravity_cs(new ha::ControlSet());
@@ -1091,7 +1091,7 @@ void  HybridAutomatonFactory::CreateGCCM(const ha::ControlMode::Ptr& cm_ptr,
     cm_ptr->setControlSet(gravity_cs);
 }
 
-void HybridAutomatonFactory::CreateGoToHomeCMAndConvergenceCSArm(const ha::ControlMode::Ptr& cm_ptr,
+void HybridAutomatonRBOFactory::CreateGoToHomeCMAndConvergenceCSArm(const ha::ControlMode::Ptr& cm_ptr,
                                                                  const ha::ControlSwitch::Ptr& cs_ptr,
                                                                  const std::string& name,
                                                                  const Eigen::MatrixXd& goal_cfg,
@@ -1139,7 +1139,7 @@ void HybridAutomatonFactory::CreateGoToHomeCMAndConvergenceCSArm(const ha::Contr
 
 
 
-void HybridAutomatonFactory::CreateGraspCMAndCS(const ha::ControlMode::Ptr& cm_ptr,
+void HybridAutomatonRBOFactory::CreateGraspCMAndCS(const ha::ControlMode::Ptr& cm_ptr,
                                                 const ha::ControlSwitch::Ptr& cs_ptr,
                                                 const std::string& name,
                                                 const GripperType& gripper,
@@ -1220,7 +1220,7 @@ void HybridAutomatonFactory::CreateGraspCMAndCS(const ha::ControlMode::Ptr& cm_p
     }
 }
 
-void HybridAutomatonFactory::CreateUngraspCMAndCS(const ha::ControlMode::Ptr& cm_ptr,
+void HybridAutomatonRBOFactory::CreateUngraspCMAndCS(const ha::ControlMode::Ptr& cm_ptr,
                                                   const ha::ControlSwitch::Ptr& cs_ptr,
                                                   const ha::ControlSwitch::Ptr& cs_ptr2,
                                                   const std::string& name,
@@ -1310,7 +1310,7 @@ void HybridAutomatonFactory::CreateUngraspCMAndCS(const ha::ControlMode::Ptr& cm
     cs_ptr2->add(to_stop_or_time_jc);
 }
 
-void HybridAutomatonFactory::CreateGoToBBCMAndConvergenceCS(const ha::ControlMode::Ptr& cm_ptr,
+void HybridAutomatonRBOFactory::CreateGoToBBCMAndConvergenceCS(const ha::ControlMode::Ptr& cm_ptr,
                                                             const ha::ControlSwitch::Ptr& cs_ptr,
                                                             const std::string& name,
                                                             const std::string& frame_name,
@@ -1356,7 +1356,7 @@ void HybridAutomatonFactory::CreateGoToBBCMAndConvergenceCS(const ha::ControlMod
     cs_ptr->add(convergence_jc);
 }
 
-void HybridAutomatonFactory::CreateGoToCMAndConvergenceCS(const ha::ControlMode::Ptr& cm_ptr,
+void HybridAutomatonRBOFactory::CreateGoToCMAndConvergenceCS(const ha::ControlMode::Ptr& cm_ptr,
                                                           const ha::ControlSwitch::Ptr& cs_ptr,
                                                           const std::string& name,
                                                           const Eigen::MatrixXd &goal_op_pos,
@@ -1405,7 +1405,7 @@ void HybridAutomatonFactory::CreateGoToCMAndConvergenceCS(const ha::ControlMode:
     cs_ptr->add(convergence_jc);
 }
 
-void HybridAutomatonFactory::CreateGoToCMConvergenceCSAndMaxForceCS(const ha::ControlMode::Ptr& cm_ptr,
+void HybridAutomatonRBOFactory::CreateGoToCMConvergenceCSAndMaxForceCS(const ha::ControlMode::Ptr& cm_ptr,
                                                                     const ha::ControlSwitch::Ptr& convergence_cs_ptr,
                                                                     const ha::ControlSwitch::Ptr& max_force_cs_ptr,
                                                                     const std::string& name,
@@ -1436,7 +1436,7 @@ void HybridAutomatonFactory::CreateGoToCMConvergenceCSAndMaxForceCS(const ha::Co
 
 }
 
-Eigen::MatrixXd HybridAutomatonFactory::_combineArmAndBase(const Eigen::MatrixXd& arm_vector, const Eigen::MatrixXd base_vector)
+Eigen::MatrixXd HybridAutomatonRBOFactory::_combineArmAndBase(const Eigen::MatrixXd& arm_vector, const Eigen::MatrixXd base_vector)
 {
     Eigen::MatrixXd combined_vector(arm_vector.rows()+base_vector.rows(), arm_vector.cols());
     combined_vector <<  arm_vector,
@@ -1444,7 +1444,7 @@ Eigen::MatrixXd HybridAutomatonFactory::_combineArmAndBase(const Eigen::MatrixXd
     return combined_vector;
 }
 
-std::string HybridAutomatonFactory::HybridAutomatonToString(ha::HybridAutomaton::ConstPtr ha)
+std::string HybridAutomatonRBOFactory::HybridAutomatonToString(ha::HybridAutomaton::ConstPtr ha)
 {
     ha::DescriptionTreeXML::Ptr tree(new ha::DescriptionTreeXML);
     ha::DescriptionTreeNode::Ptr ha_serialized;
@@ -1454,7 +1454,7 @@ std::string HybridAutomatonFactory::HybridAutomatonToString(ha::HybridAutomaton:
     }
     catch(std::string err)
     {
-        std::cerr << "[HybridAutomatonFactory.HybridAutomatonToString] Failed to serialize Hybrid Automaton: " << err << std::endl;
+        std::cerr << "[HybridAutomatonRBOFactory.HybridAutomatonToString] Failed to serialize Hybrid Automaton: " << err << std::endl;
     }
 
     tree->setRootNode(ha_serialized);
