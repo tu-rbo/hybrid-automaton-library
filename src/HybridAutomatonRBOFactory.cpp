@@ -701,10 +701,6 @@ ha::Controller::Ptr HybridAutomatonRBOFactory::createOperationalSpaceController(
                                                                                 const Eigen::MatrixXd &goal_op_translation,
                                                                                 const Eigen::MatrixXd &goal_op_rot_matrix,
                                                                                 double completion_time,
-                                                                                const Eigen::MatrixXd &kp_os_linear,
-                                                                                const Eigen::MatrixXd &kp_os_angular,
-                                                                                const Eigen::MatrixXd &kv_os_linear,
-                                                                                const Eigen::MatrixXd &kv_os_angular,
                                                                                 bool is_relative){
     HybridAutomatonRBOParams& p = (HybridAutomatonRBOParams&)params;
     Eigen::MatrixXd bin_home_frame;
@@ -723,10 +719,10 @@ ha::Controller::Ptr HybridAutomatonRBOFactory::createOperationalSpaceController(
     ctrl->setArgument("interpolation_type", "cubic");
 
     ctrl->setGoal(bin_home_frame);
-    ctrl->setKp(_combineArmAndBase((kp_os_linear.size() == 0 ? _kp_os_linear : kp_os_linear),
-                                   (kp_os_angular.size() == 0 ? _kp_os_angular : kp_os_angular)));
-    ctrl->setKv(_combineArmAndBase((kv_os_linear.size() == 0 ? _kv_os_linear : kv_os_linear),
-                                   (kv_os_angular.size() == 0 ? _kv_os_angular : kv_os_angular)));
+    ctrl->setKp(_combineArmAndBase(p._kp_os_linear,
+                                   p._kp_os_angular));
+    ctrl->setKv(_combineArmAndBase(p._kv_os_linear,
+                                   p._kv_os_angular));
 
     ctrl->setCompletionTime(completion_time);
     ctrl->setGoalIsRelative(is_relative);
@@ -739,12 +735,6 @@ ha::Controller::Ptr HybridAutomatonRBOFactory::createOperationalSpaceController(
                                                                                 std::string name,
                                                                                 const Eigen::MatrixXd &goal_op_translation,
                                                                                 const Eigen::MatrixXd &goal_op_rot_matrix,
-                                                                                double max_vel_os_linear,
-                                                                                double max_vel_os_angular,
-                                                                                const Eigen::MatrixXd &kp_os_linear,
-                                                                                const Eigen::MatrixXd &kp_os_angular,
-                                                                                const Eigen::MatrixXd &kv_os_linear,
-                                                                                const Eigen::MatrixXd &kv_os_angular,
                                                                                 bool is_relative)
 {
     HybridAutomatonRBOParams& p = (HybridAutomatonRBOParams&)params;
@@ -788,13 +778,13 @@ ha::Controller::Ptr HybridAutomatonRBOFactory::createOperationalSpaceController(
         ctrl->setArgument("interpolation_type", "cubic");
 
         ctrl->setGoal(os_goal);
-        ctrl->setKp(_combineArmAndBase((kp_os_linear.size() == 0 ? _kp_os_linear : kp_os_linear),
-                                       (kp_os_angular.size() == 0 ? _kp_os_angular : kp_os_angular)));
-        ctrl->setKv(_combineArmAndBase((kv_os_linear.size() == 0 ? _kv_os_linear : kv_os_linear),
-                                       (kv_os_angular.size() == 0 ? _kv_os_angular : kv_os_angular)));
+        ctrl->setKp(_combineArmAndBase(p._kp_os_linear,
+                                       p._kp_os_angular));
+        ctrl->setKv(_combineArmAndBase(p._kv_os_linear,
+                                       p._kv_os_angular));
 
         Eigen::MatrixXd max_vel(2,1);
-        max_vel <<  (max_vel_os_angular == -1 ? _max_vel_os_angular : max_vel_os_angular), (max_vel_os_linear == -1 ? _max_vel_os_linear : max_vel_os_linear);
+        max_vel <<  (p._max_vel_os_angular,p._max_vel_os_linear);
         ctrl->setMaximumVelocity(max_vel);
         ctrl->setGoalIsRelative(is_relative);
         ctrl->setArgument("operational_frame", "EE");
@@ -808,10 +798,10 @@ ha::Controller::Ptr HybridAutomatonRBOFactory::createOperationalSpaceController(
         ctrl->setArgument("interpolation_type", "cubic");
 
         ctrl->setGoal(os_goal);
-        ctrl->setKp((kp_os_linear.size() == 0 ? _kp_os_linear : kp_os_linear));
-        ctrl->setKv((kv_os_linear.size() == 0 ? _kv_os_linear : kv_os_linear));
+        ctrl->setKp(p._kp_os_linear);
+        ctrl->setKv(p._kv_os_linear);
 
-        Eigen::MatrixXd max_vel = Eigen::MatrixXd::Constant(3,1,(max_vel_os_linear == -1 ? _max_vel_os_linear : max_vel_os_linear));
+        Eigen::MatrixXd max_vel = Eigen::MatrixXd::Constant(3,1,(p._max_vel_os_linear));
         ctrl->setMaximumVelocity(max_vel);
         ctrl->setGoalIsRelative(is_relative);
         ctrl->setArgument("operational_frame", "EE");
@@ -821,20 +811,45 @@ ha::Controller::Ptr HybridAutomatonRBOFactory::createOperationalSpaceController(
     return ctrl;
 }
 
+ha::Controller::Ptr HybridAutomatonRBOFactory::createGraspController(const HybridAutomatonAbstractParams& params,
+                                                                     std::string name){
+    HybridAutomatonRBOParams& p = (HybridAutomatonRBOParams&)params;
+    ha::Controller::Ptr grasp_ctrl(new ha::Controller());
+    switch(p.gripper)
+    {
+    case NO_GRIPPER:
+        break;
+    case SOFT_HAND:
+    {
+        grasp_ctrl->setName("FeixGraspControl");
+        grasp_ctrl->setType("FeixGraspSoftHandController");
+        grasp_ctrl->setArgument("grasp_strength", p.grasp_strength);
+        grasp_ctrl->setArgument("grasp_type", p.grasp_type);
+    }
+        break;
+    case SUCTION_CUP:
+    {
+        grasp_ctrl->setName("VacuumGraspControl");
+        grasp_ctrl->setType("VacuumCleanerController");
+        grasp_ctrl->setArgument("power", p.grasp_strength);
+    }
+        break;
+    case BARRETT_HAND:
+        break;
+    default:
+        break;
+    }
+    return grasp_ctrl;
+}
+
+
 ha::Controller::Ptr HybridAutomatonRBOFactory::createBBOperationalSpaceController(const HybridAutomatonAbstractParams& params,
                                                                                   std::string name,
                                                                                   bool trajectory,
                                                                                   bool use_tf,
                                                                                   const std::string frame,
                                                                                   const std::string parent_frame,
-                                                                                  double max_vel_os_linear,
-                                                                                  double max_vel_os_angular,
-                                                                                  const Eigen::MatrixXd &kp_os_linear,
-                                                                                  const Eigen::MatrixXd &kp_os_angular,
-                                                                                  const Eigen::MatrixXd &kv_os_linear,
-                                                                                  const Eigen::MatrixXd &kv_os_angular,
-                                                                                  bool is_relative,
-                                                                                  int update_rate){
+                                                                                  bool is_relative){
     HybridAutomatonRBOParams& p = (HybridAutomatonRBOParams&)params;
     //Endeffector Frame Controller
     ha::Controller::Ptr ctrl(new ha::Controller);
@@ -853,16 +868,16 @@ ha::Controller::Ptr HybridAutomatonRBOFactory::createBBOperationalSpaceControlle
     }
     ctrl->setArgument("topic_name", frame);
 
-    ctrl->setArgument("update_rate", update_rate<=0 ? _update_rate : update_rate);
+    ctrl->setArgument("update_rate", p._update_rate);
 
     Eigen::MatrixXd max_vel(2,1);
-    max_vel <<  (max_vel_os_angular == -1 ? _max_vel_os_angular : max_vel_os_angular), (max_vel_os_linear == -1 ? _max_vel_os_linear : max_vel_os_linear);
+    max_vel <<  (p._max_vel_os_angular, p._max_vel_os_linear);
     ctrl->setMaximumVelocity(max_vel);
 
-    ctrl->setKp(_combineArmAndBase((kp_os_linear.size() == 0 ? _kp_os_linear : kp_os_linear),
-                                   (kp_os_angular.size() == 0 ? _kp_os_angular : kp_os_angular)));
-    ctrl->setKv(_combineArmAndBase((kv_os_linear.size() == 0 ? _kv_os_linear : kv_os_linear),
-                                   (kv_os_angular.size() == 0 ? _kv_os_angular : kv_os_angular)));
+    ctrl->setKp(_combineArmAndBase(p._kp_os_linear,
+                                   p._kp_os_angular));
+    ctrl->setKv(_combineArmAndBase(p._kv_os_linear,
+                                   p._kv_os_angular));
     ctrl->setGoalIsRelative(is_relative);
     ctrl->setArgument("operational_frame", "EE");
 
@@ -870,153 +885,153 @@ ha::Controller::Ptr HybridAutomatonRBOFactory::createBBOperationalSpaceControlle
 
 }
 
-ha::JumpCondition::Ptr HybridAutomatonRBOFactory::createJointSpaceConvergenceCondition(const HybridAutomatonAbstractParams& params,
-                                                                                       ha::ControllerConstPtr js_ctrl,
-                                                                                       const double& pos_epsilon_js)
-{
-    HybridAutomatonRBOParams& p = (HybridAutomatonRBOParams&)params;
-    ha::JumpConditionPtr jc(new ha::JumpCondition());
-    ha::SensorPtr sensor(new ha::JointConfigurationSensor());
-    jc->setSensor(sensor);
-    jc->setControllerGoal(js_ctrl);
-    jc->setJumpCriterion(ha::JumpCondition::NORM_L_INF);
-    jc->setEpsilon(pos_epsilon_js);
+//ha::JumpCondition::Ptr HybridAutomatonRBOFactory::createJointSpaceConvergenceCondition(const HybridAutomatonAbstractParams& params,
+//                                                                                       ha::ControllerConstPtr js_ctrl,
+//                                                                                       const double& pos_epsilon_js)
+//{
+//    HybridAutomatonRBOParams& p = (HybridAutomatonRBOParams&)params;
+//    ha::JumpConditionPtr jc(new ha::JumpCondition());
+//    ha::SensorPtr sensor(new ha::JointConfigurationSensor());
+//    jc->setSensor(sensor);
+//    jc->setControllerGoal(js_ctrl);
+//    jc->setJumpCriterion(ha::JumpCondition::NORM_L_INF);
+//    jc->setEpsilon(pos_epsilon_js);
 
-    return jc;
-}
+//    return jc;
+//}
 
-ha::JumpCondition::Ptr HybridAutomatonRBOFactory::createSubjointSpaceConvergenceCondition(const HybridAutomatonAbstractParams& params,
-                                                                                          ha::ControllerConstPtr subjs_ctrl,
-                                                                                          const Eigen::MatrixXd& index_vec,
-                                                                                          const double& pos_epsilon_js)
-{
-    HybridAutomatonRBOParams& p = (HybridAutomatonRBOParams&)params;
-    ha::JumpConditionPtr jc(new ha::JumpCondition());
-    ha::SubjointConfigurationSensorPtr sensor(new ha::SubjointConfigurationSensor());
-    sensor->setIndex(index_vec);
-    jc->setSensor(sensor);
-    jc->setControllerGoal(subjs_ctrl);
-    jc->setJumpCriterion(ha::JumpCondition::NORM_L_INF);
-    jc->setEpsilon(pos_epsilon_js);
+//ha::JumpCondition::Ptr HybridAutomatonRBOFactory::createSubjointSpaceConvergenceCondition(const HybridAutomatonAbstractParams& params,
+//                                                                                          ha::ControllerConstPtr subjs_ctrl,
+//                                                                                          const Eigen::MatrixXd& index_vec,
+//                                                                                          const double& pos_epsilon_js)
+//{
+//    HybridAutomatonRBOParams& p = (HybridAutomatonRBOParams&)params;
+//    ha::JumpConditionPtr jc(new ha::JumpCondition());
+//    ha::SubjointConfigurationSensorPtr sensor(new ha::SubjointConfigurationSensor());
+//    sensor->setIndex(index_vec);
+//    jc->setSensor(sensor);
+//    jc->setControllerGoal(subjs_ctrl);
+//    jc->setJumpCriterion(ha::JumpCondition::NORM_L_INF);
+//    jc->setEpsilon(pos_epsilon_js);
 
-    return jc;
-}
+//    return jc;
+//}
 
-ha::JumpCondition::Ptr HybridAutomatonRBOFactory::createSubjointSpaceConvergenceConditionArm(const HybridAutomatonAbstractParams& params,
-                                                                                             ha::ControllerConstPtr subjs_ctrl,
-                                                                                             const Eigen::MatrixXd& index_vec_arm,
-                                                                                             const double& pos_epsilon_js_arm)
-{
-    return createSubjointSpaceConvergenceCondition(subjs_ctrl,
-                                                   (index_vec_arm.size() == 0 ? _index_vec_arm : index_vec_arm),
-                                                   (pos_epsilon_js_arm == -1 ? _pos_epsilon_js_arm : pos_epsilon_js_arm));
-}
+//ha::JumpCondition::Ptr HybridAutomatonRBOFactory::createSubjointSpaceConvergenceConditionArm(const HybridAutomatonAbstractParams& params,
+//                                                                                             ha::ControllerConstPtr subjs_ctrl,
+//                                                                                             const Eigen::MatrixXd& index_vec_arm,
+//                                                                                             const double& pos_epsilon_js_arm)
+//{
+//    return createSubjointSpaceConvergenceCondition(subjs_ctrl,
+//                                                   (index_vec_arm.size() == 0 ? _index_vec_arm : index_vec_arm),
+//                                                   (pos_epsilon_js_arm == -1 ? _pos_epsilon_js_arm : pos_epsilon_js_arm));
+//}
 
-ha::JumpCondition::Ptr HybridAutomatonRBOFactory::createSubjointSpaceConvergenceConditionBase(const HybridAutomatonAbstractParams& params,
-                                                                                              ha::ControllerConstPtr subjs_ctrl,
-                                                                                              const Eigen::MatrixXd& index_vec_base,
-                                                                                              const double& pos_epsilon_js_base)
-{
-    return createSubjointSpaceConvergenceCondition(subjs_ctrl,
-                                                   (index_vec_base.size() == 0 ? _index_vec_base : index_vec_base),
-                                                   (pos_epsilon_js_base == -1 ? _pos_epsilon_js_base : pos_epsilon_js_base));
-}
+//ha::JumpCondition::Ptr HybridAutomatonRBOFactory::createSubjointSpaceConvergenceConditionBase(const HybridAutomatonAbstractParams& params,
+//                                                                                              ha::ControllerConstPtr subjs_ctrl,
+//                                                                                              const Eigen::MatrixXd& index_vec_base,
+//                                                                                              const double& pos_epsilon_js_base)
+//{
+//    return createSubjointSpaceConvergenceCondition(subjs_ctrl,
+//                                                   (index_vec_base.size() == 0 ? _index_vec_base : index_vec_base),
+//                                                   (pos_epsilon_js_base == -1 ? _pos_epsilon_js_base : pos_epsilon_js_base));
+//}
 
-ha::JumpCondition::Ptr HybridAutomatonRBOFactory::createJointSpaceVelocityCondition(const HybridAutomatonAbstractParams& params,
-                                                                                    const Eigen::MatrixXd& index_vec,
-                                                                                    const Eigen::MatrixXd& vel_goal_js,
-                                                                                    const double& vel_epsilon_js){
-    ha::JumpConditionPtr jc(new ha::JumpCondition());
-    ha::SubjointVelocitySensorPtr sensor(new ha::SubjointVelocitySensor());
-    sensor->setIndex(index_vec);
-    jc->setSensor(sensor);
-    jc->setConstantGoal(vel_goal_js);
-    jc->setJumpCriterion(ha::JumpCondition::NORM_L_INF);
-    jc->setEpsilon(vel_epsilon_js <= 0 ? std::min(_vel_epsilon_js_arm,_vel_epsilon_js_base): vel_epsilon_js);
+//ha::JumpCondition::Ptr HybridAutomatonRBOFactory::createJointSpaceVelocityCondition(const HybridAutomatonAbstractParams& params,
+//                                                                                    const Eigen::MatrixXd& index_vec,
+//                                                                                    const Eigen::MatrixXd& vel_goal_js,
+//                                                                                    const double& vel_epsilon_js){
+//    ha::JumpConditionPtr jc(new ha::JumpCondition());
+//    ha::SubjointVelocitySensorPtr sensor(new ha::SubjointVelocitySensor());
+//    sensor->setIndex(index_vec);
+//    jc->setSensor(sensor);
+//    jc->setConstantGoal(vel_goal_js);
+//    jc->setJumpCriterion(ha::JumpCondition::NORM_L_INF);
+//    jc->setEpsilon(vel_epsilon_js <= 0 ? std::min(_vel_epsilon_js_arm,_vel_epsilon_js_base): vel_epsilon_js);
 
-    return jc;
-}
+//    return jc;
+//}
 
-ha::JumpCondition::Ptr HybridAutomatonRBOFactory::createJointSpaceZeroVelocityCondition(const HybridAutomatonAbstractParams& params,
-                                                                                        const Eigen::MatrixXd& index_vec,
-                                                                                        const double &vel_epsilon_js)
-{
-    Eigen::MatrixXd zero_goal = Eigen::MatrixXd::Constant(index_vec.size(), 1, 0.0);
-    return createJointSpaceVelocityCondition(index_vec, zero_goal, vel_epsilon_js <= 0 ? std::min(_vel_epsilon_js_arm,_vel_epsilon_js_base): vel_epsilon_js);
-}
+//ha::JumpCondition::Ptr HybridAutomatonRBOFactory::createJointSpaceZeroVelocityCondition(const HybridAutomatonAbstractParams& params,
+//                                                                                        const Eigen::MatrixXd& index_vec,
+//                                                                                        const double &vel_epsilon_js)
+//{
+//    Eigen::MatrixXd zero_goal = Eigen::MatrixXd::Constant(index_vec.size(), 1, 0.0);
+//    return createJointSpaceVelocityCondition(index_vec, zero_goal, vel_epsilon_js <= 0 ? std::min(_vel_epsilon_js_arm,_vel_epsilon_js_base): vel_epsilon_js);
+//}
 
-ha::JumpCondition::Ptr HybridAutomatonRBOFactory::createJointSpaceZeroVelocityConditionArm(const HybridAutomatonAbstractParams& params,
-                                                                                           const Eigen::MatrixXd& index_vec_arm,
-                                                                                           const double &vel_epsilon_js_arm)
-{
-    return createJointSpaceZeroVelocityCondition((index_vec_arm.size() == 0 ? _index_vec_arm : index_vec_arm),
-                                                 (vel_epsilon_js_arm == -1 ? _vel_epsilon_js_arm : vel_epsilon_js_arm));
-}
+//ha::JumpCondition::Ptr HybridAutomatonRBOFactory::createJointSpaceZeroVelocityConditionArm(const HybridAutomatonAbstractParams& params,
+//                                                                                           const Eigen::MatrixXd& index_vec_arm,
+//                                                                                           const double &vel_epsilon_js_arm)
+//{
+//    return createJointSpaceZeroVelocityCondition((index_vec_arm.size() == 0 ? _index_vec_arm : index_vec_arm),
+//                                                 (vel_epsilon_js_arm == -1 ? _vel_epsilon_js_arm : vel_epsilon_js_arm));
+//}
 
-ha::JumpCondition::Ptr HybridAutomatonRBOFactory::createJointSpaceVelocityConditionArm(const HybridAutomatonAbstractParams& params,
-                                                                                       const Eigen::MatrixXd& index_vec_arm,
-                                                                                       const Eigen::MatrixXd& vel_goal_js_arm,
-                                                                                       const double& vel_epsilon_js_arm)
-{
-    return createJointSpaceVelocityCondition((index_vec_arm.size() == 0 ? _index_vec_arm : index_vec_arm),
-                                             (vel_goal_js_arm.size() == 0 ? _vel_goal_js_arm : vel_goal_js_arm),
-                                             (vel_epsilon_js_arm == -1 ? _vel_epsilon_js_arm : vel_epsilon_js_arm));
-}
+//ha::JumpCondition::Ptr HybridAutomatonRBOFactory::createJointSpaceVelocityConditionArm(const HybridAutomatonAbstractParams& params,
+//                                                                                       const Eigen::MatrixXd& index_vec_arm,
+//                                                                                       const Eigen::MatrixXd& vel_goal_js_arm,
+//                                                                                       const double& vel_epsilon_js_arm)
+//{
+//    return createJointSpaceVelocityCondition((index_vec_arm.size() == 0 ? _index_vec_arm : index_vec_arm),
+//                                             (vel_goal_js_arm.size() == 0 ? _vel_goal_js_arm : vel_goal_js_arm),
+//                                             (vel_epsilon_js_arm == -1 ? _vel_epsilon_js_arm : vel_epsilon_js_arm));
+//}
 
-ha::JumpCondition::Ptr HybridAutomatonRBOFactory::createJointSpaceZeroVelocityConditionBase(const HybridAutomatonAbstractParams& params,
-                                                                                            const Eigen::MatrixXd& index_vec_base,
-                                                                                            const double& vel_epsilon_js_base)
-{
-    return createJointSpaceZeroVelocityCondition((index_vec_base.size() == 0 ? _index_vec_base : index_vec_base),
-                                                 (vel_epsilon_js_base == -1 ? _vel_epsilon_js_base : vel_epsilon_js_base));
-}
+//ha::JumpCondition::Ptr HybridAutomatonRBOFactory::createJointSpaceZeroVelocityConditionBase(const HybridAutomatonAbstractParams& params,
+//                                                                                            const Eigen::MatrixXd& index_vec_base,
+//                                                                                            const double& vel_epsilon_js_base)
+//{
+//    return createJointSpaceZeroVelocityCondition((index_vec_base.size() == 0 ? _index_vec_base : index_vec_base),
+//                                                 (vel_epsilon_js_base == -1 ? _vel_epsilon_js_base : vel_epsilon_js_base));
+//}
 
-ha::JumpCondition::Ptr HybridAutomatonRBOFactory::createOperationalSpaceConvergenceCondition(const HybridAutomatonAbstractParams& params,
-                                                                                             ha::ControllerConstPtr ctrl,
-                                                                                             bool relative,
-                                                                                             double pos_epsilon_os_linear,
-                                                                                             double pos_epsilon_os_angular,
-                                                                                             bool only_displacement)
-{
-    ha::JumpConditionPtr jc(new ha::JumpCondition());
-    if(!only_displacement)
-    {
-        ha::SensorPtr sensor(new ha::FramePoseSensor());
-        jc->setSensor(sensor);
-        jc->setControllerGoal(ctrl);
-        jc->setJumpCriterion(ha::JumpCondition::NORM_TRANSFORM);
+//ha::JumpCondition::Ptr HybridAutomatonRBOFactory::createOperationalSpaceConvergenceCondition(const HybridAutomatonAbstractParams& params,
+//                                                                                             ha::ControllerConstPtr ctrl,
+//                                                                                             bool relative,
+//                                                                                             double pos_epsilon_os_linear,
+//                                                                                             double pos_epsilon_os_angular,
+//                                                                                             bool only_displacement)
+//{
+//    ha::JumpConditionPtr jc(new ha::JumpCondition());
+//    if(!only_displacement)
+//    {
+//        ha::SensorPtr sensor(new ha::FramePoseSensor());
+//        jc->setSensor(sensor);
+//        jc->setControllerGoal(ctrl);
+//        jc->setJumpCriterion(ha::JumpCondition::NORM_TRANSFORM);
 
-        jc->setEpsilon((pos_epsilon_os_linear == -1 ? _pos_epsilon_os_linear : pos_epsilon_os_linear));
-    }else{
-        ha::SensorPtr sensor(new ha::FrameDisplacementSensor());
-        jc->setSensor(sensor);
-        jc->setControllerGoal(ctrl);
-        jc->setJumpCriterion(ha::JumpCondition::NORM_L2);
+//        jc->setEpsilon((pos_epsilon_os_linear == -1 ? _pos_epsilon_os_linear : pos_epsilon_os_linear));
+//    }else{
+//        ha::SensorPtr sensor(new ha::FrameDisplacementSensor());
+//        jc->setSensor(sensor);
+//        jc->setControllerGoal(ctrl);
+//        jc->setJumpCriterion(ha::JumpCondition::NORM_L2);
 
-        jc->setEpsilon((pos_epsilon_os_linear == -1 ? _pos_epsilon_os_linear : pos_epsilon_os_linear));
-    }
+//        jc->setEpsilon((pos_epsilon_os_linear == -1 ? _pos_epsilon_os_linear : pos_epsilon_os_linear));
+//    }
 
 
 
-    if(relative)
-        jc->setGoalRelative();
-    else
-        jc->setGoalAbsolute();
+//    if(relative)
+//        jc->setGoalRelative();
+//    else
+//        jc->setGoalAbsolute();
 
-    return jc;
-}
+//    return jc;
+//}
 
-ha::JumpCondition::Ptr HybridAutomatonRBOFactory::createMaxTimeCondition(const HybridAutomatonAbstractParams& params,
-                                                                         double max_time){
-    ha::JumpCondition::Ptr max_time_cond(new ha::JumpCondition());
-    ha::ClockSensor::Ptr time_sensor(new ha::ClockSensor());
-    max_time_cond->setSensor(time_sensor);
-    max_time_cond->setConstantGoal(max_time);
-    max_time_cond->setGoalRelative();
-    max_time_cond->setEpsilon(0);
-    max_time_cond->setJumpCriterion(ha::JumpCondition::THRESH_UPPER_BOUND);
-    return max_time_cond;
-}
+//ha::JumpCondition::Ptr HybridAutomatonRBOFactory::createMaxTimeCondition(const HybridAutomatonAbstractParams& params,
+//                                                                         double max_time){
+//    ha::JumpCondition::Ptr max_time_cond(new ha::JumpCondition());
+//    ha::ClockSensor::Ptr time_sensor(new ha::ClockSensor());
+//    max_time_cond->setSensor(time_sensor);
+//    max_time_cond->setConstantGoal(max_time);
+//    max_time_cond->setGoalRelative();
+//    max_time_cond->setEpsilon(0);
+//    max_time_cond->setJumpCriterion(ha::JumpCondition::THRESH_UPPER_BOUND);
+//    return max_time_cond;
+//}
 
 ha::ControlSwitch::Ptr HybridAutomatonRBOFactory::CreateMaxForceTorqueControlSwitch(const HybridAutomatonAbstractParams& params,
                                                                                     const std::string& name,

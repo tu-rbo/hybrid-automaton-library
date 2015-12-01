@@ -77,11 +77,7 @@ struct HybridAutomatonRBOParams : public HybridAutomatonAbstractParams
     int update_rate;
     double completion_time;
 
-    /// Number of degrees of freedom of the arm
-    int _num_dof_arm;
 
-    /// Number of degrees of freedom of the base
-    int _num_dof_base;
 
 
 
@@ -125,14 +121,14 @@ struct HybridAutomatonRBOParams : public HybridAutomatonAbstractParams
 
 
 
-//    /// Convergence goal for the velocity of a joint space (js) controller
-//    Eigen::MatrixXd _vel_goal_js_arm;
-//    Eigen::MatrixXd _vel_goal_js_base;
+    //    /// Convergence goal for the velocity of a joint space (js) controller
+    //    Eigen::MatrixXd _vel_goal_js_arm;
+    //    Eigen::MatrixXd _vel_goal_js_base;
 
 
-//    /// Convergence goal for the velocity of an operational space (os) controller
-//    Eigen::MatrixXd _vel_goal_os_linear;
-//    Eigen::MatrixXd _vel_goal_os_angular;
+    //    /// Convergence goal for the velocity of an operational space (os) controller
+    //    Eigen::MatrixXd _vel_goal_os_linear;
+    //    Eigen::MatrixXd _vel_goal_os_angular;
 
     /// The default update rate
     int _update_rate;
@@ -213,16 +209,16 @@ struct HybridAutomatonRBOParams : public HybridAutomatonAbstractParams
         _vel_epsilon_js_arm = DEFAULT_VEL_EPSILON_JS_ARM;
         _vel_epsilon_js_base =  DEFAULT_VEL_EPSILON_JS_BASE;
 
-//        _vel_goal_js_arm = Eigen::MatrixXd::Constant(_num_dof_arm, 1, DEFAULT_VEL_GOAL_JS_ARM);
-//        _vel_goal_js_base = Eigen::MatrixXd::Constant(_num_dof_base, 1, DEFAULT_VEL_GOAL_JS_BASE);
+        //        _vel_goal_js_arm = Eigen::MatrixXd::Constant(_num_dof_arm, 1, DEFAULT_VEL_GOAL_JS_ARM);
+        //        _vel_goal_js_base = Eigen::MatrixXd::Constant(_num_dof_base, 1, DEFAULT_VEL_GOAL_JS_BASE);
 
         _pos_epsilon_os_linear =  DEFAULT_POS_EPSILON_OS_LINEAR;
         _pos_epsilon_os_angular =  DEFAULT_POS_EPSILON_OS_ANGULAR;
         _vel_epsilon_os_linear =  DEFAULT_VEL_EPSILON_OS_LINEAR;
         _vel_epsilon_os_angular =  DEFAULT_VEL_EPSILON_OS_ANGULAR;
 
-//        _vel_goal_os_linear = Eigen::MatrixXd::Constant(3, 1, DEFAULT_VEL_GOAL_OS_LINEAR);
-//        _vel_goal_os_angular =  Eigen::MatrixXd::Constant(3, 1, DEFAULT_VEL_GOAL_OS_ANGULAR);
+        //        _vel_goal_os_linear = Eigen::MatrixXd::Constant(3, 1, DEFAULT_VEL_GOAL_OS_LINEAR);
+        //        _vel_goal_os_angular =  Eigen::MatrixXd::Constant(3, 1, DEFAULT_VEL_GOAL_OS_ANGULAR);
 
         _max_vel_os_linear = DEFAULT_MAX_VEL_OS_LINEAR;
         _max_vel_os_angular = DEFAULT_MAX_VEL_OS_ANGULAR;
@@ -231,89 +227,89 @@ struct HybridAutomatonRBOParams : public HybridAutomatonAbstractParams
     }
 
 
-//    Eigen::MatrixXd max_vel_js_arm() const;
-//    void setMax_vel_js_arm(const Eigen::MatrixXd &max_vel_js_arm);
+    //    Eigen::MatrixXd max_vel_js_arm() const;
+    //    void setMax_vel_js_arm(const Eigen::MatrixXd &max_vel_js_arm);
 
-//    Eigen::MatrixXd max_vel_js_base() const;
-//    void setMax_vel_js_base(const Eigen::MatrixXd &max_vel_js_base);
+    //    Eigen::MatrixXd max_vel_js_base() const;
+    //    void setMax_vel_js_base(const Eigen::MatrixXd &max_vel_js_base);
 
-//    Eigen::MatrixXd kp_js_arm() const;
-//    void setKp_js_arm(const Eigen::MatrixXd &kp_js_arm);
+    //    Eigen::MatrixXd kp_js_arm() const;
+    //    void setKp_js_arm(const Eigen::MatrixXd &kp_js_arm);
 
-//    Eigen::MatrixXd kp_js_base() const;
-//    void setKp_js_base(const Eigen::MatrixXd &kp_js_base);
+    //    Eigen::MatrixXd kp_js_base() const;
+    //    void setKp_js_base(const Eigen::MatrixXd &kp_js_base);
 
-//    Eigen::MatrixXd kv_js_arm() const;
-//    void setKv_js_arm(const Eigen::MatrixXd &kv_js_arm);
+    //    Eigen::MatrixXd kv_js_arm() const;
+    //    void setKv_js_arm(const Eigen::MatrixXd &kv_js_arm);
 
-//    Eigen::MatrixXd kv_js_base() const;
-//    void setKv_js_base(const Eigen::MatrixXd &kv_js_base);
+    //    Eigen::MatrixXd kv_js_base() const;
+    //    void setKv_js_base(const Eigen::MatrixXd &kv_js_base);
 
-//    Eigen::MatrixXd kp_os_linear() const;
-//    void setKp_os_linear(const Eigen::MatrixXd &kp_os_linear);
+    //    Eigen::MatrixXd kp_os_linear() const;
+    //    void setKp_os_linear(const Eigen::MatrixXd &kp_os_linear);
 
-//    Eigen::MatrixXd kp_os_angular() const;
-//    void setKp_os_angular(const Eigen::MatrixXd &kp_os_angular);
+    //    Eigen::MatrixXd kp_os_angular() const;
+    //    void setKp_os_angular(const Eigen::MatrixXd &kp_os_angular);
 
-//    Eigen::MatrixXd kv_os_linear() const;
-//    void setKv_os_linear(const Eigen::MatrixXd &kv_os_linear);
+    //    Eigen::MatrixXd kv_os_linear() const;
+    //    void setKv_os_linear(const Eigen::MatrixXd &kv_os_linear);
 
-//    Eigen::MatrixXd kv_os_angular() const;
-//    void setKv_os_angular(const Eigen::MatrixXd &kv_os_angular);
+    //    Eigen::MatrixXd kv_os_angular() const;
+    //    void setKv_os_angular(const Eigen::MatrixXd &kv_os_angular);
 
-//    Eigen::MatrixXd kp_js_nakamura_arm() const;
-//    void setKp_js_nakamura_arm(const Eigen::MatrixXd &kp_js_nakamura_arm);
+    //    Eigen::MatrixXd kp_js_nakamura_arm() const;
+    //    void setKp_js_nakamura_arm(const Eigen::MatrixXd &kp_js_nakamura_arm);
 
-//    Eigen::MatrixXd kp_js_nakamura_base() const;
-//    void setKp_js_nakamura_base(const Eigen::MatrixXd &kp_js_nakamura_base);
+    //    Eigen::MatrixXd kp_js_nakamura_base() const;
+    //    void setKp_js_nakamura_base(const Eigen::MatrixXd &kp_js_nakamura_base);
 
-//    Eigen::MatrixXd kv_js_nakamura_arm() const;
-//    void setKv_js_nakamura_arm(const Eigen::MatrixXd &kv_js_nakamura_arm);
+    //    Eigen::MatrixXd kv_js_nakamura_arm() const;
+    //    void setKv_js_nakamura_arm(const Eigen::MatrixXd &kv_js_nakamura_arm);
 
-//    Eigen::MatrixXd kv_js_nakamura_base() const;
-//    void setKv_js_nakamura_base(const Eigen::MatrixXd &kv_js_nakamura_base);
+    //    Eigen::MatrixXd kv_js_nakamura_base() const;
+    //    void setKv_js_nakamura_base(const Eigen::MatrixXd &kv_js_nakamura_base);
 
-//    Eigen::MatrixXd joint_weights_nakamura_arm() const;
-//    void setJoint_weights_nakamura_arm(const Eigen::MatrixXd &joint_weights_nakamura_arm);
+    //    Eigen::MatrixXd joint_weights_nakamura_arm() const;
+    //    void setJoint_weights_nakamura_arm(const Eigen::MatrixXd &joint_weights_nakamura_arm);
 
-//    Eigen::MatrixXd joint_weights_nakamura_base() const;
-//    void setJoint_weights_nakamura_base(const Eigen::MatrixXd &joint_weights_nakamura_base);
+    //    Eigen::MatrixXd joint_weights_nakamura_base() const;
+    //    void setJoint_weights_nakamura_base(const Eigen::MatrixXd &joint_weights_nakamura_base);
 
-//    Eigen::MatrixXd joint_weights_nakamura_base_no_rotation() const;
-//    void setJoint_weights_nakamura_base_no_rotation(const Eigen::MatrixXd &joint_weights_nakamura_base_no_rotation);
+    //    Eigen::MatrixXd joint_weights_nakamura_base_no_rotation() const;
+    //    void setJoint_weights_nakamura_base_no_rotation(const Eigen::MatrixXd &joint_weights_nakamura_base_no_rotation);
 
-//    Eigen::MatrixXd joint_weights_nakamura_base_little_motion() const;
-//    void setJoint_weights_nakamura_base_little_motion(const Eigen::MatrixXd &joint_weights_nakamura_base_little_motion);
+    //    Eigen::MatrixXd joint_weights_nakamura_base_little_motion() const;
+    //    void setJoint_weights_nakamura_base_little_motion(const Eigen::MatrixXd &joint_weights_nakamura_base_little_motion);
 
-//    Eigen::MatrixXd home_config_js_arm() const;
-//    void setHome_config_js_arm(const Eigen::MatrixXd &home_config_js_arm);
+    //    Eigen::MatrixXd home_config_js_arm() const;
+    //    void setHome_config_js_arm(const Eigen::MatrixXd &home_config_js_arm);
 
-//    Eigen::MatrixXd home_config_js_base() const;
-//    void setHome_config_js_base(const Eigen::MatrixXd &home_config_js_base);
+    //    Eigen::MatrixXd home_config_js_base() const;
+    //    void setHome_config_js_base(const Eigen::MatrixXd &home_config_js_base);
 
-//    double pos_epsilon_js_arm() const;
-//    void setPos_epsilon_js_arm(const double &pos_epsilon_js_arm);
+    //    double pos_epsilon_js_arm() const;
+    //    void setPos_epsilon_js_arm(const double &pos_epsilon_js_arm);
 
-//    double pos_epsilon_js_base() const;
-//    void setPos_epsilon_js_base(const double &pos_epsilon_js_base);
+    //    double pos_epsilon_js_base() const;
+    //    void setPos_epsilon_js_base(const double &pos_epsilon_js_base);
 
-//    double vel_epsilon_js_arm() const;
-//    void setVel_epsilon_js_arm(const double &vel_epsilon_js_arm);
+    //    double vel_epsilon_js_arm() const;
+    //    void setVel_epsilon_js_arm(const double &vel_epsilon_js_arm);
 
-//    double vel_epsilon_js_base() const;
-//    void setVel_epsilon_js_base(const double &vel_epsilon_js_base);
+    //    double vel_epsilon_js_base() const;
+    //    void setVel_epsilon_js_base(const double &vel_epsilon_js_base);
 
-//    double pos_epsilon_os_linear() const;
-//    void setPos_epsilon_os_linear(const double &pos_epsilon_os_linear);
+    //    double pos_epsilon_os_linear() const;
+    //    void setPos_epsilon_os_linear(const double &pos_epsilon_os_linear);
 
-//    double pos_epsilon_os_angular() const;
-//    void setPos_epsilon_os_angular(const double &pos_epsilon_os_angular);
+    //    double pos_epsilon_os_angular() const;
+    //    void setPos_epsilon_os_angular(const double &pos_epsilon_os_angular);
 
-//    double vel_epsilon_os_linear() const;
-//    void setVel_epsilon_os_linear(const double &vel_epsilon_os_linear);
+    //    double vel_epsilon_os_linear() const;
+    //    void setVel_epsilon_os_linear(const double &vel_epsilon_os_linear);
 
-//    double vel_epsilon_os_angular() const;
-//    void setVel_epsilon_os_angular(const double &vel_epsilon_os_angular);
+    //    double vel_epsilon_os_angular() const;
+    //    void setVel_epsilon_os_angular(const double &vel_epsilon_os_angular);
 
 };
 
@@ -374,7 +370,7 @@ public:
          * @param tool The tool used by the robot
          * @return ha::HybridAutomaton::Ptr Pointer to the generated HA
          */
-//    ha::HybridAutomaton::Ptr createInitialHybridAutomaton(const HybridAutomatonAbstractParams& params);
+    //    ha::HybridAutomaton::Ptr createInitialHybridAutomaton(const HybridAutomatonAbstractParams& params);
 
     /**
          * @brief Create an empty hybrid automaton which performs gravity compensation
@@ -406,7 +402,7 @@ public:
     ha::ControlSet::Ptr createTPNakamuraControlSet(const HybridAutomatonAbstractParams& params,
                                                    ha::Controller::Ptr ctrl,
                                                    bool move_base
-            );
+                                                   );
 
 
 
@@ -423,6 +419,9 @@ public:
      * @param completion_time the desired time to arrive for the interpolator
      * @return ha::Controller::Ptr The generated controller
      */
+    virtual ha::Controller::Ptr createGraspController(const HybridAutomatonAbstractParams& params,
+                                                                         std::string name);
+
     virtual ha::Controller::Ptr createJointSpaceController(const HybridAutomatonAbstractParams& params,
                                                            std::string name,
                                                            const Eigen::MatrixXd &goal_js,
@@ -430,18 +429,18 @@ public:
                                                            bool goal_relative);
 
     virtual ha::Controller::Ptr createSubjointSpaceController(const HybridAutomatonAbstractParams& params,
-                                                                             std::string name,
-                                                                          const Eigen::MatrixXd& goal_js,
-                                                                          const Eigen::MatrixXd& index_vec,
-                                                                          bool is_relative);
+                                                              std::string name,
+                                                              const Eigen::MatrixXd& goal_js,
+                                                              const Eigen::MatrixXd& index_vec,
+                                                              bool is_relative);
 
     virtual ha::Controller::Ptr createBBSubjointSpaceController(const HybridAutomatonAbstractParams& params,
-                                                                                   std::string name,
-                                                                                bool use_tf,
-                                                                                const std::string& topic_name,
-                                                                                const std::string& tf_parent,
-                                                                                const Eigen::MatrixXd& index_vec,
-                                                                                bool is_relative);
+                                                                std::string name,
+                                                                bool use_tf,
+                                                                const std::string& topic_name,
+                                                                const std::string& tf_parent,
+                                                                const Eigen::MatrixXd& index_vec,
+                                                                bool is_relative);
     /**
      * @brief Create an interpolated joint space controller to move from the current robots position to a goal configuration (only arm)
      *
@@ -472,15 +471,25 @@ public:
       */
     virtual ha::Controller::Ptr createBBSubjointSpaceControllerBase(const HybridAutomatonAbstractParams& params,
                                                                     const std::string name,
-                                                                                    bool use_tf,
-                                                                                    const std::string& topic_name,
-                                                                                    const std::string& tf_parent,
+                                                                    bool use_tf,
+                                                                    const std::string& topic_name,
+                                                                    const std::string& tf_parent,
+                                                                    bool is_relative);
+
+
+
+    virtual ha::Controller::Ptr createOperationalSpaceController(const HybridAutomatonAbstractParams& params,
+                                                                 std::string name,
+                                                                 const Eigen::MatrixXd &goal_op_translation,
+                                                                 const Eigen::MatrixXd &goal_op_rot_matrix,
+                                                                 double completion_time,
+                                                                 bool is_relative);
+
+    virtual ha::Controller::Ptr createOperationalSpaceController(const HybridAutomatonAbstractParams& params,
+                                                                                    std::string name,
+                                                                                    const Eigen::MatrixXd &goal_op_translation,
+                                                                                    const Eigen::MatrixXd &goal_op_rot_matrix,
                                                                                     bool is_relative);
-
-
-
-    virtual ha::Controller::Ptr createOperationalSpaceController(const HybridAutomatonAbstractParams& params, const std::string name);
-
     /**
          * @brief Create an interpolated task space controller to move the end-effector from the current robots position to a goal frame given as a /tf frame
          *
@@ -491,91 +500,96 @@ public:
          * @param max_displacement_velocity the maximal end-effector translational velocity in m/s
          * @param max_rotational_velocity the maximal end-effector rotational velocity in rad/s
          */
-    virtual ha::Controller::Ptr createBBOperationalSpaceController(const HybridAutomatonAbstractParams& params, const std::string name);
+    virtual ha::Controller::Ptr createBBOperationalSpaceController(const HybridAutomatonAbstractParams& params,
+                                                                   std::string name,
+                                                                   bool trajectory,
+                                                                   bool use_tf,
+                                                                   const std::string frame,
+                                                                   const std::string parent_frame,
+                                                                   bool is_relative);
+    //    Eigen::MatrixXd max_vel_js_arm() const;
+    //    void setMax_vel_js_arm(const Eigen::MatrixXd &max_vel_js_arm);
 
-//    Eigen::MatrixXd max_vel_js_arm() const;
-//    void setMax_vel_js_arm(const Eigen::MatrixXd &max_vel_js_arm);
+    //    Eigen::MatrixXd max_vel_js_base() const;
+    //    void setMax_vel_js_base(const Eigen::MatrixXd &max_vel_js_base);
 
-//    Eigen::MatrixXd max_vel_js_base() const;
-//    void setMax_vel_js_base(const Eigen::MatrixXd &max_vel_js_base);
+    //    Eigen::MatrixXd kp_js_arm() const;
+    //    void setKp_js_arm(const Eigen::MatrixXd &kp_js_arm);
 
-//    Eigen::MatrixXd kp_js_arm() const;
-//    void setKp_js_arm(const Eigen::MatrixXd &kp_js_arm);
+    //    Eigen::MatrixXd kp_js_base() const;
+    //    void setKp_js_base(const Eigen::MatrixXd &kp_js_base);
 
-//    Eigen::MatrixXd kp_js_base() const;
-//    void setKp_js_base(const Eigen::MatrixXd &kp_js_base);
+    //    Eigen::MatrixXd kv_js_arm() const;
+    //    void setKv_js_arm(const Eigen::MatrixXd &kv_js_arm);
 
-//    Eigen::MatrixXd kv_js_arm() const;
-//    void setKv_js_arm(const Eigen::MatrixXd &kv_js_arm);
+    //    Eigen::MatrixXd kv_js_base() const;
+    //    void setKv_js_base(const Eigen::MatrixXd &kv_js_base);
 
-//    Eigen::MatrixXd kv_js_base() const;
-//    void setKv_js_base(const Eigen::MatrixXd &kv_js_base);
+    //    Eigen::MatrixXd kp_os_linear() const;
+    //    void setKp_os_linear(const Eigen::MatrixXd &kp_os_linear);
 
-//    Eigen::MatrixXd kp_os_linear() const;
-//    void setKp_os_linear(const Eigen::MatrixXd &kp_os_linear);
+    //    Eigen::MatrixXd kp_os_angular() const;
+    //    void setKp_os_angular(const Eigen::MatrixXd &kp_os_angular);
 
-//    Eigen::MatrixXd kp_os_angular() const;
-//    void setKp_os_angular(const Eigen::MatrixXd &kp_os_angular);
+    //    Eigen::MatrixXd kv_os_linear() const;
+    //    void setKv_os_linear(const Eigen::MatrixXd &kv_os_linear);
 
-//    Eigen::MatrixXd kv_os_linear() const;
-//    void setKv_os_linear(const Eigen::MatrixXd &kv_os_linear);
+    //    Eigen::MatrixXd kv_os_angular() const;
+    //    void setKv_os_angular(const Eigen::MatrixXd &kv_os_angular);
 
-//    Eigen::MatrixXd kv_os_angular() const;
-//    void setKv_os_angular(const Eigen::MatrixXd &kv_os_angular);
+    //    Eigen::MatrixXd kp_js_nakamura_arm() const;
+    //    void setKp_js_nakamura_arm(const Eigen::MatrixXd &kp_js_nakamura_arm);
 
-//    Eigen::MatrixXd kp_js_nakamura_arm() const;
-//    void setKp_js_nakamura_arm(const Eigen::MatrixXd &kp_js_nakamura_arm);
+    //    Eigen::MatrixXd kp_js_nakamura_base() const;
+    //    void setKp_js_nakamura_base(const Eigen::MatrixXd &kp_js_nakamura_base);
 
-//    Eigen::MatrixXd kp_js_nakamura_base() const;
-//    void setKp_js_nakamura_base(const Eigen::MatrixXd &kp_js_nakamura_base);
+    //    Eigen::MatrixXd kv_js_nakamura_arm() const;
+    //    void setKv_js_nakamura_arm(const Eigen::MatrixXd &kv_js_nakamura_arm);
 
-//    Eigen::MatrixXd kv_js_nakamura_arm() const;
-//    void setKv_js_nakamura_arm(const Eigen::MatrixXd &kv_js_nakamura_arm);
+    //    Eigen::MatrixXd kv_js_nakamura_base() const;
+    //    void setKv_js_nakamura_base(const Eigen::MatrixXd &kv_js_nakamura_base);
 
-//    Eigen::MatrixXd kv_js_nakamura_base() const;
-//    void setKv_js_nakamura_base(const Eigen::MatrixXd &kv_js_nakamura_base);
+    //    Eigen::MatrixXd joint_weights_nakamura_arm() const;
+    //    void setJoint_weights_nakamura_arm(const Eigen::MatrixXd &joint_weights_nakamura_arm);
 
-//    Eigen::MatrixXd joint_weights_nakamura_arm() const;
-//    void setJoint_weights_nakamura_arm(const Eigen::MatrixXd &joint_weights_nakamura_arm);
+    //    Eigen::MatrixXd joint_weights_nakamura_base() const;
+    //    void setJoint_weights_nakamura_base(const Eigen::MatrixXd &joint_weights_nakamura_base);
 
-//    Eigen::MatrixXd joint_weights_nakamura_base() const;
-//    void setJoint_weights_nakamura_base(const Eigen::MatrixXd &joint_weights_nakamura_base);
+    //    Eigen::MatrixXd joint_weights_nakamura_base_no_rotation() const;
+    //    void setJoint_weights_nakamura_base_no_rotation(const Eigen::MatrixXd &joint_weights_nakamura_base_no_rotation);
 
-//    Eigen::MatrixXd joint_weights_nakamura_base_no_rotation() const;
-//    void setJoint_weights_nakamura_base_no_rotation(const Eigen::MatrixXd &joint_weights_nakamura_base_no_rotation);
+    //    Eigen::MatrixXd joint_weights_nakamura_base_little_motion() const;
+    //    void setJoint_weights_nakamura_base_little_motion(const Eigen::MatrixXd &joint_weights_nakamura_base_little_motion);
 
-//    Eigen::MatrixXd joint_weights_nakamura_base_little_motion() const;
-//    void setJoint_weights_nakamura_base_little_motion(const Eigen::MatrixXd &joint_weights_nakamura_base_little_motion);
+    //    Eigen::MatrixXd home_config_js_arm() const;
+    //    void setHome_config_js_arm(const Eigen::MatrixXd &home_config_js_arm);
 
-//    Eigen::MatrixXd home_config_js_arm() const;
-//    void setHome_config_js_arm(const Eigen::MatrixXd &home_config_js_arm);
+    //    Eigen::MatrixXd home_config_js_base() const;
+    //    void setHome_config_js_base(const Eigen::MatrixXd &home_config_js_base);
 
-//    Eigen::MatrixXd home_config_js_base() const;
-//    void setHome_config_js_base(const Eigen::MatrixXd &home_config_js_base);
+    //    double pos_epsilon_js_arm() const;
+    //    void setPos_epsilon_js_arm(const double &pos_epsilon_js_arm);
 
-//    double pos_epsilon_js_arm() const;
-//    void setPos_epsilon_js_arm(const double &pos_epsilon_js_arm);
+    //    double pos_epsilon_js_base() const;
+    //    void setPos_epsilon_js_base(const double &pos_epsilon_js_base);
 
-//    double pos_epsilon_js_base() const;
-//    void setPos_epsilon_js_base(const double &pos_epsilon_js_base);
+    //    double vel_epsilon_js_arm() const;
+    //    void setVel_epsilon_js_arm(const double &vel_epsilon_js_arm);
 
-//    double vel_epsilon_js_arm() const;
-//    void setVel_epsilon_js_arm(const double &vel_epsilon_js_arm);
+    //    double vel_epsilon_js_base() const;
+    //    void setVel_epsilon_js_base(const double &vel_epsilon_js_base);
 
-//    double vel_epsilon_js_base() const;
-//    void setVel_epsilon_js_base(const double &vel_epsilon_js_base);
+    //    double pos_epsilon_os_linear() const;
+    //    void setPos_epsilon_os_linear(const double &pos_epsilon_os_linear);
 
-//    double pos_epsilon_os_linear() const;
-//    void setPos_epsilon_os_linear(const double &pos_epsilon_os_linear);
+    //    double pos_epsilon_os_angular() const;
+    //    void setPos_epsilon_os_angular(const double &pos_epsilon_os_angular);
 
-//    double pos_epsilon_os_angular() const;
-//    void setPos_epsilon_os_angular(const double &pos_epsilon_os_angular);
+    //    double vel_epsilon_os_linear() const;
+    //    void setVel_epsilon_os_linear(const double &vel_epsilon_os_linear);
 
-//    double vel_epsilon_os_linear() const;
-//    void setVel_epsilon_os_linear(const double &vel_epsilon_os_linear);
-
-//    double vel_epsilon_os_angular() const;
-//    void setVel_epsilon_os_angular(const double &vel_epsilon_os_angular);
+    //    double vel_epsilon_os_angular() const;
+    //    void setVel_epsilon_os_angular(const double &vel_epsilon_os_angular);
 
     /**
      * @brief

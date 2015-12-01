@@ -46,6 +46,12 @@ struct HybridAutomatonAbstractParams
     double _vel_epsilon_os_linear;
     double _vel_epsilon_os_angular;
 
+    /// Number of degrees of freedom of the arm
+    int _num_dof_arm;
+
+    /// Number of degrees of freedom of the base
+    int _num_dof_base;
+
     /// Home configuration - usually a good initial position to begin the interaction and/or a safe
     /// position to return to
     Eigen::MatrixXd _home_config_js_arm;
@@ -158,6 +164,10 @@ public:
      * @param completion_time the desired time to arrive for the interpolator
      * @return ha::Controller::Ptr The generated controller
      */
+
+    virtual ha::Controller::Ptr createGraspController(const HybridAutomatonAbstractParams& params,
+                                                                                                                           std::string name)=0;
+
     virtual ha::Controller::Ptr createJointSpaceController(const HybridAutomatonAbstractParams& params,
                                                            std::string name,
                                                            const Eigen::MatrixXd &goal_js,
@@ -212,11 +222,24 @@ public:
       * @param max_velocity The maximum velocity for the base
       * @return ha::Controller::Ptr The generated controller
       */
-    virtual ha::Controller::Ptr createBBSubjointSpaceControllerBase(const HybridAutomatonAbstractParams& params, const std::string name);
+    virtual ha::Controller::Ptr createBBSubjointSpaceControllerBase(const HybridAutomatonAbstractParams& params,
+                                                                     const std::string name,
+                                                                     bool use_tf,
+                                                                     const std::string& topic_name,
+                                                                     const std::string& tf_parent,
+                                                                     bool is_relative) = 0;
 
-    virtual ha::Controller::Ptr createOperationalSpaceController(const HybridAutomatonAbstractParams& params, const std::string name) = 0;
-
-
+    virtual ha::Controller::Ptr createOperationalSpaceController(const HybridAutomatonAbstractParams& params,
+                                                                 std::string name,
+                                                                 const Eigen::MatrixXd &goal_op_translation,
+                                                                 const Eigen::MatrixXd &goal_op_rot_matrix,
+                                                                 double completion_time,
+                                                                 bool is_relative)= 0;
+    virtual ha::Controller::Ptr createOperationalSpaceController(const HybridAutomatonAbstractParams& params,
+                                                                                    std::string name,
+                                                                                    const Eigen::MatrixXd &goal_op_translation,
+                                                                                    const Eigen::MatrixXd &goal_op_rot_matrix,
+                                                                                    bool is_relative)=0;
 
     /**
          * @brief Create an interpolated task space controller to move the end-effector from the current robots position to a goal frame given as a /tf frame
@@ -228,7 +251,13 @@ public:
          * @param max_displacement_velocity the maximal end-effector translational velocity in m/s
          * @param max_rotational_velocity the maximal end-effector rotational velocity in rad/s
          */
-    virtual ha::Controller::Ptr createBBOperationalSpaceController(const HybridAutomatonAbstractParams& params, const std::string name) = 0;
+    virtual ha::Controller::Ptr createBBOperationalSpaceController(const HybridAutomatonAbstractParams& params,
+                                                                   std::string name,
+                                                                   bool trajectory,
+                                                                   bool use_tf,
+                                                                   const std::string frame,
+                                                                   const std::string parent_frame,
+                                                                   bool is_relative) = 0;
 
 
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -239,8 +268,6 @@ public:
 
     ha::JumpCondition::Ptr createJointSpaceConvergenceCondition(const HybridAutomatonAbstractParams& params,
                                                                 ha::ControllerConstPtr js_ctrl
-//                                                                ,
-//                                                                const double &pos_epsilon_js
                                                                 );
 
     /**
@@ -377,7 +404,8 @@ public:
      * @param name The name for the control mode
      * @return bool
      */
-    void CreateGCCM(const ha::ControlMode::Ptr& cm_ptr, const std::string& name);
+    void CreateGCCM(const HybridAutomatonAbstractParams& p,
+                    const ha::ControlMode::Ptr& cm_ptr, const std::string& name);
 
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -393,20 +421,10 @@ public:
      * @param goal_cfg Goal of the CM and the convergence
      * @return bool
      */
-    void CreateGoToHomeCMAndConvergenceCSArm(const ha::ControlMode::Ptr& cm_ptr,
-                                             const ha::ControlSwitch::Ptr& cs_ptr,
-                                             const std::string& name,
-                                             //Arguments to createSubjointSpaceControllerArm
-                                             const Eigen::MatrixXd& goal_cfg = Eigen::MatrixXd(),
-                                             const Eigen::MatrixXd& max_vel_js_arm = Eigen::MatrixXd(),
-                                             const Eigen::MatrixXd& index_vec_arm = Eigen::MatrixXd(),
-                                             const Eigen::MatrixXd& kp_js_arm= Eigen::MatrixXd(),
-                                             const Eigen::MatrixXd& kv_js_arm= Eigen::MatrixXd(),
-                                             bool is_relative =false,
-                                             //createSubjointSpaceConvergenceConditionArm
-                                             const double& pos_epsilon_js_arm = -1,
-                                             //createJointSpaceZeroVelocityConditionArm
-                                             const double& vel_epsilon_js_arm = -1);
+    void CreateGoToHomeCMAndConvergenceCSArm(const HybridAutomatonAbstractParams& p,
+                                             const ha::ControlMode::Ptr& cm_ptr,
+                                     const ha::ControlSwitch::Ptr& cs_ptr,
+                                     const std::string& name);
 
     /**
      * @brief Create a CM to grasp (close the hand or activate vacuum cleaner + joint space of the arm to maintain pose) and a CS that indicates successful grasp
@@ -418,7 +436,8 @@ public:
      * @param tool The type of tool used (vacuum cleaner, soft hand or no tool)
      * @return bool
      */
-    void CreateGraspCMAndCS(const ha::ControlMode::Ptr& cm_ptr,
+    void CreateGraspCMAndCS(const HybridAutomatonAbstractParams& p,
+                            const ha::ControlMode::Ptr& cm_ptr,
                             const ha::ControlSwitch::Ptr& cs_ptr,
                             const std::string& name,
                             const GripperType& gripper,
@@ -439,15 +458,16 @@ public:
      * @param tool The type of tool used (vacuum cleaner, soft hand or no tool)
      * @return bool
      */
-    void CreateUngraspCMAndCS(const ha::ControlMode::Ptr& cm_ptr,
-                              const ha::ControlSwitch::Ptr& cs_ptr,
-                              const ha::ControlSwitch::Ptr& cs_ptr2,
-                              const std::string& name,
-                              const GripperType& gripper,
-                              const Eigen::MatrixXd& kp_drop = Eigen::MatrixXd(),
-                              const Eigen::MatrixXd& kv_drop = Eigen::MatrixXd(),
-                              const double& grasp_strength=4.0,
-                              const int& grasp_type=0);
+//    void CreateUngraspCMAndCS(const HybridAutomatonAbstractParams& p,
+//                              const ha::ControlMode::Ptr& cm_ptr,
+//                              const ha::ControlSwitch::Ptr& cs_ptr,
+//                              const ha::ControlSwitch::Ptr& cs_ptr2,
+//                              const std::string& name,
+//                              const GripperType& gripper,
+//                              const Eigen::MatrixXd& kp_drop = Eigen::MatrixXd(),
+//                              const Eigen::MatrixXd& kv_drop = Eigen::MatrixXd(),
+//                              const double& grasp_strength=4.0,
+//                              const int& grasp_type=0);
 
     /**
      * @brief Create a CM to move to a frame defined in a ROS tf or a topic (op space - arm+base) and a CS that indicates convergence
@@ -463,7 +483,8 @@ public:
      * @param useBase True if we want to move the base
      * @return bool
      */
-    void CreateGoToBBCMAndConvergenceCS(const ha::ControlMode::Ptr& cm_ptr,
+    void CreateGoToBBCMAndConvergenceCS(const HybridAutomatonAbstractParams& p,
+                                        const ha::ControlMode::Ptr& cm_ptr,
                                         const ha::ControlSwitch::Ptr& cs_ptr,
                                         const std::string& name,
                                         const std::string& frame_name,
@@ -481,7 +502,8 @@ public:
                                         const Eigen::MatrixXd &kv_os_angular = Eigen::MatrixXd(),
                                         int update_rate = 50);
 
-    void CreateGoToCMAndConvergenceCS(const ha::ControlMode::Ptr& cm_ptr,
+    void CreateGoToCMAndConvergenceCS(const HybridAutomatonAbstractParams& p,
+                                      const ha::ControlMode::Ptr& cm_ptr,
                                       const ha::ControlSwitch::Ptr& cs_ptr,
                                       const std::string& name,
                                       const Eigen::MatrixXd &goal_op_pos,
@@ -497,7 +519,8 @@ public:
                                       const Eigen::MatrixXd &kv_os_linear = Eigen::MatrixXd(),
                                       const Eigen::MatrixXd &kv_os_angular = Eigen::MatrixXd());
 
-    void CreateGoToCMConvergenceCSAndMaxForceCS(const ha::ControlMode::Ptr& cm_ptr,
+    void CreateGoToCMConvergenceCSAndMaxForceCS(const HybridAutomatonAbstractParams& p,
+                                                const ha::ControlMode::Ptr& cm_ptr,
                                                 const ha::ControlSwitch::Ptr& convergence_cs_ptr,
                                                 const ha::ControlSwitch::Ptr& max_force_cs_ptr,
                                                 const std::string& name,
