@@ -71,7 +71,7 @@ struct HybridAutomatonRBOParams : public HybridAutomatonAbstractParams
     Eigen::MatrixXd goal1, goal2;
     Eigen::MatrixXd kp1, kp2;
     Eigen::MatrixXd kv1, kv2;
-    Eigen::MatrixXd max_velocity1, max_velocity2;
+    Eigen::MatrixXd max_velocity, max_velocity1, max_velocity2;
     Eigen::MatrixXd index_vec;
     bool goal_relative, use_tf, trajectory;
     int update_rate;
@@ -83,11 +83,7 @@ struct HybridAutomatonRBOParams : public HybridAutomatonAbstractParams
     /// Number of degrees of freedom of the base
     int _num_dof_base;
 
-    /// Indices that define the convention for the joints of the arm and the base
-    std::string _index_str_base;
-    std::string _index_str_arm;
-    Eigen::MatrixXd _index_vec_base;
-    Eigen::MatrixXd _index_vec_arm;
+
 
     /// Maximum joint space (js) velocity
     Eigen::MatrixXd _max_vel_js_arm;
@@ -117,10 +113,7 @@ struct HybridAutomatonRBOParams : public HybridAutomatonAbstractParams
     Eigen::MatrixXd _joint_weights_nakamura_base_no_rotation;
     Eigen::MatrixXd _joint_weights_nakamura_base_little_motion;
 
-    /// Home configuration - usually a good initial position to begin the interaction and/or a safe
-    /// position to return to
-    Eigen::MatrixXd _home_config_js_arm;
-    Eigen::MatrixXd _home_config_js_base;
+
 
     /// Maximum joint space (os) velocity
     double _max_vel_os_linear;
@@ -130,25 +123,16 @@ struct HybridAutomatonRBOParams : public HybridAutomatonAbstractParams
     double _pos_epsilon_js_arm;
     double _pos_epsilon_js_base;
 
-    /// Convergence radius for the velocity of a joint space (js) controller
-    double _vel_epsilon_js_arm;
-    double _vel_epsilon_js_base;
 
-    /// Convergence goal for the velocity of a joint space (js) controller
-    Eigen::MatrixXd _vel_goal_js_arm;
-    Eigen::MatrixXd _vel_goal_js_base;
 
-    /// Convergence radius of an operational space (os) controller
-    double _pos_epsilon_os_linear;
-    double _pos_epsilon_os_angular;
+//    /// Convergence goal for the velocity of a joint space (js) controller
+//    Eigen::MatrixXd _vel_goal_js_arm;
+//    Eigen::MatrixXd _vel_goal_js_base;
 
-    /// Convergence radius for the velocity of an operational space (os) controller
-    double _vel_epsilon_os_linear;
-    double _vel_epsilon_os_angular;
 
-    /// Convergence goal for the velocity of an operational space (os) controller
-    Eigen::MatrixXd _vel_goal_os_linear;
-    Eigen::MatrixXd _vel_goal_os_angular;
+//    /// Convergence goal for the velocity of an operational space (os) controller
+//    Eigen::MatrixXd _vel_goal_os_linear;
+//    Eigen::MatrixXd _vel_goal_os_angular;
 
     /// The default update rate
     int _update_rate;
@@ -229,16 +213,16 @@ struct HybridAutomatonRBOParams : public HybridAutomatonAbstractParams
         _vel_epsilon_js_arm = DEFAULT_VEL_EPSILON_JS_ARM;
         _vel_epsilon_js_base =  DEFAULT_VEL_EPSILON_JS_BASE;
 
-        _vel_goal_js_arm = Eigen::MatrixXd::Constant(_num_dof_arm, 1, DEFAULT_VEL_GOAL_JS_ARM);
-        _vel_goal_js_base = Eigen::MatrixXd::Constant(_num_dof_base, 1, DEFAULT_VEL_GOAL_JS_BASE);
+//        _vel_goal_js_arm = Eigen::MatrixXd::Constant(_num_dof_arm, 1, DEFAULT_VEL_GOAL_JS_ARM);
+//        _vel_goal_js_base = Eigen::MatrixXd::Constant(_num_dof_base, 1, DEFAULT_VEL_GOAL_JS_BASE);
 
         _pos_epsilon_os_linear =  DEFAULT_POS_EPSILON_OS_LINEAR;
         _pos_epsilon_os_angular =  DEFAULT_POS_EPSILON_OS_ANGULAR;
         _vel_epsilon_os_linear =  DEFAULT_VEL_EPSILON_OS_LINEAR;
         _vel_epsilon_os_angular =  DEFAULT_VEL_EPSILON_OS_ANGULAR;
 
-        _vel_goal_os_linear = Eigen::MatrixXd::Constant(3, 1, DEFAULT_VEL_GOAL_OS_LINEAR);
-        _vel_goal_os_angular =  Eigen::MatrixXd::Constant(3, 1, DEFAULT_VEL_GOAL_OS_ANGULAR);
+//        _vel_goal_os_linear = Eigen::MatrixXd::Constant(3, 1, DEFAULT_VEL_GOAL_OS_LINEAR);
+//        _vel_goal_os_angular =  Eigen::MatrixXd::Constant(3, 1, DEFAULT_VEL_GOAL_OS_ANGULAR);
 
         _max_vel_os_linear = DEFAULT_MAX_VEL_OS_LINEAR;
         _max_vel_os_angular = DEFAULT_MAX_VEL_OS_ANGULAR;
@@ -439,12 +423,25 @@ public:
      * @param completion_time the desired time to arrive for the interpolator
      * @return ha::Controller::Ptr The generated controller
      */
-    virtual ha::Controller::Ptr createJointSpaceController(const HybridAutomatonAbstractParams& params, const std::string name);
+    virtual ha::Controller::Ptr createJointSpaceController(const HybridAutomatonAbstractParams& params,
+                                                           std::string name,
+                                                           const Eigen::MatrixXd &goal_js,
+                                                           double completion_time,
+                                                           bool goal_relative);
 
-    virtual ha::Controller::Ptr createSubjointSpaceController(const HybridAutomatonAbstractParams& params, const std::string name);
+    virtual ha::Controller::Ptr createSubjointSpaceController(const HybridAutomatonAbstractParams& params,
+                                                                             std::string name,
+                                                                          const Eigen::MatrixXd& goal_js,
+                                                                          const Eigen::MatrixXd& index_vec,
+                                                                          bool is_relative);
 
-    virtual ha::Controller::Ptr createBBSubjointSpaceController(const HybridAutomatonAbstractParams& params, const std::string name);
-
+    virtual ha::Controller::Ptr createBBSubjointSpaceController(const HybridAutomatonAbstractParams& params,
+                                                                                   std::string name,
+                                                                                bool use_tf,
+                                                                                const std::string& topic_name,
+                                                                                const std::string& tf_parent,
+                                                                                const Eigen::MatrixXd& index_vec,
+                                                                                bool is_relative);
     /**
      * @brief Create an interpolated joint space controller to move from the current robots position to a goal configuration (only arm)
      *
@@ -473,7 +470,14 @@ public:
       * @param max_velocity The maximum velocity for the base
       * @return ha::Controller::Ptr The generated controller
       */
-    virtual ha::Controller::Ptr createBBSubjointSpaceControllerBase(const HybridAutomatonAbstractParams& params, const std::string name);
+    virtual ha::Controller::Ptr createBBSubjointSpaceControllerBase(const HybridAutomatonAbstractParams& params,
+                                                                    const std::string name,
+                                                                                    bool use_tf,
+                                                                                    const std::string& topic_name,
+                                                                                    const std::string& tf_parent,
+                                                                                    bool is_relative);
+
+
 
     virtual ha::Controller::Ptr createOperationalSpaceController(const HybridAutomatonAbstractParams& params, const std::string name);
 

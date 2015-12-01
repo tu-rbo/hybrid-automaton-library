@@ -24,6 +24,33 @@ struct HybridAutomatonAbstractParams
     GripperType gripper;
     double grasp_strength;
     int grasp_type;
+
+    /// Indices that define the convention for the joints of the arm and the base
+    std::string _index_str_base;
+    std::string _index_str_arm;
+    Eigen::MatrixXd _index_vec_base;
+    Eigen::MatrixXd _index_vec_arm;
+
+    /// Convergence radius for the velocity of a joint space (js) controller
+    double _vel_epsilon_js_arm;
+    double _vel_epsilon_js_base;
+
+    double pos_epsilon_js;
+    double vel_epsilon_js;
+
+    /// Convergence radius of an operational space (os) controller
+    double _pos_epsilon_os_linear;
+    double _pos_epsilon_os_angular;
+
+    /// Convergence radius for the velocity of an operational space (os) controller
+    double _vel_epsilon_os_linear;
+    double _vel_epsilon_os_angular;
+
+    /// Home configuration - usually a good initial position to begin the interaction and/or a safe
+    /// position to return to
+    Eigen::MatrixXd _home_config_js_arm;
+    Eigen::MatrixXd _home_config_js_base;
+
 };
 
 /**
@@ -137,9 +164,19 @@ public:
                                                            double completion_time,
                                                            bool goal_relative) = 0;
 
-    virtual ha::Controller::Ptr createSubjointSpaceController(const HybridAutomatonAbstractParams& params, const std::string name) = 0;
+    virtual ha::Controller::Ptr createSubjointSpaceController(const HybridAutomatonAbstractParams& params,
+                                                                             std::string name,
+                                                                          const Eigen::MatrixXd& goal_js,
+                                                                          const Eigen::MatrixXd& index_vec,
+                                                                          bool is_relative) = 0;
 
-    virtual ha::Controller::Ptr createBBSubjointSpaceController(const HybridAutomatonAbstractParams& params, const std::string name) = 0;
+    virtual ha::Controller::Ptr createBBSubjointSpaceController(const HybridAutomatonAbstractParams& params,
+                                                                                   std::string name,
+                                                                                bool use_tf,
+                                                                                const std::string& topic_name,
+                                                                                const std::string& tf_parent,
+                                                                                const Eigen::MatrixXd& index_vec,
+                                                                                bool is_relative) = 0;
 
     /**
      * @brief Create an interpolated joint space controller to move from the current robots position to a goal configuration (only arm)
@@ -149,7 +186,10 @@ public:
      * @param max_velocity The maximum velocity for the joints of the arm
      * @return ha::Controller::Ptr The generated controller
      */
-    virtual ha::Controller::Ptr createSubjointSpaceControllerArm(const HybridAutomatonAbstractParams& params, const std::string name) = 0;
+    virtual ha::Controller::Ptr createSubjointSpaceControllerArm(const HybridAutomatonAbstractParams& params,
+                                                                 const std::string name,
+                                                                 const Eigen::MatrixXd& goal_js_arm,
+                                                                 bool is_relative);
 
     /**
          * @brief Create an interpolated joint space controller to move from the current robots position to a goal configuration (only base)
@@ -159,7 +199,10 @@ public:
          * @param max_velocity The maximum velocity for the base
          * @return ha::Controller::Ptr The generated controller
          */
-    virtual ha::Controller::Ptr createSubjointSpaceControllerBase(const HybridAutomatonAbstractParams& params, const std::string name) = 0;
+    virtual ha::Controller::Ptr createSubjointSpaceControllerBase(const HybridAutomatonAbstractParams& params,
+                                                                  const std::string name,
+                                                                  const Eigen::MatrixXd& goal_js_base,
+                                                                  bool is_relative);
 
     /**
       * @brief Create an interpolated joint space controller to move from the current robots position to a goal configuration (only base)
@@ -169,7 +212,7 @@ public:
       * @param max_velocity The maximum velocity for the base
       * @return ha::Controller::Ptr The generated controller
       */
-    virtual ha::Controller::Ptr createBBSubjointSpaceControllerBase(const HybridAutomatonAbstractParams& params, const std::string name) = 0;
+    virtual ha::Controller::Ptr createBBSubjointSpaceControllerBase(const HybridAutomatonAbstractParams& params, const std::string name);
 
     virtual ha::Controller::Ptr createOperationalSpaceController(const HybridAutomatonAbstractParams& params, const std::string name) = 0;
 
@@ -313,7 +356,8 @@ public:
                                                              const bool negate_ft_condition=false,
                                                              const float epsilon=0.0);
 
-    void CreateMaxForceTorqueControlSwitch(const ha::ControlSwitch::Ptr& cs_ptr,
+    void CreateMaxForceTorqueControlSwitch(const HybridAutomatonAbstractParams& p,
+                                           const ha::ControlSwitch::Ptr& cs_ptr,
                                            const std::string& name,
                                            const Eigen::MatrixXd& ft_weights,
                                            const Eigen::MatrixXd& ft_max_val,
