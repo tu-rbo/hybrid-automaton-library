@@ -1033,407 +1033,407 @@ ha::Controller::Ptr HybridAutomatonRBOFactory::createBBOperationalSpaceControlle
 //    return max_time_cond;
 //}
 
-ha::ControlSwitch::Ptr HybridAutomatonRBOFactory::CreateMaxForceTorqueControlSwitch(const HybridAutomatonAbstractParams& params,
-                                                                                    const std::string& name,
-                                                                                    const Eigen::MatrixXd& ft_weights,
-                                                                                    const Eigen::MatrixXd& ft_max_val,
-                                                                                    const ha::JumpCondition::JumpCriterion ft_criterion,
-                                                                                    const bool negate_ft_condition,
-                                                                                    const float epsilon)
-{
-    ha::ControlSwitch::Ptr max_ft_cs(new ha::ControlSwitch());
-    CreateMaxForceTorqueControlSwitch(max_ft_cs, name, ft_weights, ft_max_val, ft_criterion, negate_ft_condition,epsilon);
-    return max_ft_cs;
-}
+//ha::ControlSwitch::Ptr HybridAutomatonRBOFactory::CreateMaxForceTorqueControlSwitch(const HybridAutomatonAbstractParams& params,
+//                                                                                    const std::string& name,
+//                                                                                    const Eigen::MatrixXd& ft_weights,
+//                                                                                    const Eigen::MatrixXd& ft_max_val,
+//                                                                                    const ha::JumpCondition::JumpCriterion ft_criterion,
+//                                                                                    const bool negate_ft_condition,
+//                                                                                    const float epsilon)
+//{
+//    ha::ControlSwitch::Ptr max_ft_cs(new ha::ControlSwitch());
+//    CreateMaxForceTorqueControlSwitch(max_ft_cs, name, ft_weights, ft_max_val, ft_criterion, negate_ft_condition,epsilon);
+//    return max_ft_cs;
+//}
 
-void HybridAutomatonRBOFactory::CreateMaxForceTorqueControlSwitch(const HybridAutomatonAbstractParams& params,
-                                                                  const ha::ControlSwitch::Ptr& cs_ptr,
-                                                                  const std::string& name,
-                                                                  const Eigen::MatrixXd& ft_weights,
-                                                                  const Eigen::MatrixXd& ft_max_val,
-                                                                  const ha::JumpCondition::JumpCriterion ft_criterion,
-                                                                  const bool negate_ft_condition,
-                                                                  const float epsilon)
-{
-    cs_ptr->setName(name + std::string("_max_ft_cs"));
-    ha::JumpConditionPtr max_ft_jc(new ha::JumpCondition());
-    ha::ForceTorqueSensorPtr ft_sensor(new ha::ForceTorqueSensor());
-    max_ft_jc->setSensor(ft_sensor);
-    max_ft_jc->setGoalRelative();
-    max_ft_jc->setConstantGoal(ft_max_val);
-    max_ft_jc->setJumpCriterion(ft_criterion ,ft_weights);
-    max_ft_jc->setEpsilon(epsilon);
-    max_ft_jc->setNegate(negate_ft_condition);
-    cs_ptr->add(max_ft_jc);
-}
+//void HybridAutomatonRBOFactory::CreateMaxForceTorqueControlSwitch(const HybridAutomatonAbstractParams& params,
+//                                                                  const ha::ControlSwitch::Ptr& cs_ptr,
+//                                                                  const std::string& name,
+//                                                                  const Eigen::MatrixXd& ft_weights,
+//                                                                  const Eigen::MatrixXd& ft_max_val,
+//                                                                  const ha::JumpCondition::JumpCriterion ft_criterion,
+//                                                                  const bool negate_ft_condition,
+//                                                                  const float epsilon)
+//{
+//    cs_ptr->setName(name + std::string("_max_ft_cs"));
+//    ha::JumpConditionPtr max_ft_jc(new ha::JumpCondition());
+//    ha::ForceTorqueSensorPtr ft_sensor(new ha::ForceTorqueSensor());
+//    max_ft_jc->setSensor(ft_sensor);
+//    max_ft_jc->setGoalRelative();
+//    max_ft_jc->setConstantGoal(ft_max_val);
+//    max_ft_jc->setJumpCriterion(ft_criterion ,ft_weights);
+//    max_ft_jc->setEpsilon(epsilon);
+//    max_ft_jc->setNegate(negate_ft_condition);
+//    cs_ptr->add(max_ft_jc);
+//}
 
-ha::ControlSwitch::Ptr HybridAutomatonRBOFactory::CreateMaxTimeControlSwitch(const HybridAutomatonAbstractParams& params,
-                                                                             const std::string& mode_name, double max_time){
-    ha::ControlSwitchPtr time_switch(new ha::ControlSwitch);
-    time_switch->setName(mode_name + "_time_cs");
-    ha::JumpConditionPtr time_cond = createMaxTimeCondition(max_time);
-    time_switch->add(time_cond);
-    return time_switch;
-}
+//ha::ControlSwitch::Ptr HybridAutomatonRBOFactory::CreateMaxTimeControlSwitch(const HybridAutomatonAbstractParams& params,
+//                                                                             const std::string& mode_name, double max_time){
+//    ha::ControlSwitchPtr time_switch(new ha::ControlSwitch);
+//    time_switch->setName(mode_name + "_time_cs");
+//    ha::JumpConditionPtr time_cond = createMaxTimeCondition(max_time);
+//    time_switch->add(time_cond);
+//    return time_switch;
+//}
 
-void  HybridAutomatonRBOFactory::CreateGCCM(const ha::ControlMode::Ptr& cm_ptr,
-                                            const std::string& name){
-    cm_ptr->setName(name);
-    ha::ControlSet::Ptr gravity_cs(new ha::ControlSet());
-    gravity_cs->setType("rxControlSet");
-    cm_ptr->setControlSet(gravity_cs);
-}
+//void  HybridAutomatonRBOFactory::CreateGCCM(const ha::ControlMode::Ptr& cm_ptr,
+//                                            const std::string& name){
+//    cm_ptr->setName(name);
+//    ha::ControlSet::Ptr gravity_cs(new ha::ControlSet());
+//    gravity_cs->setType("rxControlSet");
+//    cm_ptr->setControlSet(gravity_cs);
+//}
 
-void HybridAutomatonRBOFactory::CreateGoToHomeCMAndConvergenceCSArm(const HybridAutomatonAbstractParams& params,
-                                                                    const ha::ControlMode::Ptr& cm_ptr,
-                                                                    const ha::ControlSwitch::Ptr& cs_ptr,
-                                                                    const std::string& name,
-                                                                    const Eigen::MatrixXd& goal_cfg,
-                                                                    const Eigen::MatrixXd& max_vel_js_arm,
-                                                                    const Eigen::MatrixXd& index_vec_arm,
-                                                                    const Eigen::MatrixXd& kp_js_arm,
-                                                                    const Eigen::MatrixXd& kv_js_arm,
-                                                                    bool is_relative,
-                                                                    const double& pos_epsilon_js_arm,
-                                                                    const double& vel_epsilon_js_arm){
-    cm_ptr->setName(name + std::string("_cm"));
+//void HybridAutomatonRBOFactory::CreateGoToHomeCMAndConvergenceCSArm(const HybridAutomatonAbstractParams& params,
+//                                                                    const ha::ControlMode::Ptr& cm_ptr,
+//                                                                    const ha::ControlSwitch::Ptr& cs_ptr,
+//                                                                    const std::string& name,
+//                                                                    const Eigen::MatrixXd& goal_cfg,
+//                                                                    const Eigen::MatrixXd& max_vel_js_arm,
+//                                                                    const Eigen::MatrixXd& index_vec_arm,
+//                                                                    const Eigen::MatrixXd& kp_js_arm,
+//                                                                    const Eigen::MatrixXd& kv_js_arm,
+//                                                                    bool is_relative,
+//                                                                    const double& pos_epsilon_js_arm,
+//                                                                    const double& vel_epsilon_js_arm){
+//    cm_ptr->setName(name + std::string("_cm"));
 
-    //ha::Controller::Ptr home_ctrl_arm = _createJointSpaceArmController(name + std::string("_arm_ctrl"), goal_cfg, _max_js_vel_arm);
-    ha::Controller::Ptr home_ctrl_arm = createSubjointSpaceControllerArm(name + std::string("_arm_ctrl"),
-                                                                         (goal_cfg.size() == 0 ? _home_config_js_arm : goal_cfg),
-                                                                         max_vel_js_arm,
-                                                                         index_vec_arm,
-                                                                         kp_js_arm,
-                                                                         kv_js_arm,
-                                                                         is_relative);
-
-
-    ha::ControlSet::Ptr goto_home_cs =  createControlSet(home_ctrl_arm);
-
-    cm_ptr->setControlSet(goto_home_cs);
-
-    //Create first ControlSwitch
-    cs_ptr->setName(name + std::string("_cs"));
-    //ha::JumpConditionPtr initial_convergence_arm_jc = _createJointSpaceArmConvergenceCondition(home_ctrl_arm);
-    ha::JumpCondition::Ptr initial_convergence_arm_jc = createSubjointSpaceConvergenceConditionArm(home_ctrl_arm,
-                                                                                                   index_vec_arm,
-                                                                                                   pos_epsilon_js_arm);
+//    //ha::Controller::Ptr home_ctrl_arm = _createJointSpaceArmController(name + std::string("_arm_ctrl"), goal_cfg, _max_js_vel_arm);
+//    ha::Controller::Ptr home_ctrl_arm = createSubjointSpaceControllerArm(name + std::string("_arm_ctrl"),
+//                                                                         (goal_cfg.size() == 0 ? _home_config_js_arm : goal_cfg),
+//                                                                         max_vel_js_arm,
+//                                                                         index_vec_arm,
+//                                                                         kp_js_arm,
+//                                                                         kv_js_arm,
+//                                                                         is_relative);
 
 
-    //ha::JumpConditionPtr initial_convergence_vel_arm_jc = _createJointSpaceArmConvergenceWithZeroVelCondition();
-    ha::JumpCondition::Ptr initial_convergence_vel_arm_jc = createJointSpaceZeroVelocityConditionArm(index_vec_arm,
-                                                                                                     vel_epsilon_js_arm);
+//    ha::ControlSet::Ptr goto_home_cs =  createControlSet(home_ctrl_arm);
 
-    //ha::JumpConditionPtr initial_convergence_base_jc = _createJointSpaceBaseConvergenceCondition(home_ctrl_base);
-    cs_ptr->add(initial_convergence_arm_jc);
-    cs_ptr->add(initial_convergence_vel_arm_jc);
-    //cs_ptr->add(initial_convergence_base_jc);
-}
+//    cm_ptr->setControlSet(goto_home_cs);
 
-
-
-
-void HybridAutomatonRBOFactory::CreateGraspCMAndCS(const HybridAutomatonAbstractParams& params,
-                                                   const ha::ControlMode::Ptr& cm_ptr,
-                                                   const ha::ControlSwitch::Ptr& cs_ptr,
-                                                   const std::string& name,
-                                                   const GripperType& gripper,
-                                                   const Eigen::MatrixXd& kp_grasp,
-                                                   const Eigen::MatrixXd& kv_grasp,
-                                                   const double grasp_strength,
-                                                   const int grasp_type){
-    cm_ptr->setName(name+ std::string("_cm"));
-    ha::ControlSet::Ptr grasp_cs(new ha::ControlSet());
-
-    grasp_cs->setType("rxControlSet");
-    cm_ptr->setControlSet(grasp_cs);
-
-    ha::Controller::Ptr grasp_ctrl(new ha::Controller());
-    switch(gripper)
-    {
-    case NO_GRIPPER:
-        break;
-    case SOFT_HAND:
-    {
-        grasp_ctrl->setName("FeixGraspControl");
-        grasp_ctrl->setType("FeixGraspSoftHandController");
-        grasp_ctrl->setArgument("grasp_strength", grasp_strength);
-        grasp_ctrl->setArgument("grasp_type", grasp_type);
-    }
-        break;
-    case SUCTION_CUP:
-    {
-        grasp_ctrl->setName("VacuumGraspControl");
-        grasp_ctrl->setType("VacuumCleanerController");
-        grasp_ctrl->setArgument("power", "1");
-    }
-        break;
-    case BARRETT_HAND:
-        break;
-    default:
-        break;
-    }
-
-    ha::Controller::Ptr grasp_joint_ctrl(new ha::Controller());
-    grasp_joint_ctrl->setName("grasp_joint_ctrl");
-    grasp_joint_ctrl->setType("JointController");
-    Eigen::MatrixXd grasp_zeros_goal = Eigen::MatrixXd::Constant(_num_dof_arm + _num_dof_base, 1, 0.0);
-    grasp_joint_ctrl->setGoal(grasp_zeros_goal);
-    grasp_joint_ctrl->setGoalIsRelative(1);
-    grasp_joint_ctrl->setKp((kp_grasp.size() == 0 ? _combineArmAndBase(_kp_js_arm, _kp_js_base) : kp_grasp));
-    grasp_joint_ctrl->setKv((kv_grasp.size() == 0 ? _combineArmAndBase(_kv_js_arm, _kv_js_base) : kv_grasp));
+//    //Create first ControlSwitch
+//    cs_ptr->setName(name + std::string("_cs"));
+//    //ha::JumpConditionPtr initial_convergence_arm_jc = _createJointSpaceArmConvergenceCondition(home_ctrl_arm);
+//    ha::JumpCondition::Ptr initial_convergence_arm_jc = createSubjointSpaceConvergenceConditionArm(home_ctrl_arm,
+//                                                                                                   index_vec_arm,
+//                                                                                                   pos_epsilon_js_arm);
 
 
-    if(gripper!=NO_GRIPPER){
-        //add controller to ControlSet
-        grasp_cs->appendController(grasp_ctrl);
-        grasp_cs->appendController(grasp_joint_ctrl);
-    }
+//    //ha::JumpConditionPtr initial_convergence_vel_arm_jc = _createJointSpaceArmConvergenceWithZeroVelCondition();
+//    ha::JumpCondition::Ptr initial_convergence_vel_arm_jc = createJointSpaceZeroVelocityConditionArm(index_vec_arm,
+//                                                                                                     vel_epsilon_js_arm);
 
-    //Create ControlSwitch
-    cs_ptr->setName(name + std::string("_pressure_time_cs"));
-
-    ha::JumpConditionPtr to_move_up_jc(new ha::JumpCondition());
-    ha::SensorPtr to_move_up_clock_sensor(new ha::ClockSensor());
-    to_move_up_jc->setSensor(to_move_up_clock_sensor);
-    to_move_up_jc->setConstantGoal(3.0);
-    to_move_up_jc->setGoalRelative();
-    to_move_up_jc->setEpsilon(0);
-    to_move_up_jc->setJumpCriterion(ha::JumpCondition::THRESH_UPPER_BOUND);
-    cs_ptr->add(to_move_up_jc);
-
-    if(gripper == SUCTION_CUP) //Vacuum cleaner
-    {
-        ha::JumpConditionPtr to_move_up_pressure_jc(new ha::JumpCondition());
-        ha::ROSTopicSensor::Ptr to_move_up_pressure_sensor(new ha::ROSTopicSensor());
-        to_move_up_pressure_sensor->setTopic("/pneumaticbox/pressure_0", "Float64");
-        to_move_up_pressure_jc->setSensor(to_move_up_pressure_sensor);
-        to_move_up_pressure_jc->setConstantGoal(18.8);
-        to_move_up_pressure_jc->setEpsilon(0);
-        to_move_up_pressure_jc->setJumpCriterion(ha::JumpCondition::THRESH_UPPER_BOUND);
-        cs_ptr->add(to_move_up_pressure_jc);
-    }
-}
-
-void HybridAutomatonRBOFactory::CreateUngraspCMAndCS(const HybridAutomatonAbstractParams& params,
-                                                     const ha::ControlMode::Ptr& cm_ptr,
-                                                     const ha::ControlSwitch::Ptr& cs_ptr,
-                                                     const ha::ControlSwitch::Ptr& cs_ptr2,
-                                                     const std::string& name,
-                                                     const GripperType& gripper,
-                                                     const Eigen::MatrixXd& kp_drop,
-                                                     const Eigen::MatrixXd& kv_drop,
-                                                     const double& grasp_strength,
-                                                     const int& grasp_type){
-    cm_ptr->setName(name+ std::string("_cm"));
-    ha::ControlSet::Ptr ungrasp_cs(new ha::ControlSet());
-    ungrasp_cs->setType("rxControlSet");
-    cm_ptr->setControlSet(ungrasp_cs);
-
-    //add controller to ControlSet
-    ha::Controller::Ptr ungrasp_ctrl(new ha::Controller());
-
-    switch(gripper)
-    {
-    case NO_GRIPPER:
-        break;
-    case SOFT_HAND:
-    {
-        ungrasp_ctrl->setName("FeixGraspControl");
-        ungrasp_ctrl->setType("FeixGraspSoftHandController");
-        ungrasp_ctrl->setArgument("grasp_strength", grasp_strength);
-        ungrasp_ctrl->setArgument("grasp_type", grasp_type);
-        ungrasp_cs->appendController(ungrasp_ctrl);
-    }
-        break;
-    case SUCTION_CUP:
-    {
-        ungrasp_ctrl->setName("VacuumGraspControl");
-        ungrasp_ctrl->setType("VacuumCleanerController");
-        ungrasp_ctrl->setArgument("power", "0");
-        ungrasp_cs->appendController(ungrasp_ctrl);
-    }
-        break;
-    case BARRETT_HAND:
-        break;
-    default:
-        break;
-    }
+//    //ha::JumpConditionPtr initial_convergence_base_jc = _createJointSpaceBaseConvergenceCondition(home_ctrl_base);
+//    cs_ptr->add(initial_convergence_arm_jc);
+//    cs_ptr->add(initial_convergence_vel_arm_jc);
+//    //cs_ptr->add(initial_convergence_base_jc);
+//}
 
 
-    ha::Controller::Ptr ungrasp_joint_ctrl(new ha::Controller());
-    ungrasp_joint_ctrl->setName("drop_joint_ctrl");
-    ungrasp_joint_ctrl->setType("JointController");
-    Eigen::MatrixXd drop_zeros_goal(7,1);
-    drop_zeros_goal << 0,0,0,0,0,0,0;
-    ungrasp_joint_ctrl->setGoal(drop_zeros_goal);
-    ungrasp_joint_ctrl->setGoalIsRelative(1);
-    ungrasp_joint_ctrl->setKp((kp_drop.size() == 0 ? _combineArmAndBase(_kp_js_arm, _kp_js_base) : kp_drop));
-    ungrasp_joint_ctrl->setKv((kv_drop.size() == 0 ? _combineArmAndBase(_kv_js_arm, _kv_js_base) : kv_drop));
-    ungrasp_cs->appendController(ungrasp_joint_ctrl);
 
-    cs_ptr->setName(name + std::string("_pressure_cs"));
-    ha::JumpConditionPtr to_stop_or_pressure_jc(new ha::JumpCondition());
-    ha::ROSTopicSensor::Ptr to_stop_or_sensor(new ha::ROSTopicSensor());
-    to_stop_or_sensor->setTopic("/pneumaticbox/pressure_0", "Float64");
-    to_stop_or_pressure_jc->setSensor(to_stop_or_sensor);
-    to_stop_or_pressure_jc->setConstantGoal(0.5);
-    to_stop_or_pressure_jc->setEpsilon(0);
-    to_stop_or_pressure_jc->setJumpCriterion(ha::JumpCondition::THRESH_LOWER_BOUND);
-    cs_ptr->add(to_stop_or_pressure_jc);
 
-    // To free from adherence wait 15 seconds or for pressure sensor
-    cs_ptr2->setName(name + std::string("_time_cs"));
-    ha::JumpConditionPtr to_stop_or_time_jc(new ha::JumpCondition());
-    ha::SensorPtr free_sensor_time(new ha::ClockSensor());
-    to_stop_or_time_jc->setSensor(free_sensor_time);
-    switch(gripper)
-    {
-    case SOFT_HAND:
-        to_stop_or_time_jc->setConstantGoal(3);
-        break;
-    case SUCTION_CUP:
-    case NO_GRIPPER:
-    case BARRETT_HAND:
-    default:
-        to_stop_or_time_jc->setConstantGoal(15);
-        break;
-    }
+//void HybridAutomatonRBOFactory::CreateGraspCMAndCS(const HybridAutomatonAbstractParams& params,
+//                                                   const ha::ControlMode::Ptr& cm_ptr,
+//                                                   const ha::ControlSwitch::Ptr& cs_ptr,
+//                                                   const std::string& name,
+//                                                   const GripperType& gripper,
+//                                                   const Eigen::MatrixXd& kp_grasp,
+//                                                   const Eigen::MatrixXd& kv_grasp,
+//                                                   const double grasp_strength,
+//                                                   const int grasp_type){
+//    cm_ptr->setName(name+ std::string("_cm"));
+//    ha::ControlSet::Ptr grasp_cs(new ha::ControlSet());
 
-    to_stop_or_time_jc->setGoalRelative();
-    to_stop_or_time_jc->setEpsilon(0);
-    to_stop_or_time_jc->setJumpCriterion(ha::JumpCondition::THRESH_UPPER_BOUND);
-    cs_ptr2->add(to_stop_or_time_jc);
-}
+//    grasp_cs->setType("rxControlSet");
+//    cm_ptr->setControlSet(grasp_cs);
 
-void HybridAutomatonRBOFactory::CreateGoToBBCMAndConvergenceCS(const HybridAutomatonAbstractParams& params,
-                                                               const ha::ControlMode::Ptr& cm_ptr,
-                                                               const ha::ControlSwitch::Ptr& cs_ptr,
-                                                               const std::string& name,
-                                                               const std::string& frame_name,
-                                                               const std::string& parent_frame_name,
-                                                               bool use_tf,
-                                                               bool use_base,
-                                                               double max_vel_os_linear,
-                                                               double max_vel_os_angular,
-                                                               double pos_epsilon_os_linear,
-                                                               double pos_epsilon_os_angular,
-                                                               bool is_relative,
-                                                               const Eigen::MatrixXd &kp_os_linear,
-                                                               const Eigen::MatrixXd &kp_os_angular,
-                                                               const Eigen::MatrixXd &kv_os_linear,
-                                                               const Eigen::MatrixXd &kv_os_angular,
-                                                               int update_rate){
-    cm_ptr->setName(name + std::string("_cm"));
+//    ha::Controller::Ptr grasp_ctrl(new ha::Controller());
+//    switch(gripper)
+//    {
+//    case NO_GRIPPER:
+//        break;
+//    case SOFT_HAND:
+//    {
+//        grasp_ctrl->setName("FeixGraspControl");
+//        grasp_ctrl->setType("FeixGraspSoftHandController");
+//        grasp_ctrl->setArgument("grasp_strength", grasp_strength);
+//        grasp_ctrl->setArgument("grasp_type", grasp_type);
+//    }
+//        break;
+//    case SUCTION_CUP:
+//    {
+//        grasp_ctrl->setName("VacuumGraspControl");
+//        grasp_ctrl->setType("VacuumCleanerController");
+//        grasp_ctrl->setArgument("power", "1");
+//    }
+//        break;
+//    case BARRETT_HAND:
+//        break;
+//    default:
+//        break;
+//    }
 
-    //Endeffector Frame Controller
-    ha::Controller::Ptr bb_ctrl;
-    bb_ctrl = createBBOperationalSpaceController(name + std::string("_ctrl"),
-                                                 false,
-                                                 use_tf,
-                                                 frame_name,
-                                                 parent_frame_name,
-                                                 max_vel_os_linear,
-                                                 max_vel_os_angular,
-                                                 kp_os_linear,
-                                                 kp_os_angular,
-                                                 kv_os_linear,
-                                                 kv_os_angular,
-                                                 is_relative,
-                                                 update_rate);
+//    ha::Controller::Ptr grasp_joint_ctrl(new ha::Controller());
+//    grasp_joint_ctrl->setName("grasp_joint_ctrl");
+//    grasp_joint_ctrl->setType("JointController");
+//    Eigen::MatrixXd grasp_zeros_goal = Eigen::MatrixXd::Constant(_num_dof_arm + _num_dof_base, 1, 0.0);
+//    grasp_joint_ctrl->setGoal(grasp_zeros_goal);
+//    grasp_joint_ctrl->setGoalIsRelative(1);
+//    grasp_joint_ctrl->setKp((kp_grasp.size() == 0 ? _combineArmAndBase(_kp_js_arm, _kp_js_base) : kp_grasp));
+//    grasp_joint_ctrl->setKv((kv_grasp.size() == 0 ? _combineArmAndBase(_kv_js_arm, _kv_js_base) : kv_grasp));
 
-    ha::ControlSet::Ptr bb_cs = createTPNakamuraControlSet(bb_ctrl, use_base);
-    cm_ptr->setControlSet(bb_cs);
 
-    cs_ptr->setName(name + std::string("_cs"));
-    ha::JumpConditionPtr convergence_jc = createOperationalSpaceConvergenceCondition(bb_ctrl,
-                                                                                     is_relative,
-                                                                                     pos_epsilon_os_linear,
-                                                                                     pos_epsilon_os_angular);
-    cs_ptr->add(convergence_jc);
-}
+//    if(gripper!=NO_GRIPPER){
+//        //add controller to ControlSet
+//        grasp_cs->appendController(grasp_ctrl);
+//        grasp_cs->appendController(grasp_joint_ctrl);
+//    }
 
-void HybridAutomatonRBOFactory::CreateGoToCMAndConvergenceCS(const HybridAutomatonAbstractParams& params,
-                                                             const ha::ControlMode::Ptr& cm_ptr,
-                                                             const ha::ControlSwitch::Ptr& cs_ptr,
-                                                             const std::string& name,
-                                                             const Eigen::MatrixXd &goal_op_pos,
-                                                             const Eigen::MatrixXd &goal_op_ori,
-                                                             bool use_base,
-                                                             double max_vel_os_linear,
-                                                             double max_vel_os_angular,
-                                                             double pos_epsilon_os_linear,
-                                                             double pos_epsilon_os_angular,
-                                                             bool is_relative,
-                                                             const Eigen::MatrixXd &kp_os_linear,
-                                                             const Eigen::MatrixXd &kp_os_angular,
-                                                             const Eigen::MatrixXd &kv_os_linear,
-                                                             const Eigen::MatrixXd &kv_os_angular)
-{
-    cm_ptr->setName(name + std::string("_cm"));
+//    //Create ControlSwitch
+//    cs_ptr->setName(name + std::string("_pressure_time_cs"));
 
-    //Endeffector Frame Controller
-    ha::Controller::Ptr os_ctrl;
-    os_ctrl = createOperationalSpaceController(name + std::string("_ctrl"),
-                                               goal_op_pos,
-                                               goal_op_ori,
-                                               max_vel_os_linear,
-                                               max_vel_os_angular,
-                                               kp_os_linear,
-                                               kp_os_angular,
-                                               kv_os_linear,
-                                               kv_os_angular,
-                                               is_relative);
+//    ha::JumpConditionPtr to_move_up_jc(new ha::JumpCondition());
+//    ha::SensorPtr to_move_up_clock_sensor(new ha::ClockSensor());
+//    to_move_up_jc->setSensor(to_move_up_clock_sensor);
+//    to_move_up_jc->setConstantGoal(3.0);
+//    to_move_up_jc->setGoalRelative();
+//    to_move_up_jc->setEpsilon(0);
+//    to_move_up_jc->setJumpCriterion(ha::JumpCondition::THRESH_UPPER_BOUND);
+//    cs_ptr->add(to_move_up_jc);
 
-    ha::ControlSet::Ptr os_cs = createTPNakamuraControlSet(os_ctrl, use_base);
-    cm_ptr->setControlSet(os_cs);
+//    if(gripper == SUCTION_CUP) //Vacuum cleaner
+//    {
+//        ha::JumpConditionPtr to_move_up_pressure_jc(new ha::JumpCondition());
+//        ha::ROSTopicSensor::Ptr to_move_up_pressure_sensor(new ha::ROSTopicSensor());
+//        to_move_up_pressure_sensor->setTopic("/pneumaticbox/pressure_0", "Float64");
+//        to_move_up_pressure_jc->setSensor(to_move_up_pressure_sensor);
+//        to_move_up_pressure_jc->setConstantGoal(18.8);
+//        to_move_up_pressure_jc->setEpsilon(0);
+//        to_move_up_pressure_jc->setJumpCriterion(ha::JumpCondition::THRESH_UPPER_BOUND);
+//        cs_ptr->add(to_move_up_pressure_jc);
+//    }
+//}
 
-    bool only_displacement = false;
-    if(goal_op_ori.size() == 0)
-    {
-        only_displacement = true;
-    }
+//void HybridAutomatonRBOFactory::CreateUngraspCMAndCS(const HybridAutomatonAbstractParams& params,
+//                                                     const ha::ControlMode::Ptr& cm_ptr,
+//                                                     const ha::ControlSwitch::Ptr& cs_ptr,
+//                                                     const ha::ControlSwitch::Ptr& cs_ptr2,
+//                                                     const std::string& name,
+//                                                     const GripperType& gripper,
+//                                                     const Eigen::MatrixXd& kp_drop,
+//                                                     const Eigen::MatrixXd& kv_drop,
+//                                                     const double& grasp_strength,
+//                                                     const int& grasp_type){
+//    cm_ptr->setName(name+ std::string("_cm"));
+//    ha::ControlSet::Ptr ungrasp_cs(new ha::ControlSet());
+//    ungrasp_cs->setType("rxControlSet");
+//    cm_ptr->setControlSet(ungrasp_cs);
 
-    cs_ptr->setName(name + std::string("_cs"));
-    ha::JumpConditionPtr convergence_jc = createOperationalSpaceConvergenceCondition(os_ctrl,
-                                                                                     is_relative,
-                                                                                     pos_epsilon_os_linear,
-                                                                                     pos_epsilon_os_angular,
-                                                                                     only_displacement);
-    cs_ptr->add(convergence_jc);
-}
+//    //add controller to ControlSet
+//    ha::Controller::Ptr ungrasp_ctrl(new ha::Controller());
 
-void HybridAutomatonRBOFactory::CreateGoToCMConvergenceCSAndMaxForceCS(const HybridAutomatonAbstractParams& params,
-                                                                       const ha::ControlMode::Ptr& cm_ptr,
-                                                                       const ha::ControlSwitch::Ptr& convergence_cs_ptr,
-                                                                       const ha::ControlSwitch::Ptr& max_force_cs_ptr,
-                                                                       const std::string& name,
-                                                                       const Eigen::MatrixXd &goal_op_pos,
-                                                                       const Eigen::MatrixXd &goal_op_ori,
-                                                                       const Eigen::MatrixXd &ft_weights,
-                                                                       const Eigen::MatrixXd &max_ft,
-                                                                       const ha::JumpCondition::JumpCriterion ft_criterion,
-                                                                       bool use_base,
-                                                                       bool negate_ft_condition,
-                                                                       double ft_epsilon,
-                                                                       double max_vel_os_linear,
-                                                                       double max_vel_os_angular,
-                                                                       double pos_epsilon_os_linear,
-                                                                       double pos_epsilon_os_angular,
-                                                                       bool is_relative,
-                                                                       const Eigen::MatrixXd &kp_os_linear,
-                                                                       const Eigen::MatrixXd &kp_os_angular,
-                                                                       const Eigen::MatrixXd &kv_os_linear,
-                                                                       const Eigen::MatrixXd &kv_os_angular)
-{
-    std::cout<<"generating max force csadjkl"<<std::endl;
-    CreateGoToCMAndConvergenceCS(cm_ptr, convergence_cs_ptr, name, goal_op_pos, goal_op_ori,
-                                 use_base, max_vel_os_linear, max_vel_os_angular, pos_epsilon_os_linear, pos_epsilon_os_angular,
-                                 is_relative, kp_os_linear, kp_os_angular, kv_os_linear, kv_os_angular);
+//    switch(gripper)
+//    {
+//    case NO_GRIPPER:
+//        break;
+//    case SOFT_HAND:
+//    {
+//        ungrasp_ctrl->setName("FeixGraspControl");
+//        ungrasp_ctrl->setType("FeixGraspSoftHandController");
+//        ungrasp_ctrl->setArgument("grasp_strength", grasp_strength);
+//        ungrasp_ctrl->setArgument("grasp_type", grasp_type);
+//        ungrasp_cs->appendController(ungrasp_ctrl);
+//    }
+//        break;
+//    case SUCTION_CUP:
+//    {
+//        ungrasp_ctrl->setName("VacuumGraspControl");
+//        ungrasp_ctrl->setType("VacuumCleanerController");
+//        ungrasp_ctrl->setArgument("power", "0");
+//        ungrasp_cs->appendController(ungrasp_ctrl);
+//    }
+//        break;
+//    case BARRETT_HAND:
+//        break;
+//    default:
+//        break;
+//    }
 
-    CreateMaxForceTorqueControlSwitch(max_force_cs_ptr,name, ft_weights, max_ft, ft_criterion,negate_ft_condition,ft_epsilon);
 
-}
+//    ha::Controller::Ptr ungrasp_joint_ctrl(new ha::Controller());
+//    ungrasp_joint_ctrl->setName("drop_joint_ctrl");
+//    ungrasp_joint_ctrl->setType("JointController");
+//    Eigen::MatrixXd drop_zeros_goal(7,1);
+//    drop_zeros_goal << 0,0,0,0,0,0,0;
+//    ungrasp_joint_ctrl->setGoal(drop_zeros_goal);
+//    ungrasp_joint_ctrl->setGoalIsRelative(1);
+//    ungrasp_joint_ctrl->setKp((kp_drop.size() == 0 ? _combineArmAndBase(_kp_js_arm, _kp_js_base) : kp_drop));
+//    ungrasp_joint_ctrl->setKv((kv_drop.size() == 0 ? _combineArmAndBase(_kv_js_arm, _kv_js_base) : kv_drop));
+//    ungrasp_cs->appendController(ungrasp_joint_ctrl);
+
+//    cs_ptr->setName(name + std::string("_pressure_cs"));
+//    ha::JumpConditionPtr to_stop_or_pressure_jc(new ha::JumpCondition());
+//    ha::ROSTopicSensor::Ptr to_stop_or_sensor(new ha::ROSTopicSensor());
+//    to_stop_or_sensor->setTopic("/pneumaticbox/pressure_0", "Float64");
+//    to_stop_or_pressure_jc->setSensor(to_stop_or_sensor);
+//    to_stop_or_pressure_jc->setConstantGoal(0.5);
+//    to_stop_or_pressure_jc->setEpsilon(0);
+//    to_stop_or_pressure_jc->setJumpCriterion(ha::JumpCondition::THRESH_LOWER_BOUND);
+//    cs_ptr->add(to_stop_or_pressure_jc);
+
+//    // To free from adherence wait 15 seconds or for pressure sensor
+//    cs_ptr2->setName(name + std::string("_time_cs"));
+//    ha::JumpConditionPtr to_stop_or_time_jc(new ha::JumpCondition());
+//    ha::SensorPtr free_sensor_time(new ha::ClockSensor());
+//    to_stop_or_time_jc->setSensor(free_sensor_time);
+//    switch(gripper)
+//    {
+//    case SOFT_HAND:
+//        to_stop_or_time_jc->setConstantGoal(3);
+//        break;
+//    case SUCTION_CUP:
+//    case NO_GRIPPER:
+//    case BARRETT_HAND:
+//    default:
+//        to_stop_or_time_jc->setConstantGoal(15);
+//        break;
+//    }
+
+//    to_stop_or_time_jc->setGoalRelative();
+//    to_stop_or_time_jc->setEpsilon(0);
+//    to_stop_or_time_jc->setJumpCriterion(ha::JumpCondition::THRESH_UPPER_BOUND);
+//    cs_ptr2->add(to_stop_or_time_jc);
+//}
+
+//void HybridAutomatonRBOFactory::CreateGoToBBCMAndConvergenceCS(const HybridAutomatonAbstractParams& params,
+//                                                               const ha::ControlMode::Ptr& cm_ptr,
+//                                                               const ha::ControlSwitch::Ptr& cs_ptr,
+//                                                               const std::string& name,
+//                                                               const std::string& frame_name,
+//                                                               const std::string& parent_frame_name,
+//                                                               bool use_tf,
+//                                                               bool use_base,
+//                                                               double max_vel_os_linear,
+//                                                               double max_vel_os_angular,
+//                                                               double pos_epsilon_os_linear,
+//                                                               double pos_epsilon_os_angular,
+//                                                               bool is_relative,
+//                                                               const Eigen::MatrixXd &kp_os_linear,
+//                                                               const Eigen::MatrixXd &kp_os_angular,
+//                                                               const Eigen::MatrixXd &kv_os_linear,
+//                                                               const Eigen::MatrixXd &kv_os_angular,
+//                                                               int update_rate){
+//    cm_ptr->setName(name + std::string("_cm"));
+
+//    //Endeffector Frame Controller
+//    ha::Controller::Ptr bb_ctrl;
+//    bb_ctrl = createBBOperationalSpaceController(name + std::string("_ctrl"),
+//                                                 false,
+//                                                 use_tf,
+//                                                 frame_name,
+//                                                 parent_frame_name,
+//                                                 max_vel_os_linear,
+//                                                 max_vel_os_angular,
+//                                                 kp_os_linear,
+//                                                 kp_os_angular,
+//                                                 kv_os_linear,
+//                                                 kv_os_angular,
+//                                                 is_relative,
+//                                                 update_rate);
+
+//    ha::ControlSet::Ptr bb_cs = createTPNakamuraControlSet(bb_ctrl, use_base);
+//    cm_ptr->setControlSet(bb_cs);
+
+//    cs_ptr->setName(name + std::string("_cs"));
+//    ha::JumpConditionPtr convergence_jc = createOperationalSpaceConvergenceCondition(bb_ctrl,
+//                                                                                     is_relative,
+//                                                                                     pos_epsilon_os_linear,
+//                                                                                     pos_epsilon_os_angular);
+//    cs_ptr->add(convergence_jc);
+//}
+
+//void HybridAutomatonRBOFactory::CreateGoToCMAndConvergenceCS(const HybridAutomatonAbstractParams& params,
+//                                                             const ha::ControlMode::Ptr& cm_ptr,
+//                                                             const ha::ControlSwitch::Ptr& cs_ptr,
+//                                                             const std::string& name,
+//                                                             const Eigen::MatrixXd &goal_op_pos,
+//                                                             const Eigen::MatrixXd &goal_op_ori,
+//                                                             bool use_base,
+//                                                             double max_vel_os_linear,
+//                                                             double max_vel_os_angular,
+//                                                             double pos_epsilon_os_linear,
+//                                                             double pos_epsilon_os_angular,
+//                                                             bool is_relative,
+//                                                             const Eigen::MatrixXd &kp_os_linear,
+//                                                             const Eigen::MatrixXd &kp_os_angular,
+//                                                             const Eigen::MatrixXd &kv_os_linear,
+//                                                             const Eigen::MatrixXd &kv_os_angular)
+//{
+//    cm_ptr->setName(name + std::string("_cm"));
+
+//    //Endeffector Frame Controller
+//    ha::Controller::Ptr os_ctrl;
+//    os_ctrl = createOperationalSpaceController(name + std::string("_ctrl"),
+//                                               goal_op_pos,
+//                                               goal_op_ori,
+//                                               max_vel_os_linear,
+//                                               max_vel_os_angular,
+//                                               kp_os_linear,
+//                                               kp_os_angular,
+//                                               kv_os_linear,
+//                                               kv_os_angular,
+//                                               is_relative);
+
+//    ha::ControlSet::Ptr os_cs = createTPNakamuraControlSet(os_ctrl, use_base);
+//    cm_ptr->setControlSet(os_cs);
+
+//    bool only_displacement = false;
+//    if(goal_op_ori.size() == 0)
+//    {
+//        only_displacement = true;
+//    }
+
+//    cs_ptr->setName(name + std::string("_cs"));
+//    ha::JumpConditionPtr convergence_jc = createOperationalSpaceConvergenceCondition(os_ctrl,
+//                                                                                     is_relative,
+//                                                                                     pos_epsilon_os_linear,
+//                                                                                     pos_epsilon_os_angular,
+//                                                                                     only_displacement);
+//    cs_ptr->add(convergence_jc);
+//}
+
+//void HybridAutomatonRBOFactory::CreateGoToCMConvergenceCSAndMaxForceCS(const HybridAutomatonAbstractParams& params,
+//                                                                       const ha::ControlMode::Ptr& cm_ptr,
+//                                                                       const ha::ControlSwitch::Ptr& convergence_cs_ptr,
+//                                                                       const ha::ControlSwitch::Ptr& max_force_cs_ptr,
+//                                                                       const std::string& name,
+//                                                                       const Eigen::MatrixXd &goal_op_pos,
+//                                                                       const Eigen::MatrixXd &goal_op_ori,
+//                                                                       const Eigen::MatrixXd &ft_weights,
+//                                                                       const Eigen::MatrixXd &max_ft,
+//                                                                       const ha::JumpCondition::JumpCriterion ft_criterion,
+//                                                                       bool use_base,
+//                                                                       bool negate_ft_condition,
+//                                                                       double ft_epsilon,
+//                                                                       double max_vel_os_linear,
+//                                                                       double max_vel_os_angular,
+//                                                                       double pos_epsilon_os_linear,
+//                                                                       double pos_epsilon_os_angular,
+//                                                                       bool is_relative,
+//                                                                       const Eigen::MatrixXd &kp_os_linear,
+//                                                                       const Eigen::MatrixXd &kp_os_angular,
+//                                                                       const Eigen::MatrixXd &kv_os_linear,
+//                                                                       const Eigen::MatrixXd &kv_os_angular)
+//{
+//    std::cout<<"generating max force csadjkl"<<std::endl;
+//    CreateGoToCMAndConvergenceCS(cm_ptr, convergence_cs_ptr, name, goal_op_pos, goal_op_ori,
+//                                 use_base, max_vel_os_linear, max_vel_os_angular, pos_epsilon_os_linear, pos_epsilon_os_angular,
+//                                 is_relative, kp_os_linear, kp_os_angular, kv_os_linear, kv_os_angular);
+
+//    CreateMaxForceTorqueControlSwitch(max_force_cs_ptr,name, ft_weights, max_ft, ft_criterion,negate_ft_condition,ft_epsilon);
+
+//}
 
 Eigen::MatrixXd HybridAutomatonRBOFactory::_combineArmAndBase(const Eigen::MatrixXd& arm_vector, const Eigen::MatrixXd base_vector)
 {
