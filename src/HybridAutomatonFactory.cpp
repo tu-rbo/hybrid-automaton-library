@@ -1444,7 +1444,7 @@ Eigen::MatrixXd HybridAutomatonFactory::_combineArmAndBase(const Eigen::MatrixXd
     return combined_vector;
 }
 
-std::string HybridAutomatonFactory::HybridAutomatonToString(ha::HybridAutomaton::ConstPtr ha)
+std::string HybridAutomatonToString(ha::HybridAutomaton::ConstPtr ha)
 {
     ha::DescriptionTreeXML::Ptr tree(new ha::DescriptionTreeXML);
     ha::DescriptionTreeNode::Ptr ha_serialized;

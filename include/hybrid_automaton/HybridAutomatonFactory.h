@@ -19,6 +19,16 @@ class HybridAutomatonFactory;
 typedef boost::shared_ptr<HybridAutomatonFactory> HybridAutomatonFactoryPtr;
 typedef boost::shared_ptr<const HybridAutomatonFactory> HybridAutomatonFactoryConstPtr;
 
+
+
+/**
+ * @brief
+ *
+ * @param ha
+ * @return std::string
+ */
+std::string HybridAutomatonToString(ha::HybridAutomaton::ConstPtr ha);
+
 /**
      * @brief A class to easily generate basic hybrid automata, control modes, control switches, jump conditions...
      *
@@ -607,13 +617,7 @@ public:
     double vel_epsilon_os_angular() const;
     void setVel_epsilon_os_angular(const double &vel_epsilon_os_angular);
 
-    /**
-     * @brief
-     *
-     * @param ha
-     * @return std::string
-     */
-    std::string HybridAutomatonToString(ha::HybridAutomaton::ConstPtr ha);
+
 
 protected:
 
