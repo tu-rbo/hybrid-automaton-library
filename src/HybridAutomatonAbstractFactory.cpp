@@ -17,157 +17,18 @@
 
 #include "hybrid_automaton/DescriptionTreeXML.h"
 
-#define DEFAULT_NUM_DOF_ARM 7
-#define DEFAULT_NUM_DOF_BASE 3
 
-#define DEFAULT_MAX_VEL_JS_ARM 0.3
-#define DEFAULT_MAX_VEL_JS_BASE 0.15
-
-#define DEFAULT_KP_JS_ARM 0.0
-#define DEFAULT_KV_JS_ARM 0.0
-#define DEFAULT_KP_JS_BASE 40.0
-#define DEFAULT_KV_JS_BASE 7.0
-
-#define DEFAULT_KP_JS_NAKAMURA_ARM 15.0
-#define DEFAULT_KP_JS_NAKAMURA_BASE 0.0
-#define DEFAULT_KV_JS_NAKAMURA_ARM 0.5
-#define DEFAULT_KV_JS_NAKAMURA_BASE 5.0
-
-#define DEFAULT_JOINT_WEIGHTS_NAKAMURA_ARM 1.0
-#define DEFAULT_JOINT_WEIGHTS_NAKAMURA_BASE 0.5
-#define DEFAULT_JOINT_WEIGHTS_NAKAMURA_BASE_LITTLE_MOTION 0.01
-
-#define DEFAULT_KP_OS_LINEAR 0.0
-#define DEFAULT_KP_OS_ANGULAR 0.0
-#define DEFAULT_KV_OS_LINEAR 10.0
-#define DEFAULT_KV_OS_ANGULAR 10.0
-
-#define DEFAULT_HOME_CONFIG_JS_ARM 0.0
-#define DEFAULT_HOME_CONFIG_JS_BASE 0.0
-
-#define DEFAULT_POS_EPSILON_JS_ARM 0.13
-#define DEFAULT_POS_EPSILON_JS_BASE 0.05
-#define DEFAULT_VEL_EPSILON_JS_ARM 0.01
-#define DEFAULT_VEL_EPSILON_JS_BASE 0.001
-#define DEFAULT_VEL_GOAL_JS_ARM 0.0
-#define DEFAULT_VEL_GOAL_JS_BASE 0.0
-
-#define DEFAULT_POS_EPSILON_OS_LINEAR 0.01
-#define DEFAULT_POS_EPSILON_OS_ANGULAR 0.01
-#define DEFAULT_VEL_EPSILON_OS_LINEAR 0.01
-#define DEFAULT_VEL_EPSILON_OS_ANGULAR 0.01
-#define DEFAULT_VEL_GOAL_OS_LINEAR 0.0
-#define DEFAULT_VEL_GOAL_OS_ANGULAR 0.0
-
-#define DEFAULT_MAX_VEL_OS_LINEAR 0.03
-#define DEFAULT_MAX_VEL_OS_ANGULAR 0.5
-
-#define DEFAULT_UPDATE_RATE 100
 
 namespace ha
 {
 HybridAutomatonAbstractFactory::HybridAutomatonAbstractFactory()
-    : _num_dof_arm(DEFAULT_NUM_DOF_ARM), _num_dof_base(DEFAULT_NUM_DOF_BASE)
 {
-    _initializeDefaultValues();
+
 }
 
-HybridAutomatonAbstractFactory::HybridAutomatonAbstractFactory(const int& num_dof_arm, const int& num_dof_base)
-    :_num_dof_arm(num_dof_arm), _num_dof_base(num_dof_base)
-{
-    _initializeDefaultValues();
-}
 
-void HybridAutomatonAbstractFactory::_initializeDefaultValues()
-{
-    _index_vec_arm = Eigen::MatrixXd::Constant(_num_dof_arm, 1, 0);
-    for(int idx_arm=0; idx_arm<_num_dof_arm; idx_arm++)
-    {
-        _index_vec_arm(idx_arm, 0) = idx_arm;
-    }
 
-    _index_vec_base = Eigen::MatrixXd::Constant(_num_dof_base, 1, 0);
-    for(int idx_base=0; idx_base<_num_dof_base; idx_base++)
-    {
-        _index_vec_base(idx_base, 0) = idx_base+_num_dof_arm;
-    }
 
-    _max_vel_js_arm = Eigen::MatrixXd::Constant(_num_dof_arm, 1, DEFAULT_MAX_VEL_JS_ARM);
-    _max_vel_js_base = Eigen::MatrixXd::Constant(_num_dof_base, 1, DEFAULT_MAX_VEL_JS_BASE);
-
-    _kp_js_arm = Eigen::MatrixXd::Constant(_num_dof_arm, 1, DEFAULT_KP_JS_ARM);
-    if(_num_dof_arm == DEFAULT_NUM_DOF_ARM)
-    {
-        _kp_js_arm << 300.0, 200.0, 150.0, 120.0, 10.0, 10.0, 10.0;
-    }
-    _kp_js_base = Eigen::MatrixXd::Constant(_num_dof_base, 1, DEFAULT_KP_JS_BASE);
-
-    _kv_js_arm = Eigen::MatrixXd::Constant(_num_dof_arm, 1, DEFAULT_KV_JS_ARM);
-    if(_num_dof_arm == DEFAULT_NUM_DOF_ARM)
-    {
-        _kv_js_arm << 2.0, 4.0, 2.0, 1.2, 0.2, 0.3, 0.02;
-    }
-    _kv_js_base = Eigen::MatrixXd::Constant(_num_dof_base, 1, DEFAULT_KV_JS_BASE);
-    _kp_os_linear = Eigen::MatrixXd::Constant(3, 1, DEFAULT_KP_OS_LINEAR);
-    _kp_os_angular = Eigen::MatrixXd::Constant(3, 1, DEFAULT_KP_OS_ANGULAR);
-    _kv_os_linear = Eigen::MatrixXd::Constant(3, 1, DEFAULT_KV_OS_LINEAR);
-    _kv_os_angular = Eigen::MatrixXd::Constant(3, 1, DEFAULT_KV_OS_ANGULAR);
-
-    _kp_js_nakamura_arm = Eigen::MatrixXd::Constant(_num_dof_arm, 1, DEFAULT_KP_JS_NAKAMURA_ARM);
-    if(_num_dof_arm == DEFAULT_NUM_DOF_ARM)
-    {
-        _kp_js_nakamura_arm << 30.0, 20.0, 15.0, 20.0, 10.0, 10.0, 10.0;
-    }
-    _kp_js_nakamura_base = Eigen::MatrixXd::Constant(_num_dof_base, 1, DEFAULT_KP_JS_NAKAMURA_BASE);
-
-    _kv_js_nakamura_arm = Eigen::MatrixXd::Constant(_num_dof_arm, 1, DEFAULT_KV_JS_NAKAMURA_ARM);
-    if(_num_dof_arm == DEFAULT_NUM_DOF_ARM)
-    {
-        _kv_js_nakamura_arm << 1.0, 2.0, 1.0, 0.4, 0.1, 0.1, 0.01;
-    }
-    _kv_js_nakamura_base = Eigen::MatrixXd::Constant(_num_dof_base, 1, DEFAULT_KV_JS_NAKAMURA_BASE);
-    if(_num_dof_base== DEFAULT_NUM_DOF_BASE)
-    {
-        _kv_js_nakamura_base << 10.0, 10.0, 2.0;
-    }
-
-    _joint_weights_nakamura_arm = Eigen::MatrixXd::Constant(_num_dof_arm, 1, DEFAULT_JOINT_WEIGHTS_NAKAMURA_ARM);
-    _joint_weights_nakamura_base = Eigen::MatrixXd::Constant(_num_dof_base, 1, DEFAULT_JOINT_WEIGHTS_NAKAMURA_BASE);
-    _joint_weights_nakamura_base_no_rotation = Eigen::MatrixXd::Constant(_num_dof_base, 1, DEFAULT_JOINT_WEIGHTS_NAKAMURA_BASE);
-    if(_num_dof_base== DEFAULT_NUM_DOF_BASE)
-    {
-        _joint_weights_nakamura_base_no_rotation << DEFAULT_JOINT_WEIGHTS_NAKAMURA_BASE, DEFAULT_JOINT_WEIGHTS_NAKAMURA_BASE, DEFAULT_JOINT_WEIGHTS_NAKAMURA_BASE_LITTLE_MOTION;
-    }
-    _joint_weights_nakamura_base_little_motion = Eigen::MatrixXd::Constant(_num_dof_base, 1, DEFAULT_JOINT_WEIGHTS_NAKAMURA_BASE_LITTLE_MOTION);
-    _home_config_js_arm = Eigen::MatrixXd::Constant(_num_dof_arm, 1, DEFAULT_HOME_CONFIG_JS_ARM);
-    if(_num_dof_arm == DEFAULT_NUM_DOF_ARM)
-    {
-        _home_config_js_arm << 0.0, -0.14, 0.0, 2.18, 0.0, 0.2, -0.13;
-    }
-    _home_config_js_base = Eigen::MatrixXd::Constant(_num_dof_base, 1, DEFAULT_HOME_CONFIG_JS_BASE);
-
-    _pos_epsilon_js_arm  = DEFAULT_POS_EPSILON_JS_ARM;
-    _pos_epsilon_js_base = DEFAULT_POS_EPSILON_JS_BASE;
-
-    _vel_epsilon_js_arm = DEFAULT_VEL_EPSILON_JS_ARM;
-    _vel_epsilon_js_base =  DEFAULT_VEL_EPSILON_JS_BASE;
-
-    _vel_goal_js_arm = Eigen::MatrixXd::Constant(_num_dof_arm, 1, DEFAULT_VEL_GOAL_JS_ARM);
-    _vel_goal_js_base = Eigen::MatrixXd::Constant(_num_dof_base, 1, DEFAULT_VEL_GOAL_JS_BASE);
-
-    _pos_epsilon_os_linear =  DEFAULT_POS_EPSILON_OS_LINEAR;
-    _pos_epsilon_os_angular =  DEFAULT_POS_EPSILON_OS_ANGULAR;
-    _vel_epsilon_os_linear =  DEFAULT_VEL_EPSILON_OS_LINEAR;
-    _vel_epsilon_os_angular =  DEFAULT_VEL_EPSILON_OS_ANGULAR;
-
-    _vel_goal_os_linear = Eigen::MatrixXd::Constant(3, 1, DEFAULT_VEL_GOAL_OS_LINEAR);
-    _vel_goal_os_angular =  Eigen::MatrixXd::Constant(3, 1, DEFAULT_VEL_GOAL_OS_ANGULAR);
-
-    _max_vel_os_linear = DEFAULT_MAX_VEL_OS_LINEAR;
-    _max_vel_os_angular = DEFAULT_MAX_VEL_OS_ANGULAR;
-
-    _update_rate = DEFAULT_UPDATE_RATE;
-}
 
 HybridAutomatonAbstractFactory::~HybridAutomatonAbstractFactory()
 {
@@ -179,268 +40,268 @@ HybridAutomatonAbstractFactory::HybridAutomatonAbstractFactory(const HybridAutom
 
 }
 
-Eigen::MatrixXd HybridAutomatonAbstractFactory::max_vel_js_arm() const
-{
-    return _max_vel_js_arm;
-}
+//Eigen::MatrixXd HybridAutomatonAbstractFactory::max_vel_js_arm() const
+//{
+//    return _max_vel_js_arm;
+//}
 
-void HybridAutomatonAbstractFactory::setMax_vel_js_arm(const Eigen::MatrixXd &max_vel_js_arm)
-{
-    _max_vel_js_arm = max_vel_js_arm;
-}
-Eigen::MatrixXd HybridAutomatonAbstractFactory::max_vel_js_base() const
-{
-    return _max_vel_js_base;
-}
+//void HybridAutomatonAbstractFactory::setMax_vel_js_arm(const Eigen::MatrixXd &max_vel_js_arm)
+//{
+//    _max_vel_js_arm = max_vel_js_arm;
+//}
+//Eigen::MatrixXd HybridAutomatonAbstractFactory::max_vel_js_base() const
+//{
+//    return _max_vel_js_base;
+//}
 
-void HybridAutomatonAbstractFactory::setMax_vel_js_base(const Eigen::MatrixXd &max_vel_js_base)
-{
-    _max_vel_js_base = max_vel_js_base;
-}
-Eigen::MatrixXd HybridAutomatonAbstractFactory::kp_js_arm() const
-{
-    return _kp_js_arm;
-}
+//void HybridAutomatonAbstractFactory::setMax_vel_js_base(const Eigen::MatrixXd &max_vel_js_base)
+//{
+//    _max_vel_js_base = max_vel_js_base;
+//}
+//Eigen::MatrixXd HybridAutomatonAbstractFactory::kp_js_arm() const
+//{
+//    return _kp_js_arm;
+//}
 
-void HybridAutomatonAbstractFactory::setKp_js_arm(const Eigen::MatrixXd &kp_js_arm)
-{
-    _kp_js_arm = kp_js_arm;
-}
-Eigen::MatrixXd HybridAutomatonAbstractFactory::kp_js_base() const
-{
-    return _kp_js_base;
-}
+//void HybridAutomatonAbstractFactory::setKp_js_arm(const Eigen::MatrixXd &kp_js_arm)
+//{
+//    _kp_js_arm = kp_js_arm;
+//}
+//Eigen::MatrixXd HybridAutomatonAbstractFactory::kp_js_base() const
+//{
+//    return _kp_js_base;
+//}
 
-void HybridAutomatonAbstractFactory::setKp_js_base(const Eigen::MatrixXd &kp_js_base)
-{
-    _kp_js_base = kp_js_base;
-}
-Eigen::MatrixXd HybridAutomatonAbstractFactory::kv_js_arm() const
-{
-    return _kv_js_arm;
-}
+//void HybridAutomatonAbstractFactory::setKp_js_base(const Eigen::MatrixXd &kp_js_base)
+//{
+//    _kp_js_base = kp_js_base;
+//}
+//Eigen::MatrixXd HybridAutomatonAbstractFactory::kv_js_arm() const
+//{
+//    return _kv_js_arm;
+//}
 
-void HybridAutomatonAbstractFactory::setKv_js_arm(const Eigen::MatrixXd &kv_js_arm)
-{
-    _kv_js_arm = kv_js_arm;
-}
-Eigen::MatrixXd HybridAutomatonAbstractFactory::kv_js_base() const
-{
-    return _kv_js_base;
-}
+//void HybridAutomatonAbstractFactory::setKv_js_arm(const Eigen::MatrixXd &kv_js_arm)
+//{
+//    _kv_js_arm = kv_js_arm;
+//}
+//Eigen::MatrixXd HybridAutomatonAbstractFactory::kv_js_base() const
+//{
+//    return _kv_js_base;
+//}
 
-void HybridAutomatonAbstractFactory::setKv_js_base(const Eigen::MatrixXd &kv_js_base)
-{
-    _kv_js_base = kv_js_base;
-}
-Eigen::MatrixXd HybridAutomatonAbstractFactory::kp_os_linear() const
-{
-    return _kp_os_linear;
-}
+//void HybridAutomatonAbstractFactory::setKv_js_base(const Eigen::MatrixXd &kv_js_base)
+//{
+//    _kv_js_base = kv_js_base;
+//}
+//Eigen::MatrixXd HybridAutomatonAbstractFactory::kp_os_linear() const
+//{
+//    return _kp_os_linear;
+//}
 
-void HybridAutomatonAbstractFactory::setKp_os_linear(const Eigen::MatrixXd &kp_os_linear)
-{
-    _kp_os_linear = kp_os_linear;
-}
-Eigen::MatrixXd HybridAutomatonAbstractFactory::kp_os_angular() const
-{
-    return _kp_os_angular;
-}
+//void HybridAutomatonAbstractFactory::setKp_os_linear(const Eigen::MatrixXd &kp_os_linear)
+//{
+//    _kp_os_linear = kp_os_linear;
+//}
+//Eigen::MatrixXd HybridAutomatonAbstractFactory::kp_os_angular() const
+//{
+//    return _kp_os_angular;
+//}
 
-void HybridAutomatonAbstractFactory::setKp_os_angular(const Eigen::MatrixXd &kp_os_angular)
-{
-    _kp_os_angular = kp_os_angular;
-}
-Eigen::MatrixXd HybridAutomatonAbstractFactory::kv_os_linear() const
-{
-    return _kv_os_linear;
-}
+//void HybridAutomatonAbstractFactory::setKp_os_angular(const Eigen::MatrixXd &kp_os_angular)
+//{
+//    _kp_os_angular = kp_os_angular;
+//}
+//Eigen::MatrixXd HybridAutomatonAbstractFactory::kv_os_linear() const
+//{
+//    return _kv_os_linear;
+//}
 
-void HybridAutomatonAbstractFactory::setKv_os_linear(const Eigen::MatrixXd &kv_os_linear)
-{
-    _kv_os_linear = kv_os_linear;
-}
-Eigen::MatrixXd HybridAutomatonAbstractFactory::kv_os_angular() const
-{
-    return _kv_os_angular;
-}
+//void HybridAutomatonAbstractFactory::setKv_os_linear(const Eigen::MatrixXd &kv_os_linear)
+//{
+//    _kv_os_linear = kv_os_linear;
+//}
+//Eigen::MatrixXd HybridAutomatonAbstractFactory::kv_os_angular() const
+//{
+//    return _kv_os_angular;
+//}
 
-void HybridAutomatonAbstractFactory::setKv_os_angular(const Eigen::MatrixXd &kv_os_angular)
-{
-    _kv_os_angular = kv_os_angular;
-}
-Eigen::MatrixXd HybridAutomatonAbstractFactory::kp_js_nakamura_arm() const
-{
-    return _kp_js_nakamura_arm;
-}
+//void HybridAutomatonAbstractFactory::setKv_os_angular(const Eigen::MatrixXd &kv_os_angular)
+//{
+//    _kv_os_angular = kv_os_angular;
+//}
+//Eigen::MatrixXd HybridAutomatonAbstractFactory::kp_js_nakamura_arm() const
+//{
+//    return _kp_js_nakamura_arm;
+//}
 
-void HybridAutomatonAbstractFactory::setKp_js_nakamura_arm(const Eigen::MatrixXd &kp_js_nakamura_arm)
-{
-    _kp_js_nakamura_arm = kp_js_nakamura_arm;
-}
-Eigen::MatrixXd HybridAutomatonAbstractFactory::kp_js_nakamura_base() const
-{
-    return _kp_js_nakamura_base;
-}
+//void HybridAutomatonAbstractFactory::setKp_js_nakamura_arm(const Eigen::MatrixXd &kp_js_nakamura_arm)
+//{
+//    _kp_js_nakamura_arm = kp_js_nakamura_arm;
+//}
+//Eigen::MatrixXd HybridAutomatonAbstractFactory::kp_js_nakamura_base() const
+//{
+//    return _kp_js_nakamura_base;
+//}
 
-void HybridAutomatonAbstractFactory::setKp_js_nakamura_base(const Eigen::MatrixXd &kp_js_nakamura_base)
-{
-    _kp_js_nakamura_base = kp_js_nakamura_base;
-}
-Eigen::MatrixXd HybridAutomatonAbstractFactory::kv_js_nakamura_arm() const
-{
-    return _kv_js_nakamura_arm;
-}
+//void HybridAutomatonAbstractFactory::setKp_js_nakamura_base(const Eigen::MatrixXd &kp_js_nakamura_base)
+//{
+//    _kp_js_nakamura_base = kp_js_nakamura_base;
+//}
+//Eigen::MatrixXd HybridAutomatonAbstractFactory::kv_js_nakamura_arm() const
+//{
+//    return _kv_js_nakamura_arm;
+//}
 
-void HybridAutomatonAbstractFactory::setKv_js_nakamura_arm(const Eigen::MatrixXd &kv_js_nakamura_arm)
-{
-    _kv_js_nakamura_arm = kv_js_nakamura_arm;
-}
-Eigen::MatrixXd HybridAutomatonAbstractFactory::kv_js_nakamura_base() const
-{
-    return _kv_js_nakamura_base;
-}
+//void HybridAutomatonAbstractFactory::setKv_js_nakamura_arm(const Eigen::MatrixXd &kv_js_nakamura_arm)
+//{
+//    _kv_js_nakamura_arm = kv_js_nakamura_arm;
+//}
+//Eigen::MatrixXd HybridAutomatonAbstractFactory::kv_js_nakamura_base() const
+//{
+//    return _kv_js_nakamura_base;
+//}
 
-void HybridAutomatonAbstractFactory::setKv_js_nakamura_base(const Eigen::MatrixXd &kv_js_nakamura_base)
-{
-    _kv_js_nakamura_base = kv_js_nakamura_base;
-}
-Eigen::MatrixXd HybridAutomatonAbstractFactory::joint_weights_nakamura_arm() const
-{
-    return _joint_weights_nakamura_arm;
-}
+//void HybridAutomatonAbstractFactory::setKv_js_nakamura_base(const Eigen::MatrixXd &kv_js_nakamura_base)
+//{
+//    _kv_js_nakamura_base = kv_js_nakamura_base;
+//}
+//Eigen::MatrixXd HybridAutomatonAbstractFactory::joint_weights_nakamura_arm() const
+//{
+//    return _joint_weights_nakamura_arm;
+//}
 
-void HybridAutomatonAbstractFactory::setJoint_weights_nakamura_arm(const Eigen::MatrixXd &joint_weights_nakamura_arm)
-{
-    _joint_weights_nakamura_arm = joint_weights_nakamura_arm;
-}
-Eigen::MatrixXd HybridAutomatonAbstractFactory::joint_weights_nakamura_base() const
-{
-    return _joint_weights_nakamura_base;
-}
+//void HybridAutomatonAbstractFactory::setJoint_weights_nakamura_arm(const Eigen::MatrixXd &joint_weights_nakamura_arm)
+//{
+//    _joint_weights_nakamura_arm = joint_weights_nakamura_arm;
+//}
+//Eigen::MatrixXd HybridAutomatonAbstractFactory::joint_weights_nakamura_base() const
+//{
+//    return _joint_weights_nakamura_base;
+//}
 
-void HybridAutomatonAbstractFactory::setJoint_weights_nakamura_base(const Eigen::MatrixXd &joint_weights_nakamura_base)
-{
-    _joint_weights_nakamura_base = joint_weights_nakamura_base;
-}
-Eigen::MatrixXd HybridAutomatonAbstractFactory::joint_weights_nakamura_base_no_rotation() const
-{
-    return _joint_weights_nakamura_base_no_rotation;
-}
+//void HybridAutomatonAbstractFactory::setJoint_weights_nakamura_base(const Eigen::MatrixXd &joint_weights_nakamura_base)
+//{
+//    _joint_weights_nakamura_base = joint_weights_nakamura_base;
+//}
+//Eigen::MatrixXd HybridAutomatonAbstractFactory::joint_weights_nakamura_base_no_rotation() const
+//{
+//    return _joint_weights_nakamura_base_no_rotation;
+//}
 
-void HybridAutomatonAbstractFactory::setJoint_weights_nakamura_base_no_rotation(const Eigen::MatrixXd &joint_weights_nakamura_base_no_rotation)
-{
-    _joint_weights_nakamura_base_no_rotation = joint_weights_nakamura_base_no_rotation;
-}
-Eigen::MatrixXd HybridAutomatonAbstractFactory::joint_weights_nakamura_base_little_motion() const
-{
-    return _joint_weights_nakamura_base_little_motion;
-}
+//void HybridAutomatonAbstractFactory::setJoint_weights_nakamura_base_no_rotation(const Eigen::MatrixXd &joint_weights_nakamura_base_no_rotation)
+//{
+//    _joint_weights_nakamura_base_no_rotation = joint_weights_nakamura_base_no_rotation;
+//}
+//Eigen::MatrixXd HybridAutomatonAbstractFactory::joint_weights_nakamura_base_little_motion() const
+//{
+//    return _joint_weights_nakamura_base_little_motion;
+//}
 
-void HybridAutomatonAbstractFactory::setJoint_weights_nakamura_base_little_motion(const Eigen::MatrixXd &joint_weights_nakamura_base_little_motion)
-{
-    _joint_weights_nakamura_base_little_motion = joint_weights_nakamura_base_little_motion;
-}
-Eigen::MatrixXd HybridAutomatonAbstractFactory::home_config_js_arm() const
-{
-    return _home_config_js_arm;
-}
+//void HybridAutomatonAbstractFactory::setJoint_weights_nakamura_base_little_motion(const Eigen::MatrixXd &joint_weights_nakamura_base_little_motion)
+//{
+//    _joint_weights_nakamura_base_little_motion = joint_weights_nakamura_base_little_motion;
+//}
+//Eigen::MatrixXd HybridAutomatonAbstractFactory::home_config_js_arm() const
+//{
+//    return _home_config_js_arm;
+//}
 
-void HybridAutomatonAbstractFactory::setHome_config_js_arm(const Eigen::MatrixXd &home_config_js_arm)
-{
-    _home_config_js_arm = home_config_js_arm;
-}
-Eigen::MatrixXd HybridAutomatonAbstractFactory::home_config_js_base() const
-{
-    return _home_config_js_base;
-}
+//void HybridAutomatonAbstractFactory::setHome_config_js_arm(const Eigen::MatrixXd &home_config_js_arm)
+//{
+//    _home_config_js_arm = home_config_js_arm;
+//}
+//Eigen::MatrixXd HybridAutomatonAbstractFactory::home_config_js_base() const
+//{
+//    return _home_config_js_base;
+//}
 
-void HybridAutomatonAbstractFactory::setHome_config_js_base(const Eigen::MatrixXd &home_config_js_base)
-{
-    _home_config_js_base = home_config_js_base;
-}
-double HybridAutomatonAbstractFactory::pos_epsilon_js_arm() const
-{
-    return _pos_epsilon_js_arm;
-}
+//void HybridAutomatonAbstractFactory::setHome_config_js_base(const Eigen::MatrixXd &home_config_js_base)
+//{
+//    _home_config_js_base = home_config_js_base;
+//}
+//double HybridAutomatonAbstractFactory::pos_epsilon_js_arm() const
+//{
+//    return _pos_epsilon_js_arm;
+//}
 
-void HybridAutomatonAbstractFactory::setPos_epsilon_js_arm(const double &pos_epsilon_js_arm)
-{
-    _pos_epsilon_js_arm = pos_epsilon_js_arm;
-}
-double HybridAutomatonAbstractFactory::pos_epsilon_js_base() const
-{
-    return _pos_epsilon_js_base;
-}
+//void HybridAutomatonAbstractFactory::setPos_epsilon_js_arm(const double &pos_epsilon_js_arm)
+//{
+//    _pos_epsilon_js_arm = pos_epsilon_js_arm;
+//}
+//double HybridAutomatonAbstractFactory::pos_epsilon_js_base() const
+//{
+//    return _pos_epsilon_js_base;
+//}
 
-void HybridAutomatonAbstractFactory::setPos_epsilon_js_base(const double &pos_epsilon_js_base)
-{
-    _pos_epsilon_js_base = pos_epsilon_js_base;
-}
-double HybridAutomatonAbstractFactory::vel_epsilon_js_arm() const
-{
-    return _vel_epsilon_js_arm;
-}
+//void HybridAutomatonAbstractFactory::setPos_epsilon_js_base(const double &pos_epsilon_js_base)
+//{
+//    _pos_epsilon_js_base = pos_epsilon_js_base;
+//}
+//double HybridAutomatonAbstractFactory::vel_epsilon_js_arm() const
+//{
+//    return _vel_epsilon_js_arm;
+//}
 
-void HybridAutomatonAbstractFactory::setVel_epsilon_js_arm(const double &vel_epsilon_js_arm)
-{
-    _vel_epsilon_js_arm = vel_epsilon_js_arm;
-}
-double HybridAutomatonAbstractFactory::vel_epsilon_js_base() const
-{
-    return _vel_epsilon_js_base;
-}
+//void HybridAutomatonAbstractFactory::setVel_epsilon_js_arm(const double &vel_epsilon_js_arm)
+//{
+//    _vel_epsilon_js_arm = vel_epsilon_js_arm;
+//}
+//double HybridAutomatonAbstractFactory::vel_epsilon_js_base() const
+//{
+//    return _vel_epsilon_js_base;
+//}
 
-void HybridAutomatonAbstractFactory::setVel_epsilon_js_base(const double &vel_epsilon_js_base)
-{
-    _vel_epsilon_js_base = vel_epsilon_js_base;
-}
-double HybridAutomatonAbstractFactory::pos_epsilon_os_linear() const
-{
-    return _pos_epsilon_os_linear;
-}
+//void HybridAutomatonAbstractFactory::setVel_epsilon_js_base(const double &vel_epsilon_js_base)
+//{
+//    _vel_epsilon_js_base = vel_epsilon_js_base;
+//}
+//double HybridAutomatonAbstractFactory::pos_epsilon_os_linear() const
+//{
+//    return _pos_epsilon_os_linear;
+//}
 
-void HybridAutomatonAbstractFactory::setPos_epsilon_os_linear(const double &pos_epsilon_os_linear)
-{
-    _pos_epsilon_os_linear = pos_epsilon_os_linear;
-}
-double HybridAutomatonAbstractFactory::pos_epsilon_os_angular() const
-{
-    return _pos_epsilon_os_angular;
-}
+//void HybridAutomatonAbstractFactory::setPos_epsilon_os_linear(const double &pos_epsilon_os_linear)
+//{
+//    _pos_epsilon_os_linear = pos_epsilon_os_linear;
+//}
+//double HybridAutomatonAbstractFactory::pos_epsilon_os_angular() const
+//{
+//    return _pos_epsilon_os_angular;
+//}
 
-void HybridAutomatonAbstractFactory::setPos_epsilon_os_angular(const double &pos_epsilon_os_angular)
-{
-    _pos_epsilon_os_angular = pos_epsilon_os_angular;
-}
-double HybridAutomatonAbstractFactory::vel_epsilon_os_linear() const
-{
-    return _vel_epsilon_os_linear;
-}
+//void HybridAutomatonAbstractFactory::setPos_epsilon_os_angular(const double &pos_epsilon_os_angular)
+//{
+//    _pos_epsilon_os_angular = pos_epsilon_os_angular;
+//}
+//double HybridAutomatonAbstractFactory::vel_epsilon_os_linear() const
+//{
+//    return _vel_epsilon_os_linear;
+//}
 
-void HybridAutomatonAbstractFactory::setVel_epsilon_os_linear(const double &vel_epsilon_os_linear)
-{
-    _vel_epsilon_os_linear = vel_epsilon_os_linear;
-}
-double HybridAutomatonAbstractFactory::vel_epsilon_os_angular() const
-{
-    return _vel_epsilon_os_angular;
-}
+//void HybridAutomatonAbstractFactory::setVel_epsilon_os_linear(const double &vel_epsilon_os_linear)
+//{
+//    _vel_epsilon_os_linear = vel_epsilon_os_linear;
+//}
+//double HybridAutomatonAbstractFactory::vel_epsilon_os_angular() const
+//{
+//    return _vel_epsilon_os_angular;
+//}
 
-void HybridAutomatonAbstractFactory::setVel_epsilon_os_angular(const double &vel_epsilon_os_angular)
-{
-    _vel_epsilon_os_angular = vel_epsilon_os_angular;
-}
-
-ha::HybridAutomaton::Ptr HybridAutomatonAbstractFactory::createInitialHybridAutomaton(const GripperType& gripper,
-                                                                              const Eigen::MatrixXd& home_config_js_arm,
-                                                                              const Eigen::MatrixXd& home_config_js_base,
-                                                                              const Eigen::MatrixXd& max_vel_js_arm,
-                                                                              const Eigen::MatrixXd& max_vel_js_base,
-                                                                              const Eigen::MatrixXd& index_vec_arm,
-                                                                              const double& pos_epsilon_js_arm,
-                                                                              const double& grasp_strength,
-                                                                              const int& grasp_type)
+//void HybridAutomatonAbstractFactory::setVel_epsilon_os_angular(const double &vel_epsilon_os_angular)
+//{
+//    _vel_epsilon_os_angular = vel_epsilon_os_angular;
+//}
+ha::HybridAutomaton::Ptr HybridAutomatonAbstractFactory::createInitialHybridAutomaton(const HybridAutomatonAbstractParams& p)
+//ha::HybridAutomaton::Ptr HybridAutomatonAbstractFactory::createInitialHybridAutomaton(const GripperType& gripper,
+//                                                                              const Eigen::MatrixXd& home_config_js_arm,
+//                                                                              const Eigen::MatrixXd& home_config_js_base,
+//                                                                              const Eigen::MatrixXd& max_vel_js_arm,
+//                                                                              const Eigen::MatrixXd& max_vel_js_base,
+//                                                                              const Eigen::MatrixXd& index_vec_arm,
+//                                                                              const double& pos_epsilon_js_arm,
+//                                                                              const double& grasp_strength,
+//                                                                              const int& grasp_type)
 {
 
     //create Hybrid Automaton
@@ -452,21 +313,20 @@ ha::HybridAutomaton::Ptr HybridAutomatonAbstractFactory::createInitialHybridAuto
 
     move_home_initial_cm->setName("move_home_initial_cm");
 
-    ha::Controller::Ptr home_ctrl_arm = createSubjointSpaceControllerArm("move_home_initial_arm_ctrl",
-                                                                         (home_config_js_arm.size() == 0 ? _home_config_js_arm : home_config_js_arm),
-                                                                         max_vel_js_arm);
-    ha::Controller::Ptr home_ctrl_base = createSubjointSpaceControllerBase("move_home_initial_base_ctrl",
-                                                                           (home_config_js_base.size() == 0 ? _home_config_js_base : home_config_js_base),
-                                                                           max_vel_js_base);
+    ha::Controller::Ptr home_ctrl_arm = createSubjointSpaceControllerArm(p,
+                                                                         "move_home_initial_arm_ctrl"
+                                                                         );
+    ha::Controller::Ptr home_ctrl_base = createSubjointSpaceControllerBase(p,
+                                                                           "move_home_initial_base_ctrl");
     std::vector<ha::Controller::Ptr> home_ctrls;
     home_ctrls.push_back(home_ctrl_arm);
     home_ctrls.push_back(home_ctrl_base);
-    ha::ControlSet::Ptr goto_home_cs = createControlSet(home_ctrls);
+    ha::ControlSet::Ptr goto_home_cs = createControlSet(p,home_ctrls);
     move_home_initial_cm->setControlSet(goto_home_cs);
 
     //add controller to ControlSet
     ha::Controller::Ptr ungrasp_ctrl(new ha::Controller());
-    switch(gripper)
+    switch(p.gripper)
     {
     case NO_GRIPPER:
         break;
@@ -474,8 +334,8 @@ ha::HybridAutomaton::Ptr HybridAutomatonAbstractFactory::createInitialHybridAuto
     {
         ungrasp_ctrl->setName("FeixGraspControl");
         ungrasp_ctrl->setType("FeixGraspSoftHandController");
-        ungrasp_ctrl->setArgument("grasp_strength", grasp_strength);
-        ungrasp_ctrl->setArgument("grasp_type", grasp_type);
+        ungrasp_ctrl->setArgument("grasp_strength", p.grasp_strength);
+        ungrasp_ctrl->setArgument("grasp_type", p.grasp_type);
         goto_home_cs->appendController(ungrasp_ctrl);
     }
         break;
@@ -496,13 +356,11 @@ ha::HybridAutomaton::Ptr HybridAutomatonAbstractFactory::createInitialHybridAuto
     //Create first ControlSwitch
     move_home_initial_cs->setName("move_home_initial_cs");
     ha::JumpConditionPtr initial_convergence_arm_jc =
-            createSubjointSpaceConvergenceConditionArm(home_ctrl_arm,
-                                                       (index_vec_arm.size() == 0 ? _index_vec_arm : index_vec_arm),
-                                                       (pos_epsilon_js_arm == -1 ? _pos_epsilon_js_arm : pos_epsilon_js_arm));
+            createSubjointSpaceConvergenceConditionArm(p,home_ctrl_arm);
     ha::JumpConditionPtr initial_convergence_vel_arm_jc =
-            createJointSpaceZeroVelocityConditionArm();
-    ha::JumpConditionPtr initial_convergence_base_jc = createSubjointSpaceConvergenceConditionBase(home_ctrl_base);
-    ha::JumpConditionPtr initial_convergence_vel_base_jc = createJointSpaceZeroVelocityConditionBase();
+            createJointSpaceZeroVelocityConditionArm(p);
+    ha::JumpConditionPtr initial_convergence_base_jc = createSubjointSpaceConvergenceConditionBase(p,home_ctrl_base);
+    ha::JumpConditionPtr initial_convergence_vel_base_jc = createJointSpaceZeroVelocityConditionBase(p);
     move_home_initial_cs->add(initial_convergence_arm_jc);
     move_home_initial_cs->add(initial_convergence_vel_arm_jc);
     move_home_initial_cs->add(initial_convergence_base_jc);
@@ -545,7 +403,7 @@ ha::HybridAutomaton::Ptr HybridAutomatonAbstractFactory::createEmptyHybridAutoma
     return grav_comp_ha;
 }
 
-ha::ControlSet::Ptr HybridAutomatonAbstractFactory::createControlSet(ha::Controller::Ptr ctrl)
+ha::ControlSet::Ptr HybridAutomatonAbstractFactory::createControlSet(const HybridAutomatonAbstractParams& p, ha::Controller::Ptr ctrl)
 {
     ha::ControlSet::Ptr cs(new ha::ControlSet());
     cs->setType("rxControlSet");
@@ -553,7 +411,7 @@ ha::ControlSet::Ptr HybridAutomatonAbstractFactory::createControlSet(ha::Control
     return cs;
 }
 
-ha::ControlSet::Ptr HybridAutomatonAbstractFactory::createControlSet(const std::vector<ha::Controller::Ptr>& ctrls)
+ha::ControlSet::Ptr HybridAutomatonAbstractFactory::createControlSet(const HybridAutomatonAbstractParams& p, const std::vector<ha::Controller::Ptr>& ctrls)
 {
     ha::ControlSet::Ptr cs(new ha::ControlSet());
     cs->setType("rxControlSet");
@@ -562,37 +420,31 @@ ha::ControlSet::Ptr HybridAutomatonAbstractFactory::createControlSet(const std::
     return cs;
 }
 
-ha::ControlSet::Ptr HybridAutomatonAbstractFactory::createTPNakamuraControlSet(ha::Controller::Ptr ctrl, bool move_base,
-                                                                       const Eigen::MatrixXd& kp_js_nakamura_arm,
-                                                                       const Eigen::MatrixXd& kp_js_nakamura_base,
-                                                                       const Eigen::MatrixXd& kv_js_nakamura_arm,
-                                                                       const Eigen::MatrixXd& kv_js_nakamura_base,
-                                                                       const Eigen::MatrixXd& joint_weights_nakamura_arm,
-                                                                       const Eigen::MatrixXd& joint_weights_nakamura_base)
-{
-    ha::ControlSet::Ptr cs(new ha::ControlSet());
-    cs->setType("TPNakamuraControlSet");
-    cs->setArgument<Eigen::MatrixXd>("js_kp", _combineArmAndBase((kp_js_nakamura_arm.size() == 0 ? _kp_js_nakamura_arm : kp_js_nakamura_arm),
-                                                                 (kp_js_nakamura_base.size() == 0 ? _kp_js_nakamura_base : kp_js_nakamura_base)));
-    cs->setArgument<Eigen::MatrixXd>("js_kd", _combineArmAndBase((kv_js_nakamura_arm.size() == 0 ? _kv_js_nakamura_arm : kv_js_nakamura_arm),
-                                                                 (kv_js_nakamura_base.size() == 0 ? _kv_js_nakamura_base : kv_js_nakamura_base)));
+//ha::ControlSet::Ptr HybridAutomatonAbstractFactory::createTPNakamuraControlSet(const HybridAutomatonAbstractParams& params, ha::Controller::Ptr ctrl, bool move_base)
+//{
+//    HybridAutomatonRBOParams& p = (HybridAutomatonRBOParams&) params;
+//    ha::ControlSet::Ptr cs(new ha::ControlSet());
+//    cs->setType("TPNakamuraControlSet");
+//    cs->setArgument<Eigen::MatrixXd>("js_kp", _combineArmAndBase(p._kp_js_nakamura_arm,
+//                                                                 p._kp_js_nakamura_base));
+//    cs->setArgument<Eigen::MatrixXd>("js_kd", _combineArmAndBase(p._kv_js_nakamura_arm,
+//                                                                 p._kv_js_nakamura_base));
 
-    if(move_base)
-        cs->setArgument<Eigen::MatrixXd>("joint_weights",
-                                         _combineArmAndBase((joint_weights_nakamura_arm.size() == 0 ? _joint_weights_nakamura_arm : joint_weights_nakamura_arm),
-                                                            (joint_weights_nakamura_base.size() == 0 ? _joint_weights_nakamura_base_no_rotation : joint_weights_nakamura_base)));
-    else
-        cs->setArgument<Eigen::MatrixXd>("joint_weights",
-                                         _combineArmAndBase((joint_weights_nakamura_arm.size() == 0 ? _joint_weights_nakamura_arm : joint_weights_nakamura_arm),
-                                                            (joint_weights_nakamura_base.size() == 0 ? _joint_weights_nakamura_base_little_motion : joint_weights_nakamura_base)));
+//    if(move_base)
+//        cs->setArgument<Eigen::MatrixXd>("joint_weights",
+//                                         _combineArmAndBase(p._joint_weights_nakamura_arm,
+//                                                            p._joint_weights_nakamura_base_no_rotation ));
+//    else
+//        cs->setArgument<Eigen::MatrixXd>("joint_weights",
+//                                         _combineArmAndBase(p._joint_weights_nakamura_arm,
+//                                                            p._joint_weights_nakamura_base_little_motion));
 
 
-    cs->appendController(ctrl);
-    return cs;
-}
+//    cs->appendController(ctrl);
+//    return cs;
+//}
 
-ha::JumpCondition::Ptr HybridAutomatonAbstractFactory::createJointSpaceConvergenceCondition(ha::ControllerConstPtr js_ctrl,
-                                                                                    const double& pos_epsilon_js)
+ha::JumpCondition::Ptr HybridAutomatonAbstractFactory::createJointSpaceConvergenceCondition(const HybridAutomatonAbstractParams& p, ha::ControllerConstPtr js_ctrl)
 {
     ha::JumpConditionPtr jc(new ha::JumpCondition());
     ha::SensorPtr sensor(new ha::JointConfigurationSensor());
@@ -604,9 +456,7 @@ ha::JumpCondition::Ptr HybridAutomatonAbstractFactory::createJointSpaceConvergen
     return jc;
 }
 
-ha::JumpCondition::Ptr HybridAutomatonAbstractFactory::createSubjointSpaceConvergenceCondition(ha::ControllerConstPtr subjs_ctrl,
-                                                                                       const Eigen::MatrixXd& index_vec,
-                                                                                       const double& pos_epsilon_js)
+ha::JumpCondition::Ptr HybridAutomatonAbstractFactory::createSubjointSpaceConvergenceCondition(const HybridAutomatonAbstractParams& p, ha::ControllerConstPtr subjs_ctrl)
 {
     ha::JumpConditionPtr jc(new ha::JumpCondition());
     ha::SubjointConfigurationSensorPtr sensor(new ha::SubjointConfigurationSensor());
@@ -619,25 +469,24 @@ ha::JumpCondition::Ptr HybridAutomatonAbstractFactory::createSubjointSpaceConver
     return jc;
 }
 
-ha::JumpCondition::Ptr HybridAutomatonAbstractFactory::createSubjointSpaceConvergenceConditionArm(ha::ControllerConstPtr subjs_ctrl,
-                                                                                          const Eigen::MatrixXd& index_vec_arm,
-                                                                                          const double& pos_epsilon_js_arm)
+ha::JumpCondition::Ptr HybridAutomatonAbstractFactory::createSubjointSpaceConvergenceConditionArm(const HybridAutomatonAbstractParams& p,
+                                                                                                  ha::ControllerConstPtr subjs_ctrl)
 {
     return createSubjointSpaceConvergenceCondition(subjs_ctrl,
                                                    (index_vec_arm.size() == 0 ? _index_vec_arm : index_vec_arm),
                                                    (pos_epsilon_js_arm == -1 ? _pos_epsilon_js_arm : pos_epsilon_js_arm));
 }
 
-ha::JumpCondition::Ptr HybridAutomatonAbstractFactory::createSubjointSpaceConvergenceConditionBase(ha::ControllerConstPtr subjs_ctrl,
-                                                                                           const Eigen::MatrixXd& index_vec_base,
-                                                                                           const double& pos_epsilon_js_base)
+ha::JumpCondition::Ptr HybridAutomatonAbstractFactory::createSubjointSpaceConvergenceConditionBase(const HybridAutomatonAbstractParams& p,
+                                                                                                   ha::ControllerConstPtr subjs_ctrl)
 {
     return createSubjointSpaceConvergenceCondition(subjs_ctrl,
                                                    (index_vec_base.size() == 0 ? _index_vec_base : index_vec_base),
                                                    (pos_epsilon_js_base == -1 ? _pos_epsilon_js_base : pos_epsilon_js_base));
 }
 
-ha::JumpCondition::Ptr HybridAutomatonAbstractFactory::createJointSpaceVelocityCondition(const Eigen::MatrixXd& index_vec,
+ha::JumpCondition::Ptr HybridAutomatonAbstractFactory::createJointSpaceVelocityCondition(const HybridAutomatonAbstractParams& p,
+                                                                                         const Eigen::MatrixXd& index_vec,
                                                                                  const Eigen::MatrixXd& vel_goal_js,
                                                                                  const double& vel_epsilon_js){
     ha::JumpConditionPtr jc(new ha::JumpCondition());

@@ -21,7 +21,9 @@ typedef boost::shared_ptr<const HybridAutomatonAbstractFactory> HybridAutomatonA
 
 struct HybridAutomatonAbstractParams
 {
-
+    GripperType gripper;
+    double grasp_strength;
+    int grasp_type;
 };
 
 /**
@@ -81,15 +83,7 @@ public:
          * @param tool The tool used by the robot
          * @return ha::HybridAutomaton::Ptr Pointer to the generated HA
          */
-    ha::HybridAutomaton::Ptr createInitialHybridAutomaton(const GripperType& gripper,
-                                                          const Eigen::MatrixXd& home_config_js_arm = Eigen::MatrixXd(),
-                                                          const Eigen::MatrixXd& home_config_js_base = Eigen::MatrixXd(),
-                                                          const Eigen::MatrixXd& max_vel_js_arm = Eigen::MatrixXd(),
-                                                          const Eigen::MatrixXd& max_vel_js_base = Eigen::MatrixXd(),
-                                                          const Eigen::MatrixXd& index_vec_arm = Eigen::MatrixXd(),
-                                                          const double& pos_epsilon_js_arm = -1,
-                                                          const double& grasp_strength=4.0,
-                                                          const int& grasp_type=0);
+    ha::HybridAutomaton::Ptr createInitialHybridAutomaton(const HybridAutomatonAbstractParams& params);
 
     /**
          * @brief Create an empty hybrid automaton which performs gravity compensation
@@ -107,9 +101,9 @@ public:
          * @param ctrl The controller in the controlset
          * @return ha::ControlSet::Ptr The generated control set
          */
-    ha::ControlSet::Ptr createControlSet(ha::Controller::Ptr ctrl);
+    ha::ControlSet::Ptr createControlSet(const HybridAutomatonAbstractParams& params,ha::Controller::Ptr ctrl);
 
-    ha::ControlSet::Ptr createControlSet(const std::vector<ha::Controller::Ptr>& ctrls);
+    ha::ControlSet::Ptr createControlSet(const HybridAutomatonAbstractParams& params,const std::vector<ha::Controller::Ptr>& ctrls);
 
     /**
          * @brief Create a control set for task space controllers
@@ -118,14 +112,10 @@ public:
          * @param move_base True if the control set should move both base and arm
          * @return ha::ControlSet::Ptr The generated control set
          */
-    ha::ControlSet::Ptr createTPNakamuraControlSet(ha::Controller::Ptr ctrl,
-                                                   bool move_base,
-                                                   const Eigen::MatrixXd &kp_js_nakamura_arm = Eigen::MatrixXd(),
-                                                   const Eigen::MatrixXd &kp_js_nakamura_base = Eigen::MatrixXd(),
-                                                   const Eigen::MatrixXd &kv_js_nakamura_arm = Eigen::MatrixXd(),
-                                                   const Eigen::MatrixXd &kv_js_nakamura_base = Eigen::MatrixXd(),
-                                                   const Eigen::MatrixXd &joint_weights_nakamura_arm = Eigen::MatrixXd(),
-                                                   const Eigen::MatrixXd &joint_weights_nakamura_base = Eigen::MatrixXd());
+    ha::ControlSet::Ptr createTPNakamuraControlSet(const HybridAutomatonAbstractParams& params,
+                                                   ha::Controller::Ptr ctrl,
+                                                   bool move_base
+            );
 
 
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -141,11 +131,15 @@ public:
      * @param completion_time the desired time to arrive for the interpolator
      * @return ha::Controller::Ptr The generated controller
      */
-    virtual ha::Controller::Ptr createJointSpaceController(const HybridAutomatonAbstractParams& params) = 0;
+    virtual ha::Controller::Ptr createJointSpaceController(const HybridAutomatonAbstractParams& params,
+                                                           std::string name,
+                                                           const Eigen::MatrixXd &goal_js,
+                                                           double completion_time,
+                                                           bool goal_relative) = 0;
 
-    virtual ha::Controller::Ptr createSubjointSpaceController(const HybridAutomatonAbstractParams& params) = 0;
+    virtual ha::Controller::Ptr createSubjointSpaceController(const HybridAutomatonAbstractParams& params, const std::string name) = 0;
 
-    virtual ha::Controller::Ptr createBBSubjointSpaceController(const HybridAutomatonAbstractParams& params) = 0;
+    virtual ha::Controller::Ptr createBBSubjointSpaceController(const HybridAutomatonAbstractParams& params, const std::string name) = 0;
 
     /**
      * @brief Create an interpolated joint space controller to move from the current robots position to a goal configuration (only arm)
@@ -155,7 +149,7 @@ public:
      * @param max_velocity The maximum velocity for the joints of the arm
      * @return ha::Controller::Ptr The generated controller
      */
-    virtual ha::Controller::Ptr createSubjointSpaceControllerArm(const HybridAutomatonAbstractParams& params) = 0;
+    virtual ha::Controller::Ptr createSubjointSpaceControllerArm(const HybridAutomatonAbstractParams& params, const std::string name) = 0;
 
     /**
          * @brief Create an interpolated joint space controller to move from the current robots position to a goal configuration (only base)
@@ -165,7 +159,7 @@ public:
          * @param max_velocity The maximum velocity for the base
          * @return ha::Controller::Ptr The generated controller
          */
-    virtual ha::Controller::Ptr createSubjointSpaceControllerBase(const HybridAutomatonAbstractParams& params) = 0;
+    virtual ha::Controller::Ptr createSubjointSpaceControllerBase(const HybridAutomatonAbstractParams& params, const std::string name) = 0;
 
     /**
       * @brief Create an interpolated joint space controller to move from the current robots position to a goal configuration (only base)
@@ -175,11 +169,11 @@ public:
       * @param max_velocity The maximum velocity for the base
       * @return ha::Controller::Ptr The generated controller
       */
-    virtual ha::Controller::Ptr createBBSubjointSpaceControllerBase(const HybridAutomatonAbstractParams& params) = 0;
+    virtual ha::Controller::Ptr createBBSubjointSpaceControllerBase(const HybridAutomatonAbstractParams& params, const std::string name) = 0;
 
-    virtual ha::Controller::Ptr createOperationalSpaceController(const HybridAutomatonAbstractParams& params) = 0;
+    virtual ha::Controller::Ptr createOperationalSpaceController(const HybridAutomatonAbstractParams& params, const std::string name) = 0;
 
-    virtual ha::Controller::Ptr createOperationalSpaceController(const HybridAutomatonAbstractParams& params) = 0;
+
 
     /**
          * @brief Create an interpolated task space controller to move the end-effector from the current robots position to a goal frame given as a /tf frame
@@ -191,7 +185,7 @@ public:
          * @param max_displacement_velocity the maximal end-effector translational velocity in m/s
          * @param max_rotational_velocity the maximal end-effector rotational velocity in rad/s
          */
-    virtual ha::Controller::Ptr createBBOperationalSpaceController(const HybridAutomatonAbstractParams& params) = 0;
+    virtual ha::Controller::Ptr createBBOperationalSpaceController(const HybridAutomatonAbstractParams& params, const std::string name) = 0;
 
 
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -200,8 +194,11 @@ public:
     ///
 
 
-    ha::JumpCondition::Ptr createJointSpaceConvergenceCondition(ha::ControllerConstPtr js_ctrl,
-                                                                const double &pos_epsilon_js);
+    ha::JumpCondition::Ptr createJointSpaceConvergenceCondition(const HybridAutomatonAbstractParams& params,
+                                                                ha::ControllerConstPtr js_ctrl
+//                                                                ,
+//                                                                const double &pos_epsilon_js
+                                                                );
 
     /**
      * @brief Create a jump condition that checks if a joint space controller converges
@@ -209,9 +206,12 @@ public:
      * @param ctrl A pointer to the goal controller
      * @return ha::JumpCondition::Ptr Pointer to the generated jump condition
      */
-    ha::JumpCondition::Ptr createSubjointSpaceConvergenceCondition(ha::ControllerConstPtr subjs_ctrl,
-                                                                   const Eigen::MatrixXd& index_vec,
-                                                                   const double& pos_epsilon_js);
+    ha::JumpCondition::Ptr createSubjointSpaceConvergenceCondition(const HybridAutomatonAbstractParams& params,
+                                                                   ha::ControllerConstPtr subjs_ctrl,
+                                                                   const Eigen::MatrixXd& index_vec
+//                                                                   ,
+//                                                                   const double& pos_epsilon_js
+                                                                   );
 
     /**
      * @brief Create a jump condition that checks if an op space space controller for the arm converges
@@ -219,59 +219,75 @@ public:
      * @param ctrl A pointer to the goal arm controller
      * @return ha::JumpCondition::Ptr Pointer to the generated jump condition
      */
-    ha::JumpCondition::Ptr createSubjointSpaceConvergenceConditionArm(ha::ControllerConstPtr subjs_ctrl,
-                                                                      const Eigen::MatrixXd& index_vec_arm = Eigen::MatrixXd(),
-                                                                      const double& pos_epsilon_js_arm = -1);
+    ha::JumpCondition::Ptr createSubjointSpaceConvergenceConditionArm(const HybridAutomatonAbstractParams& params,
+                                                                      ha::ControllerConstPtr subjs_ctrl
+//                                                                      ,
+//                                                                      const Eigen::MatrixXd& index_vec_arm = Eigen::MatrixXd(),
+//                                                                      const double& pos_epsilon_js_arm = -1
+            );
     /**
      * @brief Create a jump condition that checks if an op space space controller for the base converges
      *
      * @param ctrl A pointer to the goal base controller
      * @return ha::JumpCondition::Ptr Pointer to the generated jump condition
      */
-    ha::JumpCondition::Ptr createSubjointSpaceConvergenceConditionBase(ha::ControllerConstPtr subjs_ctrl,
-                                                                       const Eigen::MatrixXd& index_vec_base = Eigen::MatrixXd(),
-                                                                       const double &pos_epsilon_js_base = -1);
+    ha::JumpCondition::Ptr createSubjointSpaceConvergenceConditionBase(const HybridAutomatonAbstractParams& params,
+                                                                       ha::ControllerConstPtr subjs_ctrl
+//                                                                       ,
+//                                                                       const Eigen::MatrixXd& index_vec_base = Eigen::MatrixXd(),
+//                                                                       const double &pos_epsilon_js_base = -1
+            );
 
-    ha::JumpCondition::Ptr createJointSpaceVelocityCondition(const Eigen::MatrixXd& index_vec,
-                                                             const Eigen::MatrixXd& vel_goal_js,
-                                                             const double& vel_epsilon_js = -1);
+    ha::JumpCondition::Ptr createJointSpaceVelocityCondition(const HybridAutomatonAbstractParams& params,
+                                                             const Eigen::MatrixXd& index_vec,
+                                                             const Eigen::MatrixXd& vel_goal_js
+//                                                             ,
+//                                                             const double& vel_epsilon_js = -1
+            );
 
     /**
      * @brief Create a jump condition that checks if a joint space controller has zero velocity
      *
      * @return ha::JumpCondition::Ptr Pointer to the generated jump condition
      */
-    ha::JumpCondition::Ptr createJointSpaceZeroVelocityCondition(const Eigen::MatrixXd& index_vec,
-                                                                 const double& vel_epsilon_js = -1);
+    ha::JumpCondition::Ptr createJointSpaceZeroVelocityCondition(const HybridAutomatonAbstractParams& params,
+                                                                 const Eigen::MatrixXd& index_vec
+//                                                                 ,
+//                                                                 const double& vel_epsilon_js = -1
+            );
 
     /**
      * @brief Create a jump condition that checks if an op space controller for the arm has zero velocity
      *
      * @return ha::JumpCondition::Ptr Pointer to the generated jump condition
      */
-    ha::JumpCondition::Ptr createJointSpaceZeroVelocityConditionArm(const Eigen::MatrixXd& index_vec_arm = Eigen::MatrixXd(),
-                                                                    const double& vel_epsilon_js_arm = -1);
+    ha::JumpCondition::Ptr createJointSpaceZeroVelocityConditionArm(const HybridAutomatonAbstractParams& params
+//                                                                    const Eigen::MatrixXd& index_vec_arm = Eigen::MatrixXd(),
+//                                                                    const double& vel_epsilon_js_arm = -1
+            );
 
-    ha::JumpCondition::Ptr createJointSpaceVelocityConditionArm(const Eigen::MatrixXd& index_vec_arm  = Eigen::MatrixXd(),
-                                                                const Eigen::MatrixXd& vel_goal_js_arm  = Eigen::MatrixXd(),
-                                                                const double& vel_epsilon_js_arm = -1);
+    ha::JumpCondition::Ptr createJointSpaceVelocityConditionArm(const HybridAutomatonAbstractParams& params,
+                                                                const Eigen::MatrixXd& vel_goal_js_arm  = Eigen::MatrixXd()
+//                                                                   const Eigen::MatrixXd& index_vec_arm  = Eigen::MatrixXd(),
+//                                                                    const double& vel_epsilon_js_arm = -1
+                                                            );
 
     /**
      * @brief Create a jump condition that checks if an op space controller for the base has zero velocity
      *
      * @return ha::JumpCondition::Ptr Pointer to the generated jump condition
      */
-    ha::JumpCondition::Ptr createJointSpaceZeroVelocityConditionBase(const Eigen::MatrixXd &index_vec_base = Eigen::MatrixXd(),
-                                                                     const double& vel_epsilon_js_base =  -1);
+    ha::JumpCondition::Ptr createJointSpaceZeroVelocityConditionBase(const HybridAutomatonAbstractParams& params);
 
-    ha::JumpCondition::Ptr createOperationalSpaceConvergenceCondition(ha::ControllerConstPtr ctrl,
+    ha::JumpCondition::Ptr createOperationalSpaceConvergenceCondition(const HybridAutomatonAbstractParams& params,
+                                                                      ha::ControllerConstPtr ctrl,
                                                                       bool relative,
-                                                                      double pos_epsilon_os_linear = -1,
-                                                                      double pos_epsilon_os_angular = -1,
-                                                                      bool only_displacement = false);
+                                                                      bool only_displacement = false
+                                                                      );
 
 
-    ha::JumpCondition::Ptr createMaxTimeCondition(double max_time);
+    ha::JumpCondition::Ptr createMaxTimeCondition(const HybridAutomatonAbstractParams& params,
+                                                  double max_time);
 
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -285,9 +301,12 @@ public:
      * @param max_time Max time to wait before triggering
      * @return ha::ControlSwitch::Ptr The generated CS
      */
-    ha::ControlSwitch::Ptr CreateMaxTimeControlSwitch(const std::string& mode_name, double max_time);
+    ha::ControlSwitch::Ptr CreateMaxTimeControlSwitch(const HybridAutomatonAbstractParams& params,
+                                                      const std::string& mode_name,
+                                                      double max_time);
 
-    ha::ControlSwitch::Ptr CreateMaxForceTorqueControlSwitch(const std::string& name,
+    ha::ControlSwitch::Ptr CreateMaxForceTorqueControlSwitch(const HybridAutomatonAbstractParams& params,
+                                                             const std::string& name,
                                                              const Eigen::MatrixXd& ft_weights,
                                                              const Eigen::MatrixXd& ft_max_val,
                                                              const ha::JumpCondition::JumpCriterion ft_criterion,
@@ -456,89 +475,7 @@ public:
                                                 const Eigen::MatrixXd &kv_os_linear = Eigen::MatrixXd(),
                                                 const Eigen::MatrixXd &kv_os_angular = Eigen::MatrixXd());
 
-    Eigen::MatrixXd max_vel_js_arm() const;
-    void setMax_vel_js_arm(const Eigen::MatrixXd &max_vel_js_arm);
 
-    Eigen::MatrixXd max_vel_js_base() const;
-    void setMax_vel_js_base(const Eigen::MatrixXd &max_vel_js_base);
-
-    Eigen::MatrixXd kp_js_arm() const;
-    void setKp_js_arm(const Eigen::MatrixXd &kp_js_arm);
-
-    Eigen::MatrixXd kp_js_base() const;
-    void setKp_js_base(const Eigen::MatrixXd &kp_js_base);
-
-    Eigen::MatrixXd kv_js_arm() const;
-    void setKv_js_arm(const Eigen::MatrixXd &kv_js_arm);
-
-    Eigen::MatrixXd kv_js_base() const;
-    void setKv_js_base(const Eigen::MatrixXd &kv_js_base);
-
-    Eigen::MatrixXd kp_os_linear() const;
-    void setKp_os_linear(const Eigen::MatrixXd &kp_os_linear);
-
-    Eigen::MatrixXd kp_os_angular() const;
-    void setKp_os_angular(const Eigen::MatrixXd &kp_os_angular);
-
-    Eigen::MatrixXd kv_os_linear() const;
-    void setKv_os_linear(const Eigen::MatrixXd &kv_os_linear);
-
-    Eigen::MatrixXd kv_os_angular() const;
-    void setKv_os_angular(const Eigen::MatrixXd &kv_os_angular);
-
-    Eigen::MatrixXd kp_js_nakamura_arm() const;
-    void setKp_js_nakamura_arm(const Eigen::MatrixXd &kp_js_nakamura_arm);
-
-    Eigen::MatrixXd kp_js_nakamura_base() const;
-    void setKp_js_nakamura_base(const Eigen::MatrixXd &kp_js_nakamura_base);
-
-    Eigen::MatrixXd kv_js_nakamura_arm() const;
-    void setKv_js_nakamura_arm(const Eigen::MatrixXd &kv_js_nakamura_arm);
-
-    Eigen::MatrixXd kv_js_nakamura_base() const;
-    void setKv_js_nakamura_base(const Eigen::MatrixXd &kv_js_nakamura_base);
-
-    Eigen::MatrixXd joint_weights_nakamura_arm() const;
-    void setJoint_weights_nakamura_arm(const Eigen::MatrixXd &joint_weights_nakamura_arm);
-
-    Eigen::MatrixXd joint_weights_nakamura_base() const;
-    void setJoint_weights_nakamura_base(const Eigen::MatrixXd &joint_weights_nakamura_base);
-
-    Eigen::MatrixXd joint_weights_nakamura_base_no_rotation() const;
-    void setJoint_weights_nakamura_base_no_rotation(const Eigen::MatrixXd &joint_weights_nakamura_base_no_rotation);
-
-    Eigen::MatrixXd joint_weights_nakamura_base_little_motion() const;
-    void setJoint_weights_nakamura_base_little_motion(const Eigen::MatrixXd &joint_weights_nakamura_base_little_motion);
-
-    Eigen::MatrixXd home_config_js_arm() const;
-    void setHome_config_js_arm(const Eigen::MatrixXd &home_config_js_arm);
-
-    Eigen::MatrixXd home_config_js_base() const;
-    void setHome_config_js_base(const Eigen::MatrixXd &home_config_js_base);
-
-    double pos_epsilon_js_arm() const;
-    void setPos_epsilon_js_arm(const double &pos_epsilon_js_arm);
-
-    double pos_epsilon_js_base() const;
-    void setPos_epsilon_js_base(const double &pos_epsilon_js_base);
-
-    double vel_epsilon_js_arm() const;
-    void setVel_epsilon_js_arm(const double &vel_epsilon_js_arm);
-
-    double vel_epsilon_js_base() const;
-    void setVel_epsilon_js_base(const double &vel_epsilon_js_base);
-
-    double pos_epsilon_os_linear() const;
-    void setPos_epsilon_os_linear(const double &pos_epsilon_os_linear);
-
-    double pos_epsilon_os_angular() const;
-    void setPos_epsilon_os_angular(const double &pos_epsilon_os_angular);
-
-    double vel_epsilon_os_linear() const;
-    void setVel_epsilon_os_linear(const double &vel_epsilon_os_linear);
-
-    double vel_epsilon_os_angular() const;
-    void setVel_epsilon_os_angular(const double &vel_epsilon_os_angular);
 
     /**
      * @brief
@@ -557,10 +494,7 @@ protected:
          *
          * @return HybridAutomatonAbstractFactory Pointer to the generated clone
          */
-    virtual HybridAutomatonAbstractFactory* _doClone() const
-    {
-        return (new HybridAutomatonAbstractFactory(*this));
-    }
+    virtual HybridAutomatonAbstractFactory* _doClone() const = 0;
 
     /**
          * @brief Concatenates two vectors, one for the arm and one for the base
@@ -571,81 +505,7 @@ protected:
          */
     virtual Eigen::MatrixXd _combineArmAndBase(const Eigen::MatrixXd& arm_vector, const Eigen::MatrixXd base_vector);
 
-    /// Number of degrees of freedom of the arm
-    int _num_dof_arm;
 
-    /// Number of degrees of freedom of the base
-    int _num_dof_base;
-
-    /// Indices that define the convention for the joints of the arm and the base
-    std::string _index_str_base;
-    std::string _index_str_arm;
-    Eigen::MatrixXd _index_vec_base;
-    Eigen::MatrixXd _index_vec_arm;
-
-    /// Maximum joint space (js) velocity
-    Eigen::MatrixXd _max_vel_js_arm;
-    Eigen::MatrixXd _max_vel_js_base;
-
-    /// Joint space (js) gains
-    Eigen::MatrixXd _kp_js_arm;
-    Eigen::MatrixXd _kp_js_base;
-    Eigen::MatrixXd _kv_js_arm;
-    Eigen::MatrixXd _kv_js_base;
-
-    /// Operational space gains (3x orientation + 3x position)
-    Eigen::MatrixXd _kp_os_linear;
-    Eigen::MatrixXd _kp_os_angular;
-    Eigen::MatrixXd _kv_os_linear;
-    Eigen::MatrixXd _kv_os_angular;
-
-    /// Joint space integration gains for operational space Nakamura control set
-    Eigen::MatrixXd _kp_js_nakamura_arm;
-    Eigen::MatrixXd _kp_js_nakamura_base;
-    Eigen::MatrixXd _kv_js_nakamura_arm;
-    Eigen::MatrixXd _kv_js_nakamura_base;
-
-    /// Weights of each joint for operational space Nakamura control set
-    Eigen::MatrixXd _joint_weights_nakamura_arm;
-    Eigen::MatrixXd _joint_weights_nakamura_base;
-    Eigen::MatrixXd _joint_weights_nakamura_base_no_rotation;
-    Eigen::MatrixXd _joint_weights_nakamura_base_little_motion;
-
-    /// Home configuration - usually a good initial position to begin the interaction and/or a safe
-    /// position to return to
-    Eigen::MatrixXd _home_config_js_arm;
-    Eigen::MatrixXd _home_config_js_base;
-
-    /// Maximum joint space (os) velocity
-    double _max_vel_os_linear;
-    double _max_vel_os_angular;
-
-    /// Convergence radius for the position of a joint space (js) controller
-    double _pos_epsilon_js_arm;
-    double _pos_epsilon_js_base;
-
-    /// Convergence radius for the velocity of a joint space (js) controller
-    double _vel_epsilon_js_arm;
-    double _vel_epsilon_js_base;
-
-    /// Convergence goal for the velocity of a joint space (js) controller
-    Eigen::MatrixXd _vel_goal_js_arm;
-    Eigen::MatrixXd _vel_goal_js_base;
-
-    /// Convergence radius of an operational space (os) controller
-    double _pos_epsilon_os_linear;
-    double _pos_epsilon_os_angular;
-
-    /// Convergence radius for the velocity of an operational space (os) controller
-    double _vel_epsilon_os_linear;
-    double _vel_epsilon_os_angular;
-
-    /// Convergence goal for the velocity of an operational space (os) controller
-    Eigen::MatrixXd _vel_goal_os_linear;
-    Eigen::MatrixXd _vel_goal_os_angular;
-
-    /// The default update rate
-    int _update_rate;
 };
 
 }
