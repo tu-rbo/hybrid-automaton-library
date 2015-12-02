@@ -5,6 +5,26 @@
 
 #include <boost/shared_ptr.hpp>
 
+/**
+ * Things you have to implement in your own Factory:
+ *
+ * Control Sets:
+ *  virtual ha::ControlSet::Ptr createJointSpaceControlSet(const HybridAutomatonAbstractParams& params,ha::Controller::Ptr ctrl) = 0;
+ *  virtual ha::ControlSet::Ptr createJointSpaceControlSet(const HybridAutomatonAbstractParams& params,const std::vector<ha::Controller::Ptr>& ctrls) = 0;
+ *  virtual ha::ControlSet::Ptr createTaskSpaceControlSet(const HybridAutomatonAbstractParams& params, ha::Controller::Ptr ctrl, bool move_base ) = 0;
+ *
+ * Controllers:
+ *  virtual ha::Controller::Ptr createGraspController(const HybridAutomatonAbstractParams& params, std::string name) = 0;
+ *  virtual ha::Controller::Ptr createJointSpaceController(const HybridAutomatonAbstractParams& params, std::string name, const Eigen::MatrixXd &goal_js, double completion_time, bool goal_relative) = 0;
+ *  virtual ha::Controller::Ptr createSubjointSpaceController(const HybridAutomatonAbstractParams& params, std::string name, const Eigen::MatrixXd& goal_js, const Eigen::MatrixXd& index_vec, bool is_relative) = 0;
+ *  virtual ha::Controller::Ptr createBBSubjointSpaceController(const HybridAutomatonAbstractParams& params, std::string name, bool use_tf, const std::string& topic_name, const std::string& tf_parent, const Eigen::MatrixXd& index_vec, bool is_relative) = 0;
+ *  virtual ha::Controller::Ptr createBBSubjointSpaceControllerBase(const HybridAutomatonAbstractParams& params, const std::string name, bool use_tf, const std::string& topic_name, const std::string& tf_parent, bool is_relative) = 0;
+ *  virtual ha::Controller::Ptr createOperationalSpaceController(const HybridAutomatonAbstractParams& params, std::string name, const Eigen::MatrixXd &goal_op_translation, const Eigen::MatrixXd &goal_op_rot_matrix, double completion_time, bool is_relative)= 0;
+ *  virtual ha::Controller::Ptr createOperationalSpaceController(const HybridAutomatonAbstractParams& params, std::string name, const Eigen::MatrixXd &goal_op_translation, const Eigen::MatrixXd &goal_op_rot_matrix, bool is_relative)=0;
+ *
+ * Various:
+ *  virtual HybridAutomatonAbstractFactory* _doClone() const = 0;
+ */
 namespace ha {
 
 enum GripperType
@@ -22,6 +42,7 @@ typedef boost::shared_ptr<const HybridAutomatonAbstractFactory> HybridAutomatonA
 
 struct HybridAutomatonAbstractParams
 {
+    /// Grasp parameters
     GripperType gripper;
     double grasp_strength;
     int grasp_type;
