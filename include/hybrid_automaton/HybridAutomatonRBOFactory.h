@@ -388,9 +388,9 @@ public:
          * @param ctrl The controller in the controlset
          * @return ha::ControlSet::Ptr The generated control set
          */
-    ha::ControlSet::Ptr createControlSet(const HybridAutomatonAbstractParams& params,ha::Controller::Ptr ctrl);
+    ha::ControlSet::Ptr createJointSpaceControlSet(const HybridAutomatonAbstractParams& params,ha::Controller::Ptr ctrl);
 
-    ha::ControlSet::Ptr createControlSet(const HybridAutomatonAbstractParams& params,const std::vector<ha::Controller::Ptr>& ctrls);
+    ha::ControlSet::Ptr createJointSpaceControlSet(const HybridAutomatonAbstractParams& params,const std::vector<ha::Controller::Ptr>& ctrls);
 
     /**
          * @brief Create a control set for task space controllers
@@ -399,7 +399,7 @@ public:
          * @param move_base True if the control set should move both base and arm
          * @return ha::ControlSet::Ptr The generated control set
          */
-    ha::ControlSet::Ptr createTPNakamuraControlSet(const HybridAutomatonAbstractParams& params,
+    virtual ha::ControlSet::Ptr createTaskSpaceControlSet(const HybridAutomatonAbstractParams& params,
                                                    ha::Controller::Ptr ctrl,
                                                    bool move_base
                                                    );
@@ -441,26 +441,6 @@ public:
                                                                 const std::string& tf_parent,
                                                                 const Eigen::MatrixXd& index_vec,
                                                                 bool is_relative);
-    /**
-     * @brief Create an interpolated joint space controller to move from the current robots position to a goal configuration (only arm)
-     *
-     * @param name The controller name - must be unique within a hybrid automaton
-     * @param goal The goal configuration
-     * @param max_velocity The maximum velocity for the joints of the arm
-     * @return ha::Controller::Ptr The generated controller
-     */
-    virtual ha::Controller::Ptr createSubjointSpaceControllerArm(const HybridAutomatonAbstractParams& params, const std::string name);
-
-    /**
-         * @brief Create an interpolated joint space controller to move from the current robots position to a goal configuration (only base)
-         *
-         * @param name The controller name - must be unique within a hybrid automaton
-         * @param goal The goal configuration
-         * @param max_velocity The maximum velocity for the base
-         * @return ha::Controller::Ptr The generated controller
-         */
-    virtual ha::Controller::Ptr createSubjointSpaceControllerBase(const HybridAutomatonAbstractParams& params, const std::string name);
-
     /**
       * @brief Create an interpolated joint space controller to move from the current robots position to a goal configuration (only base)
       *

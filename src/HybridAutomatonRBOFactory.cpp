@@ -545,7 +545,7 @@ ha::HybridAutomaton::Ptr HybridAutomatonRBOFactory::createEmptyHybridAutomaton()
     return grav_comp_ha;
 }
 
-ha::ControlSet::Ptr HybridAutomatonRBOFactory::createControlSet(const HybridAutomatonAbstractParams& params, ha::Controller::Ptr ctrl)
+ha::ControlSet::Ptr HybridAutomatonRBOFactory::createJointSpaceControlSet(const HybridAutomatonAbstractParams& params, ha::Controller::Ptr ctrl)
 {
     ha::ControlSet::Ptr cs(new ha::ControlSet());
     cs->setType("rxControlSet");
@@ -553,7 +553,7 @@ ha::ControlSet::Ptr HybridAutomatonRBOFactory::createControlSet(const HybridAuto
     return cs;
 }
 
-ha::ControlSet::Ptr HybridAutomatonRBOFactory::createControlSet(const HybridAutomatonAbstractParams& params, const std::vector<ha::Controller::Ptr>& ctrls)
+ha::ControlSet::Ptr HybridAutomatonRBOFactory::createJointSpaceControlSet(const HybridAutomatonAbstractParams& params, const std::vector<ha::Controller::Ptr>& ctrls)
 {
     ha::ControlSet::Ptr cs(new ha::ControlSet());
     cs->setType("rxControlSet");
@@ -562,7 +562,7 @@ ha::ControlSet::Ptr HybridAutomatonRBOFactory::createControlSet(const HybridAuto
     return cs;
 }
 
-ha::ControlSet::Ptr HybridAutomatonRBOFactory::createTPNakamuraControlSet(const HybridAutomatonAbstractParams& params, ha::Controller::Ptr ctrl, bool move_base)
+ha::ControlSet::Ptr HybridAutomatonRBOFactory::createTaskSpaceControlSet(const HybridAutomatonAbstractParams& params, ha::Controller::Ptr ctrl, bool move_base)
 {
     HybridAutomatonRBOParams& p = (HybridAutomatonRBOParams&)params;
     ha::ControlSet::Ptr cs(new ha::ControlSet());

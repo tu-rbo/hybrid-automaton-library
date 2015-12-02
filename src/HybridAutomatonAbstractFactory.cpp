@@ -325,7 +325,7 @@ ha::HybridAutomaton::Ptr HybridAutomatonAbstractFactory::createInitialHybridAuto
     std::vector<ha::Controller::Ptr> home_ctrls;
     home_ctrls.push_back(home_ctrl_arm);
     home_ctrls.push_back(home_ctrl_base);
-    ha::ControlSet::Ptr goto_home_cs = createControlSet(p,home_ctrls);
+    ha::ControlSet::Ptr goto_home_cs = createJointSpaceControlSet(p,home_ctrls);
     move_home_initial_cm->setControlSet(goto_home_cs);
 
     //add controller to ControlSet
@@ -432,47 +432,6 @@ ha::Controller::Ptr HybridAutomatonAbstractFactory::createSubjointSpaceControlle
                                          is_relative);
 }
 
-
-ha::ControlSet::Ptr HybridAutomatonAbstractFactory::createControlSet(const HybridAutomatonAbstractParams& p, ha::Controller::Ptr ctrl)
-{
-    ha::ControlSet::Ptr cs(new ha::ControlSet());
-    cs->setType("rxControlSet");
-    cs->appendController(ctrl);
-    return cs;
-}
-
-ha::ControlSet::Ptr HybridAutomatonAbstractFactory::createControlSet(const HybridAutomatonAbstractParams& p, const std::vector<ha::Controller::Ptr>& ctrls)
-{
-    ha::ControlSet::Ptr cs(new ha::ControlSet());
-    cs->setType("rxControlSet");
-    for(int i=0; i<ctrls.size(); i++)
-        cs->appendController(ctrls.at(i));
-    return cs;
-}
-
-//ha::ControlSet::Ptr HybridAutomatonAbstractFactory::createTPNakamuraControlSet(const HybridAutomatonAbstractParams& params, ha::Controller::Ptr ctrl, bool move_base)
-//{
-//    HybridAutomatonRBOParams& p = (HybridAutomatonRBOParams&) params;
-//    ha::ControlSet::Ptr cs(new ha::ControlSet());
-//    cs->setType("TPNakamuraControlSet");
-//    cs->setArgument<Eigen::MatrixXd>("js_kp", _combineArmAndBase(p._kp_js_nakamura_arm,
-//                                                                 p._kp_js_nakamura_base));
-//    cs->setArgument<Eigen::MatrixXd>("js_kd", _combineArmAndBase(p._kv_js_nakamura_arm,
-//                                                                 p._kv_js_nakamura_base));
-
-//    if(move_base)
-//        cs->setArgument<Eigen::MatrixXd>("joint_weights",
-//                                         _combineArmAndBase(p._joint_weights_nakamura_arm,
-//                                                            p._joint_weights_nakamura_base_no_rotation ));
-//    else
-//        cs->setArgument<Eigen::MatrixXd>("joint_weights",
-//                                         _combineArmAndBase(p._joint_weights_nakamura_arm,
-//                                                            p._joint_weights_nakamura_base_little_motion));
-
-
-//    cs->appendController(ctrl);
-//    return cs;
-//}
 
 ha::JumpCondition::Ptr HybridAutomatonAbstractFactory::createJointSpaceConvergenceCondition(const HybridAutomatonAbstractParams& p, ha::ControllerConstPtr js_ctrl)
 {
@@ -664,7 +623,7 @@ void HybridAutomatonAbstractFactory::CreateGoToHomeCMAndConvergenceCSArm(const H
                                                                          false);
 
 
-    ha::ControlSet::Ptr goto_home_cs =  createControlSet(p,
+    ha::ControlSet::Ptr goto_home_cs =  createJointSpaceControlSet(p,
                                                          home_ctrl_arm);
 
     cm_ptr->setControlSet(goto_home_cs);
@@ -848,7 +807,7 @@ void HybridAutomatonAbstractFactory::CreateGoToBBCMAndConvergenceCS(const Hybrid
                                                  parent_frame_name,
                                                  is_relative);
 
-    ha::ControlSet::Ptr bb_cs = createTPNakamuraControlSet(p, bb_ctrl, use_base);
+    ha::ControlSet::Ptr bb_cs = createTaskSpaceControlSet(p, bb_ctrl, use_base);
     cm_ptr->setControlSet(bb_cs);
 
     cs_ptr->setName(name + std::string("_cs"));
@@ -878,7 +837,7 @@ void HybridAutomatonAbstractFactory::CreateGoToCMAndConvergenceCS(const HybridAu
                                                goal_op_ori,
                                                is_relative);
 
-    ha::ControlSet::Ptr os_cs = createTPNakamuraControlSet(p, os_ctrl, use_base);
+    ha::ControlSet::Ptr os_cs = createTaskSpaceControlSet(p, os_ctrl, use_base);
     cm_ptr->setControlSet(os_cs);
 
     bool only_displacement = false;
