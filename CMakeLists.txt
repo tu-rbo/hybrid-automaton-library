@@ -5,6 +5,7 @@ cmake_minimum_required (VERSION 2.6)
 # as Visual Studio projects (.vcproj)
 project (hybrid_automaton)
 
+
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${PROJECT_SOURCE_DIR}/cmake/Modules/")
 
 option(UNIT_TESTS "Build all tests." OFF)
@@ -141,7 +142,8 @@ set (HA_DESCRIPTION_HEADERS
 	"${PROJECT_SOURCE_DIR}/include/hybrid_automaton/DescriptionTreeNodeXML.h")
 
 set (HA_FACTORY_HEADERS
-	"${PROJECT_SOURCE_DIR}/include/hybrid_automaton/HybridAutomatonFactory.h")
+	"${PROJECT_SOURCE_DIR}/include/hybrid_automaton/HybridAutomatonAbstractFactory.h"
+	"${PROJECT_SOURCE_DIR}/include/hybrid_automaton/HybridAutomatonRBOFactory.h")
 
 
 set (HA_CORE_SOURCES
@@ -172,7 +174,8 @@ set (HA_SENSOR_SOURCES
     "${PROJECT_SOURCE_DIR}/src/SubjointVelocitySensor.cpp")
 
 set (HA_FACTORY_SOURCES
-    "${PROJECT_SOURCE_DIR}/src/HybridAutomatonFactory.cpp")
+    "${PROJECT_SOURCE_DIR}/src/HybridAutomatonAbstractFactory.cpp"
+    "${PROJECT_SOURCE_DIR}/src/HybridAutomatonRBOFactory.cpp")
 	
 source_group("Header Files" FILES ${HA_CORE_HEADERS})
 
@@ -229,6 +232,6 @@ if(WIN32)
 	install(TARGETS hybrid_automaton DESTINATION "${CMAKE_CURRENT_SOURCE_DIR}/lib")
 else()
 	install(TARGETS hybrid_automaton DESTINATION "${CMAKE_CURRENT_SOURCE_DIR}/lib")
-	install(TARGETS hybrid_automaton DESTINATION "/usr/local/lib")
-        install(DIRECTORY "${PROJECT_SOURCE_DIR}/include/hybrid_automaton" DESTINATION "/usr/local/include")
+        #install(TARGETS hybrid_automaton DESTINATION "/usr/local/lib")
+        #install(DIRECTORY "${PROJECT_SOURCE_DIR}/include/hybrid_automaton" DESTINATION "/usr/local/include")
 endif()
