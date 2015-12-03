@@ -57,8 +57,16 @@ struct HybridAutomatonAbstractParams
     double _vel_epsilon_js_arm;
     double _vel_epsilon_js_base;
 
-    double pos_epsilon_js;
-    double vel_epsilon_js;
+    //double pos_epsilon_js;
+    //double vel_epsilon_js;
+
+    /// Maximum joint space (os) velocity
+    double _max_vel_os_linear;
+    double _max_vel_os_angular;
+
+    /// Convergence radius for the position of a joint space (js) controller
+    double _pos_epsilon_js_arm;
+    double _pos_epsilon_js_base;
 
     /// Convergence radius of an operational space (os) controller
     double _pos_epsilon_os_linear;
@@ -69,10 +77,10 @@ struct HybridAutomatonAbstractParams
     double _vel_epsilon_os_angular;
 
     /// Number of degrees of freedom of the arm
-    int _num_dof_arm;
+    int num_dof_arm;
 
     /// Number of degrees of freedom of the base
-    int _num_dof_base;
+    int num_dof_base;
 
     /// Home configuration - usually a good initial position to begin the interaction and/or a safe
     /// position to return to
@@ -289,7 +297,8 @@ public:
 
 
     ha::JumpCondition::Ptr createJointSpaceConvergenceCondition(const HybridAutomatonAbstractParams& params,
-                                                                ha::ControllerConstPtr js_ctrl
+                                                                ha::ControllerConstPtr js_ctrl,
+                                                                double epsilon
                                                                 );
 
     /**
@@ -300,7 +309,8 @@ public:
      */
     ha::JumpCondition::Ptr createSubjointSpaceConvergenceCondition(const HybridAutomatonAbstractParams& params,
                                                                    ha::ControllerConstPtr subjs_ctrl,
-                                                                   const Eigen::MatrixXd& index_vec
+                                                                   const Eigen::MatrixXd& index_vec,
+                                                                   double epsilon
                                                                    //                                                                   ,
                                                                    //                                                                   const double& pos_epsilon_js
                                                                    );
@@ -332,7 +342,8 @@ public:
 
     ha::JumpCondition::Ptr createJointSpaceVelocityCondition(const HybridAutomatonAbstractParams& params,
                                                              const Eigen::MatrixXd& index_vec,
-                                                             const Eigen::MatrixXd& vel_goal_js
+                                                             const Eigen::MatrixXd& vel_goal_js,
+                                                             double epsilon
                                                              //                                                             ,
                                                              //                                                             const double& vel_epsilon_js = -1
                                                              );
@@ -343,7 +354,8 @@ public:
      * @return ha::JumpCondition::Ptr Pointer to the generated jump condition
      */
     ha::JumpCondition::Ptr createJointSpaceZeroVelocityCondition(const HybridAutomatonAbstractParams& params,
-                                                                 const Eigen::MatrixXd& index_vec
+                                                                 const Eigen::MatrixXd& index_vec,
+                                                                 double epsilon
                                                                  //                                                                 ,
                                                                  //                                                                 const double& vel_epsilon_js = -1
                                                                  );
@@ -461,13 +473,15 @@ public:
     void CreateGraspCMAndCS(const HybridAutomatonAbstractParams& p,
                             const ha::ControlMode::Ptr& cm_ptr,
                             const ha::ControlSwitch::Ptr& cs_ptr,
-                            const std::string& name,
-                            const GripperType& gripper,
-                            const Eigen::MatrixXd& kp_grasp = Eigen::MatrixXd(),
-                            const Eigen::MatrixXd& kv_grasp = Eigen::MatrixXd(),
-                            //softhand
-                            const double grasp_strength=0.2,
-                            const int graps_type=4);
+                            const std::string& name
+//                            ,
+//                            const GripperType& gripper,
+//                            const Eigen::MatrixXd& kp_grasp = Eigen::MatrixXd(),
+//                            const Eigen::MatrixXd& kv_grasp = Eigen::MatrixXd(),
+//                            //softhand
+//                            const double grasp_strength=0.2,
+//                            const int graps_type=4
+            );
 
     /**
      * @brief Create a CM to ungrasp (open the hand or deactivate vacuum cleaner + joint space of the arm to maintain pose) and a CS that indicates successful ungrasp

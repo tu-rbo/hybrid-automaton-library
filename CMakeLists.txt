@@ -5,6 +5,7 @@ cmake_minimum_required (VERSION 2.6)
 # as Visual Studio projects (.vcproj)
 project (hybrid_automaton)
 
+
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${PROJECT_SOURCE_DIR}/cmake/Modules/")
 
 option(UNIT_TESTS "Build all tests." OFF)
@@ -231,6 +232,6 @@ if(WIN32)
 	install(TARGETS hybrid_automaton DESTINATION "${CMAKE_CURRENT_SOURCE_DIR}/lib")
 else()
 	install(TARGETS hybrid_automaton DESTINATION "${CMAKE_CURRENT_SOURCE_DIR}/lib")
-	install(TARGETS hybrid_automaton DESTINATION "/usr/local/lib")
-        install(DIRECTORY "${PROJECT_SOURCE_DIR}/include/hybrid_automaton" DESTINATION "/usr/local/include")
+        #install(TARGETS hybrid_automaton DESTINATION "/usr/local/lib")
+        #install(DIRECTORY "${PROJECT_SOURCE_DIR}/include/hybrid_automaton" DESTINATION "/usr/local/include")
 endif()

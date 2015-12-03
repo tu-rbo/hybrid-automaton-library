@@ -67,107 +67,100 @@
 namespace ha
 {
 HybridAutomatonRBOFactory::HybridAutomatonRBOFactory()
-    : _num_dof_arm(DEFAULT_NUM_DOF_ARM), _num_dof_base(DEFAULT_NUM_DOF_BASE)
 {
-    _initializeDefaultValues();
+    //_initializeDefaultValues();
 }
 
-HybridAutomatonRBOFactory::HybridAutomatonRBOFactory(const int& num_dof_arm, const int& num_dof_base)
-    :_num_dof_arm(num_dof_arm), _num_dof_base(num_dof_base)
-{
-    _initializeDefaultValues();
-}
+//void HybridAutomatonRBOFactory::_initializeDefaultValues()
+//{
+//    _index_vec_arm = Eigen::MatrixXd::Constant(_num_dof_arm, 1, 0);
+//    for(int idx_arm=0; idx_arm<_num_dof_arm; idx_arm++)
+//    {
+//        _index_vec_arm(idx_arm, 0) = idx_arm;
+//    }
 
-void HybridAutomatonRBOFactory::_initializeDefaultValues()
-{
-    _index_vec_arm = Eigen::MatrixXd::Constant(_num_dof_arm, 1, 0);
-    for(int idx_arm=0; idx_arm<_num_dof_arm; idx_arm++)
-    {
-        _index_vec_arm(idx_arm, 0) = idx_arm;
-    }
+//    _index_vec_base = Eigen::MatrixXd::Constant(_num_dof_base, 1, 0);
+//    for(int idx_base=0; idx_base<_num_dof_base; idx_base++)
+//    {
+//        _index_vec_base(idx_base, 0) = idx_base+_num_dof_arm;
+//    }
 
-    _index_vec_base = Eigen::MatrixXd::Constant(_num_dof_base, 1, 0);
-    for(int idx_base=0; idx_base<_num_dof_base; idx_base++)
-    {
-        _index_vec_base(idx_base, 0) = idx_base+_num_dof_arm;
-    }
+//    _max_vel_js_arm = Eigen::MatrixXd::Constant(_num_dof_arm, 1, DEFAULT_MAX_VEL_JS_ARM);
+//    _max_vel_js_base = Eigen::MatrixXd::Constant(_num_dof_base, 1, DEFAULT_MAX_VEL_JS_BASE);
 
-    _max_vel_js_arm = Eigen::MatrixXd::Constant(_num_dof_arm, 1, DEFAULT_MAX_VEL_JS_ARM);
-    _max_vel_js_base = Eigen::MatrixXd::Constant(_num_dof_base, 1, DEFAULT_MAX_VEL_JS_BASE);
+//    _kp_js_arm = Eigen::MatrixXd::Constant(_num_dof_arm, 1, DEFAULT_KP_JS_ARM);
+//    if(_num_dof_arm == DEFAULT_NUM_DOF_ARM)
+//    {
+//        _kp_js_arm << 300.0, 200.0, 150.0, 120.0, 10.0, 10.0, 10.0;
+//    }
+//    _kp_js_base = Eigen::MatrixXd::Constant(_num_dof_base, 1, DEFAULT_KP_JS_BASE);
 
-    _kp_js_arm = Eigen::MatrixXd::Constant(_num_dof_arm, 1, DEFAULT_KP_JS_ARM);
-    if(_num_dof_arm == DEFAULT_NUM_DOF_ARM)
-    {
-        _kp_js_arm << 300.0, 200.0, 150.0, 120.0, 10.0, 10.0, 10.0;
-    }
-    _kp_js_base = Eigen::MatrixXd::Constant(_num_dof_base, 1, DEFAULT_KP_JS_BASE);
+//    _kv_js_arm = Eigen::MatrixXd::Constant(_num_dof_arm, 1, DEFAULT_KV_JS_ARM);
+//    if(_num_dof_arm == DEFAULT_NUM_DOF_ARM)
+//    {
+//        _kv_js_arm << 2.0, 4.0, 2.0, 1.2, 0.2, 0.3, 0.02;
+//    }
+//    _kv_js_base = Eigen::MatrixXd::Constant(_num_dof_base, 1, DEFAULT_KV_JS_BASE);
+//    _kp_os_linear = Eigen::MatrixXd::Constant(3, 1, DEFAULT_KP_OS_LINEAR);
+//    _kp_os_angular = Eigen::MatrixXd::Constant(3, 1, DEFAULT_KP_OS_ANGULAR);
+//    _kv_os_linear = Eigen::MatrixXd::Constant(3, 1, DEFAULT_KV_OS_LINEAR);
+//    _kv_os_angular = Eigen::MatrixXd::Constant(3, 1, DEFAULT_KV_OS_ANGULAR);
 
-    _kv_js_arm = Eigen::MatrixXd::Constant(_num_dof_arm, 1, DEFAULT_KV_JS_ARM);
-    if(_num_dof_arm == DEFAULT_NUM_DOF_ARM)
-    {
-        _kv_js_arm << 2.0, 4.0, 2.0, 1.2, 0.2, 0.3, 0.02;
-    }
-    _kv_js_base = Eigen::MatrixXd::Constant(_num_dof_base, 1, DEFAULT_KV_JS_BASE);
-    _kp_os_linear = Eigen::MatrixXd::Constant(3, 1, DEFAULT_KP_OS_LINEAR);
-    _kp_os_angular = Eigen::MatrixXd::Constant(3, 1, DEFAULT_KP_OS_ANGULAR);
-    _kv_os_linear = Eigen::MatrixXd::Constant(3, 1, DEFAULT_KV_OS_LINEAR);
-    _kv_os_angular = Eigen::MatrixXd::Constant(3, 1, DEFAULT_KV_OS_ANGULAR);
+//    _kp_js_nakamura_arm = Eigen::MatrixXd::Constant(_num_dof_arm, 1, DEFAULT_KP_JS_NAKAMURA_ARM);
+//    if(_num_dof_arm == DEFAULT_NUM_DOF_ARM)
+//    {
+//        _kp_js_nakamura_arm << 30.0, 20.0, 15.0, 20.0, 10.0, 10.0, 10.0;
+//    }
+//    _kp_js_nakamura_base = Eigen::MatrixXd::Constant(_num_dof_base, 1, DEFAULT_KP_JS_NAKAMURA_BASE);
 
-    _kp_js_nakamura_arm = Eigen::MatrixXd::Constant(_num_dof_arm, 1, DEFAULT_KP_JS_NAKAMURA_ARM);
-    if(_num_dof_arm == DEFAULT_NUM_DOF_ARM)
-    {
-        _kp_js_nakamura_arm << 30.0, 20.0, 15.0, 20.0, 10.0, 10.0, 10.0;
-    }
-    _kp_js_nakamura_base = Eigen::MatrixXd::Constant(_num_dof_base, 1, DEFAULT_KP_JS_NAKAMURA_BASE);
+//    _kv_js_nakamura_arm = Eigen::MatrixXd::Constant(_num_dof_arm, 1, DEFAULT_KV_JS_NAKAMURA_ARM);
+//    if(_num_dof_arm == DEFAULT_NUM_DOF_ARM)
+//    {
+//        _kv_js_nakamura_arm << 1.0, 2.0, 1.0, 0.4, 0.1, 0.1, 0.01;
+//    }
+//    _kv_js_nakamura_base = Eigen::MatrixXd::Constant(_num_dof_base, 1, DEFAULT_KV_JS_NAKAMURA_BASE);
+//    if(_num_dof_base== DEFAULT_NUM_DOF_BASE)
+//    {
+//        _kv_js_nakamura_base << 10.0, 10.0, 2.0;
+//    }
 
-    _kv_js_nakamura_arm = Eigen::MatrixXd::Constant(_num_dof_arm, 1, DEFAULT_KV_JS_NAKAMURA_ARM);
-    if(_num_dof_arm == DEFAULT_NUM_DOF_ARM)
-    {
-        _kv_js_nakamura_arm << 1.0, 2.0, 1.0, 0.4, 0.1, 0.1, 0.01;
-    }
-    _kv_js_nakamura_base = Eigen::MatrixXd::Constant(_num_dof_base, 1, DEFAULT_KV_JS_NAKAMURA_BASE);
-    if(_num_dof_base== DEFAULT_NUM_DOF_BASE)
-    {
-        _kv_js_nakamura_base << 10.0, 10.0, 2.0;
-    }
+//    _joint_weights_nakamura_arm = Eigen::MatrixXd::Constant(_num_dof_arm, 1, DEFAULT_JOINT_WEIGHTS_NAKAMURA_ARM);
+//    _joint_weights_nakamura_base = Eigen::MatrixXd::Constant(_num_dof_base, 1, DEFAULT_JOINT_WEIGHTS_NAKAMURA_BASE);
+//    _joint_weights_nakamura_base_no_rotation = Eigen::MatrixXd::Constant(_num_dof_base, 1, DEFAULT_JOINT_WEIGHTS_NAKAMURA_BASE);
+//    if(_num_dof_base== DEFAULT_NUM_DOF_BASE)
+//    {
+//        _joint_weights_nakamura_base_no_rotation << DEFAULT_JOINT_WEIGHTS_NAKAMURA_BASE, DEFAULT_JOINT_WEIGHTS_NAKAMURA_BASE, DEFAULT_JOINT_WEIGHTS_NAKAMURA_BASE_LITTLE_MOTION;
+//    }
+//    _joint_weights_nakamura_base_little_motion = Eigen::MatrixXd::Constant(_num_dof_base, 1, DEFAULT_JOINT_WEIGHTS_NAKAMURA_BASE_LITTLE_MOTION);
+//    _home_config_js_arm = Eigen::MatrixXd::Constant(_num_dof_arm, 1, DEFAULT_HOME_CONFIG_JS_ARM);
+//    if(_num_dof_arm == DEFAULT_NUM_DOF_ARM)
+//    {
+//        _home_config_js_arm << 0.0, -0.14, 0.0, 2.18, 0.0, 0.2, -0.13;
+//    }
+//    _home_config_js_base = Eigen::MatrixXd::Constant(_num_dof_base, 1, DEFAULT_HOME_CONFIG_JS_BASE);
 
-    _joint_weights_nakamura_arm = Eigen::MatrixXd::Constant(_num_dof_arm, 1, DEFAULT_JOINT_WEIGHTS_NAKAMURA_ARM);
-    _joint_weights_nakamura_base = Eigen::MatrixXd::Constant(_num_dof_base, 1, DEFAULT_JOINT_WEIGHTS_NAKAMURA_BASE);
-    _joint_weights_nakamura_base_no_rotation = Eigen::MatrixXd::Constant(_num_dof_base, 1, DEFAULT_JOINT_WEIGHTS_NAKAMURA_BASE);
-    if(_num_dof_base== DEFAULT_NUM_DOF_BASE)
-    {
-        _joint_weights_nakamura_base_no_rotation << DEFAULT_JOINT_WEIGHTS_NAKAMURA_BASE, DEFAULT_JOINT_WEIGHTS_NAKAMURA_BASE, DEFAULT_JOINT_WEIGHTS_NAKAMURA_BASE_LITTLE_MOTION;
-    }
-    _joint_weights_nakamura_base_little_motion = Eigen::MatrixXd::Constant(_num_dof_base, 1, DEFAULT_JOINT_WEIGHTS_NAKAMURA_BASE_LITTLE_MOTION);
-    _home_config_js_arm = Eigen::MatrixXd::Constant(_num_dof_arm, 1, DEFAULT_HOME_CONFIG_JS_ARM);
-    if(_num_dof_arm == DEFAULT_NUM_DOF_ARM)
-    {
-        _home_config_js_arm << 0.0, -0.14, 0.0, 2.18, 0.0, 0.2, -0.13;
-    }
-    _home_config_js_base = Eigen::MatrixXd::Constant(_num_dof_base, 1, DEFAULT_HOME_CONFIG_JS_BASE);
+//    _pos_epsilon_js_arm  = DEFAULT_POS_EPSILON_JS_ARM;
+//    _pos_epsilon_js_base = DEFAULT_POS_EPSILON_JS_BASE;
 
-    _pos_epsilon_js_arm  = DEFAULT_POS_EPSILON_JS_ARM;
-    _pos_epsilon_js_base = DEFAULT_POS_EPSILON_JS_BASE;
+//    _vel_epsilon_js_arm = DEFAULT_VEL_EPSILON_JS_ARM;
+//    _vel_epsilon_js_base =  DEFAULT_VEL_EPSILON_JS_BASE;
 
-    _vel_epsilon_js_arm = DEFAULT_VEL_EPSILON_JS_ARM;
-    _vel_epsilon_js_base =  DEFAULT_VEL_EPSILON_JS_BASE;
+//    _vel_goal_js_arm = Eigen::MatrixXd::Constant(_num_dof_arm, 1, DEFAULT_VEL_GOAL_JS_ARM);
+//    _vel_goal_js_base = Eigen::MatrixXd::Constant(_num_dof_base, 1, DEFAULT_VEL_GOAL_JS_BASE);
 
-    _vel_goal_js_arm = Eigen::MatrixXd::Constant(_num_dof_arm, 1, DEFAULT_VEL_GOAL_JS_ARM);
-    _vel_goal_js_base = Eigen::MatrixXd::Constant(_num_dof_base, 1, DEFAULT_VEL_GOAL_JS_BASE);
+//    _pos_epsilon_os_linear =  DEFAULT_POS_EPSILON_OS_LINEAR;
+//    _pos_epsilon_os_angular =  DEFAULT_POS_EPSILON_OS_ANGULAR;
+//    _vel_epsilon_os_linear =  DEFAULT_VEL_EPSILON_OS_LINEAR;
+//    _vel_epsilon_os_angular =  DEFAULT_VEL_EPSILON_OS_ANGULAR;
 
-    _pos_epsilon_os_linear =  DEFAULT_POS_EPSILON_OS_LINEAR;
-    _pos_epsilon_os_angular =  DEFAULT_POS_EPSILON_OS_ANGULAR;
-    _vel_epsilon_os_linear =  DEFAULT_VEL_EPSILON_OS_LINEAR;
-    _vel_epsilon_os_angular =  DEFAULT_VEL_EPSILON_OS_ANGULAR;
+//    _vel_goal_os_linear = Eigen::MatrixXd::Constant(3, 1, DEFAULT_VEL_GOAL_OS_LINEAR);
+//    _vel_goal_os_angular =  Eigen::MatrixXd::Constant(3, 1, DEFAULT_VEL_GOAL_OS_ANGULAR);
 
-    _vel_goal_os_linear = Eigen::MatrixXd::Constant(3, 1, DEFAULT_VEL_GOAL_OS_LINEAR);
-    _vel_goal_os_angular =  Eigen::MatrixXd::Constant(3, 1, DEFAULT_VEL_GOAL_OS_ANGULAR);
+//    _max_vel_os_linear = DEFAULT_MAX_VEL_OS_LINEAR;
+//    _max_vel_os_angular = DEFAULT_MAX_VEL_OS_ANGULAR;
 
-    _max_vel_os_linear = DEFAULT_MAX_VEL_OS_LINEAR;
-    _max_vel_os_angular = DEFAULT_MAX_VEL_OS_ANGULAR;
-
-    _update_rate = DEFAULT_UPDATE_RATE;
-}
+//    _update_rate = DEFAULT_UPDATE_RATE;
+//}
 
 HybridAutomatonRBOFactory::~HybridAutomatonRBOFactory()
 {
@@ -598,8 +591,8 @@ ha::Controller::Ptr HybridAutomatonRBOFactory::createJointSpaceController(const 
     ctrl->setType("InterpolatedJointController");
     ctrl->setArgument("interpolation_type", "quintic");
     ctrl->setGoal(goal_js);
-    ctrl->setKp(_combineArmAndBase(p._kp_js_arm, p._kp_js_base));
-    ctrl->setKv(_combineArmAndBase(p._kv_js_arm, p._kv_js_base));
+    ctrl->setKp(_combineArmAndBase(p.kp_js_arm, p.kp_js_base));
+    ctrl->setKv(_combineArmAndBase(p.kv_js_arm, p.kv_js_base));
     ctrl->setCompletionTime(completion_time);
     ctrl->setGoalIsRelative(goal_relative);
     return ctrl;
@@ -621,12 +614,17 @@ ha::Controller::Ptr HybridAutomatonRBOFactory::createSubjointSpaceController(con
     index_vec_ss << index_vec;
     ctrl->setArgument("index", index_vec_ss.str());
     ctrl->setGoal(goal_js);
-    ctrl->setKp(_combineArmAndBase(p._kp_js_arm, p._kp_js_base));
-    ctrl->setKv(_combineArmAndBase(p._kv_js_arm, p._kv_js_base));
-    ctrl->setMaximumVelocity(p.max_velocity);
+    Eigen::VectorXd kp_js_masked = mask_by_index(p.kp_js,index_vec);
+    ctrl->setKp(kp_js_masked);
+    Eigen::VectorXd kv_js_masked = mask_by_index(p.kv_js,index_vec);
+    ctrl->setKv(kv_js_masked);
+    Eigen::VectorXd max_vel_js_masked = mask_by_index(p.max_vel_js,index_vec);
+    ctrl->setMaximumVelocity(max_vel_js_masked);
     ctrl->setGoalIsRelative(is_relative);
     return ctrl;
 }
+
+
 
 ha::Controller::Ptr HybridAutomatonRBOFactory::createBBSubjointSpaceController(const HybridAutomatonAbstractParams& params,
                                                                                std::string name,
@@ -653,9 +651,9 @@ ha::Controller::Ptr HybridAutomatonRBOFactory::createBBSubjointSpaceController(c
     }
     ctrl->setArgument("topic_name", topic_name);
     ctrl->setArgument("update_rate", p._update_rate);
-    ctrl->setKp(_combineArmAndBase(p._kp_js_arm, p._kp_js_base));
-    ctrl->setKv(_combineArmAndBase(p._kv_js_arm, p._kv_js_base));
-    ctrl->setMaximumVelocity(p.max_velocity);
+    ctrl->setKp(_combineArmAndBase(p.kp_js_arm, p.kp_js_base));
+    ctrl->setKv(_combineArmAndBase(p.kv_js_arm, p.kv_js_base));
+    ctrl->setMaximumVelocity(p.max_vel_js);
     ctrl->setGoalIsRelative(is_relative);
     return ctrl;
 }
@@ -688,9 +686,9 @@ ha::Controller::Ptr HybridAutomatonRBOFactory::createBBSubjointSpaceControllerBa
     ctrl->setArgument("topic_name", topic_name);
     ctrl->setArgument("tf_parent", tf_parent);
     ctrl->setArgument("update_rate", p._update_rate);
-    ctrl->setKp(p._kp_js_base);
-    ctrl->setKv(p._kv_js_base);
-    ctrl->setMaximumVelocity(p._max_vel_js_base);
+    ctrl->setKp(p.kp_js_base);
+    ctrl->setKv(p.kv_js_base);
+    ctrl->setMaximumVelocity(p.max_vel_js_base);
     ctrl->setGoalIsRelative(is_relative);
     return ctrl;
 }
@@ -784,7 +782,7 @@ ha::Controller::Ptr HybridAutomatonRBOFactory::createOperationalSpaceController(
                                        p._kv_os_angular));
 
         Eigen::MatrixXd max_vel(2,1);
-        max_vel <<  (p._max_vel_os_angular,p._max_vel_os_linear);
+        max_vel <<  p._max_vel_os_angular,p._max_vel_os_linear;
         ctrl->setMaximumVelocity(max_vel);
         ctrl->setGoalIsRelative(is_relative);
         ctrl->setArgument("operational_frame", "EE");
@@ -855,9 +853,9 @@ ha::Controller::Ptr HybridAutomatonRBOFactory::createBBOperationalSpaceControlle
     ha::Controller::Ptr ctrl(new ha::Controller);
     ctrl->setName(name);
     if(trajectory)
-        ctrl->setType("BlackboardInterpolatedHTransformController");
-    else
         ctrl->setType("BlackboardInterpolatedHTransformTrajectoryController");
+    else
+        ctrl->setType("BlackboardInterpolatedHTransformController");
     ctrl->setArgument("interpolation_type", "cubic");
     ctrl->setArgument("reinterpolation", "1");
     if (use_tf){
@@ -871,7 +869,7 @@ ha::Controller::Ptr HybridAutomatonRBOFactory::createBBOperationalSpaceControlle
     ctrl->setArgument("update_rate", p._update_rate);
 
     Eigen::MatrixXd max_vel(2,1);
-    max_vel <<  (p._max_vel_os_angular, p._max_vel_os_linear);
+    max_vel <<  p._max_vel_os_angular, p._max_vel_os_linear;
     ctrl->setMaximumVelocity(max_vel);
 
     ctrl->setKp(_combineArmAndBase(p._kp_os_linear,
@@ -1435,12 +1433,21 @@ ha::Controller::Ptr HybridAutomatonRBOFactory::createBBOperationalSpaceControlle
 
 //}
 
-Eigen::MatrixXd HybridAutomatonRBOFactory::_combineArmAndBase(const Eigen::MatrixXd& arm_vector, const Eigen::MatrixXd base_vector)
+Eigen::MatrixXd _combineArmAndBase(const Eigen::MatrixXd& arm_vector, const Eigen::MatrixXd base_vector)
 {
     Eigen::MatrixXd combined_vector(arm_vector.rows()+base_vector.rows(), arm_vector.cols());
     combined_vector <<  arm_vector,
             base_vector;
     return combined_vector;
+}
+Eigen::MatrixXd mask_by_index(const Eigen::MatrixXd m, const Eigen::MatrixXd index_vec)
+{
+    Eigen::VectorXd masked;
+        masked.resize(index_vec.size());
+        for (int i=0;i<index_vec.size();++i){
+            masked(i)=m(index_vec(i));
+        }
+        return masked;
 }
 
 std::string HybridAutomatonRBOFactory::HybridAutomatonToString(ha::HybridAutomaton::ConstPtr ha)
