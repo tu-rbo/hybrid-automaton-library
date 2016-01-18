@@ -1,4 +1,4 @@
-#include "hybrid_automaton/HybridAutomatonOStringStream.h"
+#include "hybrid_automaton/HybridAutomatonStringStream.h"
 
 
 namespace ha{

@@ -112,7 +112,7 @@ add_subdirectory(examples)
 # Collect sources into the variable HA_SOURCES 
 set (HA_CORE_HEADERS
     "${PROJECT_SOURCE_DIR}/include/hybrid_automaton/HybridAutomaton.h"
-	"${PROJECT_SOURCE_DIR}/include/hybrid_automaton/HybridAutomatonOStringStream.h"
+	"${PROJECT_SOURCE_DIR}/include/hybrid_automaton/HybridAutomatonStringStream.h"
 	"${PROJECT_SOURCE_DIR}/include/hybrid_automaton/HybridAutomatonRegistration.h"
 	"${PROJECT_SOURCE_DIR}/include/hybrid_automaton/ControlMode.h"
 	"${PROJECT_SOURCE_DIR}/include/hybrid_automaton/ControlSwitch.h"
@@ -148,7 +148,7 @@ set (HA_FACTORY_HEADERS
 
 set (HA_CORE_SOURCES
     "${PROJECT_SOURCE_DIR}/src/HybridAutomaton.cpp"
-    "${PROJECT_SOURCE_DIR}/src/HybridAutomatonOStringStream.cpp"
+    "${PROJECT_SOURCE_DIR}/src/HybridAutomatonStringStream.cpp"
     "${PROJECT_SOURCE_DIR}/src/ControlMode.cpp"
     "${PROJECT_SOURCE_DIR}/src/ControlSwitch.cpp"
     "${PROJECT_SOURCE_DIR}/src/ControlSet.cpp"

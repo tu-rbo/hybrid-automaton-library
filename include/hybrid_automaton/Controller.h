@@ -11,7 +11,7 @@
 #include "hybrid_automaton/HybridAutomatonRegistration.h"
 #include "hybrid_automaton/error_handling.h"
 
-#include "hybrid_automaton/HybridAutomatonOStringStream.h"
+#include "hybrid_automaton/HybridAutomatonStringStream.h"
 
 #include <boost/shared_ptr.hpp>
 #include <Eigen/Dense>
