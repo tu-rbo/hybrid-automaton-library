@@ -1,5 +1,5 @@
-#ifndef HYBRID_AUTOMATON_O_STRING_STREAM_H_
-#define HYBRID_AUTOMATON_O_STRING_STREAM_H_
+#ifndef HYBRID_AUTOMATON_STRING_STREAM_H_
+#define HYBRID_AUTOMATON_STRING_STREAM_H_
 
 // FIXME remove
 #include <iostream>
@@ -11,28 +11,28 @@ namespace ha {
 * @brief This is a helper class to override the << operator for some data types.
 * i.e. we use it here to have a compactly formatted output for Eigen:: types without newlines
 */
-class ha_ostringstream
+class ha_stringstream
 	{
 	public:
-		ha_ostringstream()
+		ha_stringstream()
 		{
 			// set "classic" locale (floating point instead of floating comma: http://stackoverflow.com/questions/571359/how-do-i-set-the-proper-initial-locale-for-a-c-program-on-windows)
 			this->_ss.imbue(std::locale("C"));
 		}
 		
-		ha_ostringstream(const std::string& val)
+		ha_stringstream(const std::string& val)
 			: _ss(val)
 		{
 			// set "classic" locale (floating point instead of floating comma: http://stackoverflow.com/questions/571359/how-do-i-set-the-proper-initial-locale-for-a-c-program-on-windows)
 			this->_ss.imbue(std::locale("C"));
 		}
 
-		~ha_ostringstream()
+		~ha_stringstream()
 		{
 		}
 
 		template <typename T>
-		ha_ostringstream& operator<<(const T& pX)
+		ha_stringstream& operator<<(const T& pX)
 		{
 			this->_ss << pX;
 
@@ -40,7 +40,7 @@ class ha_ostringstream
 		}
 
 		template <typename T>
-		ha_ostringstream& operator>>(T& pX)
+		ha_stringstream& operator>>(T& pX)
 		{
 			this->_ss >> pX;
 
@@ -57,10 +57,10 @@ class ha_ostringstream
 	};
 
 	template <>
-	ha_ostringstream& ha_ostringstream::operator<<(const ::Eigen::MatrixXd& pX);
+	ha_stringstream& ha_stringstream::operator<<(const ::Eigen::MatrixXd& pX);
 
 	template <>
-    ha_ostringstream& ha_ostringstream::operator>>(Eigen::MatrixXd& matrix);
+    ha_stringstream& ha_stringstream::operator>>(Eigen::MatrixXd& matrix);
 }
 
 #endif

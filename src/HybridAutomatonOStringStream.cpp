@@ -3,7 +3,7 @@
 
 namespace ha{
 	template <>
-	ha_ostringstream& ha_ostringstream::operator<<(const ::Eigen::MatrixXd& pX)
+	ha_stringstream& ha_stringstream::operator<<(const ::Eigen::MatrixXd& pX)
 	{
 		this->_ss << "[" << pX.rows() << "," << pX.cols() << "]" ;
 		for(int rows_it = 0; rows_it < pX.rows() ; ++rows_it)
@@ -26,7 +26,7 @@ namespace ha{
 	}
 
 	template <>
-	ha_ostringstream& ha_ostringstream::operator>>(Eigen::MatrixXd& matrix)
+	ha_stringstream& ha_stringstream::operator>>(Eigen::MatrixXd& matrix)
 	{
 		int num_rows = 0;
 		int num_cols = 0;
@@ -37,13 +37,13 @@ namespace ha{
 
 		// Then we read the number of rows
 		std::getline(this->_ss, deparsing_string, ',');
-		ha_ostringstream iss_num_rows(deparsing_string);
+		ha_stringstream iss_num_rows(deparsing_string);
 		iss_num_rows >> num_rows;
 		//std::cout << "Num of rows: " << num_rows << std::endl;
 
 		// Then we read the number of cols
 		std::getline(this->_ss, deparsing_string, ']');
-		ha_ostringstream iss_num_cols(deparsing_string);
+		ha_stringstream iss_num_cols(deparsing_string);
 		iss_num_cols >> num_cols;
 		//std::cout << "Num of cols: " << num_cols << std::endl;
 
@@ -55,11 +55,11 @@ namespace ha{
 		for(int i = 0; i<num_rows; ++i)
 		{
 			std::getline(this->_ss, deparsing_string, ';');
-			ha_ostringstream iss_row(deparsing_string);
+			ha_stringstream iss_row(deparsing_string);
 			for(int j=0; j<num_cols; ++j)
 			{
 				std::getline(iss_row._ss, deparsing_string, ',');
-				ha_ostringstream iss_element(deparsing_string);
+				ha_stringstream iss_element(deparsing_string);
 				iss_element >> matrix_element;
 				matrix(i,j) = matrix_element;
 			}

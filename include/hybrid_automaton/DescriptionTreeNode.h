@@ -96,11 +96,11 @@ namespace ha {
         *
         * Specify type with the template parameter T.
         * Your type T needs to implement the << operator.
-        * If you want to use a different format than the << operator, edit ha_ostringstream.
+        * If you want to use a different format than the << operator, edit ha_stringstream.
         */
         template <typename T> void setAttribute(const std::string& field_name, const T& field_value)
 		{
-			ha_ostringstream ha_oss;
+			ha_stringstream ha_oss;
 			ha_oss << field_value ;
 			this->setAttributeString(field_name, ha_oss.str());
 		}
@@ -116,7 +116,7 @@ namespace ha {
 			bool ret = this->getAttributeString(field_name, val);
 			if (ret)
 			{
-				ha_ostringstream ss(val);
+				ha_stringstream ss(val);
 				ss >> return_value;
 
 				return true;
@@ -138,7 +138,7 @@ namespace ha {
 			bool ret = this->getAttributeString(field_name, val);
 			if (ret)
 			{
-				ha_ostringstream ss(val);
+				ha_stringstream ss(val);
 				ss >> return_value;
 				return true;
 			}

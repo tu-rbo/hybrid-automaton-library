@@ -143,7 +143,7 @@ namespace ha {
 
 		template <typename T> void setArgument(const std::string& field_name, const T& field_value)
 		{
-			ha_ostringstream ha_oss;
+			ha_stringstream ha_oss;
 			ha_oss << field_value;
 			this->setArgumentString(field_name, ha_oss.str());
 		}
@@ -155,7 +155,7 @@ namespace ha {
 			bool ret = this->getArgumentString(field_name, val);
 			if (ret)
 			{
-				ha_ostringstream ss(val);
+				ha_stringstream ss(val);
 				ss >> return_value;
 				return true;
 			}
