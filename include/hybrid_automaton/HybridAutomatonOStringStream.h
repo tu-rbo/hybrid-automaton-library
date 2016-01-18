@@ -17,14 +17,14 @@ class ha_ostringstream
 		ha_ostringstream()
 		{
 			// set "classic" locale (floating point instead of floating comma: http://stackoverflow.com/questions/571359/how-do-i-set-the-proper-initial-locale-for-a-c-program-on-windows)
-			this->_oss.imbue(std::locale("C"));
+			this->_ss.imbue(std::locale("C"));
 		}
 		
 		ha_ostringstream(const std::string& val)
-			: _oss(val)
+			: _ss(val)
 		{
 			// set "classic" locale (floating point instead of floating comma: http://stackoverflow.com/questions/571359/how-do-i-set-the-proper-initial-locale-for-a-c-program-on-windows)
-			this->_oss.imbue(std::locale("C"));
+			this->_ss.imbue(std::locale("C"));
 		}
 
 		~ha_ostringstream()
@@ -34,7 +34,7 @@ class ha_ostringstream
 		template <typename T>
 		ha_ostringstream& operator<<(const T& pX)
 		{
-			this->_oss << pX;
+			this->_ss << pX;
 
 			return *this;
 		}
@@ -42,18 +42,18 @@ class ha_ostringstream
 		template <typename T>
 		ha_ostringstream& operator>>(T& pX)
 		{
-			this->_oss >> pX;
+			this->_ss >> pX;
 
 			return *this;
 		}
 
 		std::string str()
 		{
-			return this->_oss.str();
+			return this->_ss.str();
 		}
 
-	public:
-		std::stringstream _oss;    
+	private:
+		std::stringstream _ss;    
 	};
 
 	template <>
