@@ -155,7 +155,7 @@ namespace ha {
 			bool ret = this->getArgumentString(field_name, val);
 			if (ret)
 			{
-				std::istringstream ss(val);
+				ha_ostringstream ss(val);
 				ss >> return_value;
 				return true;
 			}

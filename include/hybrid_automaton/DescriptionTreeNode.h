@@ -22,8 +22,6 @@
 
 namespace ha {
 
-    std::istringstream& operator>>(std::istringstream& iss, Eigen::MatrixXd& matrix);
-
 	class DescriptionTreeNode;
 	typedef boost::shared_ptr<DescriptionTreeNode> DescriptionTreeNodePtr;
 	typedef boost::shared_ptr<const DescriptionTreeNode> DescriptionTreeNodeConstPtr;
@@ -118,7 +116,7 @@ namespace ha {
 			bool ret = this->getAttributeString(field_name, val);
 			if (ret)
 			{
-				std::istringstream ss(val);
+				ha_ostringstream ss(val);
 				ss >> return_value;
 
 				return true;
@@ -140,7 +138,7 @@ namespace ha {
 			bool ret = this->getAttributeString(field_name, val);
 			if (ret)
 			{
-				std::istringstream ss(val);
+				ha_ostringstream ss(val);
 				ss >> return_value;
 				return true;
 			}

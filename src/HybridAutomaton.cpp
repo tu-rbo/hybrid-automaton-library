@@ -196,7 +196,7 @@ namespace ha {
 
 					ha::ControlMode::Ptr next_control_mode = _graph.graph()[mode_handle];					
 					//switchControlMode realizes smooth transitions between control modes
-					next_control_mode->switchControlMode(_current_control_mode);
+					//next_control_mode->switchControlMode(_current_control_mode);
 					
 					_current_control_mode->terminate();
 
