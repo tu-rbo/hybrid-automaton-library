@@ -18,7 +18,7 @@
 #include "hybrid_automaton/DescriptionTreeXML.h"
 #include "hybrid_automaton/HybridAutomatonRBOFactory.h"
 
-
+#include <exception>
 namespace ha
 {
 HybridAutomatonAbstractFactory::HybridAutomatonAbstractFactory()
@@ -40,268 +40,8 @@ HybridAutomatonAbstractFactory::HybridAutomatonAbstractFactory(const HybridAutom
 
 }
 
-//Eigen::MatrixXd HybridAutomatonAbstractFactory::max_vel_js_arm() const
-//{
-//    return _max_vel_js_arm;
-//}
 
-//void HybridAutomatonAbstractFactory::setMax_vel_js_arm(const Eigen::MatrixXd &max_vel_js_arm)
-//{
-//    _max_vel_js_arm = max_vel_js_arm;
-//}
-//Eigen::MatrixXd HybridAutomatonAbstractFactory::max_vel_js_base() const
-//{
-//    return _max_vel_js_base;
-//}
-
-//void HybridAutomatonAbstractFactory::setMax_vel_js_base(const Eigen::MatrixXd &max_vel_js_base)
-//{
-//    _max_vel_js_base = max_vel_js_base;
-//}
-//Eigen::MatrixXd HybridAutomatonAbstractFactory::kp_js_arm() const
-//{
-//    return _kp_js_arm;
-//}
-
-//void HybridAutomatonAbstractFactory::setKp_js_arm(const Eigen::MatrixXd &kp_js_arm)
-//{
-//    _kp_js_arm = kp_js_arm;
-//}
-//Eigen::MatrixXd HybridAutomatonAbstractFactory::kp_js_base() const
-//{
-//    return _kp_js_base;
-//}
-
-//void HybridAutomatonAbstractFactory::setKp_js_base(const Eigen::MatrixXd &kp_js_base)
-//{
-//    _kp_js_base = kp_js_base;
-//}
-//Eigen::MatrixXd HybridAutomatonAbstractFactory::kv_js_arm() const
-//{
-//    return _kv_js_arm;
-//}
-
-//void HybridAutomatonAbstractFactory::setKv_js_arm(const Eigen::MatrixXd &kv_js_arm)
-//{
-//    _kv_js_arm = kv_js_arm;
-//}
-//Eigen::MatrixXd HybridAutomatonAbstractFactory::kv_js_base() const
-//{
-//    return _kv_js_base;
-//}
-
-//void HybridAutomatonAbstractFactory::setKv_js_base(const Eigen::MatrixXd &kv_js_base)
-//{
-//    _kv_js_base = kv_js_base;
-//}
-//Eigen::MatrixXd HybridAutomatonAbstractFactory::kp_os_linear() const
-//{
-//    return _kp_os_linear;
-//}
-
-//void HybridAutomatonAbstractFactory::setKp_os_linear(const Eigen::MatrixXd &kp_os_linear)
-//{
-//    _kp_os_linear = kp_os_linear;
-//}
-//Eigen::MatrixXd HybridAutomatonAbstractFactory::kp_os_angular() const
-//{
-//    return _kp_os_angular;
-//}
-
-//void HybridAutomatonAbstractFactory::setKp_os_angular(const Eigen::MatrixXd &kp_os_angular)
-//{
-//    _kp_os_angular = kp_os_angular;
-//}
-//Eigen::MatrixXd HybridAutomatonAbstractFactory::kv_os_linear() const
-//{
-//    return _kv_os_linear;
-//}
-
-//void HybridAutomatonAbstractFactory::setKv_os_linear(const Eigen::MatrixXd &kv_os_linear)
-//{
-//    _kv_os_linear = kv_os_linear;
-//}
-//Eigen::MatrixXd HybridAutomatonAbstractFactory::kv_os_angular() const
-//{
-//    return _kv_os_angular;
-//}
-
-//void HybridAutomatonAbstractFactory::setKv_os_angular(const Eigen::MatrixXd &kv_os_angular)
-//{
-//    _kv_os_angular = kv_os_angular;
-//}
-//Eigen::MatrixXd HybridAutomatonAbstractFactory::kp_js_nakamura_arm() const
-//{
-//    return _kp_js_nakamura_arm;
-//}
-
-//void HybridAutomatonAbstractFactory::setKp_js_nakamura_arm(const Eigen::MatrixXd &kp_js_nakamura_arm)
-//{
-//    _kp_js_nakamura_arm = kp_js_nakamura_arm;
-//}
-//Eigen::MatrixXd HybridAutomatonAbstractFactory::kp_js_nakamura_base() const
-//{
-//    return _kp_js_nakamura_base;
-//}
-
-//void HybridAutomatonAbstractFactory::setKp_js_nakamura_base(const Eigen::MatrixXd &kp_js_nakamura_base)
-//{
-//    _kp_js_nakamura_base = kp_js_nakamura_base;
-//}
-//Eigen::MatrixXd HybridAutomatonAbstractFactory::kv_js_nakamura_arm() const
-//{
-//    return _kv_js_nakamura_arm;
-//}
-
-//void HybridAutomatonAbstractFactory::setKv_js_nakamura_arm(const Eigen::MatrixXd &kv_js_nakamura_arm)
-//{
-//    _kv_js_nakamura_arm = kv_js_nakamura_arm;
-//}
-//Eigen::MatrixXd HybridAutomatonAbstractFactory::kv_js_nakamura_base() const
-//{
-//    return _kv_js_nakamura_base;
-//}
-
-//void HybridAutomatonAbstractFactory::setKv_js_nakamura_base(const Eigen::MatrixXd &kv_js_nakamura_base)
-//{
-//    _kv_js_nakamura_base = kv_js_nakamura_base;
-//}
-//Eigen::MatrixXd HybridAutomatonAbstractFactory::joint_weights_nakamura_arm() const
-//{
-//    return _joint_weights_nakamura_arm;
-//}
-
-//void HybridAutomatonAbstractFactory::setJoint_weights_nakamura_arm(const Eigen::MatrixXd &joint_weights_nakamura_arm)
-//{
-//    _joint_weights_nakamura_arm = joint_weights_nakamura_arm;
-//}
-//Eigen::MatrixXd HybridAutomatonAbstractFactory::joint_weights_nakamura_base() const
-//{
-//    return _joint_weights_nakamura_base;
-//}
-
-//void HybridAutomatonAbstractFactory::setJoint_weights_nakamura_base(const Eigen::MatrixXd &joint_weights_nakamura_base)
-//{
-//    _joint_weights_nakamura_base = joint_weights_nakamura_base;
-//}
-//Eigen::MatrixXd HybridAutomatonAbstractFactory::joint_weights_nakamura_base_no_rotation() const
-//{
-//    return _joint_weights_nakamura_base_no_rotation;
-//}
-
-//void HybridAutomatonAbstractFactory::setJoint_weights_nakamura_base_no_rotation(const Eigen::MatrixXd &joint_weights_nakamura_base_no_rotation)
-//{
-//    _joint_weights_nakamura_base_no_rotation = joint_weights_nakamura_base_no_rotation;
-//}
-//Eigen::MatrixXd HybridAutomatonAbstractFactory::joint_weights_nakamura_base_little_motion() const
-//{
-//    return _joint_weights_nakamura_base_little_motion;
-//}
-
-//void HybridAutomatonAbstractFactory::setJoint_weights_nakamura_base_little_motion(const Eigen::MatrixXd &joint_weights_nakamura_base_little_motion)
-//{
-//    _joint_weights_nakamura_base_little_motion = joint_weights_nakamura_base_little_motion;
-//}
-//Eigen::MatrixXd HybridAutomatonAbstractFactory::home_config_js_arm() const
-//{
-//    return _home_config_js_arm;
-//}
-
-//void HybridAutomatonAbstractFactory::setHome_config_js_arm(const Eigen::MatrixXd &home_config_js_arm)
-//{
-//    _home_config_js_arm = home_config_js_arm;
-//}
-//Eigen::MatrixXd HybridAutomatonAbstractFactory::home_config_js_base() const
-//{
-//    return _home_config_js_base;
-//}
-
-//void HybridAutomatonAbstractFactory::setHome_config_js_base(const Eigen::MatrixXd &home_config_js_base)
-//{
-//    _home_config_js_base = home_config_js_base;
-//}
-//double HybridAutomatonAbstractFactory::pos_epsilon_js_arm() const
-//{
-//    return _pos_epsilon_js_arm;
-//}
-
-//void HybridAutomatonAbstractFactory::setPos_epsilon_js_arm(const double &pos_epsilon_js_arm)
-//{
-//    _pos_epsilon_js_arm = pos_epsilon_js_arm;
-//}
-//double HybridAutomatonAbstractFactory::pos_epsilon_js_base() const
-//{
-//    return _pos_epsilon_js_base;
-//}
-
-//void HybridAutomatonAbstractFactory::setPos_epsilon_js_base(const double &pos_epsilon_js_base)
-//{
-//    _pos_epsilon_js_base = pos_epsilon_js_base;
-//}
-//double HybridAutomatonAbstractFactory::vel_epsilon_js_arm() const
-//{
-//    return _vel_epsilon_js_arm;
-//}
-
-//void HybridAutomatonAbstractFactory::setVel_epsilon_js_arm(const double &vel_epsilon_js_arm)
-//{
-//    _vel_epsilon_js_arm = vel_epsilon_js_arm;
-//}
-//double HybridAutomatonAbstractFactory::vel_epsilon_js_base() const
-//{
-//    return _vel_epsilon_js_base;
-//}
-
-//void HybridAutomatonAbstractFactory::setVel_epsilon_js_base(const double &vel_epsilon_js_base)
-//{
-//    _vel_epsilon_js_base = vel_epsilon_js_base;
-//}
-//double HybridAutomatonAbstractFactory::pos_epsilon_os_linear() const
-//{
-//    return _pos_epsilon_os_linear;
-//}
-
-//void HybridAutomatonAbstractFactory::setPos_epsilon_os_linear(const double &pos_epsilon_os_linear)
-//{
-//    _pos_epsilon_os_linear = pos_epsilon_os_linear;
-//}
-//double HybridAutomatonAbstractFactory::pos_epsilon_os_angular() const
-//{
-//    return _pos_epsilon_os_angular;
-//}
-
-//void HybridAutomatonAbstractFactory::setPos_epsilon_os_angular(const double &pos_epsilon_os_angular)
-//{
-//    _pos_epsilon_os_angular = pos_epsilon_os_angular;
-//}
-//double HybridAutomatonAbstractFactory::vel_epsilon_os_linear() const
-//{
-//    return _vel_epsilon_os_linear;
-//}
-
-//void HybridAutomatonAbstractFactory::setVel_epsilon_os_linear(const double &vel_epsilon_os_linear)
-//{
-//    _vel_epsilon_os_linear = vel_epsilon_os_linear;
-//}
-//double HybridAutomatonAbstractFactory::vel_epsilon_os_angular() const
-//{
-//    return _vel_epsilon_os_angular;
-//}
-
-//void HybridAutomatonAbstractFactory::setVel_epsilon_os_angular(const double &vel_epsilon_os_angular)
-//{
-//    _vel_epsilon_os_angular = vel_epsilon_os_angular;
-//}
 ha::HybridAutomaton::Ptr HybridAutomatonAbstractFactory::createInitialHybridAutomaton(const HybridAutomatonAbstractParams& p)
-//ha::HybridAutomaton::Ptr HybridAutomatonAbstractFactory::createInitialHybridAutomaton(const GripperType& gripper,
-//                                                                              const Eigen::MatrixXd& home_config_js_arm,
-//                                                                              const Eigen::MatrixXd& home_config_js_base,
-//                                                                              const Eigen::MatrixXd& max_vel_js_arm,
-//                                                                              const Eigen::MatrixXd& max_vel_js_base,
-//                                                                              const Eigen::MatrixXd& index_vec_arm,
-//                                                                              const double& pos_epsilon_js_arm,
-//                                                                              const double& grasp_strength,
-//                                                                              const int& grasp_type)
 {
 
     //create Hybrid Automaton
@@ -325,11 +65,12 @@ ha::HybridAutomaton::Ptr HybridAutomatonAbstractFactory::createInitialHybridAuto
     std::vector<ha::Controller::Ptr> home_ctrls;
     home_ctrls.push_back(home_ctrl_arm);
     home_ctrls.push_back(home_ctrl_base);
-    ha::ControlSet::Ptr goto_home_cs = createJointSpaceControlSet(p,home_ctrls);
+    ha::ControlSet::Ptr goto_home_cs = createControlSet(p,home_ctrls);
     move_home_initial_cm->setControlSet(goto_home_cs);
 
     //add controller to ControlSet
     ha::Controller::Ptr ungrasp_ctrl(new ha::Controller());
+
     switch(p.gripper)
     {
     case NO_GRIPPER:
@@ -338,6 +79,15 @@ ha::HybridAutomaton::Ptr HybridAutomatonAbstractFactory::createInitialHybridAuto
     {
         ungrasp_ctrl->setName("FeixGraspControl");
         ungrasp_ctrl->setType("FeixGraspSoftHandController");
+        ungrasp_ctrl->setArgument("grasp_strength", p.grasp_strength);
+        ungrasp_ctrl->setArgument("grasp_type", p.grasp_type);
+        goto_home_cs->appendController(ungrasp_ctrl);
+    }
+        break;
+    case SOFT_HAND_8CHANNELS:
+    {
+        ungrasp_ctrl->setName("FeixGraspControl");
+        ungrasp_ctrl->setType("FeixGraspSoftHand8ChannelsController");
         ungrasp_ctrl->setArgument("grasp_strength", p.grasp_strength);
         ungrasp_ctrl->setArgument("grasp_type", p.grasp_type);
         goto_home_cs->appendController(ungrasp_ctrl);
@@ -354,6 +104,7 @@ ha::HybridAutomaton::Ptr HybridAutomatonAbstractFactory::createInitialHybridAuto
     case BARRETT_HAND:
         break;
     default:
+        throw std::invalid_argument( "received unkown grasp_type" );
         break;
     }
 
@@ -607,14 +358,6 @@ ha::ControlSwitch::Ptr HybridAutomatonAbstractFactory::CreateMaxTimeControlSwitc
     return time_switch;
 }
 
-void  HybridAutomatonAbstractFactory::CreateGCCM(const HybridAutomatonAbstractParams& p,
-                                                 const ha::ControlMode::Ptr& cm_ptr,
-                                         const std::string& name){
-    cm_ptr->setName(name);
-    ha::ControlSet::Ptr gravity_cs(new ha::ControlSet());
-    gravity_cs->setType("rxControlSet");
-    cm_ptr->setControlSet(gravity_cs);
-}
 
 void HybridAutomatonAbstractFactory::CreateGoToHomeCMAndConvergenceCSArm(const HybridAutomatonAbstractParams& p,
                                                                          const ha::ControlMode::Ptr& cm_ptr,
@@ -629,7 +372,7 @@ void HybridAutomatonAbstractFactory::CreateGoToHomeCMAndConvergenceCSArm(const H
                                                                          false);
 
 
-    ha::ControlSet::Ptr goto_home_cs =  createJointSpaceControlSet(p,
+    ha::ControlSet::Ptr goto_home_cs =  createControlSet(p,
                                                          home_ctrl_arm);
 
     cm_ptr->setControlSet(goto_home_cs);
@@ -657,12 +400,6 @@ void HybridAutomatonAbstractFactory::CreateGraspCMAndCS(const HybridAutomatonAbs
                                                         const ha::ControlMode::Ptr& cm_ptr,
                                                 const ha::ControlSwitch::Ptr& cs_ptr,
                                                 const std::string& name
-//                                                        ,
-//                                                const GripperType& gripper,
-//                                                const Eigen::MatrixXd& kp_grasp,
-//                                                const Eigen::MatrixXd& kv_grasp,
-//                                                const double grasp_strength,
-//                                                const int grasp_type
                                                         ){
     cm_ptr->setName(name+ std::string("_cm"));
     ha::ControlSet::Ptr grasp_cs(new ha::ControlSet());
@@ -677,16 +414,6 @@ Eigen::MatrixXd grasp_zeros_goal = Eigen::MatrixXd::Constant(p.num_dof_arm, 1, 0
                                                                             name + std::string("_grasp_joint_ctrl"),
                                                                             grasp_zeros_goal,
                                                                             true);
-
-
-
-//    grasp_joint_ctrl->setName("grasp_joint_ctrl");
-//    grasp_joint_ctrl->setType("JointController");
-
-//    grasp_joint_ctrl->setGoal(grasp_zeros_goal);
-//    grasp_joint_ctrl->setGoalIsRelative(1);
-//    grasp_joint_ctrl->setKp((kp_grasp.size() == 0 ? _combineArmAndBase(_kp_js_arm, _kp_js_base) : kp_grasp));
-//    grasp_joint_ctrl->setKv((kv_grasp.size() == 0 ? _combineArmAndBase(_kv_js_arm, _kv_js_base) : kv_grasp));
 
 
     if(p.gripper!=NO_GRIPPER){
@@ -720,85 +447,7 @@ Eigen::MatrixXd grasp_zeros_goal = Eigen::MatrixXd::Constant(p.num_dof_arm, 1, 0
     }
 }
 
-//void HybridAutomatonAbstractFactory::CreateUngraspCMAndCS(const HybridAutomatonAbstractParams& p,
-//                                                          const ha::ControlMode::Ptr& cm_ptr,
-//                                                  const ha::ControlSwitch::Ptr& cs_ptr,
-//                                                  const ha::ControlSwitch::Ptr& cs_ptr2,
-//                                                  const std::string& name){
-//    cm_ptr->setName(name+ std::string("_cm"));
-//    ha::ControlSet::Ptr ungrasp_cs(new ha::ControlSet());
-//    ungrasp_cs->setType("rxControlSet");
-//    cm_ptr->setControlSet(ungrasp_cs);
 
-//    //add controller to ControlSet
-//    ha::Controller::Ptr ungrasp_ctrl(new ha::Controller());
-
-//    switch(gripper)
-//    {
-//    case NO_GRIPPER:
-//        break;
-//    case SOFT_HAND:
-//    {
-//        ungrasp_ctrl->setName("FeixGraspControl");
-//        ungrasp_ctrl->setType("FeixGraspSoftHandController");
-//        ungrasp_ctrl->setArgument("grasp_strength", grasp_strength);
-//        ungrasp_ctrl->setArgument("grasp_type", grasp_type);
-//        ungrasp_cs->appendController(ungrasp_ctrl);
-//    }
-//        break;
-//    case SUCTION_CUP:
-//    {
-//        ungrasp_ctrl->setName("VacuumGraspControl");
-//        ungrasp_ctrl->setType("VacuumCleanerController");
-//        ungrasp_ctrl->setArgument("power", "0");
-//        ungrasp_cs->appendController(ungrasp_ctrl);
-//    }
-//        break;
-//    case BARRETT_HAND:
-//        break;
-//    default:
-//        break;
-//    }
-
-//    Eigen::MatrixXd drop_zeros_goal(7,1);
-//    drop_zeros_goal << 0,0,0,0,0,0,0;
-//    ha::Controller::Ptr ungrasp_joint_ctrl = createJointSpaceController(p, name + std::string("_drop_joint_ctrl"),
-//                                                                        drop_zeros_goal, 1.0, true);
-//    ungrasp_cs->appendController(ungrasp_joint_ctrl);
-
-//    cs_ptr->setName(name + std::string("_pressure_cs"));
-//    ha::JumpConditionPtr to_stop_or_pressure_jc(new ha::JumpCondition());
-//    ha::ROSTopicSensor::Ptr to_stop_or_sensor(new ha::ROSTopicSensor());
-//    to_stop_or_sensor->setTopic("/pneumaticbox/pressure_0", "Float64");
-//    to_stop_or_pressure_jc->setSensor(to_stop_or_sensor);
-//    to_stop_or_pressure_jc->setConstantGoal(0.5);
-//    to_stop_or_pressure_jc->setEpsilon(0);
-//    to_stop_or_pressure_jc->setJumpCriterion(ha::JumpCondition::THRESH_LOWER_BOUND);
-//    cs_ptr->add(to_stop_or_pressure_jc);
-
-//    // To free from adherence wait 15 seconds or for pressure sensor
-//    cs_ptr2->setName(name + std::string("_time_cs"));
-//    ha::JumpConditionPtr to_stop_or_time_jc(new ha::JumpCondition());
-//    ha::SensorPtr free_sensor_time(new ha::ClockSensor());
-//    to_stop_or_time_jc->setSensor(free_sensor_time);
-//    switch(gripper)
-//    {
-//    case SOFT_HAND:
-//        to_stop_or_time_jc->setConstantGoal(3);
-//        break;
-//    case SUCTION_CUP:
-//    case NO_GRIPPER:
-//    case BARRETT_HAND:
-//    default:
-//        to_stop_or_time_jc->setConstantGoal(15);
-//        break;
-//    }
-
-//    to_stop_or_time_jc->setGoalRelative();
-//    to_stop_or_time_jc->setEpsilon(0);
-//    to_stop_or_time_jc->setJumpCriterion(ha::JumpCondition::THRESH_UPPER_BOUND);
-//    cs_ptr2->add(to_stop_or_time_jc);
-//}
 
 void HybridAutomatonAbstractFactory::CreateGoToBBCMAndConvergenceCS(const HybridAutomatonAbstractParams& p,
                                                                     const ha::ControlMode::Ptr& cm_ptr,
@@ -882,11 +531,9 @@ void HybridAutomatonAbstractFactory::CreateGoToCMConvergenceCSAndMaxForceCS(cons
                                                                     double ft_epsilon,
                                                                     bool is_relative)
 {
-    std::cout<<"generating gotocmandconvergence"<<std::endl;
     CreateGoToCMAndConvergenceCS(p, cm_ptr, convergence_cs_ptr, name, goal_op_pos, goal_op_ori,
                                  use_base,
                                  is_relative);
-    std::cout<<"generating maxftcs"<<std::endl;
     CreateMaxForceTorqueControlSwitch(p, max_force_cs_ptr,name, ft_weights, max_ft, ft_criterion,negate_ft_condition,ft_epsilon);
 
 }

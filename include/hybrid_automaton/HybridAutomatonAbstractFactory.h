@@ -31,6 +31,7 @@ enum GripperType
 {
     NO_GRIPPER,
     SOFT_HAND,
+    SOFT_HAND_8CHANNELS,
     SUCTION_CUP,
     BARRETT_HAND,
     PR2_GRIPPER
@@ -164,9 +165,9 @@ public:
          * @param ctrl The controller in the controlset
          * @return ha::ControlSet::Ptr The generated control set
          */
-    virtual ha::ControlSet::Ptr createJointSpaceControlSet(const HybridAutomatonAbstractParams& params,ha::Controller::Ptr ctrl) = 0;
+    virtual ha::ControlSet::Ptr createControlSet(const HybridAutomatonAbstractParams& params,ha::Controller::Ptr ctrl) = 0;
 
-    virtual ha::ControlSet::Ptr createJointSpaceControlSet(const HybridAutomatonAbstractParams& params,const std::vector<ha::Controller::Ptr>& ctrls) = 0;
+    virtual ha::ControlSet::Ptr createControlSet(const HybridAutomatonAbstractParams& params,const std::vector<ha::Controller::Ptr>& ctrls) = 0;
 
     /**
          * @brief Create a control set for task space controllers
@@ -296,7 +297,7 @@ public:
     ///
 
 
-    ha::JumpCondition::Ptr createJointSpaceConvergenceCondition(const HybridAutomatonAbstractParams& params,
+    virtual ha::JumpCondition::Ptr createJointSpaceConvergenceCondition(const HybridAutomatonAbstractParams& params,
                                                                 ha::ControllerConstPtr js_ctrl,
                                                                 double epsilon
                                                                 );
@@ -307,7 +308,7 @@ public:
      * @param ctrl A pointer to the goal controller
      * @return ha::JumpCondition::Ptr Pointer to the generated jump condition
      */
-    ha::JumpCondition::Ptr createSubjointSpaceConvergenceCondition(const HybridAutomatonAbstractParams& params,
+    virtual ha::JumpCondition::Ptr createSubjointSpaceConvergenceCondition(const HybridAutomatonAbstractParams& params,
                                                                    ha::ControllerConstPtr subjs_ctrl,
                                                                    const Eigen::MatrixXd& index_vec,
                                                                    double epsilon
@@ -321,7 +322,7 @@ public:
      * @param ctrl A pointer to the goal arm controller
      * @return ha::JumpCondition::Ptr Pointer to the generated jump condition
      */
-    ha::JumpCondition::Ptr createSubjointSpaceConvergenceConditionArm(const HybridAutomatonAbstractParams& params,
+    virtual ha::JumpCondition::Ptr createSubjointSpaceConvergenceConditionArm(const HybridAutomatonAbstractParams& params,
                                                                       ha::ControllerConstPtr subjs_ctrl
                                                                       //                                                                      ,
                                                                       //                                                                      const Eigen::MatrixXd& index_vec_arm = Eigen::MatrixXd(),
@@ -333,14 +334,14 @@ public:
      * @param ctrl A pointer to the goal base controller
      * @return ha::JumpCondition::Ptr Pointer to the generated jump condition
      */
-    ha::JumpCondition::Ptr createSubjointSpaceConvergenceConditionBase(const HybridAutomatonAbstractParams& params,
+    virtual ha::JumpCondition::Ptr createSubjointSpaceConvergenceConditionBase(const HybridAutomatonAbstractParams& params,
                                                                        ha::ControllerConstPtr subjs_ctrl
                                                                        //                                                                       ,
                                                                        //                                                                       const Eigen::MatrixXd& index_vec_base = Eigen::MatrixXd(),
                                                                        //                                                                       const double &pos_epsilon_js_base = -1
                                                                        );
 
-    ha::JumpCondition::Ptr createJointSpaceVelocityCondition(const HybridAutomatonAbstractParams& params,
+    virtual ha::JumpCondition::Ptr createJointSpaceVelocityCondition(const HybridAutomatonAbstractParams& params,
                                                              const Eigen::MatrixXd& index_vec,
                                                              const Eigen::MatrixXd& vel_goal_js,
                                                              double epsilon
@@ -353,7 +354,7 @@ public:
      *
      * @return ha::JumpCondition::Ptr Pointer to the generated jump condition
      */
-    ha::JumpCondition::Ptr createJointSpaceZeroVelocityCondition(const HybridAutomatonAbstractParams& params,
+    virtual ha::JumpCondition::Ptr createJointSpaceZeroVelocityCondition(const HybridAutomatonAbstractParams& params,
                                                                  const Eigen::MatrixXd& index_vec,
                                                                  double epsilon
                                                                  //                                                                 ,
@@ -365,12 +366,12 @@ public:
      *
      * @return ha::JumpCondition::Ptr Pointer to the generated jump condition
      */
-    ha::JumpCondition::Ptr createJointSpaceZeroVelocityConditionArm(const HybridAutomatonAbstractParams& params
+    virtual ha::JumpCondition::Ptr createJointSpaceZeroVelocityConditionArm(const HybridAutomatonAbstractParams& params
                                                                     //                                                                    const Eigen::MatrixXd& index_vec_arm = Eigen::MatrixXd(),
                                                                     //                                                                    const double& vel_epsilon_js_arm = -1
                                                                     );
 
-    ha::JumpCondition::Ptr createJointSpaceVelocityConditionArm(const HybridAutomatonAbstractParams& params,
+    virtual ha::JumpCondition::Ptr createJointSpaceVelocityConditionArm(const HybridAutomatonAbstractParams& params,
                                                                 const Eigen::MatrixXd& vel_goal_js_arm  = Eigen::MatrixXd()
             //                                                                   const Eigen::MatrixXd& index_vec_arm  = Eigen::MatrixXd(),
             //                                                                    const double& vel_epsilon_js_arm = -1
@@ -381,16 +382,16 @@ public:
      *
      * @return ha::JumpCondition::Ptr Pointer to the generated jump condition
      */
-    ha::JumpCondition::Ptr createJointSpaceZeroVelocityConditionBase(const HybridAutomatonAbstractParams& params);
+    virtual ha::JumpCondition::Ptr createJointSpaceZeroVelocityConditionBase(const HybridAutomatonAbstractParams& params);
 
-    ha::JumpCondition::Ptr createOperationalSpaceConvergenceCondition(const HybridAutomatonAbstractParams& params,
+    virtual ha::JumpCondition::Ptr createOperationalSpaceConvergenceCondition(const HybridAutomatonAbstractParams& params,
                                                                       ha::ControllerConstPtr ctrl,
                                                                       bool relative,
                                                                       bool only_displacement = false
             );
 
 
-    ha::JumpCondition::Ptr createMaxTimeCondition(const HybridAutomatonAbstractParams& params,
+    virtual ha::JumpCondition::Ptr createMaxTimeCondition(const HybridAutomatonAbstractParams& params,
                                                   double max_time);
 
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -405,11 +406,11 @@ public:
      * @param max_time Max time to wait before triggering
      * @return ha::ControlSwitch::Ptr The generated CS
      */
-    ha::ControlSwitch::Ptr CreateMaxTimeControlSwitch(const HybridAutomatonAbstractParams& params,
+    virtual ha::ControlSwitch::Ptr CreateMaxTimeControlSwitch(const HybridAutomatonAbstractParams& params,
                                                       const std::string& mode_name,
                                                       double max_time);
 
-    ha::ControlSwitch::Ptr CreateMaxForceTorqueControlSwitch(const HybridAutomatonAbstractParams& params,
+    virtual ha::ControlSwitch::Ptr CreateMaxForceTorqueControlSwitch(const HybridAutomatonAbstractParams& params,
                                                              const std::string& name,
                                                              const Eigen::MatrixXd& ft_weights,
                                                              const Eigen::MatrixXd& ft_max_val,
@@ -417,7 +418,7 @@ public:
                                                              const bool negate_ft_condition=false,
                                                              const float epsilon=0.0);
 
-    void CreateMaxForceTorqueControlSwitch(const HybridAutomatonAbstractParams& p,
+    virtual void CreateMaxForceTorqueControlSwitch(const HybridAutomatonAbstractParams& p,
                                            const ha::ControlSwitch::Ptr& cs_ptr,
                                            const std::string& name,
                                            const Eigen::MatrixXd& ft_weights,
@@ -438,8 +439,8 @@ public:
      * @param name The name for the control mode
      * @return bool
      */
-    void CreateGCCM(const HybridAutomatonAbstractParams& p,
-                    const ha::ControlMode::Ptr& cm_ptr, const std::string& name);
+    virtual void CreateGCCM(const HybridAutomatonAbstractParams& p,
+                    const ha::ControlMode::Ptr& cm_ptr, const std::string& name) = 0;
 
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -455,7 +456,7 @@ public:
      * @param goal_cfg Goal of the CM and the convergence
      * @return bool
      */
-    void CreateGoToHomeCMAndConvergenceCSArm(const HybridAutomatonAbstractParams& p,
+    virtual void CreateGoToHomeCMAndConvergenceCSArm(const HybridAutomatonAbstractParams& p,
                                              const ha::ControlMode::Ptr& cm_ptr,
                                              const ha::ControlSwitch::Ptr& cs_ptr,
                                              const std::string& name);
@@ -470,7 +471,7 @@ public:
      * @param tool The type of tool used (vacuum cleaner, soft hand or no tool)
      * @return bool
      */
-    void CreateGraspCMAndCS(const HybridAutomatonAbstractParams& p,
+    virtual void CreateGraspCMAndCS(const HybridAutomatonAbstractParams& p,
                             const ha::ControlMode::Ptr& cm_ptr,
                             const ha::ControlSwitch::Ptr& cs_ptr,
                             const std::string& name
@@ -519,7 +520,7 @@ public:
      * @param useBase True if we want to move the base
      * @return bool
      */
-    void CreateGoToBBCMAndConvergenceCS(const HybridAutomatonAbstractParams& p,
+    virtual void CreateGoToBBCMAndConvergenceCS(const HybridAutomatonAbstractParams& p,
                                         const ha::ControlMode::Ptr& cm_ptr,
                                         const ha::ControlSwitch::Ptr& cs_ptr,
                                         const std::string& name,
@@ -529,7 +530,7 @@ public:
                                         bool use_base,
                                         bool is_relative);
 
-    void CreateGoToCMAndConvergenceCS(const HybridAutomatonAbstractParams& p,
+    virtual void CreateGoToCMAndConvergenceCS(const HybridAutomatonAbstractParams& p,
                                       const ha::ControlMode::Ptr& cm_ptr,
                                       const ha::ControlSwitch::Ptr& cs_ptr,
                                       const std::string& name,
@@ -538,7 +539,7 @@ public:
                                       bool use_base,
                                       bool is_relative);
 
-    void CreateGoToCMConvergenceCSAndMaxForceCS(const HybridAutomatonAbstractParams& p,
+    virtual void CreateGoToCMConvergenceCSAndMaxForceCS(const HybridAutomatonAbstractParams& p,
                                                 const ha::ControlMode::Ptr& cm_ptr,
                                                 const ha::ControlSwitch::Ptr& convergence_cs_ptr,
                                                 const ha::ControlSwitch::Ptr& max_force_cs_ptr,

@@ -146,7 +146,7 @@ struct HybridAutomatonRBOParams : public HybridAutomatonAbstractParams
     {
         num_dof_arm = 7;
         num_dof_base = 3;
-        std::cout<<"Params constructor"<<std::endl;
+
         _index_vec_arm = Eigen::MatrixXd::Constant(num_dof_arm, 1, 0);
         for(int idx_arm=0; idx_arm<num_dof_arm; idx_arm++)
         {
@@ -166,10 +166,10 @@ struct HybridAutomatonRBOParams : public HybridAutomatonAbstractParams
         kp_js_arm = Eigen::MatrixXd::Constant(num_dof_arm, 1, DEFAULT_KP_JS_ARM);
         if(num_dof_arm == DEFAULT_NUM_DOF_ARM)
         {
-            std::cout<<"default"<<std::endl;
+
             kp_js_arm << 300.0, 200.0, 150.0, 120.0, 10.0, 10.0, 10.0;
         }
-        std::cout<<"after initialization:"<<kp_js_arm.size()<<std::endl;
+
         kp_js_base = Eigen::MatrixXd::Constant(num_dof_base, 1, DEFAULT_KP_JS_BASE);
         kp_js = _combineArmAndBase(kp_js_arm, kp_js_base);
 
@@ -404,9 +404,9 @@ public:
          * @param ctrl The controller in the controlset
          * @return ha::ControlSet::Ptr The generated control set
          */
-    ha::ControlSet::Ptr createJointSpaceControlSet(const HybridAutomatonAbstractParams& params,ha::Controller::Ptr ctrl);
+    ha::ControlSet::Ptr createControlSet(const HybridAutomatonAbstractParams& params,ha::Controller::Ptr ctrl);
 
-    ha::ControlSet::Ptr createJointSpaceControlSet(const HybridAutomatonAbstractParams& params,const std::vector<ha::Controller::Ptr>& ctrls);
+    ha::ControlSet::Ptr createControlSet(const HybridAutomatonAbstractParams& params,const std::vector<ha::Controller::Ptr>& ctrls);
 
     /**
          * @brief Create a control set for task space controllers
@@ -503,89 +503,10 @@ public:
                                                                    const std::string frame,
                                                                    const std::string parent_frame,
                                                                    bool is_relative);
-    //    Eigen::MatrixXd max_vel_js_arm() const;
-    //    void setMax_vel_js_arm(const Eigen::MatrixXd &max_vel_js_arm);
 
-    //    Eigen::MatrixXd max_vel_js_base() const;
-    //    void setMax_vel_js_base(const Eigen::MatrixXd &max_vel_js_base);
+    virtual void CreateGCCM(const HybridAutomatonAbstractParams& p,
+                    const ha::ControlMode::Ptr& cm_ptr, const std::string& name);
 
-    //    Eigen::MatrixXd kp_js_arm() const;
-    //    void setKp_js_arm(const Eigen::MatrixXd &kp_js_arm);
-
-    //    Eigen::MatrixXd kp_js_base() const;
-    //    void setKp_js_base(const Eigen::MatrixXd &kp_js_base);
-
-    //    Eigen::MatrixXd kv_js_arm() const;
-    //    void setKv_js_arm(const Eigen::MatrixXd &kv_js_arm);
-
-    //    Eigen::MatrixXd kv_js_base() const;
-    //    void setKv_js_base(const Eigen::MatrixXd &kv_js_base);
-
-    //    Eigen::MatrixXd kp_os_linear() const;
-    //    void setKp_os_linear(const Eigen::MatrixXd &kp_os_linear);
-
-    //    Eigen::MatrixXd kp_os_angular() const;
-    //    void setKp_os_angular(const Eigen::MatrixXd &kp_os_angular);
-
-    //    Eigen::MatrixXd kv_os_linear() const;
-    //    void setKv_os_linear(const Eigen::MatrixXd &kv_os_linear);
-
-    //    Eigen::MatrixXd kv_os_angular() const;
-    //    void setKv_os_angular(const Eigen::MatrixXd &kv_os_angular);
-
-    //    Eigen::MatrixXd kp_js_nakamura_arm() const;
-    //    void setKp_js_nakamura_arm(const Eigen::MatrixXd &kp_js_nakamura_arm);
-
-    //    Eigen::MatrixXd kp_js_nakamura_base() const;
-    //    void setKp_js_nakamura_base(const Eigen::MatrixXd &kp_js_nakamura_base);
-
-    //    Eigen::MatrixXd kv_js_nakamura_arm() const;
-    //    void setKv_js_nakamura_arm(const Eigen::MatrixXd &kv_js_nakamura_arm);
-
-    //    Eigen::MatrixXd kv_js_nakamura_base() const;
-    //    void setKv_js_nakamura_base(const Eigen::MatrixXd &kv_js_nakamura_base);
-
-    //    Eigen::MatrixXd joint_weights_nakamura_arm() const;
-    //    void setJoint_weights_nakamura_arm(const Eigen::MatrixXd &joint_weights_nakamura_arm);
-
-    //    Eigen::MatrixXd joint_weights_nakamura_base() const;
-    //    void setJoint_weights_nakamura_base(const Eigen::MatrixXd &joint_weights_nakamura_base);
-
-    //    Eigen::MatrixXd joint_weights_nakamura_base_no_rotation() const;
-    //    void setJoint_weights_nakamura_base_no_rotation(const Eigen::MatrixXd &joint_weights_nakamura_base_no_rotation);
-
-    //    Eigen::MatrixXd joint_weights_nakamura_base_little_motion() const;
-    //    void setJoint_weights_nakamura_base_little_motion(const Eigen::MatrixXd &joint_weights_nakamura_base_little_motion);
-
-    //    Eigen::MatrixXd home_config_js_arm() const;
-    //    void setHome_config_js_arm(const Eigen::MatrixXd &home_config_js_arm);
-
-    //    Eigen::MatrixXd home_config_js_base() const;
-    //    void setHome_config_js_base(const Eigen::MatrixXd &home_config_js_base);
-
-    //    double pos_epsilon_js_arm() const;
-    //    void setPos_epsilon_js_arm(const double &pos_epsilon_js_arm);
-
-    //    double pos_epsilon_js_base() const;
-    //    void setPos_epsilon_js_base(const double &pos_epsilon_js_base);
-
-    //    double vel_epsilon_js_arm() const;
-    //    void setVel_epsilon_js_arm(const double &vel_epsilon_js_arm);
-
-    //    double vel_epsilon_js_base() const;
-    //    void setVel_epsilon_js_base(const double &vel_epsilon_js_base);
-
-    //    double pos_epsilon_os_linear() const;
-    //    void setPos_epsilon_os_linear(const double &pos_epsilon_os_linear);
-
-    //    double pos_epsilon_os_angular() const;
-    //    void setPos_epsilon_os_angular(const double &pos_epsilon_os_angular);
-
-    //    double vel_epsilon_os_linear() const;
-    //    void setVel_epsilon_os_linear(const double &vel_epsilon_os_linear);
-
-    //    double vel_epsilon_os_angular() const;
-    //    void setVel_epsilon_os_angular(const double &vel_epsilon_os_angular);
 
     /**
      * @brief
@@ -596,8 +517,6 @@ public:
     std::string HybridAutomatonToString(ha::HybridAutomaton::ConstPtr ha);
 
 protected:
-
-    //virtual void _initializeDefaultValues();
 
     /**
          * @brief Performs the cloning operation (this solves some issues of inheritance and smart pointers)
