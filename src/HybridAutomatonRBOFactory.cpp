@@ -179,7 +179,7 @@ ha::Controller::Ptr HybridAutomatonRBOFactory::createSubjointSpaceController(con
     ctrl->setName(name);
     ctrl->setType("InterpolatedSubjointController");
     ctrl->setArgument("interpolation_type", "quintic");
-    ha_ostringstream index_vec_ss;
+    ha_stringstream index_vec_ss;
     index_vec_ss << index_vec;
     ctrl->setArgument("index", index_vec_ss.str());
     ctrl->setGoal(goal_js);
@@ -208,7 +208,7 @@ ha::Controller::Ptr HybridAutomatonRBOFactory::createBBSubjointSpaceController(c
     ctrl->setName(name);
     ctrl->setType("BlackboardInterpolatedSubjointController");
     ctrl->setArgument("interpolation_type", "quintic");
-    ha_ostringstream index_vec_ss;
+    ha_stringstream index_vec_ss;
     index_vec_ss << index_vec;
     ctrl->setArgument("index", index_vec_ss.str());
     ctrl->setArgument("reinterpolation", "1");
@@ -242,7 +242,7 @@ ha::Controller::Ptr HybridAutomatonRBOFactory::createBBSubjointSpaceControllerBa
     ctrl->setName(name);
     ctrl->setType("BlackboardInterpolatedSubjointController");
     ctrl->setArgument("interpolation_type", "quintic");
-    ha_ostringstream index_vec_ss;
+    ha_stringstream index_vec_ss;
     index_vec_ss << p._index_vec_base ;
     ctrl->setArgument("index", index_vec_ss.str());
     ctrl->setArgument("reinterpolation", "1");
