@@ -56,7 +56,18 @@ namespace ha {
         * @brief Activate the controller for execution. Is called automatically from the ControlSet
 	    */
 		virtual void initialize() {
-			HA_THROW_ERROR("Controller.initialize", "not implemented");
+			// Some more things will be done in the derived classes
+			this->updateGoal();
+		}
+
+		virtual	void updateGoal() {
+			Eigen::MatrixXd abs_goal;
+			if(this->_goal_is_relative)
+				abs_goal = this->relativeGoalToAbsolute(this->_goal);
+			else
+				abs_goal = this->_goal;
+
+			this->_updateAbsoluteGoal(abs_goal);
 		}
 
         /**
@@ -209,6 +220,19 @@ namespace ha {
 
 		
 	protected:
+
+		/** 
+		 * @brief This method invokes the right call setPoint / addPoint for this controller type
+		 *
+		 * this method needs the goal in absolute coordinates and thus should only be called
+		 * in initialize() AND updateGoal()
+		 */
+		virtual void _updateAbsoluteGoal(const Eigen::MatrixXd& goal_abs)
+		{
+			//default: do nothing special - most controllers do rlab specific things here - i.e. call setPoint(..)
+		}
+
+
         /**
          * @brief A pointer to the active robot system
          */
