@@ -60,7 +60,12 @@ namespace ha {
 			this->updateGoal();
 		}
 
-		virtual	void updateGoal() {
+		/**
+        * @brief Updates the goal of the controller. To do so, it first converts it from relative to absolute (if it was passed
+		* as relative goal). The function is called by initialize() and by the Blackboard decorator to update the goal. 
+		* This function is not virtual because it should not be reimplemented in derived classes.
+	    */
+		void updateGoal() {
 			Eigen::MatrixXd abs_goal;
 			if(this->_goal_is_relative)
 				abs_goal = this->relativeGoalToAbsolute(this->_goal);
