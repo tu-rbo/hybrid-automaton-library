@@ -491,14 +491,39 @@ namespace ha {
 		if(!tree->getAttribute<double>("epsilon", _epsilon))
 			HA_WARN("JumpCondition.deserialize", "No \"epsilon\" parameter given in JumpCondition - using default values");
 
-		int jump_criterion = -1;
-		if(tree->getAttribute<int>("jump_criterion", jump_criterion))
+		std::string jump_criterion_as_string;
+		if(tree->getAttribute<std::string>("jump_criterion", jump_criterion_as_string))
 		{
-			if(jump_criterion < 0 || jump_criterion >= NUM_CRITERIA)
-				HA_THROW_ERROR("JumpCondition.deserialize", "Unknown jumpCriterion " << jump_criterion);
+			if (!jump_criterion_as_string.empty() && jump_criterion_as_string.find_first_not_of("0123456789") == std::string::npos)
+			{
+				// it's a digit
+				int jump_criterion = atoi(jump_criterion_as_string.c_str());
 
-			//Cast int to enum
-			_jump_criterion = static_cast<JumpCriterion> (jump_criterion);	
+				if(jump_criterion < 0 || jump_criterion >= NUM_CRITERIA)
+					HA_THROW_ERROR("JumpCondition.deserialize", "Unknown jumpCriterion: " << jump_criterion);
+
+				//Cast int to enum
+				_jump_criterion = static_cast<JumpCriterion> (jump_criterion);	
+			}
+			else
+			{
+				if (jump_criterion_as_string == "NORM_L1")
+					_jump_criterion = NORM_L1;
+				else if (jump_criterion_as_string == "NORM_L2")
+					_jump_criterion = NORM_L1;
+				else if (jump_criterion_as_string == "NORM_L_INF")
+					_jump_criterion = NORM_L_INF;
+				else if (jump_criterion_as_string == "NORM_ROTATION")
+					_jump_criterion = NORM_ROTATION;
+				else if (jump_criterion_as_string == "NORM_TRANSFORM")
+					_jump_criterion = NORM_TRANSFORM;
+				else if (jump_criterion_as_string == "THRESH_UPPER_BOUND")
+					_jump_criterion = THRESH_UPPER_BOUND;
+				else if (jump_criterion_as_string == "THRESH_LOWER_BOUND")
+					_jump_criterion = THRESH_LOWER_BOUND;
+				else
+					HA_THROW_ERROR("JumpCondition.deserialize", "Unknown jumpCriterion: '" << jump_criterion_as_string << "'");
+			}
 		}
 		else
 		{
