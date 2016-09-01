@@ -510,7 +510,7 @@ namespace ha {
 				if (jump_criterion_as_string == "NORM_L1")
 					_jump_criterion = NORM_L1;
 				else if (jump_criterion_as_string == "NORM_L2")
-					_jump_criterion = NORM_L1;
+					_jump_criterion = NORM_L2;
 				else if (jump_criterion_as_string == "NORM_L_INF")
 					_jump_criterion = NORM_L_INF;
 				else if (jump_criterion_as_string == "NORM_ROTATION")
