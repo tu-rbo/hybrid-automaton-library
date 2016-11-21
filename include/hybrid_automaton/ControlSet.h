@@ -133,6 +133,10 @@ namespace ha {
             return _controllers;
         }
 
+		virtual std::map<std::string, Controller::Ptr> getControllers() const {
+            return _controllers;
+        }
+
     protected:
 		virtual void setArgumentString(const std::string& name, const std::string& value)
 		{
