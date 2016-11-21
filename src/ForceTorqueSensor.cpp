@@ -43,13 +43,13 @@ namespace ha
                     // torque
                     ft.bottomLeftCorner(3,1) = rot*torque; // + translation.cross(force);
 
-					static int i = 0;
+					/*static int i = 0;
 					if ( (i++ % 500) == 0)
 					{
 						std::cout << "ori: "<< forceTorque.transpose() << std::endl;
 						std::cout << "rot: "<<ft.transpose() << std::endl;
 
-					}
+					}*/
 
                     forceTorque = ft;
 
