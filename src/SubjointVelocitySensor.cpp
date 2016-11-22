@@ -54,6 +54,29 @@ namespace ha
         if(!tree->getAttribute< ::Eigen::MatrixXd >("index", index_mat) )
             HA_THROW_ERROR("SubjointVelocitySensor.deserialize", "This type of sensor needs a value 'index'!");
 
+		if(index_mat.rows()> system->getDof() || index_mat.cols() != 1)
+			HA_THROW_ERROR("SubjointVelocitySensor::deserialize", "Wrong dimensions for index!! - need (" << system->getDof()<<"x1), got ("<<index_mat.rows()<<"x"<<index_mat.cols()<<") !");
+
+		std::vector<long> index_vec(index_mat.rows());
+		for(size_t i = 0; i < index_vec.size(); i++)
+		{
+			if(fabs(index_mat(i,0) - floor(index_mat(i,0)))>0.01)
+				HA_THROW_ERROR("SubjointVelocitySensor::deserialize", "Value in index not an integer - instead it's "<<index_mat(i,0)<<" !");
+			int index_int = (int)floor(index_mat(i,0));
+			if(index_int >= system->getDof() || index_int < 0)
+				HA_THROW_ERROR("SubjointVelocitySensor::deserialize", "Value in index does not match a joint index - instead it's "<<index_mat(i,0)<<" !");
+			index_vec[i] = index_int;
+		}
+		for(size_t i = 0; i < index_vec.size(); i++)
+		{
+			for(size_t j = i+1; j < index_vec.size(); j++)
+			{
+				if(index_vec[i] == index_vec[j]){
+					HA_THROW_ERROR("SubjointVelocitySensor::deserialize", "Value in index occurs twice: "<<index_vec.at(i)<<". These should be unique !");
+				}
+			}
+		}
+
 		_index.resize(index_mat.rows());
         for(int j=0; j<index_mat.rows(); j++)
             _index[j]=index_mat(j);
