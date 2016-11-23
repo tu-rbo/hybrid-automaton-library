@@ -60,7 +60,7 @@ namespace ha {
             _index.resize(index.size());
             for(int i=0; i<index.rows(); i++)
             {
-                _index.at(i) = index(i,0);
+                _index.at(i) = (int)floor(index(i,0));
             }
         }
 
