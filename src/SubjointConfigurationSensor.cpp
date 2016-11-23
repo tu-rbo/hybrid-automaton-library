@@ -22,7 +22,7 @@ namespace ha
 	{
         ::Eigen::MatrixXd cfg = this->_system->getJointConfiguration();
         ::Eigen::MatrixXd subcfg(_index.size(), 1);
-        for(int i=0; i< _index.size(); i++)
+        for(size_t i=0; i< _index.size(); i++)
             subcfg(i) = cfg(_index[i]);
 
         return subcfg;

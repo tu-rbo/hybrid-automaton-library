@@ -22,7 +22,7 @@ namespace ha
 	{
         ::Eigen::MatrixXd cfg = this->_system->getJointVelocity();
         ::Eigen::MatrixXd subcfg(_index.size(), 1);
-        for(int i=0; i< _index.size(); i++)
+        for(size_t i=0; i< _index.size(); i++)
             subcfg(i) = cfg(_index[i]);
 
         return subcfg;
@@ -78,7 +78,7 @@ namespace ha
 		}
 
 		_index.resize(index_mat.rows());
-        for(int j=0; j<index_mat.rows(); j++)
+        for(size_t j=0; j<index_mat.rows(); j++)
             _index[j]=index_mat(j);
 
 		if (_type == "" || !HybridAutomaton::isSensorRegistered(_type)) {
