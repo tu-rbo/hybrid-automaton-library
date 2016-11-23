@@ -126,6 +126,14 @@ namespace ha {
 		return this->_goal;
 	}
 
+	
+	Eigen::MatrixXd Controller::getCurrentInterpolationGoal() const
+	{
+		//Default behaviour: just return goal - if you have an interpolated controller overwrite this function and return
+		//the last via point
+		return this->_goal;
+	}
+
 	void Controller::setGoal(const Eigen::MatrixXd& new_goal)
 	{
 		this->_goal = new_goal;

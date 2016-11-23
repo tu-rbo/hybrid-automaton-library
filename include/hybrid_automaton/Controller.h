@@ -125,6 +125,12 @@ namespace ha {
 
 		virtual Eigen::MatrixXd getGoal() const;
 		virtual void setGoal(const Eigen::MatrixXd& new_goal);
+
+		/**
+		* Helper function to return the current via point of an interpolator.
+		* Overwrite it for interpolated controllers, ignore it for non-interpolated controllers.
+		*/
+		virtual ::Eigen::MatrixXd getCurrentInterpolationGoal() const;
 	
 		virtual bool getGoalIsRelative() const;
 		virtual void setGoalIsRelative(bool is_goal_relative);
