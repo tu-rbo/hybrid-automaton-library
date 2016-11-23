@@ -55,7 +55,7 @@ namespace ha
             HA_THROW_ERROR("SubjointVelocitySensor.deserialize", "This type of sensor needs a value 'index'!");
 
 		if(index_mat.rows()> system->getDof() || index_mat.cols() != 1)
-			HA_THROW_ERROR("SubjointVelocitySensor::deserialize", "Wrong dimensions for index!! - need at least (" << system->getDof()<<"x1), got ("<<index_mat.rows()<<"x"<<index_mat.cols()<<") !");
+			HA_THROW_ERROR("SubjointVelocitySensor::deserialize", "Wrong dimensions for index!! - need at most (" << system->getDof()<<"x1), got ("<<index_mat.rows()<<"x"<<index_mat.cols()<<") !");
 
 		std::vector<long> index_vec(index_mat.rows());
 		for(size_t i = 0; i < index_vec.size(); i++)
