@@ -199,6 +199,16 @@ namespace ha {
             return _additional_arguments;
         }
 
+		/**
+		* This function realizes a smooth transfer from this controller to controller
+		*
+		* Overload it in your controller, i.e. if you want to transfer members from one controller to the other
+		*/
+	    virtual void switchController(Controller::ConstPtr other_ctrl)
+		{
+			//Default: do nothing
+		}
+
 	protected:
 
 		virtual void setArgumentString(const std::string& name, const std::string& value)
