@@ -412,7 +412,7 @@ ha::Controller::Ptr HybridAutomatonCreator::_createJointSpaceBaseController(std:
     ctrl->setArgument("reinterpolation", "1");
     ctrl->setArgument("use_tf", "1");
     ctrl->setArgument("topic_name", topic);
-    ctrl->setArgument("tf_parent", "odom");
+    ctrl->setArgument("tf_parent", "rlab_origin");
     ctrl->setArgument("update_rate", 100);
     ctrl->setKp(_kp_base_jointspace);
     ctrl->setKv(_kv_base_jointspace);
@@ -484,7 +484,7 @@ ha::Controller::Ptr HybridAutomatonCreator::_createTaskSpaceControllerTF(std::st
     ctrl->setArgument("reinterpolation", "1");
     ctrl->setArgument("use_tf", "1");
     ctrl->setArgument("topic_name", frame);
-    ctrl->setArgument("tf_parent", "odom");
+    ctrl->setArgument("tf_parent", "rlab_origin");
     ctrl->setArgument("update_rate", 50);
 
     Eigen::MatrixXd max_vel(2,1);
