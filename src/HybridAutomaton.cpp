@@ -191,6 +191,9 @@ namespace ha {
 
 				if (control_switch->isActive())
 				{
+					// Copy the pointer to return it if someone asks for it
+					_last_active_control_switch = control_switch;
+
 					// switch to the next control mode
 					ModeHandle mode_handle = boost::target(switch_handle, _graph);
 
@@ -353,6 +356,11 @@ namespace ha {
 	ControlMode::Ptr HybridAutomaton::getCurrentControlMode() const 
 	{
 		return _current_control_mode;
+	}
+
+	ControlSwitch::Ptr HybridAutomaton::getLastActiveControlSwitch() const 
+	{
+		return _last_active_control_switch;
 	}
 
 	void HybridAutomaton::_activateCurrentControlMode(const double& t) 

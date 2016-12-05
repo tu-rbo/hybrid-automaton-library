@@ -94,6 +94,11 @@ namespace ha {
          */
 		ControlMode::Ptr _current_control_mode;
 
+		/**
+         * @brief The last active control switch
+         */
+		ControlSwitch::Ptr _last_active_control_switch;
+
         /**
          * @brief maps switch names to edges in the graph
          */
@@ -269,6 +274,7 @@ namespace ha {
 
 		void setCurrentControlMode(const std::string& control_mode);
 		ControlMode::Ptr getCurrentControlMode() const;
+		ControlSwitch::Ptr getLastActiveControlSwitch() const;
 
         /**
          * @brief write this HybridAutomaton into a DescriptionTreeNode.
