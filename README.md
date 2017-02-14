@@ -16,7 +16,7 @@ Library for creating feedback-based motion descriptions for robots.
 ### Installation on Linux
    * Build gmock and gtest
       ```bash
-      cd $(RSWIN_ROOT)/thirdparty/gmock-1.7.0
+      cd $(GMOCK_ROOT)/gmock-1.7.0
       mkdir build && cd build
       cmake ..   #use  cmake .. -DCMAKE_BUILD_TYPE=DEBUG for a configuring a debug build
       make
@@ -25,7 +25,7 @@ Library for creating feedback-based motion descriptions for robots.
 
    * Build hybrid_automaton
       ```bash
-      cd $(RSWIN_ROOT)/hybrid_automaton
+      cd $(hybrid_automaton_library_ROOT)
       mkdir build && cd build
       cmake ..    #-DUNIT_TESTS=ON  for compiling the unit tests
       make
