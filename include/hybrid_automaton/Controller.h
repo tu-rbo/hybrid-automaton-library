@@ -1,5 +1,5 @@
 /*
- * Copyright 2017, Robotics and Biology Lab, TU Berlin
+ * Copyright 2015-2017, Robotics and Biology Lab, TU Berlin
  * 
  * Redistribution and use in source and binary forms, with or without 
  * modification, are permitted provided that the following conditions are met:
