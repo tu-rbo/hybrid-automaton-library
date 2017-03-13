@@ -93,6 +93,9 @@ namespace ha {
          */
         std::string _frame_id;
 
+		// The port of the force-torque sensor to query values from
+		int _port;
+
 		virtual ForceTorqueSensor* _doClone() const
 		{
 			return (new ForceTorqueSensor(*this));
