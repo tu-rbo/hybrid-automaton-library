@@ -26,7 +26,7 @@ namespace JumpConditionSerialization1 {
 		MOCK_CONST_METHOD0(getDof, int () );
 		MOCK_CONST_METHOD0(getJointConfiguration, ::Eigen::MatrixXd () );
 		MOCK_CONST_METHOD0(getJointVelocity, ::Eigen::MatrixXd () );
-        MOCK_CONST_METHOD1(getForceTorqueMeasurement, ::Eigen::MatrixXd (const std::string& frame_id) );
+        MOCK_CONST_METHOD1(getForceTorqueMeasurement, ::Eigen::MatrixXd (const int& port) );
 		MOCK_CONST_METHOD0(getCurrentTime, ::Eigen::MatrixXd () );
 		MOCK_CONST_METHOD1(getFramePose, ::Eigen::MatrixXd (const std::string& frame_id) );
 	};

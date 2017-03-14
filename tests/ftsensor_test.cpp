@@ -24,7 +24,7 @@ namespace ForceTorqueSensorTest {
         MOCK_CONST_METHOD0(getDof, int () );
         MOCK_CONST_METHOD0(getJointConfiguration, ::Eigen::MatrixXd () );
         MOCK_CONST_METHOD0(getJointVelocity, ::Eigen::MatrixXd () );
-        MOCK_CONST_METHOD1(getForceTorqueMeasurement, ::Eigen::MatrixXd (const std::string& frame_id) );
+        MOCK_CONST_METHOD1(getForceTorqueMeasurement, ::Eigen::MatrixXd (const int& port) );
         MOCK_CONST_METHOD0(getCurrentTime, ::Eigen::MatrixXd () );
         MOCK_CONST_METHOD1(getFramePose, ::Eigen::MatrixXd (const std::string& frame_id) );
     };
@@ -40,7 +40,7 @@ TEST(ForceTorqueSensor, FrameId) {
     //The sensor reading of the system - we will mock it as constant
     ::Eigen::MatrixXd ftSensorMat(6,1);
     ftSensorMat<<1.0,2.0,3.0,4.0,5.0,6.0;
-    EXPECT_CALL(*_ms, getForceTorqueMeasurement("ee"))
+    EXPECT_CALL(*_ms, getForceTorqueMeasurement(DEFAULT_FT_PORT))
         .WillRepeatedly(Return(ftSensorMat));
 
     ::Eigen::MatrixXd poseMat(4,4);
