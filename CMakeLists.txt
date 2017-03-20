@@ -18,7 +18,7 @@ endif()
 # If you want to do special things on windows
 if(MSVC)
     set(MSVC_COMPILER_DEFS "/MP")
-	add_definitions(/MP)
+    add_definitions(/MP)
 endif() 
 
 # Turn on the ability to create folders to organize projects (.vcproj)
@@ -28,14 +28,14 @@ set_property (GLOBAL PROPERTY USE_FOLDERS ON)
 
 find_package(TinyXML)
 if(NOT TinyXML_FOUND)
-	#message ("TinyXML not found automatically. Retrying using TinyXML_ROOT_DIR=${PROJECT_SOURCE_DIR}/../thirdparty/tinyxml/")
-	set (TinyXML_ROOT_DIR "${PROJECT_SOURCE_DIR}/../thirdparty/tinyxml/")
-	find_package(TinyXML)
+    #message ("TinyXML not found automatically. Retrying using TinyXML_ROOT_DIR=${PROJECT_SOURCE_DIR}/../thirdparty/tinyxml/")
+    set (TinyXML_ROOT_DIR "${PROJECT_SOURCE_DIR}/../thirdparty/tinyxml/")
+    find_package(TinyXML)
 endif()
 
 if(NOT TinyXML_FOUND)
-	message (FATAL_ERROR "TinyXML not found!!")
-	if (CMAKE_COMPILER_IS_GNUCXX)
+    message (FATAL_ERROR "TinyXML not found!!")
+    if (CMAKE_COMPILER_IS_GNUCXX)
         message("Hint: Try to install package libtinyxml-dev or set -DTinyXML_ROOT_DIR=/path/to/custom/tinyxml")	
     endif()
 else()
@@ -45,34 +45,34 @@ endif()
 
 find_package(Boost 1.46.0)
 if(NOT Boost_FOUND AND WIN32)
-	message ("Boost not found automatically. Retrying using BOOST_ROOT=C:/Program Files/boost/boost_1_57_0")
-	set (BOOST_ROOT "C:/Program Files/boost/boost_1_57_0")
-	find_package(Boost 1.46.0)
+    message ("Boost not found automatically. Retrying using BOOST_ROOT=C:/Program Files/boost/boost_1_57_0")
+    set (BOOST_ROOT "C:/Program Files/boost/boost_1_57_0")
+    find_package(Boost 1.46.0)
 endif()
 	
 if(NOT Boost_FOUND)
-	message (FATAL_ERROR "Boost not found!!")
+    message (FATAL_ERROR "Boost not found!!")
 else()
-	message ("Boost found with root directory BOOST_ROOT=${BOOST_ROOT}")
-	include_directories(${Boost_INCLUDE_DIR})
-	include_directories(${BOOST_ROOT} )
+    message ("Boost found with root directory BOOST_ROOT=${BOOST_ROOT}")
+    include_directories(${Boost_INCLUDE_DIR})
+    include_directories(${BOOST_ROOT} )
 endif()
 
 find_package(Eigen3)
 if(NOT EIGEN3_FOUND AND WIN32)
-	message ("Eigen not found automatically. Retrying using EIGEN_DIR=C:/Program Files/eigen/eigen-eigen-1306d75b4a21")
-	set (EIGEN_DIR "C:/Program Files/eigen/eigen-eigen-1306d75b4a21")
-	find_package(Eigen3)
+    message ("Eigen not found automatically. Retrying using EIGEN_DIR=C:/Program Files/eigen/eigen-eigen-1306d75b4a21")
+    set (EIGEN_DIR "C:/Program Files/eigen/eigen-eigen-1306d75b4a21")
+    find_package(Eigen3)
 endif()
 
 if(NOT EIGEN3_FOUND)
-	message (FATAL_ERROR "Eigen not found!!")
+    message (FATAL_ERROR "Eigen not found!!")
     if (UNIX)
         message("Hint: Try to install package libeigen3-dev or set -DEIGEN_DIR=/path/to/custom/libeigen3")	
     endif()
 else()
-	message ("Eigen found with include directories EIGEN3_INCLUDE_DIR=${EIGEN3_INCLUDE_DIR}")
-	include_directories(${EIGEN3_INCLUDE_DIR} )
+    message ("Eigen found with include directories EIGEN3_INCLUDE_DIR=${EIGEN3_INCLUDE_DIR}")
+    include_directories(${EIGEN3_INCLUDE_DIR} )
 endif()
 
 
@@ -112,38 +112,38 @@ add_subdirectory(examples)
 # Collect sources into the variable HA_SOURCES 
 set (HA_CORE_HEADERS
     "${PROJECT_SOURCE_DIR}/include/hybrid_automaton/HybridAutomaton.h"
-	"${PROJECT_SOURCE_DIR}/include/hybrid_automaton/HybridAutomatonStringStream.h"
-	"${PROJECT_SOURCE_DIR}/include/hybrid_automaton/HybridAutomatonRegistration.h"
-	"${PROJECT_SOURCE_DIR}/include/hybrid_automaton/ControlMode.h"
-	"${PROJECT_SOURCE_DIR}/include/hybrid_automaton/ControlSwitch.h"
-	"${PROJECT_SOURCE_DIR}/include/hybrid_automaton/ControlSet.h"
-	"${PROJECT_SOURCE_DIR}/include/hybrid_automaton/Controller.h"
-	"${PROJECT_SOURCE_DIR}/include/hybrid_automaton/JumpCondition.h"
-	"${PROJECT_SOURCE_DIR}/include/hybrid_automaton/System.h"
-	"${PROJECT_SOURCE_DIR}/include/hybrid_automaton/Serializable.h")
+    "${PROJECT_SOURCE_DIR}/include/hybrid_automaton/HybridAutomatonStringStream.h"
+    "${PROJECT_SOURCE_DIR}/include/hybrid_automaton/HybridAutomatonRegistration.h"
+    "${PROJECT_SOURCE_DIR}/include/hybrid_automaton/ControlMode.h"
+    "${PROJECT_SOURCE_DIR}/include/hybrid_automaton/ControlSwitch.h"
+    "${PROJECT_SOURCE_DIR}/include/hybrid_automaton/ControlSet.h"
+    "${PROJECT_SOURCE_DIR}/include/hybrid_automaton/Controller.h"
+    "${PROJECT_SOURCE_DIR}/include/hybrid_automaton/JumpCondition.h"
+    "${PROJECT_SOURCE_DIR}/include/hybrid_automaton/System.h"
+    "${PROJECT_SOURCE_DIR}/include/hybrid_automaton/Serializable.h")
 
 set (HA_SENSOR_HEADERS
-	"${PROJECT_SOURCE_DIR}/include/hybrid_automaton/Sensor.h"
-	"${PROJECT_SOURCE_DIR}/include/hybrid_automaton/ClockSensor.h"
-	"${PROJECT_SOURCE_DIR}/include/hybrid_automaton/ForceTorqueSensor.h"
-	"${PROJECT_SOURCE_DIR}/include/hybrid_automaton/FramePoseSensor.h"
-	"${PROJECT_SOURCE_DIR}/include/hybrid_automaton/JointConfigurationSensor.h"
-        "${PROJECT_SOURCE_DIR}/include/hybrid_automaton/JointVelocitySensor.h"
-	"${PROJECT_SOURCE_DIR}/include/hybrid_automaton/FrameDisplacementSensor.h"
-	"${PROJECT_SOURCE_DIR}/include/hybrid_automaton/FrameOrientationSensor.h"
- 	"${PROJECT_SOURCE_DIR}/include/hybrid_automaton/ROSTopicSensor.h"
-	"${PROJECT_SOURCE_DIR}/include/hybrid_automaton/SubjointConfigurationSensor.h"
-	"${PROJECT_SOURCE_DIR}/include/hybrid_automaton/SubjointVelocitySensor.h")
+    "${PROJECT_SOURCE_DIR}/include/hybrid_automaton/Sensor.h"
+    "${PROJECT_SOURCE_DIR}/include/hybrid_automaton/ClockSensor.h"
+    "${PROJECT_SOURCE_DIR}/include/hybrid_automaton/ForceTorqueSensor.h"
+    "${PROJECT_SOURCE_DIR}/include/hybrid_automaton/FramePoseSensor.h"
+    "${PROJECT_SOURCE_DIR}/include/hybrid_automaton/JointConfigurationSensor.h"
+    "${PROJECT_SOURCE_DIR}/include/hybrid_automaton/JointVelocitySensor.h"
+    "${PROJECT_SOURCE_DIR}/include/hybrid_automaton/FrameDisplacementSensor.h"
+    "${PROJECT_SOURCE_DIR}/include/hybrid_automaton/FrameOrientationSensor.h"
+    "${PROJECT_SOURCE_DIR}/include/hybrid_automaton/ROSTopicSensor.h"
+    "${PROJECT_SOURCE_DIR}/include/hybrid_automaton/SubjointConfigurationSensor.h"
+    "${PROJECT_SOURCE_DIR}/include/hybrid_automaton/SubjointVelocitySensor.h")
 
 set (HA_DESCRIPTION_HEADERS
-	"${PROJECT_SOURCE_DIR}/include/hybrid_automaton/DescriptionTree.h"
-	"${PROJECT_SOURCE_DIR}/include/hybrid_automaton/DescriptionTreeNode.h"
-	"${PROJECT_SOURCE_DIR}/include/hybrid_automaton/DescriptionTreeXML.h"
-	"${PROJECT_SOURCE_DIR}/include/hybrid_automaton/DescriptionTreeNodeXML.h")
+    "${PROJECT_SOURCE_DIR}/include/hybrid_automaton/DescriptionTree.h"
+    "${PROJECT_SOURCE_DIR}/include/hybrid_automaton/DescriptionTreeNode.h"
+    "${PROJECT_SOURCE_DIR}/include/hybrid_automaton/DescriptionTreeXML.h"
+    "${PROJECT_SOURCE_DIR}/include/hybrid_automaton/DescriptionTreeNodeXML.h")
 
 set (HA_FACTORY_HEADERS
-	"${PROJECT_SOURCE_DIR}/include/hybrid_automaton/HybridAutomatonAbstractFactory.h"
-	"${PROJECT_SOURCE_DIR}/include/hybrid_automaton/HybridAutomatonRBOFactory.h")
+    "${PROJECT_SOURCE_DIR}/include/hybrid_automaton/HybridAutomatonAbstractFactory.h"
+    "${PROJECT_SOURCE_DIR}/include/hybrid_automaton/HybridAutomatonRBOFactory.h")
 
 
 set (HA_CORE_SOURCES
@@ -176,62 +176,73 @@ set (HA_SENSOR_SOURCES
 set (HA_FACTORY_SOURCES
     "${PROJECT_SOURCE_DIR}/src/HybridAutomatonAbstractFactory.cpp"
     "${PROJECT_SOURCE_DIR}/src/HybridAutomatonRBOFactory.cpp")
-	
+
 source_group("Header Files" FILES ${HA_CORE_HEADERS})
-
 source_group("Header Files\\Description" FILES ${HA_DESCRIPTION_HEADERS})
-
 source_group("Header Files\\Sensor" FILES ${HA_SENSOR_HEADERS})
-
 source_group("Source Files" FILES ${HA_CORE_SOURCES})
-
 source_group("Source Files\\Description" FILES ${HA_DESCRIPTION_SOURCES})
-
 source_group("Source Files\\Sensor" FILES ${HA_SENSOR_SOURCES})
-
 source_group("Source Files\\Factory" FILES ${HA_FACTORY_SOURCES})
-	
-add_library(hybrid_automaton STATIC ${HA_CORE_SOURCES} 
-                        ${HA_DESCRIPTION_SOURCES} 
-                        ${HA_SENSOR_SOURCES}
-                        ${HA_FACTORY_SOURCES} 
-			${HA_CORE_HEADERS}
-                        ${HA_DESCRIPTION_HEADERS} 
-                        ${HA_SENSOR_HEADERS}
-                        ${HA_FACTORY_HEADERS})
-						
+
+add_library(hybrid_automaton STATIC
+    ${HA_CORE_SOURCES} 
+    ${HA_DESCRIPTION_SOURCES} 
+    ${HA_SENSOR_SOURCES}
+    ${HA_FACTORY_SOURCES} 
+    ${HA_CORE_HEADERS}
+    ${HA_DESCRIPTION_HEADERS} 
+    ${HA_SENSOR_HEADERS}
+    ${HA_FACTORY_HEADERS})
 target_link_libraries(hybrid_automaton ${TinyXML_LIBRARIES} ${Boost_LIBRARIES} ${Eigen3_LIBRARIES})
 
+if (UNIX)
+    # Build also the shared version of the library -- not under windows
+    add_library(hybrid_automaton_shared SHARED
+        ${HA_CORE_SOURCES} 
+        ${HA_DESCRIPTION_SOURCES} 
+        ${HA_SENSOR_SOURCES}
+        ${HA_FACTORY_SOURCES} 
+        ${HA_CORE_HEADERS}
+        ${HA_DESCRIPTION_HEADERS} 
+        ${HA_SENSOR_HEADERS}
+        ${HA_FACTORY_HEADERS})
+    target_link_libraries(hybrid_automaton_shared ${TinyXML_LIBRARIES} ${Boost_LIBRARIES} ${Eigen3_LIBRARIES})
+    set_target_properties(hybrid_automaton_shared PROPERTIES OUTPUT_NAME hybrid_automaton)
+endif()
 
 # because of sensor registration hybrid_automaton_visualizer needs to compile
 # the sources again and cannot link against the libraries
-add_executable(hybrid_automaton_visualizer src/hybrid_automaton_visualizer.cpp
-												${HA_CORE_SOURCES}
-												${HA_DESCRIPTION_SOURCES}
-												${HA_SENSOR_SOURCES}
-												${HA_FACTORY_SOURCES} 
-												${HA_CORE_HEADERS}
-                        									${HA_DESCRIPTION_HEADERS} 
-                        									${HA_SENSOR_HEADERS}
-                        									${HA_FACTORY_HEADERS})
+add_executable(hybrid_automaton_visualizer
+    src/hybrid_automaton_visualizer.cpp
+    ${HA_CORE_SOURCES}
+    ${HA_DESCRIPTION_SOURCES}
+    ${HA_SENSOR_SOURCES}
+    ${HA_FACTORY_SOURCES} 
+    ${HA_CORE_HEADERS}
+    ${HA_DESCRIPTION_HEADERS} 
+    ${HA_SENSOR_HEADERS}
+    ${HA_FACTORY_HEADERS})
 target_link_libraries(hybrid_automaton_visualizer ${TinyXML_LIBRARIES} ${Boost_LIBRARIES} ${Eigen3_LIBRARIES})
 
 #subdirs(src)
 
 if(UNIT_TESTS)
-	message ("Compilation of unit tests is ENABLED.")
-	message ("Hint: use -DUNIT_TESTS=false if if you dontwant them built.")
+    message ("Compilation of unit tests is ENABLED.")
+    message ("Hint: use -DUNIT_TESTS=false if if you dontwant them built.")
     enable_testing()
-	subdirs(tests)
+    subdirs(tests)
 else()
-	message ("Compilation of unit tests is disabled. (default behavior).")
-	message ("Hint: use -DUNIT_TESTS=true if you want them built.")
+    message ("Compilation of unit tests is disabled. (default behavior).")
+    message ("Hint: use -DUNIT_TESTS=true if you want them built.")
 endif()
 
 if(WIN32)
-	install(TARGETS hybrid_automaton DESTINATION "${CMAKE_CURRENT_SOURCE_DIR}/lib")
+    install(TARGETS hybrid_automaton DESTINATION "${CMAKE_CURRENT_SOURCE_DIR}/lib")
 else()
-	install(TARGETS hybrid_automaton DESTINATION "${CMAKE_CURRENT_SOURCE_DIR}/lib")
-        #install(TARGETS hybrid_automaton DESTINATION "/usr/local/lib")
-        #install(DIRECTORY "${PROJECT_SOURCE_DIR}/include/hybrid_automaton" DESTINATION "/usr/local/include")
+    install(TARGETS hybrid_automaton DESTINATION "${CMAKE_CURRENT_SOURCE_DIR}/lib")
+    install(TARGETS hybrid_automaton_shared DESTINATION "${CMAKE_CURRENT_SOURCE_DIR}/lib")
+    install(TARGETS hybrid_automaton DESTINATION "/usr/local/lib")
+    install(TARGETS hybrid_automaton_shared DESTINATION "/usr/local/lib")
+    install(DIRECTORY "${PROJECT_SOURCE_DIR}/include/hybrid_automaton" DESTINATION "/usr/local/include")
 endif()
