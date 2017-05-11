@@ -390,6 +390,7 @@ namespace ha {
 
 	void HybridAutomaton::_activateCurrentControlMode(const double& t) 
 	{
+		HA_INFO("HybridAutomaton._activeCurrentControlMode", "Current mode: "<< _current_control_mode->getName());
 		_current_control_mode->initialize();
 
 		// initialize all outgoing edges
