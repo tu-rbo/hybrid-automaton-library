@@ -43,22 +43,33 @@ namespace ha
 		_port = ss._port;
 	}
 
-	::Eigen::MatrixXd ForceTorqueSensor::getCurrentValue() const
-	{
-    //This is the F/T wrench from the hardware - It must be in EE frame
-    ::Eigen::MatrixXd forceTorque = _system->getForceTorqueMeasurement(DEFAULT_FT_PORT);
-
-    ::Eigen::Matrix3d frameRot = _frame.block(0,0,3,3);
-    ::Eigen::Vector3d frameTrans(_frame(0,3), _frame(1,3), _frame(2,3));
-    ::Eigen::Vector3d forcePart(forceTorque(0,0), forceTorque(1,0),forceTorque(2,0));
-    ::Eigen::Vector3d momentPart(forceTorque(3,0), forceTorque(4,0),forceTorque(5,0));
+  ::Eigen::MatrixXd ForceTorqueSensor::transformWrench(const ::Eigen::MatrixXd& wrench, const ::Eigen::MatrixXd& transform) const
+  {
+    ::Eigen::Matrix3d frameRot = transform.block(0,0,3,3);
+    ::Eigen::Vector3d frameTrans(transform(0,3), transform(1,3), transform(2,3));
+    ::Eigen::Vector3d forcePart(wrench(0,0), wrench(1,0),wrench(2,0));
+    ::Eigen::Vector3d momentPart(wrench(3,0), wrench(4,0),wrench(5,0));
 
     forcePart = frameRot*forcePart;
     momentPart = frameRot*(momentPart - frameTrans.cross(forcePart));
 
-    Eigen::MatrixXd ftOut(6,1);
-    ftOut(0) = forcePart(0); ftOut(1) = forcePart(1); ftOut(2) = forcePart(2);
-    ftOut(3) = momentPart(0); ftOut(4) = momentPart(1); ftOut(5) = momentPart(2);
+    Eigen::MatrixXd wrenchOut(6,1);
+    wrenchOut(0) = forcePart(0); wrenchOut(1) = forcePart(1); wrenchOut(2) = forcePart(2);
+    wrenchOut(3) = momentPart(0); wrenchOut(4) = momentPart(1); wrenchOut(5) = momentPart(2);
+    return wrenchOut;
+  }
+
+	::Eigen::MatrixXd ForceTorqueSensor::getCurrentValue() const
+	{
+    //This is the F/T wrench from the hardware - It must be in EE frame
+    ::Eigen::MatrixXd forceTorque = _system->getForceTorqueMeasurement(DEFAULT_FT_PORT);
+    ::Eigen::MatrixXd eeFrame = _system->getFramePose("EE");
+
+    //Transform FT wrench to world frame
+    Eigen::MatrixXd ftOut = transformWrench(forceTorque, eeFrame.inverse());
+
+    //Transform FT wrench to given frame
+    ftOut = transformWrench(forceTorque, _frame);
 
     return ftOut;
 	}

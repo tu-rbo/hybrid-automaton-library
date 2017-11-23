@@ -101,6 +101,7 @@ namespace ha {
 			return (new ForceTorqueSensor(*this));
 		}
 
+    ::Eigen::MatrixXd transformWrench(const ::Eigen::MatrixXd& wrench, const ::Eigen::MatrixXd& transform) const;
 	};
 
 }
