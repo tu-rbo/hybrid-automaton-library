@@ -42,36 +42,38 @@ namespace ha
 	{
 		_port = ss._port;
 	}
+	::Eigen::MatrixXd ForceTorqueSensor::transformWrench(const ::Eigen::MatrixXd& wrench, const ::Eigen::MatrixXd& transform) const
+	{
+		::Eigen::Matrix3d frameRot = transform.block(0,0,3,3);
+		::Eigen::Vector3d frameTrans(transform(0,3), transform(1,3), transform(2,3));
+		::Eigen::Vector3d forcePart(wrench(0,0), wrench(1,0),wrench(2,0));
+		::Eigen::Vector3d momentPart(wrench(3,0), wrench(4,0),wrench(5,0));
 
-  ::Eigen::MatrixXd ForceTorqueSensor::transformWrench(const ::Eigen::MatrixXd& wrench, const ::Eigen::MatrixXd& transform) const
-  {
-    ::Eigen::Matrix3d frameRot = transform.block(0,0,3,3);
-    ::Eigen::Vector3d frameTrans(transform(0,3), transform(1,3), transform(2,3));
-    ::Eigen::Vector3d forcePart(wrench(0,0), wrench(1,0),wrench(2,0));
-    ::Eigen::Vector3d momentPart(wrench(3,0), wrench(4,0),wrench(5,0));
+		forcePart = frameRot*forcePart;
+		momentPart = frameRot*(momentPart - frameTrans.cross(forcePart));
 
-    forcePart = frameRot*forcePart;
-    momentPart = frameRot*(momentPart - frameTrans.cross(forcePart));
+		Eigen::MatrixXd wrenchOut(6,1);
+		wrenchOut(0) = forcePart(0); wrenchOut(1) = forcePart(1); wrenchOut(2) = forcePart(2);
+		wrenchOut(3) = momentPart(0); wrenchOut(4) = momentPart(1); wrenchOut(5) = momentPart(2);
+		return wrenchOut;
+	}
 
-    Eigen::MatrixXd wrenchOut(6,1);
-    wrenchOut(0) = forcePart(0); wrenchOut(1) = forcePart(1); wrenchOut(2) = forcePart(2);
-    wrenchOut(3) = momentPart(0); wrenchOut(4) = momentPart(1); wrenchOut(5) = momentPart(2);
-    return wrenchOut;
-  }
-
+	int k;
 	::Eigen::MatrixXd ForceTorqueSensor::getCurrentValue() const
 	{
-    //This is the F/T wrench from the hardware - It must be in EE frame
-    ::Eigen::MatrixXd forceTorque = _system->getForceTorqueMeasurement(DEFAULT_FT_PORT);
-    ::Eigen::MatrixXd eeFrame = _system->getFramePose("EE");
+		//This is the F/T wrench from the hardware - It must be in EE frame
+		::Eigen::MatrixXd forceTorque = _system->getForceTorqueMeasurement(_port);
+		::Eigen::MatrixXd eeFrame = _system->getFramePose("EE");
 
-    //Transform FT wrench to world frame
-    Eigen::MatrixXd ftOut = transformWrench(forceTorque, eeFrame.inverse());
+		//Transform FT wrench to world frame
+		Eigen::MatrixXd ftOut = transformWrench(forceTorque, eeFrame.inverse());
 
-    //Transform FT wrench to given frame
-    ftOut = transformWrench(forceTorque, _frame);
+		//Transform FT wrench to given frame
+		ftOut = transformWrench(ftOut, _frame);
 
-    return ftOut;
+		if((k++)%2000 == 0)
+			HA_INFO("ForceTorqueSensor.getCurrentValue","ftout: "<<ftOut.transpose());
+		return ftOut;
 	}
 
 	DescriptionTreeNode::Ptr ForceTorqueSensor::serialize(const DescriptionTree::ConstPtr& factory) const
