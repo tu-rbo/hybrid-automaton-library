@@ -58,13 +58,13 @@ namespace ha {
 			return (ForceTorqueSensorPtr(_doClone()));
 		};
 
-        /**
-         * @brief Returns the current force-torque sensor reading as a 6x1 vector.
-         *
-         * Optionally transforms the force into frame _frame_id - PLEASE TEST THIS BEFORE USING!
-         *
-         * x ,y ,z ,rot_x, rot_y, rot_z
-         */
+    /**
+     * @brief Returns the current force-torque sensor reading as a 6x1 vector.
+     *
+     * Optionally transforms the force into frame _frame if parameter is given
+     *
+     * x ,y ,z ,rot_x, rot_y, rot_z
+     */
 		virtual ::Eigen::MatrixXd getCurrentValue() const;
 
 		virtual DescriptionTreeNode::Ptr serialize(const DescriptionTree::ConstPtr& factory) const;
@@ -78,20 +78,20 @@ namespace ha {
 			return sensor;
 		}
 
-		virtual void setFrameId(const std::string& frame_id) {
-			_frame_id = frame_id;
+    virtual void setFrame(const Eigen::MatrixXd& frame) {
+      _frame = frame;
 		}
 
-		virtual std::string getFrameId() const {
-			return _frame_id;
+    virtual ::Eigen::MatrixXd getFrame() const {
+      return _frame;
 		}
 
 	protected:
 
-        /**
-         * @brief Optional frame ID to transform the force into
-         */
-        std::string _frame_id;
+    /**
+     * @brief Optional frame to transform the force into
+     */
+    ::Eigen::MatrixXd _frame;
 
 		// The port of the force-torque sensor to query values from
 		int _port;

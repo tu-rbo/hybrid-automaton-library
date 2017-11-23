@@ -45,8 +45,22 @@ namespace ha
 
 	::Eigen::MatrixXd ForceTorqueSensor::getCurrentValue() const
 	{
-		::Eigen::MatrixXd forceTorque = _system->getForceTorqueMeasurement(DEFAULT_FT_PORT);
-        return forceTorque;
+    //This is the F/T wrench from the hardware - It must be in EE frame
+    ::Eigen::MatrixXd forceTorque = _system->getForceTorqueMeasurement(DEFAULT_FT_PORT);
+
+    ::Eigen::Matrix3d frameRot = _frame.block(0,0,3,3);
+    ::Eigen::Vector3d frameTrans(_frame(0,3), _frame(1,3), _frame(2,3));
+    ::Eigen::Vector3d forcePart(forceTorque(0,0), forceTorque(1,0),forceTorque(2,0));
+    ::Eigen::Vector3d momentPart(forceTorque(3,0), forceTorque(4,0),forceTorque(5,0));
+
+    forcePart = frameRot*forcePart;
+    momentPart = frameRot*(momentPart - frameTrans.cross(forcePart));
+
+    Eigen::MatrixXd ftOut(6,1);
+    ftOut(0) = forcePart(0); ftOut(1) = forcePart(1); ftOut(2) = forcePart(2);
+    ftOut(3) = momentPart(0); ftOut(4) = momentPart(1); ftOut(5) = momentPart(2);
+
+    return ftOut;
 	}
 
 	DescriptionTreeNode::Ptr ForceTorqueSensor::serialize(const DescriptionTree::ConstPtr& factory) const
@@ -76,11 +90,15 @@ namespace ha
 				<< "invalid - empty or not registered with HybridAutomaton!");
 		}
 
-		std::string frame_id;
-		tree->getAttribute<std::string>("frame_id", frame_id, "");
-		if(frame_id != "")
+    _frame.resize(4,4);
+    _frame.setIdentity();
+    if(tree->getAttribute< Eigen::MatrixXd>("frame", _frame))
 		{
-			HA_WARN("ForceTorqueSensor.deserialize", "The attribute frame_id for the force torque sensor is not implemented!");	
+      HA_INFO("ForceTorqueSensor.deserialize", "Using external frame to express F/T value in");
+      if(_frame.cols()!=4 || _frame.rows()!=4)
+      {
+        HA_THROW_ERROR("ForceTorqueSensor.deserialize", "frame parameter must be 4x4 homogeneous transform!");
+      }
 		}
 
 		_system = system;
