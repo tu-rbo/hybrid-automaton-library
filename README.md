@@ -1,5 +1,5 @@
 # hybrid-automaton-library
-Library for creating feedback-based motion descriptions for robots.
+Library for creating feedback-based motion descriptions for robots. 
 
 ## Installation
 
