@@ -1,35 +1,35 @@
 /*
- * Copyright 2015-2017, Robotics and Biology Lab, TU Berlin
- * 
- * Redistribution and use in source and binary forms, with or without 
- * modification, are permitted provided that the following conditions are met:
- * 
- * 1. Redistributions of source code must retain the above copyright notice, 
- * this list of conditions and the following disclaimer.
- * 
- * 2. Redistributions in binary form must reproduce the above copyright 
- * notice, this list of conditions and the following disclaimer in the 
- * documentation and/or other materials provided with the distribution.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
- * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE 
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE 
- * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE 
- * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR 
- * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF 
- * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS 
- * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN 
- * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) 
- * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE 
- * POSSIBILITY OF SUCH DAMAGE.
- */
+* Copyright 2015-2017, Robotics and Biology Lab, TU Berlin
+* 
+* Redistribution and use in source and binary forms, with or without 
+* modification, are permitted provided that the following conditions are met:
+* 
+* 1. Redistributions of source code must retain the above copyright notice, 
+* this list of conditions and the following disclaimer.
+* 
+* 2. Redistributions in binary form must reproduce the above copyright 
+* notice, this list of conditions and the following disclaimer in the 
+* documentation and/or other materials provided with the distribution.
+*
+* THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+* AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE 
+* IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE 
+* ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE 
+* LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR 
+* CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF 
+* SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS 
+* INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN 
+* CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) 
+* ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE 
+* POSSIBILITY OF SUCH DAMAGE.
+*/
 #include "hybrid_automaton/ForceTorqueSensor.h"
 
 namespace ha
 {
 	HA_SENSOR_REGISTER("ForceTorqueSensor", ForceTorqueSensor);
 
-        ForceTorqueSensor::ForceTorqueSensor() : _port(DEFAULT_FT_PORT)
+	ForceTorqueSensor::ForceTorqueSensor() : _port(DEFAULT_FT_PORT)
 	{
 	}
 
@@ -58,21 +58,23 @@ namespace ha
 		return wrenchOut;
 	}
 
-	int k;
 	::Eigen::MatrixXd ForceTorqueSensor::getCurrentValue() const
 	{
 		//This is the F/T wrench from the hardware - It must be in EE frame
 		::Eigen::MatrixXd forceTorque = _system->getForceTorqueMeasurement(_port);
-		::Eigen::MatrixXd eeFrame = _system->getFramePose("EE");
+		Eigen::MatrixXd ftOut = forceTorque;
+		
+		if(_frame_id == "world")
+		{
+			::Eigen::MatrixXd eeFrame = _system->getFramePose("EE");
 
-		//Transform FT wrench to world frame
-		Eigen::MatrixXd ftOut = transformWrench(forceTorque, eeFrame.inverse());
+			//Transform FT wrench to world frame
+			ftOut = transformWrench(forceTorque, eeFrame.inverse());
+		}
 
 		//Transform FT wrench to given frame
 		ftOut = transformWrench(ftOut, _frame);
 
-		if((k++)%2000 == 0)
-			HA_INFO("ForceTorqueSensor.getCurrentValue","ftout: "<<ftOut.transpose());
 		return ftOut;
 	}
 
@@ -81,7 +83,7 @@ namespace ha
 		DescriptionTreeNode::Ptr tree = factory->createNode("Sensor");
 		tree->setAttribute<std::string>(std::string("type"), this->getType());
 		tree->setAttribute<int>(std::string("port"), _port);
-        return tree;
+		return tree;
 	}
 
 	void ForceTorqueSensor::deserialize(const DescriptionTreeNode::ConstPtr& tree, const System::ConstPtr& system, const HybridAutomaton* ha)
@@ -102,16 +104,21 @@ namespace ha
 			HA_THROW_ERROR("ForceTorqueSensor.deserialize", "SensorType type '" << _type << "' "
 				<< "invalid - empty or not registered with HybridAutomaton!");
 		}
+		
+		std::string frame_id;
+		tree->getAttribute<std::string>("frame_id", _frame_id, "EE");
+		if(_frame_id != "EE" || "world")
+			HA_THROW_ERROR("ForceTorqueSensor.deserialize", "Currently only frame_id EE or world supported.");
 
-    _frame.resize(4,4);
-    _frame.setIdentity();
-    if(tree->getAttribute< Eigen::MatrixXd>("frame", _frame))
+		_frame.resize(4,4);
+		_frame.setIdentity();
+		if(tree->getAttribute< Eigen::MatrixXd>("frame", _frame))
 		{
-      HA_INFO("ForceTorqueSensor.deserialize", "Using external frame to express F/T value in");
-      if(_frame.cols()!=4 || _frame.rows()!=4)
-      {
-        HA_THROW_ERROR("ForceTorqueSensor.deserialize", "frame parameter must be 4x4 homogeneous transform!");
-      }
+			HA_INFO("ForceTorqueSensor.deserialize", "Using external frame to express F/T value in");
+			if(_frame.cols()!=4 || _frame.rows()!=4)
+			{
+				HA_THROW_ERROR("ForceTorqueSensor.deserialize", "frame parameter must be 4x4 homogeneous transform!");
+			}
 		}
 
 		_system = system;
