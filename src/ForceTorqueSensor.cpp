@@ -75,6 +75,9 @@ namespace ha
 		//Transform FT wrench to given frame
 		ftOut = transformWrench(ftOut, _frame);
 
+		//if((k++)%2000 == 0)
+		//	HA_INFO("ForceTorqueSensor.getCurrentValue","ftout: "<<ftOut.transpose());
+
 		return ftOut;
 	}
 
@@ -105,10 +108,9 @@ namespace ha
 				<< "invalid - empty or not registered with HybridAutomaton!");
 		}
 		
-		std::string frame_id;
 		tree->getAttribute<std::string>("frame_id", _frame_id, "EE");
-		if(_frame_id != "EE" || "world")
-			HA_THROW_ERROR("ForceTorqueSensor.deserialize", "Currently only frame_id EE or world supported.");
+		if(_frame_id != "EE" && _frame_id != "world")
+			HA_THROW_ERROR("ForceTorqueSensor.deserialize", "Currently only frame_id EE or world supported. Found "<<_frame_id);
 
 		_frame.resize(4,4);
 		_frame.setIdentity();
