@@ -49,8 +49,8 @@ namespace ha
 		::Eigen::Vector3d forcePart(wrench(0,0), wrench(1,0),wrench(2,0));
 		::Eigen::Vector3d momentPart(wrench(3,0), wrench(4,0),wrench(5,0));
 
-		forcePart = frameRot*forcePart;
-		momentPart = frameRot*(momentPart - frameTrans.cross(forcePart));
+		forcePart = frameRot.transpose()*forcePart;
+		momentPart = frameRot.transpose()*(momentPart - frameTrans.cross(forcePart));
 
 		Eigen::MatrixXd wrenchOut(6,1);
 		wrenchOut(0) = forcePart(0); wrenchOut(1) = forcePart(1); wrenchOut(2) = forcePart(2);
