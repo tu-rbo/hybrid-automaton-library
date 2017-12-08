@@ -110,7 +110,10 @@ namespace ha
 		
 		tree->getAttribute<std::string>("frame_id", _frame_id, "EE");
 		if(_frame_id != "EE" && _frame_id != "world")
-			HA_THROW_ERROR("ForceTorqueSensor.deserialize", "Currently only frame_id EE or world supported. Found "<<_frame_id);
+		{
+			HA_WARN("ForceTorqueSensor.deserialize", "Currently only frame_id EE or world supported. Found "<<_frame_id<<". Will use default value EE!");
+			_frame_id = "EE";
+		}
 
 		_frame.resize(4,4);
 		_frame.setIdentity();
