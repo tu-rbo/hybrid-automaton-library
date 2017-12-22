@@ -85,6 +85,8 @@ namespace ha {
 
 		std::string _frame_id;
 
+    std::string _reference_frame;
+
 		virtual FramePoseSensor* _doClone() const
 		{
 			return (new FramePoseSensor(*this));
