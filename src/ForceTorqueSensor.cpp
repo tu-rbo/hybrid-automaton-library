@@ -86,6 +86,8 @@ namespace ha
 		DescriptionTreeNode::Ptr tree = factory->createNode("Sensor");
 		tree->setAttribute<std::string>(std::string("type"), this->getType());
 		tree->setAttribute<int>(std::string("port"), _port);
+		tree->setAttribute<Eigen::MatrixXd>(std::string("frame"), _frame);
+		tree->setAttribute<std::string>(std::string("frame_id"), _frame_id);
 		return tree;
 	}
 
