@@ -58,7 +58,10 @@ namespace ha
 	::Eigen::MatrixXd FramePoseSensor::getRelativeCurrentValue() const
 	{
 		::Eigen::MatrixXd pose = this->_system->getFramePose(this->_frame_id);
-		pose = _initial_sensor_value.inverse()*pose;
+    if(_reference_frame == "world")
+      pose = pose*_initial_sensor_value.inverse();
+    else
+      pose = _initial_sensor_value.inverse()*pose;
 		return pose;
 	}
 
@@ -73,6 +76,7 @@ namespace ha
 
 		tree->setAttribute<std::string>(std::string("type"), this->getType());
 		tree->setAttribute<std::string>(std::string("frame_id"), _frame_id);
+    tree->setAttribute<std::string>(std::string("reference_frame"), _reference_frame);
 
 		return tree;
 	}
@@ -94,6 +98,13 @@ namespace ha
 			HA_WARN("FramePoseSensor::deserialize", "frame_id not defined. using default value EE");
 			_frame_id = "EE";
 		}
+
+    if(!tree->getAttribute<std::string>("reference_frame", _reference_frame))
+    {
+      HA_WARN("FramePoseSensor::deserialize", "reference_frame not defined. using default value EE");
+      _reference_frame = "EE";
+    }
+
 
 		
 		_system = system;
