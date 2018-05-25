@@ -120,7 +120,8 @@ set (HA_CORE_HEADERS
     "${PROJECT_SOURCE_DIR}/include/hybrid_automaton/Controller.h"
     "${PROJECT_SOURCE_DIR}/include/hybrid_automaton/JumpCondition.h"
     "${PROJECT_SOURCE_DIR}/include/hybrid_automaton/System.h"
-    "${PROJECT_SOURCE_DIR}/include/hybrid_automaton/Serializable.h")
+    "${PROJECT_SOURCE_DIR}/include/hybrid_automaton/Serializable.h"
+    "${PROJECT_SOURCE_DIR}/include/hybrid_automaton/NonblockingPrinting.h")
 
 set (HA_SENSOR_HEADERS
     "${PROJECT_SOURCE_DIR}/include/hybrid_automaton/Sensor.h"

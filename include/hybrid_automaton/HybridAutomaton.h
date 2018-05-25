@@ -45,6 +45,8 @@
 
 #include <Eigen/Dense>
 
+#include "hybrid_automaton/NonblockingPrinting.h"
+
 namespace ha {
 
 	class HybridAutomaton;
