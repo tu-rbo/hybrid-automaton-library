@@ -10,6 +10,11 @@
 
 #include <list>
 
+#define PRINTLVL_DEBUG 0
+#define PRINTLVL_INFO 1
+#define PRINTLVL_WARN 2
+#define PRINTLVL_ERROR 3
+
 class printLock
 {
 
@@ -62,10 +67,13 @@ private:
 
 class NonblockingPrinting
 {
+
 	private:
 	    //The printing thread
 		#ifdef _WIN32
 			HANDLE _printingThread;
+			// the handle to the console (need this for colored output)
+			HANDLE hConsole;
 		#else
 			pthread_t _printingThread;
 		#endif
@@ -73,7 +81,8 @@ class NonblockingPrinting
 		bool _printingThreadActive;
 
 	protected:
-		std::list<std::string> _printQueue;
+		std::list<std::pair<std::string, int> > _printQueue;
+
 		printLock _printLock;
 		
 
@@ -85,7 +94,8 @@ class NonblockingPrinting
             return instance;
         }
 
-		void appendMessage(std::string msg){
+		void appendMessage(std::string msg_text, int msg_level = PRINTLVL_DEBUG){
+			std::pair<std::string, int> msg (msg_text, msg_level);
 			_printLock.lock();
 			_printQueue.push_back(msg);
 			_printLock.unlock();
@@ -128,6 +138,11 @@ class NonblockingPrinting
 		#endif
 			{
 				NonblockingPrinting* printer = (NonblockingPrinting*)obj;
+
+				#ifdef _WIN32
+					HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
+				#endif
+
 				while(true){
 					Sleep(100);
 					if(printer->_printQueue.size()){
@@ -136,12 +151,53 @@ class NonblockingPrinting
 					  {
 					    
 						printer->_printLock.lock();
-						std::string str = printer->_printQueue.front();
+						std::pair<std::string, int> msg = printer->_printQueue.front();
 						printer->_printQueue.pop_front();
 						printer->_printLock.unlock();
-						std::cout  << str <<"\n";
+
+						std::ostream& stream = (msg.second == PRINTLVL_WARN || msg.second == PRINTLVL_ERROR)? std::cerr : std::cout;
+
+						#ifdef _WIN32
+						// text coloring on windows as according to
+						// https://stackoverflow.com/questions/4053837/colorizing-text-in-the-console-with-c
+						switch(msg.second){
+							case PRINTLVL_DEBUG:
+								break;
+							case PRINTLVL_INFO:
+								break;
+							case PRINTLVL_WARN:
+								SetConsoleTextAttribute(hConsole, 14);
+								break;
+							case PRINTLVL_ERROR:
+								SetConsoleTextAttribute(hConsole, 12);
+   								break;
+						}
+						#else
+							switch(msg.second){
+								case PRINTLVL_DEBUG:
+									break;
+								case PRINTLVL_INFO:
+									break;
+								case PRINTLVL_WARN:
+									stream<<"\033[33m";
+									break;
+								case PRINTLVL_ERROR:
+									stream<<"\033[31m";
+   									break;
+							}
+						#endif
+
+							stream  << msg.first <<"\n";
+							
 						
+						
+						#ifdef _WIN32
+							SetConsoleTextAttribute(hConsole, 15);
+						#else
+							stream<<"\033[0m";
+						#endif
 					  }
+					  std::cerr<<std::flush;
 					  std::cout<<std::flush;
 					}
 				}
@@ -150,8 +206,8 @@ class NonblockingPrinting
 
 };
 
-inline void safePrint(std::string msg){
+inline void safePrint(std::string msg_text, int msg_level = PRINTLVL_DEBUG){
 	//const std::string red("\033[0;31m"); 
 	//const std::string reset("\033[0m");
-	NonblockingPrinting::getInstance().appendMessage(msg);
+	NonblockingPrinting::getInstance().appendMessage(msg_text, msg_level);
 }
