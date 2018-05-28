@@ -144,19 +144,23 @@ class NonblockingPrinting
 				#endif
 
 				while(true){
+					// check for stuff to be printed ten times a second
 					Sleep(100);
-					if(printer->_printQueue.size()){
+					
 					  
-					  while (!printer->_printQueue.empty())
-					  {
+					while (!printer->_printQueue.empty())
+					{
 					    
+						// get the message to be printed out of the print queue and lock the mutex for as short as possible
 						printer->_printLock.lock();
 						std::pair<std::string, int> msg = printer->_printQueue.front();
 						printer->_printQueue.pop_front();
 						printer->_printLock.unlock();
 
+						// choose cerr or cout, depending on the print level
 						std::ostream& stream = (msg.second == PRINTLVL_WARN || msg.second == PRINTLVL_ERROR)? std::cerr : std::cout;
 
+						// set the color
 						#ifdef _WIN32
 						// text coloring on windows as according to
 						// https://stackoverflow.com/questions/4053837/colorizing-text-in-the-console-with-c
@@ -170,7 +174,7 @@ class NonblockingPrinting
 								break;
 							case PRINTLVL_ERROR:
 								SetConsoleTextAttribute(hConsole, 12);
-   								break;
+								break;
 						}
 						#else
 							switch(msg.second){
@@ -183,23 +187,25 @@ class NonblockingPrinting
 									break;
 								case PRINTLVL_ERROR:
 									stream<<"\033[31m";
-   									break;
+									break;
 							}
 						#endif
 
-							stream  << msg.first <<"\n";
+						// actually print the message
+						stream  << msg.first <<"\n";
 							
 						
-						
+						// reset printing to the standard color
 						#ifdef _WIN32
 							SetConsoleTextAttribute(hConsole, 15);
 						#else
 							stream<<"\033[0m";
 						#endif
-					  }
-					  std::cerr<<std::flush;
-					  std::cout<<std::flush;
 					}
+					// after going through the loop of messages, flush both streams once
+					std::cerr<<std::flush;
+					std::cout<<std::flush;
+					
 				}
 			}
 
