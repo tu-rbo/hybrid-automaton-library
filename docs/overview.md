@@ -30,6 +30,9 @@ Typical Jump Conditions are:
 * Reaching a certain time stamp
 * Registering a force threshold
 
+## Sensors
+A [Sensor](@ref ha::Sensor) is the description of a type of information source that shapes the jump conditions. Different sensor classes (i.e. encoder, force/torque, etc.) are used to inform and monitor system state. Each sensor class returns its state at a given time and have inherent serialization/deserialization functions to uniquely express them in hybrid automaton descriptions.
+
 # Installation
 See our [GitLab WIKI](https://gitlab.tubit.tu-berlin.de/rbo-lab/rswin/wikis/ha_build)
 
