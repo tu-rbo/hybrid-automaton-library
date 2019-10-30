@@ -134,7 +134,8 @@ set (HA_SENSOR_HEADERS
     "${PROJECT_SOURCE_DIR}/include/hybrid_automaton/FrameOrientationSensor.h"
     "${PROJECT_SOURCE_DIR}/include/hybrid_automaton/ROSTopicSensor.h"
     "${PROJECT_SOURCE_DIR}/include/hybrid_automaton/SubjointConfigurationSensor.h"
-    "${PROJECT_SOURCE_DIR}/include/hybrid_automaton/SubjointVelocitySensor.h")
+    "${PROJECT_SOURCE_DIR}/include/hybrid_automaton/SubjointVelocitySensor.h"
+    "${PROJECT_SOURCE_DIR}/include/hybrid_automaton/AcousticSensor.h")
 
 set (HA_DESCRIPTION_HEADERS
     "${PROJECT_SOURCE_DIR}/include/hybrid_automaton/DescriptionTree.h"
@@ -172,7 +173,8 @@ set (HA_SENSOR_SOURCES
     "${PROJECT_SOURCE_DIR}/src/FrameOrientationSensor.cpp"
     "${PROJECT_SOURCE_DIR}/src/ROSTopicSensor.cpp"
     "${PROJECT_SOURCE_DIR}/src/SubjointConfigurationSensor.cpp"
-    "${PROJECT_SOURCE_DIR}/src/SubjointVelocitySensor.cpp")
+    "${PROJECT_SOURCE_DIR}/src/SubjointVelocitySensor.cpp"
+    "${PROJECT_SOURCE_DIR}/src/AcousticSensor.cpp")
 
 set (HA_FACTORY_SOURCES
     "${PROJECT_SOURCE_DIR}/src/HybridAutomatonAbstractFactory.cpp"

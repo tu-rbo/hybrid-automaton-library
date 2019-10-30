@@ -80,6 +80,11 @@ namespace ha {
         * @brief Return the current Force-torque mieasurement of your sensor (6x1)
         */
 		virtual ::Eigen::MatrixXd getForceTorqueMeasurement(const int& port = DEFAULT_FT_PORT) const = 0;
+		
+	/**
+        * @brief Return the current Force-torque mieasurement of your sensor (6x1)
+        */
+		virtual ::Eigen::MatrixXd getAcousticSensorMeasurement() const = 0;
 
         /**
         * @brief Return the pose of a frame with id \a frame_id (4x4)
