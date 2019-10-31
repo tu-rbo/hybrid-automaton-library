@@ -25,10 +25,10 @@ namespace ha{
 		{
 			return (AcousticSensorPtr(_doClone()));
         }
-        
-        
-                /**
-         * @brief Returns the current System time as a 1x1 matrix
+
+         /**
+            * @brief Returns the current contact classification of the acoustic sensor for one finger.
+                     We currently assume 6-classes with as a 6x1 probability matrix.
          */
 		virtual ::Eigen::MatrixXd getCurrentValue() const;
 
