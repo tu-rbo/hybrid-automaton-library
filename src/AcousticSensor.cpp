@@ -1,6 +1,5 @@
 #include <hybrid_automaton/AcousticSensor.h>
 
-
 namespace ha{
 
   HA_SENSOR_REGISTER("AcousticSensor", AcousticSensor);
