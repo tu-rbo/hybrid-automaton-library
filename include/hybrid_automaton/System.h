@@ -77,36 +77,49 @@ namespace ha {
 		virtual ::Eigen::MatrixXd getJointVelocity() const = 0;
 
         /**
-        * @brief Return the current Force-torque mieasurement of your sensor (6x1)
+        * @brief Return the current Force-torque measurement of your sensor (6x1)
         */
 		virtual ::Eigen::MatrixXd getForceTorqueMeasurement(const int& port = DEFAULT_FT_PORT) const = 0;
+		
+	    /**
+        * @brief Return the current contact-classification measurement of your acoustic-finger-sensor (6x1)
+                 6-Classes and one finger are assumed in the moment.
+        */
+		virtual ::Eigen::MatrixXd getAcousticSensorMeasurement() const = 0;
+
+        /**
+        * @brief Return the current strain-deformation-prediction of your strain-sensorized-finger-sensor (3x1)
+                 3-values that represent deformation in flexional, lateral and twist direction
+                 additionally one finger is assumed in the moment.
+        */
+		virtual ::Eigen::MatrixXd getStrainSensorMeasurement() const = 0;
 
         /**
         * @brief Return the pose of a frame with id \a frame_id (4x4)
         */
-		virtual ::Eigen::MatrixXd getFramePose(const std::string& frame_id) const = 0;
+	virtual ::Eigen::MatrixXd getFramePose(const std::string& frame_id) const = 0;
 
-		virtual bool subscribeToROSMessage(const std::string& topic) const {
-			HA_THROW_ERROR("System.subscribeToROSMessage", "Not implemented");
-		}
-		virtual bool subscribeToTransform(const std::string& frame, const std::string& parent) const {
-			HA_THROW_ERROR("System.subscribeToTransform", "Not implemented");
-		}
+	virtual bool subscribeToROSMessage(const std::string& topic) const {
+		HA_THROW_ERROR("System.subscribeToROSMessage", "Not implemented");
+	}
+	virtual bool subscribeToTransform(const std::string& frame, const std::string& parent) const {
+		HA_THROW_ERROR("System.subscribeToTransform", "Not implemented");
+	}
 
-		virtual bool isROSTopicAvailable(const std::string& topic_name) const  {
-			HA_THROW_ERROR("System.isROSTopicAvailable", "Not implemented");
-		}
+	virtual bool isROSTopicAvailable(const std::string& topic_name) const  {
+		HA_THROW_ERROR("System.isROSTopicAvailable", "Not implemented");
+	}
 
-		virtual bool isROSTopicUpdated(const std::string& topic_name) const  {
-			HA_THROW_ERROR("System.isROSTopicUpdated", "Not implemented");
-		}
+	virtual bool isROSTopicUpdated(const std::string& topic_name) const  {
+		HA_THROW_ERROR("System.isROSTopicUpdated", "Not implemented");
+	}
 
-		virtual bool getROSPose(const std::string& topic_name, const std::string& topic_type, ::Eigen::MatrixXd& pose) const  {
-			HA_THROW_ERROR("System.getROSPose", "Not implemented");
-		}
-		virtual bool getROSTfPose(const std::string& child, const std::string& parent, ::Eigen::MatrixXd& pose) const  {
-			HA_THROW_ERROR("System.getROSTfPose", "Not implemented");
-		}
+	virtual bool getROSPose(const std::string& topic_name, const std::string& topic_type, ::Eigen::MatrixXd& pose) const  {
+		HA_THROW_ERROR("System.getROSPose", "Not implemented");
+	}
+	virtual bool getROSTfPose(const std::string& child, const std::string& parent, ::Eigen::MatrixXd& pose) const  {
+		HA_THROW_ERROR("System.getROSTfPose", "Not implemented");
+	}
 
   };
 
