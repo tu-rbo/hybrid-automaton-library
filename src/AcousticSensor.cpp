@@ -20,7 +20,7 @@ namespace ha{
 
 	::Eigen::MatrixXd AcousticSensor::getCurrentValue() const
 	{
-		::Eigen::MatrixXd ret(6,1);
+		::Eigen::MatrixXd ret;
 		ret = _system->getAcousticSensorMeasurement();
 		return ret;
 	}
