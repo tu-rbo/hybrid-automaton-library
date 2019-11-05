@@ -144,6 +144,7 @@ namespace ha {
 		}
 		
 		double ret = 0;
+
 		switch(_jump_criterion) {
 			case NORM_L1: 
 				for(int i = 0; i<x.rows(); i++)
@@ -239,6 +240,9 @@ namespace ha {
 
 			case THRESH_UPPER_BOUND:
 				
+				// Required for potential negative goals --> ret initialized with 0 only accounts for positve goals
+				ret = -1 * std::numeric_limits<double>::infinity();
+
 				for(int i = 0; i<x.rows(); i++)
 				{
 					for(int j = 0; j<y.cols(); j++)
@@ -250,6 +254,10 @@ namespace ha {
 				break;
 
 			case THRESH_LOWER_BOUND:
+
+				// Required for potential negative goals --> ret initialized with 0 only accounts for positve goals
+				ret = -1 * std::numeric_limits<double>::infinity();
+
 				for(int i = 0; i<x.rows(); i++)
 				{
 					for(int j = 0; j<y.cols(); j++)
@@ -262,7 +270,6 @@ namespace ha {
 			default:
 				HA_THROW_ERROR("JumpCondition._computeJumpCriterion", "Not Implemented: unknown jump criterion");
 		}
-
 		return ret;
 	}
 
