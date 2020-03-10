@@ -85,7 +85,7 @@ namespace ha {
         * @brief Return the current contact-classification measurement of your acoustic-finger-sensor (6x1)
                  6-Classes and one finger are assumed in the moment.
         */
-		virtual ::Eigen::MatrixXd getAcousticSensorMeasurement() const = 0;
+		virtual ::Eigen::MatrixXd getAcousticSensorMeasurement(int n_fingers, int n_classes) const = 0;
 
         /**
         * @brief Return the current strain-deformation-prediction of your strain-sensorized-finger-sensor (3x1)

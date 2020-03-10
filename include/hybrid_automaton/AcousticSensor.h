@@ -57,6 +57,9 @@ namespace ha{
 		* The current time
 		*/
 		Eigen::MatrixXd _current_value;
+
+		int _n_fingers;
+		int _n_classes;
     
     
   };
