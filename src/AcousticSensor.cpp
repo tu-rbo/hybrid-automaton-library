@@ -21,9 +21,17 @@ namespace ha{
 
 	::Eigen::MatrixXd AcousticSensor::getCurrentValue() const
 	{
-		::Eigen::MatrixXd ret(6,1);
-		ret = _system->getAcousticSensorMeasurement();
+		::Eigen::MatrixXd ret;
+		ret = _system->getAcousticSensorMeasurement(this->_n_fingers, this->_n_classes);
 		return ret;
+	}
+
+	int AcousticSensor::get_n_fingers(){
+		return this->_n_fingers;
+	}
+
+	int AcousticSensor::get_n_classes(){
+		return this->_n_classes;
 	}
 
 	void AcousticSensor::initialize(const double& t) 
@@ -59,6 +67,10 @@ namespace ha{
 			HA_THROW_ERROR("AcousticSensor.deserialize", "Sensor type '" << _type << "' "
 				<< "invalid - empty or not registered with HybridAutomaton!");
 		}
+
+		
+		tree->getAttribute<int>("fingers", _n_fingers);
+		tree->getAttribute<int>("classes", _n_classes);
 
 		_system = system;
 	}

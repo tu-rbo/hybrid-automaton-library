@@ -46,6 +46,9 @@ namespace ha{
 			return sensor;
 		}
 
+		int get_n_fingers();
+		int get_n_classes();
+
 	protected:
 
 		virtual AcousticSensor* _doClone() const
@@ -57,6 +60,9 @@ namespace ha{
 		* The current time
 		*/
 		Eigen::MatrixXd _current_value;
+
+		int _n_fingers;
+		int _n_classes;
     
     
   };
