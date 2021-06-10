@@ -9,6 +9,8 @@
 #endif
 
 #include <list>
+#include <thread>
+#include <chrono>
 
 #define PRINTLVL_DEBUG 0
 #define PRINTLVL_INFO 1
@@ -146,12 +148,7 @@ class NonblockingPrinting
 				while(true){
 					// check for stuff to be printed ten times a second
 
-					#ifdef _WIN32
-						Sleep(100);
-					#else
-						sleep(100);
-					#endif
-					
+					std::this_thread::sleep_for(std::chrono::milliseconds(100));
 					  
 					while (!printer->_printQueue.empty())
 					{
