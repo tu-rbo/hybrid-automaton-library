@@ -93,7 +93,8 @@ else()
     )
 endif()
 
-
+# add thread libraries to fix pthread_create undefined errors
+find_package(Threads)
 
 
 # Set compiler flags and options. 
@@ -197,7 +198,7 @@ add_library(hybrid_automaton STATIC
     ${HA_DESCRIPTION_HEADERS} 
     ${HA_SENSOR_HEADERS}
     ${HA_FACTORY_HEADERS})
-target_link_libraries(hybrid_automaton ${TinyXML_LIBRARIES} ${Boost_LIBRARIES} ${Eigen3_LIBRARIES})
+target_link_libraries(hybrid_automaton ${TinyXML_LIBRARIES} ${Boost_LIBRARIES} ${Eigen3_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT})
 
 if (UNIX)
     # Build also the shared version of the library -- not under windows
@@ -210,7 +211,7 @@ if (UNIX)
         ${HA_DESCRIPTION_HEADERS} 
         ${HA_SENSOR_HEADERS}
         ${HA_FACTORY_HEADERS})
-    target_link_libraries(hybrid_automaton_shared ${TinyXML_LIBRARIES} ${Boost_LIBRARIES} ${Eigen3_LIBRARIES})
+    target_link_libraries(hybrid_automaton_shared ${TinyXML_LIBRARIES} ${Boost_LIBRARIES} ${Eigen3_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT})
     set_target_properties(hybrid_automaton_shared PROPERTIES OUTPUT_NAME hybrid_automaton)
 endif()
 
@@ -226,7 +227,7 @@ add_executable(hybrid_automaton_visualizer
     ${HA_DESCRIPTION_HEADERS} 
     ${HA_SENSOR_HEADERS}
     ${HA_FACTORY_HEADERS})
-target_link_libraries(hybrid_automaton_visualizer ${TinyXML_LIBRARIES} ${Boost_LIBRARIES} ${Eigen3_LIBRARIES})
+target_link_libraries(hybrid_automaton_visualizer ${TinyXML_LIBRARIES} ${Boost_LIBRARIES} ${Eigen3_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT})
 
 #subdirs(src)
 

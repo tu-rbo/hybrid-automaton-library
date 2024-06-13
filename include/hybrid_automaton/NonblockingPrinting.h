@@ -9,6 +9,8 @@
 #endif
 
 #include <list>
+#include <thread>
+#include <chrono>
 
 #define PRINTLVL_DEBUG 0
 #define PRINTLVL_INFO 1
@@ -108,7 +110,7 @@ class NonblockingPrinting
         NonblockingPrinting(NonblockingPrinting const&);              
         void operator=(NonblockingPrinting const&); 
 
-		void NonblockingPrinting::createThread(void) {
+		void createThread(void) {
 			//creating network handling thread
 			_printingThreadActive = true;
 			#ifdef _WIN32
@@ -119,9 +121,9 @@ class NonblockingPrinting
 				pthread_t _printThread;
 				int rc;
 				//usleep(10);
-				rc=pthread_create(&_printThread,NULL,printThread,this);
+				rc=pthread_create(&_printThread,NULL,&printThread,this);
 				if(rc){
-					throw Network2Exception("[Network2::createThread] Error in creating thread");
+					throw "Error in creating thread";
 				}
 
 				//Arne: I think we do not need this? - we call join in the destructor
@@ -134,7 +136,7 @@ class NonblockingPrinting
 		#ifdef _WIN32
 			friend DWORD WINAPI printThread(void *obj)
 		#else
-			friend void *printThread(void *obj)
+			static void *printThread(void *obj)
 		#endif
 			{
 				NonblockingPrinting* printer = (NonblockingPrinting*)obj;
@@ -145,8 +147,8 @@ class NonblockingPrinting
 
 				while(true){
 					// check for stuff to be printed ten times a second
-					Sleep(100);
-					
+
+					std::this_thread::sleep_for(std::chrono::milliseconds(100));
 					  
 					while (!printer->_printQueue.empty())
 					{
